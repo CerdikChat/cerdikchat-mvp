@@ -33,12 +33,37 @@ export default {
     } catch { return json({error:'Tidak dapat terhubung ke layanan AI. Coba lagi nanti.'},502); }
     let result;
     try { result = await upstream.json(); } catch { return json({error:'Layanan AI mengirim respons yang tidak dapat dibaca.'},502); }
-    if (!upstream.ok) {
-      // Do not forward upstream details that may contain internal configuration.
-      const status = upstream.status === 429 ? 429 : upstream.status === 400 ? 400 : 502;
-      const msg = status === 429 ? 'Kuota atau batas permintaan AI tercapai. Coba lagi nanti.' : status === 400 ? 'Permintaan ditolak oleh model AI. Periksa konfigurasi model atau pesan.' : 'Layanan AI sedang bermasalah. Coba lagi nanti.';
-      return json({error:msg},status);
-    }
+    
+if (!upstream.ok) {
+  const apiError = result?.error || {};
+  const safeMessage = String(apiError.message || "Tidak ada pesan error dari layanan AI")
+    .replace(/AIza[0-9A-Za-z_-]+/g, "[REDACTED_API_KEY]")
+    .replace(/key=[^&\s]+/gi, "key=[REDACTED]")
+    .slice(0, 500);
+
+  console.error("Gemini API error", {
+    status: upstream.status,
+    statusText: upstream.statusText,
+    message: safeMessage,
+    apiStatus: apiError.status || "UNKNOWN"
+  });
+
+  const status = upstream.status === 429 ? 429
+    : upstream.status === 400 ? 400
+    : upstream.status === 403 ? 403
+    : 502;
+
+  const msg = status === 429
+    ? "Kuota atau batas permintaan AI tercapai. Periksa kuota Gemini API."
+    : status === 400
+    ? "Permintaan ditolak oleh Gemini API. Periksa pesan error di Workers Logs."
+    : status === 403
+    ? "Akses Gemini API ditolak. Periksa izin, status API key, dan proyek."
+    : "Gemini API gagal merespons. Periksa pesan error di Workers Logs.";
+
+  return json({ error: msg }, status);
+}
+
     const reply = (result.candidates?.[0]?.content?.parts || []).map(p=>p.text || '').join('\n').trim();
     if (!reply) return json({error:'Model tidak menghasilkan teks. Coba ubah pertanyaan.'},502);
     return json({reply, model});
