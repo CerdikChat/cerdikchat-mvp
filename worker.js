@@ -110,6 +110,7 @@ export default {
         `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
         {
           method: "POST",
+          signal: AbortSignal.timeout(20000), 
           headers: {
             "content-type": "application/json",
             "x-goog-api-key": env.GEMINI_API_KEY
