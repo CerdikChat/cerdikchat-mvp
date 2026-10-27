@@ -28,7 +28,8 @@ export default {
     try {
       upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
         method:'POST', headers:{'content-type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},
-        body:JSON.stringify({systemInstruction:{parts:[{text:'Anda adalah CerdikChat, asisten AI yang membantu riset, analisis, penulisan, dan perencanaan. Jawab dalam bahasa pengguna, utamakan kejelasan dan ketepatan. Jangan mengarang sumber atau fakta; nyatakan ketidakpastian bila perlu. Ingatkan pengguna untuk memverifikasi keputusan berisiko tinggi.'}]},contents,generationConfig:maxOutputTokens:2048}})
+        body:JSON.stringify({systemInstruction:{parts:[{text:'Anda adalah CerdikChat, asisten AI yang membantu riset, analisis, penulisan, dan perencanaan. Jawab dalam bahasa pengguna, utamakan kejelasan dan ketepatan. Jangan mengarang sumber atau fakta; nyatakan ketidakpastian bila perlu. Ingatkan pengguna untuk memverifikasi keputusan berisiko tinggi.'}]},contents,
+  generationConfig:{maxOutputTokens:2048}
       });
     } catch { return json({error:'Tidak dapat terhubung ke layanan AI. Coba lagi nanti.'},502); }
     let result;
