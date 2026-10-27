@@ -165,10 +165,13 @@ async function requestGemini(env, contents) {
         error?.name === "AbortError";
 
       console.error("Gemini network error", {
-        attempt: attempt + 1,
-        timedOut,
-        message: safeErrorMessage(error?.message)
-      });
+  attempt: attempt + 1,
+  maxAttempts: MAX_ATTEMPTS,
+  model,
+  timedOut,
+  errorName: error?.name || "UnknownError",
+  message: safeErrorMessage(error?.message)
+});
 
       const networkError = new Error(
         timedOut
