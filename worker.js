@@ -1,5 +1,7 @@
 
 const DEFAULT_MODEL = "gemini-3.8-flash";
+const DEFAULT_OPENAI_MODEL = "gpt-5.5";
+
 const MAX_MESSAGE_LENGTH = 8000;
 const MAX_HISTORY_MESSAGES = 12;
 const MAX_OUTPUT_TOKENS = 2048;
@@ -86,6 +88,7 @@ function normalizeHistory(history) {
 function safeErrorMessage(message) {
   return String(message || "Unknown error")
     .replace(/AIza[0-9A-Za-z_-]+/g, "[REDACTED_API_KEY]")
+    .replace(/sk-[0-9A-Za-z_-]+/g, "[REDACTED_API_KEY]")
     .replace(/key=[^&\s]+/gi, "key=[REDACTED]")
     .slice(0, 300);
 }
@@ -105,27 +108,27 @@ function clientError(status) {
   if (status === 401 || status === 403) {
     return {
       status: 502,
-      message: "Akses Gemini ditolak. Periksa API key dan izin proyek di Google AI Studio."
+      message: "Akses Gemini ditolak. Periksa API key dan izin proyek."
     };
   }
 
   if (status === 429) {
     return {
       status: 429,
-      message: "Batas permintaan atau kuota Gemini tercapai. Coba lagi nanti."
+      message: "Batas permintaan atau kuota Gemini tercapai."
     };
   }
 
   if (status === 503) {
     return {
       status: 503,
-      message: "Gemini sedang mengalami permintaan tinggi. Silakan coba lagi beberapa saat."
+      message: "Gemini sedang mengalami permintaan tinggi."
     };
   }
 
   return {
     status: 502,
-    message: "Layanan Gemini gagal merespons. Periksa Workers Logs."
+    message: "Layanan Gemini gagal merespons."
   };
 }
 
@@ -165,18 +168,18 @@ async function requestGemini(env, contents) {
         error?.name === "AbortError";
 
       console.error("Gemini network error", {
-  attempt: attempt + 1,
-  maxAttempts: MAX_ATTEMPTS,
-  model,
-  timedOut,
-  errorName: error?.name || "UnknownError",
-  message: safeErrorMessage(error?.message)
-});
+        attempt: attempt + 1,
+        maxAttempts: MAX_ATTEMPTS,
+        model,
+        timedOut,
+        errorName: error?.name || "UnknownError",
+        message: safeErrorMessage(error?.message)
+      });
 
       const networkError = new Error(
         timedOut
-          ? "Permintaan ke Gemini melewati batas waktu 20 detik."
-          : "Tidak dapat terhubung ke layanan Gemini."
+          ? "Permintaan Gemini melewati batas waktu."
+          : "Tidak dapat terhubung ke Gemini."
       );
 
       networkError.status = timedOut ? 504 : 502;
@@ -188,11 +191,6 @@ async function requestGemini(env, contents) {
     try {
       data = await response.json();
     } catch {
-      console.error("Gemini returned invalid JSON", {
-        status: response.status,
-        attempt: attempt + 1
-      });
-
       const error = new Error(
         "Gemini mengirim respons yang tidak dapat dibaca."
       );
@@ -209,33 +207,29 @@ async function requestGemini(env, contents) {
         .trim();
 
       if (!reply) {
-        console.error("Gemini returned no text", {
-          finishReason: data?.candidates?.[0]?.finishReason || "UNKNOWN",
-          promptFeedback: data?.promptFeedback?.blockReason || null
-        });
-
         const error = new Error(
-          "Model tidak menghasilkan teks. Coba ubah pertanyaan."
+          "Gemini tidak menghasilkan teks."
         );
         error.status = 502;
         throw error;
       }
 
-      return { reply, model };
+      return { reply, model, provider: "gemini" };
     }
 
     const apiError = data?.error || {};
-    const safeMessage = safeErrorMessage(apiError.message);
 
     console.error("Gemini API error", {
       attempt: attempt + 1,
       status: response.status,
       apiStatus: apiError.status || "UNKNOWN",
-      message: safeMessage
+      message: safeErrorMessage(apiError.message)
     });
 
-    // Retry hanya untuk gangguan ketersediaan sementara.
-    if (response.status === 503 && attempt < MAX_ATTEMPTS - 1) {
+    if (
+      response.status === 503 &&
+      attempt < MAX_ATTEMPTS - 1
+    ) {
       await sleep(RETRY_DELAYS_MS[attempt]);
       continue;
     }
@@ -247,16 +241,123 @@ async function requestGemini(env, contents) {
   }
 
   const error = new Error(
-    "Gemini masih sibuk setelah beberapa percobaan. Coba lagi nanti."
+    "Gemini masih sibuk setelah beberapa percobaan."
   );
   error.status = 503;
   throw error;
 }
 
+function shouldFallback(error) {
+  return [429, 500, 502, 503, 504].includes(error?.status);
+}
+
+async function requestOpenAI(env, contents) {
+  if (!env.OPENAI_API_KEY) {
+    const error = new Error(
+      "Secret OPENAI_API_KEY belum tersedia di Cloudflare."
+    );
+    error.status = 503;
+    throw error;
+  }
+
+  const model = env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL;
+
+  const input = contents.map(item => ({
+    role: item.role === "model" ? "assistant" : "user",
+    content: (item.parts || [])
+      .map(part => part.text || "")
+      .join("\n")
+  }));
+
+  let response;
+
+  try {
+    response = await fetch(
+      "https://api.openai.com/v1/responses",
+      {
+        method: "POST",
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        headers: {
+          "content-type": "application/json",
+          "authorization": `Bearer ${env.OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model,
+          instructions: SYSTEM_INSTRUCTION,
+          input,
+          max_output_tokens: MAX_OUTPUT_TOKENS,
+          store: false
+        })
+      }
+    );
+  } catch (error) {
+    console.error("OpenAI network error", {
+      model,
+      errorName: error?.name || "UnknownError",
+      message: safeErrorMessage(error?.message)
+    });
+
+    const networkError = new Error(
+      "Tidak dapat terhubung ke layanan OpenAI."
+    );
+    networkError.status = 502;
+    throw networkError;
+  }
+
+  let data;
+
+  try {
+    data = await response.json();
+  } catch {
+    const error = new Error(
+      "OpenAI mengirim respons yang tidak dapat dibaca."
+    );
+    error.status = 502;
+    throw error;
+  }
+
+  if (!response.ok) {
+    console.error("OpenAI API error", {
+      status: response.status,
+      apiStatus: data?.error?.code || "UNKNOWN",
+      message: safeErrorMessage(data?.error?.message)
+    });
+
+    const error = new Error(
+      "Layanan OpenAI gagal memproses permintaan."
+    );
+
+    error.status = [429, 500, 502, 503, 504]
+      .includes(response.status)
+      ? response.status
+      : 502;
+
+    throw error;
+  }
+
+  const reply = (data?.output || [])
+    .filter(item => item.type === "message")
+    .flatMap(item => item.content || [])
+    .filter(item => item.type === "output_text")
+    .map(item => item.text || "")
+    .join("\n")
+    .trim();
+
+  if (!reply) {
+    const error = new Error(
+      "OpenAI tidak menghasilkan teks."
+    );
+    error.status = 502;
+    throw error;
+  }
+
+  return { reply, model, provider: "openai" };
+}
+
 async function handleChat(request, env) {
-  if (!env.GEMINI_API_KEY) {
+  if (!env.GEMINI_API_KEY && !env.OPENAI_API_KEY) {
     return json({
-      error: "Backend belum dikonfigurasi: GEMINI_API_KEY belum tersedia."
+      error: "Backend belum dikonfigurasi. API key AI belum tersedia."
     }, 503);
   }
 
@@ -286,22 +387,46 @@ async function handleChat(request, env) {
     }
   ];
 
-  try {
-    const result = await requestGemini(env, contents);
-    return json(result);
-  } catch (error) {
-    if (error.status) {
-      return json({
-        error: error.message
-      }, error.status);
-    }
+  if (env.GEMINI_API_KEY) {
+    try {
+      return json(await requestGemini(env, contents));
+    } catch (error) {
+      console.error("Gemini primary provider failed", {
+        status: error?.status || 502,
+        message: safeErrorMessage(error?.message)
+      });
 
-    console.error("CerdikChat internal error", {
+      if (!shouldFallback(error)) {
+        return json({
+          error: error.message || "Gemini gagal memproses permintaan."
+        }, error.status || 502);
+      }
+
+      if (!env.OPENAI_API_KEY) {
+        return json({
+          error: "Gemini sedang bermasalah dan OpenAI belum dikonfigurasi."
+        }, 503);
+      }
+
+      console.warn("Switching to OpenAI fallback");
+    }
+  }
+
+  try {
+    const result = await requestOpenAI(env, contents);
+
+    return json({
+      ...result,
+      fallback: true
+    });
+  } catch (error) {
+    console.error("OpenAI fallback failed", {
+      status: error?.status || 502,
       message: safeErrorMessage(error?.message)
     });
 
     return json({
-      error: "Layanan AI gagal memproses permintaan. Coba lagi nanti."
+      error: "Gemini dan OpenAI belum berhasil memproses permintaan. Silakan coba lagi nanti."
     }, 502);
   }
 }
