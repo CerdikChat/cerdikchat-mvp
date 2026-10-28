@@ -1,22 +1,763 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#101827"><meta name="description" content="CerdikChat — ruang kerja AI yang jernih, praktis, dan bertanggung jawab.">
-<title>CerdikChat — AI Workspace</title>
-<style>
-:root{color-scheme:dark;--bg:#0b1220;--panel:#111c2e;--panel2:#17243a;--line:#293950;--text:#edf4ff;--muted:#9aabc4;--blue:#6ea8fe;--mint:#66e0c2;--danger:#ff8d9a}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#142a49 0,transparent 40%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}.app{max-width:1100px;margin:auto;min-height:100vh;display:grid;grid-template-columns:260px 1fr}.side{border-right:1px solid var(--line);padding:24px 18px;background:#0b1424cc}.brand{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:800;letter-spacing:-.5px}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(140deg,#6ea8fe,#66e0c2);display:grid;place-items:center;color:#091525;font-weight:900}.tag{font-size:11px;color:var(--mint);border:1px solid #2e665f;border-radius:20px;padding:3px 8px;display:inline-block;margin-top:20px}.side h3{font-size:12px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted);margin:25px 0 10px}.prompt{width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:12px;padding:11px;color:#d7e4f8;cursor:pointer;margin:3px 0}.prompt:hover{background:var(--panel2);border-color:var(--line)}.side-note{font-size:12px;color:var(--muted);margin-top:28px}.main{display:flex;flex-direction:column;min-width:0;min-height:100vh}.top{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;gap:12px}.top strong{font-size:14px}.pill{font-size:11px;color:var(--mint);background:#12322f;border:1px solid #28534e;padding:5px 9px;border-radius:99px}.feed{flex:1;overflow:auto;padding:28px max(20px,calc((100% - 720px)/2));width:100%}.welcome{max-width:660px;margin:8vh auto 30px}.eyebrow{color:var(--mint);font-size:12px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase}.welcome h1{font-size:clamp(30px,5vw,48px);line-height:1.08;letter-spacing:-1.7px;margin:13px 0}.welcome h1 span{color:var(--blue)}.welcome p{color:var(--muted);font-size:16px;max-width:570px}.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:24px}.suggest{background:#111e30;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;color:var(--text);cursor:pointer}.suggest:hover{border-color:#648fc8}.suggest b{display:block;font-size:13px;margin-bottom:4px}.suggest small{color:var(--muted)}.msg{display:flex;gap:12px;margin:22px auto;max-width:720px;white-space:pre-wrap;overflow-wrap:anywhere}.avatar{flex:0 0 32px;height:32px;border-radius:10px;background:var(--panel2);display:grid;place-items:center;font-size:12px;font-weight:800}.msg.user .avatar{background:#284e83}.bubble{min-width:0;padding-top:4px;flex:1}.who{font-size:12px;color:var(--muted);margin-bottom:7px}.content{line-height:1.7}.content p{margin:0 0 10px}.content pre{white-space:pre-wrap;overflow:auto;background:#08101d;border:1px solid var(--line);padding:12px;border-radius:10px}.composer-wrap{padding:16px 20px 20px;border-top:1px solid var(--line);background:#0b1220ed}.composer{max-width:720px;margin:auto;border:1px solid #344761;background:var(--panel);border-radius:17px;padding:10px;box-shadow:0 12px 36px #0002}.composer textarea{width:100%;resize:vertical;min-height:54px;max-height:180px;background:transparent;border:0;outline:0;color:var(--text);font:inherit;padding:8px}.controls{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 3px 1px}.hint{font-size:11px;color:var(--muted)}button{font:inherit}.send{border:0;background:linear-gradient(120deg,#6ea8fe,#66e0c2);color:#081525;font-weight:800;border-radius:11px;padding:10px 16px;cursor:pointer}.send:disabled{opacity:.5;cursor:not-allowed}.status{max-width:720px;margin:8px auto 0;font-size:12px;color:var(--muted);min-height:18px}.error{color:var(--danger)}.footer{font-size:10px;color:#6f819a;text-align:center;margin:10px auto 0;max-width:720px}.mobile-brand{display:none}
-@media(max-width:720px){.app{display:block}.side{display:none}.main{min-height:100dvh}.top{height:60px;padding:0 16px}.mobile-brand{display:flex;align-items:center;gap:8px;font-weight:800}.mobile-brand .logo{width:30px;height:30px;border-radius:9px}.feed{padding:16px}.welcome{margin:7vh auto 24px}.welcome h1{letter-spacing:-1px}.suggestions{grid-template-columns:1fr}.composer-wrap{padding:12px}.hint{max-width:65%}.pill{font-size:10px}}
-</style></head><body>
-<div class="app"><aside class="side"><div class="brand"><div class="logo">C</div>CerdikChat</div><div class="tag">CLOSED BETA · v0.1</div><h3>Mulai dari sini</h3><button class="prompt" data-prompt="Bantu saya menyusun rencana kerja yang realistis untuk minggu ini.">✦ Rencana kerja</button><button class="prompt" data-prompt="Analisis masalah berikut secara terstruktur: akar masalah, dampak, opsi solusi, risiko, dan rekomendasi.">⌘ Analisis masalah</button><button class="prompt" data-prompt="Bantu saya menulis ulang teks ini agar jelas, profesional, dan alami: ">✎ Menulis profesional</button><button class="prompt" data-prompt="Jelaskan topik ini dari dasar, beri contoh praktis, lalu tutup dengan ringkasan: ">◎ Belajar topik baru</button><h3>Tentang beta</h3><div class="side-note">CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting secara mandiri. Hindari memasukkan data pribadi atau rahasia.</div></aside>
-<main class="main"><header class="top"><div class="mobile-brand"><div class="logo">C</div>CerdikChat</div><strong>AI Workspace</strong><span class="pill">● Gemini · Beta</span></header><section class="feed" id="feed" aria-live="polite"><div class="welcome" id="welcome"><div class="eyebrow">Pikirkan lebih jernih</div><h1>Ide besar dimulai dari <span>pertanyaan yang tepat.</span></h1><p>Ruang kerja AI untuk membantu riset, analisis, penulisan, dan perencanaan — satu percakapan pada satu waktu.</p><div class="suggestions"><button class="suggest" data-prompt="Buat kerangka analisis strategis untuk sebuah ide bisnis baru."><b>↗ Analisis strategis</b><small>Ubah masalah kompleks menjadi langkah yang jelas.</small></button><button class="suggest" data-prompt="Bantu saya menyusun ringkasan eksekutif yang singkat dan meyakinkan tentang: "><b>▤ Ringkasan eksekutif</b><small>Susun pesan utama secara terstruktur.</small></button><button class="suggest" data-prompt="Buat rencana riset dengan pertanyaan penelitian, metode, sumber data, dan keterbatasan untuk topik: "><b>⌕ Rencana riset</b><small>Mulai dengan pertanyaan dan metode yang tepat.</small></button><button class="suggest" data-prompt="Bantu saya memetakan risiko sebuah proyek beserta mitigasi dan indikator peringatannya: "><b>◇ Pemetaan risiko</b><small>Identifikasi risiko sebelum menjadi masalah.</small></button></div></div></section>
-<div class="composer-wrap"><form id="chatForm" class="composer"><textarea id="message" rows="2" maxlength="8000" placeholder="Tanyakan sesuatu kepada CerdikChat…" aria-label="Pesan Anda"></textarea><div class="controls"><span class="hint"><span id="count">0</span>/8000 karakter · Enter untuk kirim</span><button class="send" id="send" type="submit">Kirim ↑</button></div></form><div class="status" id="status" role="status"></div><div class="footer">Jawaban AI dapat keliru. Jangan kirim kata sandi, data pelanggan, atau informasi rahasia.</div></div></main></div>
-<script>
-const form=document.querySelector('#chatForm'),input=document.querySelector('#message'),feed=document.querySelector('#feed'),welcome=document.querySelector('#welcome'),send=document.querySelector('#send'),statusEl=document.querySelector('#status'),count=document.querySelector('#count');
-let history=[];const MAX_HISTORY=12;
-input.addEventListener('input',()=>count.textContent=input.value.length);
-input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
-document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.prompt;count.textContent=input.value.length;input.focus()}));
-function addMessage(role,text){if(welcome)welcome.remove();const row=document.createElement('article');row.className='msg '+(role==='user'?'user':'assistant');const avatar=document.createElement('div');avatar.className='avatar';avatar.textContent=role==='user'?'Anda':'C';const wrap=document.createElement('div');wrap.className='bubble';const who=document.createElement('div');who.className='who';who.textContent=role==='user'?'Anda':'CerdikChat';const body=document.createElement('div');body.className='content';body.textContent=text;wrap.append(who,body);row.append(avatar,wrap);feed.append(row);feed.scrollTop=feed.scrollHeight;return body}
-form.addEventListener('submit',async e=>{e.preventDefault();const message=input.value.trim();if(!message||send.disabled)return;addMessage('user',message);input.value='';count.textContent='0';send.disabled=true;statusEl.className='status';statusEl.textContent='CerdikChat sedang berpikir…';const placeholder=addMessage('assistant','');placeholder.textContent='Menyiapkan jawaban…';try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,history:history.slice(-MAX_HISTORY)})});let data={};try{data=await res.json()}catch{}if(!res.ok)throw new Error(data.error||`Permintaan gagal (${res.status})`);const answer=typeof data.reply==='string'?data.reply:'';if(!answer)throw new Error('Respons AI kosong. Silakan coba lagi.');placeholder.textContent=answer;history.push({role:'user',content:message},{role:'assistant',content:answer});history=history.slice(-MAX_HISTORY);statusEl.textContent='';}catch(err){placeholder.textContent='Maaf, jawaban belum berhasil diperoleh.';statusEl.className='status error';statusEl.textContent=err.message+' Jika baru dipasang, pastikan Worker secret GEMINI_API_KEY sudah diatur dan endpoint /api/chat aktif.';}finally{send.disabled=false;input.focus();feed.scrollTop=feed.scrollHeight}});
-</script></body></html>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="CerdikChat — asisten AI untuk riset, analisis, penulisan, dan perencanaan.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="CerdikChat">
+  <meta name="color-scheme" content="dark">
+
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <title>CerdikChat — AI Workspace</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1220;
+      --panel: #111c2e;
+      --panel2: #17243a;
+      --line: #293950;
+      --text: #edf4ff;
+      --muted: #9aabc4;
+      --blue: #6ea8fe;
+      --mint: #66e0c2;
+      --danger: #ff8d9a;
+      --radius: 16px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background:
+        radial-gradient(ellipse at 20% 0%, #142a49 0, transparent 40%),
+        var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    button, textarea {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--mint);
+      outline-offset: 3px;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      max-width: 1200px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0 auto;
+    }
+
+    .side {
+      padding: 24px 18px;
+      background: #0b1424dd;
+      border-right: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(140deg, var(--blue), var(--mint));
+      color: #091525;
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 4px 9px;
+      border: 1px solid #2e665f;
+      border-radius: 30px;
+      background: #12322f;
+      color: var(--mint);
+      font-size: 11px;
+    }
+
+    .side h2 {
+      margin: 26px 0 10px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+    }
+
+    .prompt {
+      width: 100%;
+      margin: 3px 0;
+      padding: 11px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      color: #d7e4f8;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .prompt:hover {
+      border-color: var(--line);
+      background: var(--panel2);
+    }
+
+    .side-note {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 64px;
+      padding: 10px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .top strong {
+      font-size: 14px;
+    }
+
+    .mobile-brand {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+    }
+
+    .mobile-brand .logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      font-size: 17px;
+    }
+
+    .pill {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border: 1px solid #28534e;
+      border-radius: 30px;
+      background: #12322f;
+      color: var(--mint);
+      font-size: 11px;
+    }
+
+    .feed {
+      flex: 1;
+      width: 100%;
+      padding: 28px 22px;
+    }
+
+    .welcome {
+      max-width: 660px;
+      margin: 7vh auto 32px;
+    }
+
+    .eyebrow {
+      color: var(--mint);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    .welcome h1 {
+      margin: 13px 0;
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.1;
+      letter-spacing: -1.6px;
+    }
+
+    .welcome h1 span {
+      color: var(--blue);
+    }
+
+    .welcome p {
+      max-width: 570px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .suggestions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .suggest {
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #111e30;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .suggest:hover {
+      border-color: #648fc8;
+    }
+
+    .suggest b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .suggest small {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .msg {
+      display: flex;
+      gap: 12px;
+      max-width: 760px;
+      margin: 24px auto;
+      overflow-wrap: anywhere;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      flex: 0 0 32px;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: var(--panel2);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .msg.user .avatar {
+      background: #284e83;
+    }
+
+    .bubble {
+      flex: 1;
+      min-width: 0;
+      padding-top: 3px;
+    }
+
+    .who {
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .content {
+      overflow-wrap: anywhere;
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+
+    .content a {
+      color: var(--blue);
+    }
+
+    .composer-wrap {
+      padding: 14px 20px max(14px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--line);
+      background: #0b1220ed;
+    }
+
+    .composer {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 10px;
+      border: 1px solid #344761;
+      border-radius: 17px;
+      background: var(--panel);
+      box-shadow: 0 12px 36px #0002;
+    }
+
+    .composer textarea {
+      display: block;
+      width: 100%;
+      min-height: 54px;
+      max-height: 180px;
+      padding: 9px;
+      resize: vertical;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .composer textarea::placeholder {
+      color: #8192ad;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 4px 3px 1px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .send {
+      flex: 0 0 auto;
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 11px;
+      background: linear-gradient(120deg, var(--blue), var(--mint));
+      color: #081525;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .send:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      max-width: 760px;
+      min-height: 18px;
+      margin: 8px auto 0;
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .footer {
+      max-width: 760px;
+      margin: 9px auto 0;
+      color: #8190a7;
+      font-size: 10px;
+      text-align: center;
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        display: block;
+      }
+
+      .side {
+        display: none;
+      }
+
+      .main {
+        min-height: 100vh;
+        min-height: 100dvh;
+      }
+
+      .top {
+        min-height: 58px;
+        padding: 10px 14px;
+      }
+
+      .mobile-brand {
+        display: flex;
+      }
+
+      .top strong {
+        margin-left: auto;
+        font-size: 12px;
+      }
+
+      .pill {
+        font-size: 10px;
+      }
+
+      .feed {
+        padding: 16px;
+      }
+
+      .welcome {
+        margin: 6vh auto 24px;
+      }
+
+      .welcome h1 {
+        letter-spacing: -1px;
+      }
+
+      .suggestions {
+        grid-template-columns: 1fr;
+      }
+
+      .composer-wrap {
+        padding: 10px 12px max(10px, env(safe-area-inset-bottom));
+      }
+
+      .hint {
+        max-width: 65%;
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .suggest, .prompt, .send {
+        transition: border-color .15s ease, opacity .15s ease;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="side">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">C</div>
+        CerdikChat
+      </div>
+
+      <div class="tag">CLOSED BETA · v0.1</div>
+
+      <h2>Mulai dari sini</h2>
+
+      <button class="prompt" type="button"
+        data-prompt="Bantu saya menyusun rencana kerja yang realistis untuk minggu ini.">
+        ✦ Rencana kerja
+      </button>
+
+      <button class="prompt" type="button"
+        data-prompt="Analisis masalah berikut secara terstruktur: akar masalah, dampak, opsi solusi, risiko, dan rekomendasi.">
+        ⌘ Analisis masalah
+      </button>
+
+      <button class="prompt" type="button"
+        data-prompt="Bantu saya menulis ulang teks ini agar jelas, profesional, dan alami: ">
+        ✎ Menulis profesional
+      </button>
+
+      <button class="prompt" type="button"
+        data-prompt="Jelaskan topik ini dari dasar, beri contoh praktis, lalu tutup dengan ringkasan: ">
+        ◎ Belajar topik baru
+      </button>
+
+      <h2>Tentang beta</h2>
+      <div class="side-note">
+        CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting
+        secara mandiri. Hindari memasukkan data pribadi atau rahasia.
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="top">
+        <div class="mobile-brand">
+          <div class="logo" aria-hidden="true">C</div>
+          CerdikChat
+        </div>
+
+        <strong>AI Workspace</strong>
+        <span class="pill">● AI · Beta</span>
+      </header>
+
+      <section class="feed" id="feed" aria-live="polite"
+        aria-label="Percakapan">
+        <div class="welcome" id="welcome">
+          <div class="eyebrow">Pikirkan lebih jernih</div>
+
+          <h1>
+            Ide besar dimulai dari
+            <span>pertanyaan yang tepat.</span>
+          </h1>
+
+          <p>
+            Ruang kerja AI untuk membantu riset, analisis, penulisan, dan
+            perencanaan — satu percakapan pada satu waktu.
+          </p>
+
+          <div class="suggestions">
+            <button class="suggest" type="button"
+              data-prompt="Buat kerangka analisis strategis untuk sebuah ide bisnis baru.">
+              <b>↗ Analisis strategis</b>
+              <small>Ubah masalah kompleks menjadi langkah yang jelas.</small>
+            </button>
+
+            <button class="suggest" type="button"
+              data-prompt="Bantu saya menyusun ringkasan eksekutif yang singkat dan meyakinkan tentang: ">
+              <b>▤ Ringkasan eksekutif</b>
+              <small>Susun pesan utama secara terstruktur.</small>
+            </button>
+
+            <button class="suggest" type="button"
+              data-prompt="Buat rencana riset dengan pertanyaan penelitian, metode, sumber data, dan keterbatasan untuk topik: ">
+              <b>⌕ Rencana riset</b>
+              <small>Mulai dengan pertanyaan dan metode yang tepat.</small>
+            </button>
+
+            <button class="suggest" type="button"
+              data-prompt="Bantu saya memetakan risiko sebuah proyek beserta mitigasi dan indikator peringatannya: ">
+              <b>◇ Pemetaan risiko</b>
+              <small>Identifikasi risiko sebelum menjadi masalah.</small>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div class="composer-wrap">
+        <form id="chatForm" class="composer">
+          <textarea
+            id="message"
+            rows="2"
+            maxlength="8000"
+            placeholder="Tanyakan sesuatu kepada CerdikChat…"
+            aria-label="Pesan Anda"
+            required></textarea>
+
+          <div class="controls">
+            <span class="hint">
+              <span id="count">0</span>/8000 karakter · Enter untuk kirim
+            </span>
+            <button class="send" id="send" type="submit">Kirim ↑</button>
+          </div>
+        </form>
+
+        <div class="status" id="status" role="status"
+          aria-live="polite"></div>
+
+        <div class="footer">
+          Jawaban AI dapat keliru. Jangan kirim kata sandi, data pelanggan,
+          atau informasi rahasia.
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    "use strict";
+
+    const form = document.querySelector("#chatForm");
+    const input = document.querySelector("#message");
+    const feed = document.querySelector("#feed");
+    const send = document.querySelector("#send");
+    const statusEl = document.querySelector("#status");
+    const count = document.querySelector("#count");
+
+    const MAX_HISTORY_MESSAGES = 12;
+    const MAX_MESSAGE_LENGTH = 8000;
+
+    let history = [];
+    let isSending = false;
+
+    function updateCount() {
+      count.textContent = String(input.value.length);
+    }
+
+    function setStatus(message = "", isError = false) {
+      statusEl.textContent = message;
+      statusEl.className = isError ? "status error" : "status";
+    }
+
+    function scrollToLatest() {
+      window.requestAnimationFrame(() => {
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: "auto"
+        });
+      });
+    }
+
+    function addMessage(role, text) {
+      const welcome = document.querySelector("#welcome");
+      if (welcome) welcome.remove();
+
+      const row = document.createElement("article");
+      row.className = `msg ${role === "user" ? "user" : "assistant"}`;
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = role === "user" ? "Anda" : "C";
+
+      const wrap = document.createElement("div");
+      wrap.className = "bubble";
+
+      const who = document.createElement("div");
+      who.className = "who";
+      who.textContent = role === "user" ? "Anda" : "CerdikChat";
+
+      const body = document.createElement("div");
+      body.className = "content";
+      body.textContent = text;
+
+      wrap.append(who, body);
+      row.append(avatar, wrap);
+      feed.append(row);
+
+      scrollToLatest();
+      return body;
+    }
+
+    function usePrompt(prompt) {
+      input.value = prompt;
+      updateCount();
+      input.focus();
+    }
+
+    document.querySelectorAll("[data-prompt]").forEach(button => {
+      button.addEventListener("click", () => {
+        usePrompt(button.dataset.prompt || "");
+      });
+    });
+
+    input.addEventListener("input", updateCount);
+
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        if (typeof form.requestSubmit === "function") {
+          form.requestSubmit();
+        } else {
+          send.click();
+        }
+      }
+    });
+
+    async function sendMessage(event) {
+      event.preventDefault();
+
+      const message = input.value.trim();
+
+      if (!message || isSending) return;
+
+      if (message.length > MAX_MESSAGE_LENGTH) {
+        setStatus("Pesan terlalu panjang. Maksimal 8.000 karakter.", true);
+        return;
+      }
+
+      isSending = true;
+      send.disabled = true;
+      input.disabled = true;
+      send.textContent = "Memproses…";
+      setStatus("CerdikChat sedang menyiapkan jawaban…");
+
+      addMessage("user", message);
+      input.value = "";
+      updateCount();
+
+      const answerElement = addMessage("assistant", "Menyiapkan jawaban…");
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            message,
+            history: history.slice(-MAX_HISTORY_MESSAGES)
+          })
+        });
+
+        let data = {};
+
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error("Server mengirim respons yang tidak valid.");
+        }
+
+        if (!response.ok) {
+          const messageFromServer =
+            typeof data.error === "string" ? data.error : "";
+
+          throw new Error(
+            messageFromServer || `Permintaan gagal (HTTP ${response.status}).`
+          );
+        }
+
+        const answer =
+          typeof data.reply === "string" ? data.reply.trim() : "";
+
+        if (!answer) {
+          throw new Error("Respons AI kosong. Silakan coba lagi.");
+        }
+
+        answerElement.textContent = answer;
+
+        history.push(
+          { role: "user", content: message },
+          { role: "assistant", content: answer }
+        );
+
+        history = history.slice(-MAX_HISTORY_MESSAGES);
+        setStatus();
+
+      } catch (error) {
+        answerElement.textContent =
+          "Maaf, jawaban belum berhasil diperoleh.";
+
+        const errorMessage =
+          error instanceof Error ? error.message : "Terjadi kesalahan.";
+
+        setStatus(
+          `${errorMessage} Periksa koneksi dan endpoint /api/chat pada Worker.`,
+          true
+        );
+
+      } finally {
+        isSending = false;
+        send.disabled = false;
+        input.disabled = false;
+        send.textContent = "Kirim ↑";
+        input.focus();
+        scrollToLatest();
+      }
+    }
+
+    form.addEventListener("submit", sendMessage);
+    updateCount();
+  </script>
+</body>
+</html>
