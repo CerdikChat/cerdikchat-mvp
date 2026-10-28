@@ -1,15 +1,16 @@
+
 const CONFIG = Object.freeze({
-  GEMINI_MODEL: "gemini-3.8-flash",
-  OPENAI_MODEL: "gpt-5.5",
+  GEMINI_MODEL: "gemini-3.1-flash-lite",
 
   MAX_MESSAGE_LENGTH: 8000,
   MAX_HISTORY_MESSAGES: 12,
   MAX_HISTORY_ITEM_LENGTH: 2000,
-  MAX_OUTPUT_TOKENS: 2048,
+  MAX_OUTPUT_TOKENS: 1024,
 
-  MAX_ATTEMPTS: 3,
-  REQUEST_TIMEOUT_MS: 20000,
-  RETRY_DELAYS_MS: [800, 1800]
+  // Dua percobaan maksimum, hanya untuk error sementara.
+  MAX_ATTEMPTS: 2,
+  REQUEST_TIMEOUT_MS: 15000,
+  RETRY_DELAY_MS: 1000
 });
 
 const SYSTEM_INSTRUCTION = [
@@ -26,10 +27,6 @@ const JSON_HEADERS = {
   "x-content-type-options": "nosniff"
 };
 
-// --------------------------------------------------
-// HTTP HELPERS
-// --------------------------------------------------
-
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -37,102 +34,40 @@ function json(data, status = 200) {
   });
 }
 
-function textResponse(message, status = 404) {
-  return new Response(message, {
-    status,
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "x-content-type-options": "nosniff"
-    }
-  });
-}
-
-function createError(message, status = 502, code = "PROVIDER_ERROR") {
+function createError(message, status, code) {
   const error = new Error(message);
   error.status = status;
   error.code = code;
   return error;
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function safeErrorMessage(message) {
-  return String(message || "Unknown error")
-    .replace(/AIza[0-9A-Za-z_-]+/g, "[REDACTED_API_KEY]")
-    .replace(/sk-[0-9A-Za-z_-]+/g, "[REDACTED_API_KEY]")
-    .replace(/Bearer\s+\S+/gi, "Bearer [REDACTED]")
-    .replace(/key=[^&\s]+/gi, "key=[REDACTED]")
-    .slice(0, 300);
-}
-
 function logError(event, details = {}) {
-  // Jangan pernah mencatat API key, header Authorization,
-  // request body lengkap, atau isi percakapan pengguna.
+  // Jangan log API key, request body, atau percakapan pengguna.
   console.error(event, details);
 }
 
-function isRetryableStatus(status) {
-  return [429, 500, 502, 503, 504].includes(status);
+function safeMessage(value) {
+  return String(value || "")
+    .replace(/AIza[0-9A-Za-z_-]+/g, "[REDACTED]")
+    .replace(/sk-[0-9A-Za-z_-]+/g, "[REDACTED]")
+    .replace(/Bearer\s+\S+/gi, "Bearer [REDACTED]")
+    .slice(0, 200);
 }
-
-function retryDelay(attempt, retryAfterMs = 0) {
-  const configuredDelay =
-    CONFIG.RETRY_DELAYS_MS[attempt] ??
-    CONFIG.RETRY_DELAYS_MS.at(-1);
-
-  // Batas retryAfter untuk mencegah menunggu terlalu lama.
-  const boundedRetryAfter = Math.min(
-    Math.max(0, retryAfterMs),
-    5000
-  );
-
-  return Math.max(configuredDelay, boundedRetryAfter);
-}
-
-function getRetryAfterMs(response) {
-  const value = response.headers.get("retry-after");
-
-  if (!value) return 0;
-
-  const seconds = Number(value);
-
-  if (Number.isFinite(seconds) && seconds >= 0) {
-    return seconds * 1000;
-  }
-
-  const dateMs = Date.parse(value);
-
-  return Number.isFinite(dateMs)
-    ? Math.max(0, dateMs - Date.now())
-    : 0;
-}
-
-// --------------------------------------------------
-// INPUT VALIDATION
-// --------------------------------------------------
 
 function validateMessage(body) {
   if (!body || typeof body.message !== "string") {
-    return {
-      error: "Pesan harus berupa teks.",
-      status: 400
-    };
+    return { error: "Pesan harus berupa teks.", status: 400 };
   }
 
   const message = body.message.trim();
 
   if (!message) {
-    return {
-      error: "Pesan tidak boleh kosong.",
-      status: 400
-    };
+    return { error: "Pesan tidak boleh kosong.", status: 400 };
   }
 
   if (message.length > CONFIG.MAX_MESSAGE_LENGTH) {
     return {
-      error: "Pesan terlalu panjang (maksimal 8.000 karakter).",
+      error: "Pesan terlalu panjang. Maksimal 8.000 karakter.",
       status: 413
     };
   }
@@ -148,201 +83,107 @@ function normalizeHistory(history) {
       item &&
       ["user", "assistant"].includes(item.role) &&
       typeof item.content === "string" &&
-      item.content.trim().length > 0
+      item.content.trim()
     )
     .slice(-CONFIG.MAX_HISTORY_MESSAGES)
     .map(item => ({
       role: item.role === "assistant" ? "model" : "user",
       parts: [{
-        text: item.content
-          .slice(0, CONFIG.MAX_HISTORY_ITEM_LENGTH)
+        text: item.content.slice(0, CONFIG.MAX_HISTORY_ITEM_LENGTH)
       }]
     }));
 }
 
-function buildContents(body, message) {
-  return [
-    ...normalizeHistory(body.history),
-    {
-      role: "user",
-      parts: [{ text: message }]
-    }
-  ];
-}
+function getGeminiError(status, apiError = {}) {
+  const reason = String(
+    apiError.status || apiError.reason || apiError.code || ""
+  ).toUpperCase();
 
-// --------------------------------------------------
-// PROVIDER ERROR NORMALIZATION
-// --------------------------------------------------
+  const message = String(apiError.message || "").toLowerCase();
 
-function mapGeminiError(status) {
   if (status === 400) {
     return createError(
-      "Permintaan Gemini ditolak. Periksa format permintaan dan konfigurasi model.",
+      "Permintaan tidak valid. Periksa format pesan atau konfigurasi model.",
       400,
-      "GEMINI_BAD_REQUEST"
+      "BAD_REQUEST"
     );
   }
 
   if (status === 401 || status === 403) {
-    // Kesalahan autentikasi/izin tidak boleh disamarkan
-    // sebagai gangguan sementara.
     return createError(
-      "Akses Gemini ditolak. Periksa secret API key dan izin proyek.",
+      "Akses Gemini ditolak. Periksa secret dan izin proyek.",
       502,
-      "GEMINI_AUTH_ERROR"
+      "GEMINI_ACCESS_ERROR"
+    );
+  }
+
+  if (status === 404) {
+    return createError(
+      "Model tidak ditemukan atau tidak tersedia untuk API ini.",
+      502,
+      "GEMINI_MODEL_NOT_FOUND"
     );
   }
 
   if (status === 429) {
+    const quotaError =
+      reason.includes("QUOTA") ||
+      reason.includes("RESOURCE_EXHAUSTED") ||
+      message.includes("quota") ||
+      message.includes("billing") ||
+      message.includes("limit: 0");
+
+    if (quotaError) {
+      return createError(
+        "Kuota Gemini saat ini tidak tersedia atau telah tercapai. Coba lagi setelah kuota pulih atau periksa batas penggunaan proyek.",
+        429,
+        "GEMINI_QUOTA_EXHAUSTED"
+      );
+    }
+
     return createError(
-      "Batas permintaan atau kuota Gemini tercapai.",
+      "Batas permintaan Gemini tercapai. Tunggu sebentar sebelum mencoba kembali.",
       429,
       "GEMINI_RATE_LIMIT"
     );
   }
 
-  if (status === 503) {
+  if (status === 500 || status === 502 || status === 503 || status === 504) {
     return createError(
-      "Gemini sedang mengalami permintaan tinggi.",
+      "Layanan Gemini sedang mengalami gangguan sementara.",
       503,
-      "GEMINI_UNAVAILABLE"
+      "GEMINI_TEMPORARY_ERROR"
     );
   }
 
   return createError(
-    "Layanan Gemini gagal memproses permintaan.",
+    "Gemini gagal memproses permintaan.",
     502,
     "GEMINI_PROVIDER_ERROR"
   );
 }
 
-function normalizeProviderStatus(status) {
-  return isRetryableStatus(status) ? status : 502;
+function shouldRetry(status) {
+  // Jangan retry 400, 401, 403, 404, atau 429.
+  // Retry hanya gangguan server sementara.
+  return [500, 502, 503, 504].includes(status);
 }
-
-// --------------------------------------------------
-// SHARED FETCH WITH LIMITED RETRIES
-// --------------------------------------------------
-
-async function fetchWithRetry({
-  provider,
-  url,
-  headers,
-  payload,
-  model
-}) {
-  let lastError;
-
-  for (
-    let attempt = 0;
-    attempt < CONFIG.MAX_ATTEMPTS;
-    attempt++
-  ) {
-    let response;
-
-    try {
-      response = await fetch(url, {
-        method: "POST",
-        signal: AbortSignal.timeout(
-          CONFIG.REQUEST_TIMEOUT_MS
-        ),
-        headers,
-        body: JSON.stringify(payload)
-      });
-    } catch (error) {
-      const timedOut =
-        error?.name === "TimeoutError" ||
-        error?.name === "AbortError";
-
-      lastError = createError(
-        timedOut
-          ? `Permintaan ${provider} melewati batas waktu.`
-          : `Tidak dapat terhubung ke ${provider}.`,
-        timedOut ? 504 : 502,
-        timedOut ? "REQUEST_TIMEOUT" : "NETWORK_ERROR"
-      );
-
-      logError(`${provider} network error`, {
-        attempt: attempt + 1,
-        maxAttempts: CONFIG.MAX_ATTEMPTS,
-        model,
-        errorName: error?.name || "UnknownError",
-        message: safeErrorMessage(error?.message)
-      });
-
-      if (attempt < CONFIG.MAX_ATTEMPTS - 1) {
-        await sleep(retryDelay(attempt));
-        continue;
-      }
-
-      throw lastError;
-    }
-
-    if (response.ok) {
-      return response;
-    }
-
-    let errorData = {};
-
-    try {
-      errorData = await response.json();
-    } catch {
-      // Respons error bukan JSON; status HTTP tetap dicatat.
-    }
-
-    const apiError = errorData?.error || {};
-
-    logError(`${provider} API error`, {
-      attempt: attempt + 1,
-      status: response.status,
-      apiStatus: apiError.status || apiError.code || "UNKNOWN",
-      model,
-      message: safeErrorMessage(apiError.message)
-    });
-
-    lastError = createError(
-      `${provider} mengembalikan HTTP ${response.status}.`,
-      normalizeProviderStatus(response.status),
-      apiError.status || apiError.code || "PROVIDER_ERROR"
-    );
-
-    if (
-      !isRetryableStatus(response.status) ||
-      attempt >= CONFIG.MAX_ATTEMPTS - 1
-    ) {
-      throw lastError;
-    }
-
-    await sleep(
-      retryDelay(attempt, getRetryAfterMs(response))
-    );
-  }
-
-  throw lastError || createError(
-    `Permintaan ${provider} gagal.`,
-    502
-  );
-}
-
-// --------------------------------------------------
-// GEMINI PROVIDER
-// --------------------------------------------------
 
 async function requestGemini(env, contents) {
   if (!env.GEMINI_API_KEY) {
     throw createError(
-      "Secret GEMINI_API_KEY belum tersedia.",
+      "Secret GEMINI_API_KEY belum dikonfigurasi.",
       503,
       "MISSING_GEMINI_KEY"
     );
   }
 
-  const model =
-    env.GEMINI_MODEL || CONFIG.GEMINI_MODEL;
+  const model = env.GEMINI_MODEL || CONFIG.GEMINI_MODEL;
 
   const url =
     "https://generativelanguage.googleapis.com/v1beta/models/" +
-    `${encodeURIComponent(model)}:generateContent`;
+    encodeURIComponent(model) +
+    ":generateContent";
 
   const payload = {
     systemInstruction: {
@@ -354,229 +195,196 @@ async function requestGemini(env, contents) {
     }
   };
 
-  const response = await fetchWithRetry({
-    provider: "Gemini",
-    url,
-    model,
-    headers: {
-      "content-type": "application/json",
-      "x-goog-api-key": env.GEMINI_API_KEY
-    },
-    payload
-  });
+  let lastError;
 
-  let data;
+  for (let attempt = 0; attempt < CONFIG.MAX_ATTEMPTS; attempt++) {
+    let response;
 
-  try {
-    data = await response.json();
-  } catch {
-    throw createError(
-      "Gemini mengirim respons yang tidak dapat dibaca.",
-      502,
-      "INVALID_PROVIDER_RESPONSE"
-    );
-  }
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        signal: AbortSignal.timeout(CONFIG.REQUEST_TIMEOUT_MS),
+        headers: {
+          "content-type": "application/json",
+          "x-goog-api-key": env.GEMINI_API_KEY
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (error) {
+      const timeout =
+        error?.name === "TimeoutError" ||
+        error?.name === "AbortError";
 
-  const reply = (
-    data?.candidates?.[0]?.content?.parts || []
-  )
-    .map(part => part.text || "")
-    .join("\n")
-    .trim();
+      lastError = createError(
+        timeout
+          ? "Permintaan Gemini melewati batas waktu."
+          : "Tidak dapat terhubung ke Gemini.",
+        timeout ? 504 : 502,
+        timeout ? "REQUEST_TIMEOUT" : "NETWORK_ERROR"
+      );
 
-  if (!reply) {
-    throw createError(
-      "Gemini tidak menghasilkan teks.",
-      502,
-      "EMPTY_PROVIDER_RESPONSE"
-    );
-  }
+      logError("Gemini network failure", {
+        attempt: attempt + 1,
+        errorName: error?.name || "UnknownError"
+      });
 
-  return {
-    reply,
-    model,
-    provider: "gemini"
-  };
-}
+      if (attempt < CONFIG.MAX_ATTEMPTS - 1) {
+        await new Promise(resolve =>
+          setTimeout(resolve, CONFIG.RETRY_DELAY_MS)
+        );
+        continue;
+      }
 
-// --------------------------------------------------
-// OPENAI PROVIDER
-// --------------------------------------------------
-
-async function requestOpenAI(env, contents) {
-  if (!env.OPENAI_API_KEY) {
-    throw createError(
-      "Secret OPENAI_API_KEY belum tersedia.",
-      503,
-      "MISSING_OPENAI_KEY"
-    );
-  }
-
-  const model =
-    env.OPENAI_MODEL || CONFIG.OPENAI_MODEL;
-
-  const input = contents.map(item => ({
-    role: item.role === "model" ? "assistant" : "user",
-    content: (item.parts || [])
-      .map(part => part.text || "")
-      .join("\n")
-  }));
-
-  const response = await fetchWithRetry({
-    provider: "OpenAI",
-    url: "https://api.openai.com/v1/responses",
-    model,
-    headers: {
-      "content-type": "application/json",
-      "authorization": `Bearer ${env.OPENAI_API_KEY}`
-    },
-    payload: {
-      model,
-      instructions: SYSTEM_INSTRUCTION,
-      input,
-      max_output_tokens: CONFIG.MAX_OUTPUT_TOKENS,
-      store: false
+      throw lastError;
     }
-  });
 
-  let data;
+    if (response.ok) {
+      let data;
 
-  try {
-    data = await response.json();
-  } catch {
-    throw createError(
-      "OpenAI mengirim respons yang tidak dapat dibaca.",
-      502,
-      "INVALID_PROVIDER_RESPONSE"
+      try {
+        data = await response.json();
+      } catch {
+        throw createError(
+          "Respons Gemini tidak dapat dibaca.",
+          502,
+          "INVALID_PROVIDER_RESPONSE"
+        );
+      }
+
+      const reply = (data?.candidates?.[0]?.content?.parts || [])
+        .map(part => part.text || "")
+        .join("\n")
+        .trim();
+
+      if (!reply) {
+        throw createError(
+          "Gemini tidak menghasilkan teks. Coba kirim ulang pesan.",
+          502,
+          "EMPTY_RESPONSE"
+        );
+      }
+
+      return { reply, model, provider: "gemini" };
+    }
+
+    let errorData = {};
+
+    try {
+      errorData = await response.json();
+    } catch {
+      // Respons error mungkin bukan JSON.
+    }
+
+    const apiError = errorData?.error || {};
+    const mappedError = getGeminiError(response.status, apiError);
+
+    logError("Gemini API failure", {
+      status: response.status,
+      code: mappedError.code,
+      model,
+      message: safeMessage(apiError.message)
+    });
+
+    if (
+      !shouldRetry(response.status) ||
+      attempt >= CONFIG.MAX_ATTEMPTS - 1
+    ) {
+      throw mappedError;
+    }
+
+    lastError = mappedError;
+
+    await new Promise(resolve =>
+      setTimeout(resolve, CONFIG.RETRY_DELAY_MS)
     );
   }
 
-  const reply = (
-    data?.output || []
-  )
-    .filter(item => item.type === "message")
-    .flatMap(item => item.content || [])
-    .filter(item => item.type === "output_text")
-    .map(item => item.text || "")
-    .join("\n")
-    .trim();
-
-  if (!reply) {
-    throw createError(
-      "OpenAI tidak menghasilkan teks.",
-      502,
-      "EMPTY_PROVIDER_RESPONSE"
-    );
-  }
-
-  return {
-    reply,
-    model,
-    provider: "openai"
-  };
-}
-
-// --------------------------------------------------
-// CHAT ORCHESTRATION
-// --------------------------------------------------
-
-function shouldFallback(error) {
-  return [
-    429, 500, 502, 503, 504
-  ].includes(error?.status);
+  throw lastError || createError(
+    "Permintaan Gemini gagal.",
+    502,
+    "GEMINI_FAILURE"
+  );
 }
 
 async function handleChat(request, env) {
-  if (!env.GEMINI_API_KEY && !env.OPENAI_API_KEY) {
-    return json({
-      error: "Backend belum dikonfigurasi. Secret API key belum tersedia."
-    }, 503);
-  }
-
   let body;
 
   try {
     body = await request.json();
   } catch {
-    return json({
-      error: "Format permintaan tidak valid."
-    }, 400);
+    return json({ error: "Format permintaan tidak valid." }, 400);
   }
 
   const validation = validateMessage(body);
 
   if (validation.error) {
-    return json({
-      error: validation.error
-    }, validation.status);
+    return json(
+      { error: validation.error },
+      validation.status
+    );
   }
 
-  const contents = buildContents(
-    body,
-    validation.message
-  );
-
-  // Provider utama: Gemini.
-  if (env.GEMINI_API_KEY) {
-    try {
-      const result = await requestGemini(env, contents);
-      return json(result);
-    } catch (error) {
-      logError("Gemini primary provider failed", {
-        status: error?.status || 502,
-        code: error?.code || "UNKNOWN_ERROR",
-        message: safeErrorMessage(error?.message)
-      });
-
-      if (!shouldFallback(error)) {
-        return json({
-          error: error.message || "Gemini gagal memproses permintaan."
-        }, error.status || 502);
-      }
-
-      if (!env.OPENAI_API_KEY) {
-        return json({
-          error: "Gemini sedang bermasalah dan OpenAI belum dikonfigurasi."
-        }, 503);
-      }
-
-      logError("Switching to OpenAI fallback", {
-        reason: error?.code || "GEMINI_FAILURE"
-      });
+  const contents = [
+    ...normalizeHistory(body.history),
+    {
+      role: "user",
+      parts: [{ text: validation.message }]
     }
-  }
+  ];
 
-  // Provider cadangan: OpenAI.
   try {
-    const result = await requestOpenAI(env, contents);
-
-    return json({
-      ...result,
-      fallback: true
-    });
+    const result = await requestGemini(env, contents);
+    return json(result);
   } catch (error) {
-    logError("OpenAI fallback failed", {
-      status: error?.status || 502,
-      code: error?.code || "UNKNOWN_ERROR",
-      message: safeErrorMessage(error?.message)
-    });
+    const status = error?.status || 502;
+    const code = error?.code || "INTERNAL_ERROR";
+
+    logError("Chat request failed", { status, code });
+
+    // Pesan aman untuk frontend; detail internal tidak dibocorkan.
+    if (code === "GEMINI_QUOTA_EXHAUSTED") {
+      return json({
+        error: "Kuota Gemini gratis telah tercapai atau belum tersedia. Coba lagi nanti."
+      }, 429);
+    }
+
+    if (code === "GEMINI_RATE_LIMIT") {
+      return json({
+        error: "Terlalu banyak permintaan. Tunggu sebentar lalu coba kembali."
+      }, 429);
+    }
+
+    if (code === "GEMINI_MODEL_NOT_FOUND") {
+      return json({
+        error: "Model Gemini tidak tersedia. Periksa konfigurasi model."
+      }, 502);
+    }
+
+    if (code === "GEMINI_ACCESS_ERROR" || code === "MISSING_GEMINI_KEY") {
+      return json({
+        error: "Akses Gemini belum terkonfigurasi dengan benar."
+      }, 503);
+    }
+
+    if (status === 400 || status === 413) {
+      return json({ error: error.message }, status);
+    }
 
     return json({
-      error: "Gemini dan OpenAI belum berhasil memproses permintaan. Silakan coba lagi nanti."
-    }, 502);
+      error: "CerdikChat belum dapat memproses permintaan. Coba lagi nanti."
+    }, status >= 500 ? status : 502);
   }
 }
-
-// --------------------------------------------------
-// CLOUDFLARE WORKER ENTRY POINT
-// --------------------------------------------------
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
     if (url.pathname !== "/api/chat") {
-      return textResponse("Not found", 404);
+      return new Response("Not found", {
+        status: 404,
+        headers: { "content-type": "text/plain; charset=utf-8" }
+      });
     }
 
     if (request.method === "OPTIONS") {
@@ -584,12 +392,9 @@ export default {
     }
 
     if (request.method !== "POST") {
-      return json({
-        error: "Metode tidak diizinkan."
-      }, 405);
+      return json({ error: "Metode tidak diizinkan." }, 405);
     }
 
     return handleChat(request, env);
   }
 };
-
