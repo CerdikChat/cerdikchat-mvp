@@ -1,4 +1,3 @@
-
 const CONFIG = Object.freeze({
   MODEL: "@cf/zai-org/glm-4.7-flash",
   MAX_MESSAGE_LENGTH: 8000,
@@ -9,12 +8,20 @@ const CONFIG = Object.freeze({
 
 const SYSTEM_INSTRUCTION = [
   "Anda adalah CerdikChat, asisten AI untuk riset, analisis, penulisan, dan perencanaan.",
-  "Jawab menggunakan bahasa pengguna dengan jelas, akurat, dan terstruktur.",
-  "Jangan mengarang fakta, data, kutipan, sumber, atau hasil penelitian.",
-  "Bedakan fakta terverifikasi, estimasi, asumsi, dan opini.",
-  "Jika informasi terkini diperlukan, nyatakan keterbatasan akses dan sarankan verifikasi.",
-  "Untuk pertanyaan ambigu, mintalah klarifikasi yang diperlukan.",
-  "Untuk keputusan berisiko tinggi, jelaskan ketidakpastian dan perlunya verifikasi."
+  "Jawab menggunakan bahasa pengguna dengan jelas, akurat, relevan, dan terstruktur.",
+  "Jawab inti pertanyaan secara langsung sebelum memberi penjelasan tambahan.",
+  "Ikuti format, bahasa, panjang, dan jumlah poin yang diminta pengguna.",
+  "Jangan membuat klasifikasi, alasan, atau konteks yang tidak diminta.",
+  "Jangan mengarang fakta, angka, kutipan, sumber, penelitian, atau referensi.",
+  "Bedakan fakta, estimasi, asumsi, dan opini jika perbedaannya penting.",
+  "Jika informasi tidak diketahui atau tidak dapat diverifikasi, nyatakan keterbatasannya.",
+  "Jangan mengaku telah melakukan pencarian, pengujian, atau verifikasi jika belum dilakukan.",
+  "Untuk informasi yang dapat berubah, jelaskan bahwa informasi perlu diperiksa dari sumber terkini.",
+  "Untuk pertanyaan ambigu, mintalah klarifikasi jika diperlukan untuk menjawab dengan benar.",
+  "Untuk keputusan berisiko tinggi, jelaskan ketidakpastian dan sarankan verifikasi yang sesuai.",
+  "Periksa konsistensi jawaban terhadap pertanyaan sebelum merespons.",
+  "Gunakan Markdown standar. Tampilkan rumus kimia dan matematika dengan format yang mudah dibaca.",
+  "Hindari pengulangan, pembukaan yang panjang, dan kesimpulan yang tidak diperlukan."
 ].join(" ");
 
 const JSON_HEADERS = {
@@ -31,7 +38,7 @@ function json(data, status = 200) {
 }
 
 function logError(event, details = {}) {
-  // Jangan pernah mencatat pesan, riwayat, atau kredensial pengguna.
+  // Jangan mencatat isi pesan, riwayat, atau kredensial.
   console.error(event, details);
 }
 
@@ -91,9 +98,7 @@ function contentToText(content) {
     return content.trim();
   }
 
-  if (!Array.isArray(content)) {
-    return "";
-  }
+  if (!Array.isArray(content)) return "";
 
   return content
     .map(part => {
@@ -108,44 +113,45 @@ function contentToText(content) {
 }
 
 function extractReply(result) {
+  if (typeof result === "string") {
+    return result.trim();
+  }
+
   if (!result || typeof result !== "object") {
     return "";
   }
 
-  // Format Workers AI yang umum.
+  // Cloudflare Workers AI response format.
   if (typeof result.response === "string") {
     return result.response.trim();
   }
 
-  // Format chat-completions.
+  // Chat-completions response format.
   const choice = result.choices?.[0];
+  const choiceMessage = contentToText(choice?.message?.content);
 
-  if (typeof choice?.message?.content === "string") {
-    return choice.message.content.trim();
-  }
-
-  const choiceContent = contentToText(choice?.message?.content);
-  if (choiceContent) return choiceContent;
+  if (choiceMessage) return choiceMessage;
 
   if (typeof choice?.text === "string") {
     return choice.text.trim();
   }
 
-  // Beberapa API mengembalikan output_text.
+  // Alternative output-text format.
   if (typeof result.output_text === "string") {
     return result.output_text.trim();
   }
 
-  // Format output terstruktur.
+  // Structured output format.
   if (Array.isArray(result.output)) {
     const text = result.output
-      .flatMap(item => Array.isArray(item?.content) ? item.content : [])
-      .filter(item =>
-        item?.type === "output_text" ||
-        item?.type === "text" ||
-        typeof item?.text === "string"
+      .flatMap(item =>
+        Array.isArray(item?.content) ? item.content : []
       )
-      .map(item => typeof item.text === "string" ? item.text : "")
+      .map(item => {
+        if (typeof item?.text === "string") return item.text;
+        if (typeof item?.content === "string") return item.content;
+        return "";
+      })
       .filter(Boolean)
       .join("\n")
       .trim();
@@ -195,7 +201,6 @@ async function requestAI(env, history, message) {
   const reply = extractReply(result);
 
   if (!reply) {
-    // Catat struktur umum saja, bukan isi respons model.
     logError("Workers AI returned no extractable text", {
       model: CONFIG.MODEL,
       resultType: typeof result,
@@ -259,18 +264,18 @@ async function handleChat(request, env) {
 
     if (code === "AI_EMPTY_RESPONSE") {
       return json({
-        error: "Model belum menghasilkan teks yang dapat dibaca. Silakan coba lagi nanti."
+        error: "Model belum menghasilkan teks yang dapat dibaca. Silakan coba lagi."
       }, 502);
     }
 
     if (code === "AI_INFERENCE_FAILED") {
       return json({
-        error: "Layanan AI gagal memproses permintaan. Silakan coba lagi nanti."
+        error: "Layanan AI gagal memproses permintaan. Silakan coba lagi."
       }, 502);
     }
 
     return json({
-      error: "Terjadi kesalahan internal. Silakan coba lagi nanti."
+      error: "Terjadi kesalahan internal. Silakan coba lagi."
     }, 500);
   }
 }
