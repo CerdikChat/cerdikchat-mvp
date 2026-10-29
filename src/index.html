@@ -9,9 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="CerdikChat">
   <meta name="color-scheme" content="dark">
-
   <link rel="manifest" href="/manifest.webmanifest">
-
   <title>CerdikChat — AI Workspace</title>
 
   <style>
@@ -26,14 +24,11 @@
       --blue: #6ea8fe;
       --mint: #66e0c2;
       --danger: #ff8d9a;
-      --radius: 16px;
       font-family: system-ui, -apple-system, BlinkMacSystemFont,
         "Segoe UI", Roboto, sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -47,13 +42,8 @@
       line-height: 1.5;
     }
 
-    button, textarea {
-      font: inherit;
-    }
-
-    button {
-      -webkit-tap-highlight-color: transparent;
-    }
+    button, textarea { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
 
     button:focus-visible,
     textarea:focus-visible {
@@ -158,9 +148,7 @@
       border-bottom: 1px solid var(--line);
     }
 
-    .top strong {
-      font-size: 14px;
-    }
+    .top strong { font-size: 14px; }
 
     .mobile-brand {
       display: none;
@@ -212,9 +200,7 @@
       letter-spacing: -1.6px;
     }
 
-    .welcome h1 span {
-      color: var(--blue);
-    }
+    .welcome h1 span { color: var(--blue); }
 
     .welcome p {
       max-width: 570px;
@@ -240,9 +226,7 @@
       cursor: pointer;
     }
 
-    .suggest:hover {
-      border-color: #648fc8;
-    }
+    .suggest:hover { border-color: #648fc8; }
 
     .suggest b {
       display: block;
@@ -275,9 +259,7 @@
       font-weight: 800;
     }
 
-    .msg.user .avatar {
-      background: #284e83;
-    }
+    .msg.user .avatar { background: #284e83; }
 
     .bubble {
       flex: 1;
@@ -297,8 +279,32 @@
       white-space: pre-wrap;
     }
 
-    .content a {
-      color: var(--blue);
+    .content strong { font-weight: 800; }
+    .content em { font-style: italic; }
+
+    .content code {
+      padding: 2px 5px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--panel2);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: .92em;
+    }
+
+    .content pre {
+      max-width: 100%;
+      overflow-x: auto;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #080e19;
+      white-space: pre;
+    }
+
+    .content pre code {
+      padding: 0;
+      border: 0;
+      background: transparent;
     }
 
     .composer-wrap {
@@ -332,9 +338,7 @@
       line-height: 1.5;
     }
 
-    .composer textarea::placeholder {
-      color: #8192ad;
-    }
+    .composer textarea::placeholder { color: #8192ad; }
 
     .controls {
       display: flex;
@@ -374,9 +378,7 @@
       overflow-wrap: anywhere;
     }
 
-    .status.error {
-      color: var(--danger);
-    }
+    .status.error { color: var(--danger); }
 
     .footer {
       max-width: 760px;
@@ -387,13 +389,8 @@
     }
 
     @media (max-width: 720px) {
-      .app {
-        display: block;
-      }
-
-      .side {
-        display: none;
-      }
+      .app { display: block; }
+      .side { display: none; }
 
       .main {
         min-height: 100vh;
@@ -405,42 +402,24 @@
         padding: 10px 14px;
       }
 
-      .mobile-brand {
-        display: flex;
-      }
+      .mobile-brand { display: flex; }
 
       .top strong {
         margin-left: auto;
         font-size: 12px;
       }
 
-      .pill {
-        font-size: 10px;
-      }
-
-      .feed {
-        padding: 16px;
-      }
-
-      .welcome {
-        margin: 6vh auto 24px;
-      }
-
-      .welcome h1 {
-        letter-spacing: -1px;
-      }
-
-      .suggestions {
-        grid-template-columns: 1fr;
-      }
+      .pill { font-size: 10px; }
+      .feed { padding: 16px; }
+      .welcome { margin: 6vh auto 24px; }
+      .welcome h1 { letter-spacing: -1px; }
+      .suggestions { grid-template-columns: 1fr; }
 
       .composer-wrap {
         padding: 10px 12px max(10px, env(safe-area-inset-bottom));
       }
 
-      .hint {
-        max-width: 65%;
-      }
+      .hint { max-width: 65%; }
     }
 
     @media (prefers-reduced-motion: no-preference) {
@@ -596,6 +575,7 @@
     function setStatus(message = "", isError = false) {
       statusEl.textContent = message;
       statusEl.className = isError ? "status error" : "status";
+      statusEl.setAttribute("role", isError ? "alert" : "status");
     }
 
     function scrollToLatest() {
@@ -605,6 +585,78 @@
           behavior: "auto"
         });
       });
+    }
+
+    // Escape untrusted HTML before adding limited, controlled formatting.
+    // Links and raw HTML are intentionally not rendered as active content.
+    function renderBasicMarkdown(element, text) {
+      const escapeHTML = value => value.replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[character]);
+
+      const lines = text.split("\n");
+      const output = [];
+      let inCodeBlock = false;
+      let codeLines = [];
+
+      function inlineMarkdown(value) {
+        let html = escapeHTML(value);
+
+        html = html.replace(
+          /`([^`\n]+)`/g,
+          "<code>$1</code>"
+        );
+
+        html = html.replace(
+          /\*\*([^*\n]+)\*\*/g,
+          "<strong>$1</strong>"
+        );
+
+        html = html.replace(
+          /(^|[^*])\*([^*\n]+)\*(?!\*)/g,
+          "$1<em>$2</em>"
+        );
+
+        return html;
+      }
+
+      for (const line of lines) {
+        if (/^\s*```/.test(line)) {
+          if (!inCodeBlock) {
+            inCodeBlock = true;
+            codeLines = [];
+          } else {
+            output.push(
+              "<pre><code>" +
+              escapeHTML(codeLines.join("\n")) +
+              "</code></pre>"
+            );
+            inCodeBlock = false;
+            codeLines = [];
+          }
+          continue;
+        }
+
+        if (inCodeBlock) {
+          codeLines.push(line);
+        } else {
+          output.push(inlineMarkdown(line));
+        }
+      }
+
+      if (inCodeBlock) {
+        output.push(
+          "<pre><code>" +
+          escapeHTML(codeLines.join("\n")) +
+          "</code></pre>"
+        );
+      }
+
+      element.innerHTML = output.join("<br>");
     }
 
     function addMessage(role, text) {
@@ -639,6 +691,8 @@
     }
 
     function usePrompt(prompt) {
+      if (isSending) return;
+
       input.value = prompt;
       updateCount();
       input.focus();
@@ -655,6 +709,7 @@
     input.addEventListener("keydown", event => {
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
+
         if (typeof form.requestSubmit === "function") {
           form.requestSubmit();
         } else {
@@ -666,9 +721,14 @@
     async function sendMessage(event) {
       event.preventDefault();
 
+      if (isSending) return;
+
       const message = input.value.trim();
 
-      if (!message || isSending) return;
+      if (!message) {
+        setStatus("Silakan masukkan pesan terlebih dahulu.", true);
+        return;
+      }
 
       if (message.length > MAX_MESSAGE_LENGTH) {
         setStatus("Pesan terlalu panjang. Maksimal 8.000 karakter.", true);
@@ -679,13 +739,17 @@
       send.disabled = true;
       input.disabled = true;
       send.textContent = "Memproses…";
+      form.setAttribute("aria-busy", "true");
       setStatus("CerdikChat sedang menyiapkan jawaban…");
 
       addMessage("user", message);
       input.value = "";
       updateCount();
 
-      const answerElement = addMessage("assistant", "Menyiapkan jawaban…");
+      const answerElement = addMessage(
+        "assistant",
+        "Menyiapkan jawaban…"
+      );
 
       try {
         const response = await fetch("/api/chat", {
@@ -700,7 +764,7 @@
           })
         });
 
-        let data = {};
+        let data;
 
         try {
           data = await response.json();
@@ -709,11 +773,16 @@
         }
 
         if (!response.ok) {
-          const messageFromServer =
+          const serverMessage =
+            typeof data.message === "string" ? data.message : "";
+
+          const serverError =
             typeof data.error === "string" ? data.error : "";
 
           throw new Error(
-            messageFromServer || `Permintaan gagal (HTTP ${response.status}).`
+            serverMessage ||
+            serverError ||
+            `Permintaan gagal (HTTP ${response.status}).`
           );
         }
 
@@ -724,7 +793,7 @@
           throw new Error("Respons AI kosong. Silakan coba lagi.");
         }
 
-        answerElement.textContent = answer;
+        renderBasicMarkdown(answerElement, answer);
 
         history.push(
           { role: "user", content: message },
@@ -739,7 +808,9 @@
           "Maaf, jawaban belum berhasil diperoleh.";
 
         const errorMessage =
-          error instanceof Error ? error.message : "Terjadi kesalahan.";
+          error instanceof Error
+            ? error.message
+            : "Terjadi kesalahan yang tidak diketahui.";
 
         setStatus(
           `${errorMessage} Periksa koneksi dan endpoint /api/chat pada Worker.`,
@@ -751,6 +822,7 @@
         send.disabled = false;
         input.disabled = false;
         send.textContent = "Kirim ↑";
+        form.removeAttribute("aria-busy");
         input.focus();
         scrollToLatest();
       }
