@@ -2,33 +2,39 @@
  * CerdikChat — Cloudflare Workers AI
  * ATLAS-9 Strategic Intelligence System
  *
- * Primary model: @cf/zai-org/glm-4.7-flash
- * Binding: env.AI
- * Assets: env.ASSETS
+ * Configured model: @cf/zai-org/glm-4.7-flash
+ * Bindings: env.AI, env.ASSETS
  *
- * Security objectives:
- * - No provider API keys in source code.
- * - Bounded request body and message/history sizes.
- * - Validate JSON, roles, and message content.
- * - Same-origin browser requests only when Origin is present.
- * - No prompt or response content in error logs.
+ * Security controls:
+ * - Bounded request-body and message sizes
+ * - JSON and HTTP method validation
+ * - Reject mismatched browser Origin headers
+ * - History normalization and role allowlist
+ * - No prompt or conversation content in application logs
+ * - Sanitized provider errors
+ * - Security headers
  *
- * Important:
- * - CORS is not authentication.
- * - Rate limiting and user authentication are not implemented here.
- * - This Worker does not execute external tools or actions.
+ * Limitations:
+ * - No user authentication
+ * - No persistent rate limiting
+ * - No independent multi-agent execution
+ * - No external tools or actions
  */
+
+"use strict";
 
 const CONFIG = Object.freeze({
   MODEL: "@cf/zai-org/glm-4.7-flash",
 
+  API_PATH: "/api/chat",
+
   MAX_BODY_BYTES: 40 * 1024,
   MAX_MESSAGE_CHARS: 8000,
+
   MAX_HISTORY_MESSAGES: 12,
   MAX_HISTORY_ITEM_CHARS: 2000,
-  MAX_OUTPUT_TOKENS: 1024,
 
-  API_PATH: "/api/chat",
+  MAX_OUTPUT_TOKENS: 1024,
 });
 
 const SYSTEM_INSTRUCTION = `
@@ -49,50 +55,73 @@ KONTEKS TIM:
 - AEGIS: hukum, keamanan, risiko, kepatuhan, dan quality assurance.
 - ORACLE: ekonomi, keuangan, bisnis, dan strategi.
 
-BATASAN IDENTITAS:
-Nama tersebut adalah peran analitis dalam satu model AI.
-Jangan mengklaim bahwa sembilan agen independen sedang berjalan
+BATAS IDENTITAS:
+Nama-nama tersebut merupakan peran analitis dalam satu model AI.
+Jangan mengklaim bahwa sembilan agen atau model independen berjalan,
 atau bahwa spesialis benar-benar dipanggil.
 
-BATASAN TINDAKAN:
+TRANSPARANSI MODEL:
+Model yang dikonfigurasi oleh aplikasi adalah
+@cf/zai-org/glm-4.7-flash.
+Jika ditanya, bedakan konfigurasi aplikasi dari identitas internal,
+arsitektur, versi, atau data pelatihan yang belum diverifikasi.
+Jangan mengarang detail teknis atau mengklaim telah memeriksa
+konfigurasi runtime jika pemeriksaan tersebut tidak dilakukan.
+
+BATAS TINDAKAN:
 Jangan mengklaim telah melakukan riset web, menjalankan kode,
 mengubah repository, menguji sistem, atau melakukan deployment
-kecuali tersedia bukti bahwa tindakan itu benar-benar dilakukan.
-Jangan mengklaim memiliki database internal, autentikasi,
-pemantauan keamanan, atau penguncian sistem yang belum terbukti.
+kecuali tersedia bukti bahwa tindakan tersebut benar-benar dilakukan.
+Jangan mengklaim memiliki database internal, autentikasi pengguna,
+atau kemampuan pemantauan yang belum diterapkan.
 
 PRINSIP KERJA:
-1. Jawab dalam bahasa pengguna; gunakan bahasa Indonesia secara default.
+1. Jawab dalam bahasa pengguna; bahasa Indonesia secara default.
 2. Utamakan akurasi, struktur jelas, dan rekomendasi praktis.
 3. Bedakan fakta, asumsi, estimasi, dan opini.
-4. Jangan mengarang sumber, data, harga, hasil tes, atau kemampuan.
+4. Jangan mengarang sumber, data, harga, hasil pengujian,
+   atau kemampuan sistem.
 5. Untuk coding, prioritaskan solusi aman dan mudah diuji.
 6. Jelaskan perubahan kode dan cara memverifikasi hasilnya.
-7. Untuk riset, jelaskan keterbatasan sumber dan data bila relevan.
+7. Untuk riset, jelaskan keterbatasan sumber jika relevan.
 8. Utamakan solusi gratis atau berbiaya rendah.
-9. Jangan mengaktifkan billing, membeli, menghapus data, atau
-   mengubah sistem eksternal tanpa persetujuan eksplisit pengguna.
-10. Jangan meminta atau menampilkan API key, token, atau kata sandi.
-11. Jangan menyebut klaim keamanan sebagai fakta tanpa bukti.
-12. Untuk topik kesehatan, keselamatan, hukum, dan keuangan,
-    jelaskan risiko dan perlunya verifikasi profesional bila perlu.
+9. Jangan mengaktifkan billing, melakukan pembelian, deployment,
+   menghapus data, atau mengubah sistem eksternal tanpa
+   persetujuan eksplisit pengguna.
+10. Jangan meminta atau menampilkan API key, token, kata sandi,
+    atau informasi rahasia.
+11. Simpan rahasia di secret manager, bukan source code.
+12. Untuk kesehatan, keselamatan, hukum, dan keuangan,
+    jelaskan risiko dan perlunya verifikasi profesional bila relevan.
 13. Jika informasi penting tidak tersedia, nyatakan keterbatasan
     atau ajukan pertanyaan klarifikasi yang paling menentukan.
 
 FORMAT JAWABAN:
-- Ringkasan atau diagnosis.
-- Rekomendasi utama.
-- Langkah implementasi atau contoh.
-- Risiko, batasan, dan verifikasi bila relevan.
+- Ringkasan atau diagnosis
+- Rekomendasi utama
+- Langkah implementasi atau contoh
+- Risiko, batasan, dan verifikasi bila relevan
 `.trim();
 
 const JSON_HEADERS = Object.freeze({
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
   "x-content-type-options": "nosniff",
-  "referrer-policy": "no-referrer",
+  "referrer-policy": "strict-origin-when-cross-origin",
   "x-frame-options": "DENY",
+  "permissions-policy":
+    "camera=(), microphone=(), geolocation=()",
 });
+
+function securityHeaders() {
+  return {
+    "x-content-type-options": "nosniff",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "x-frame-options": "DENY",
+    "permissions-policy":
+      "camera=(), microphone=(), geolocation=()",
+  };
+}
 
 function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -104,9 +133,20 @@ function jsonResponse(data, status = 200, extraHeaders = {}) {
   });
 }
 
+function apiError(code, message, status, headers = {}) {
+  return jsonResponse(
+    {
+      error: code,
+      message,
+    },
+    status,
+    headers
+  );
+}
+
 function getCorsHeaders(request) {
   const origin = request.headers.get("Origin");
-  const requestUrl = new URL(request.url);
+  const requestOrigin = new URL(request.url).origin;
 
   const headers = {
     "vary": "Origin",
@@ -115,11 +155,28 @@ function getCorsHeaders(request) {
     "access-control-max-age": "86400",
   };
 
-  if (origin && origin === requestUrl.origin) {
-    headers["access-control-allow-origin"] = origin;
+  // Never reflect an arbitrary Origin.
+  if (origin && origin === requestOrigin) {
+    headers["access-control-allow-origin"] = requestOrigin;
   }
 
   return headers;
+}
+
+function hasInvalidOrigin(request) {
+  const origin = request.headers.get("Origin");
+
+  // Non-browser clients may omit Origin. This check alone
+  // does not authenticate or authorize those clients.
+  if (!origin) {
+    return false;
+  }
+
+  try {
+    return origin !== new URL(request.url).origin;
+  } catch {
+    return true;
+  }
 }
 
 function isPlainObject(value) {
@@ -130,129 +187,27 @@ function isPlainObject(value) {
   );
 }
 
-function makeInputError(code) {
-  const error = new Error(code);
-  error.code = code;
-  return error;
-}
-
-async function readJsonBody(request) {
-  const contentType = request.headers.get("Content-Type") || "";
-
-  if (!/^application\/json(?:\s*;|$)/i.test(contentType)) {
-    throw makeInputError("UNSUPPORTED_MEDIA_TYPE");
-  }
-
-  const declaredLength = Number(
-    request.headers.get("Content-Length")
-  );
-
-  if (
-    Number.isFinite(declaredLength) &&
-    declaredLength > CONFIG.MAX_BODY_BYTES
-  ) {
-    throw makeInputError("BODY_TOO_LARGE");
-  }
-
-  if (!request.body) {
-    throw makeInputError("INVALID_JSON");
-  }
-
-  const reader = request.body.getReader();
-  const chunks = [];
-  let totalBytes = 0;
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) break;
-
-      totalBytes += value.byteLength;
-
-      if (totalBytes > CONFIG.MAX_BODY_BYTES) {
-        await reader.cancel();
-        throw makeInputError("BODY_TOO_LARGE");
-      }
-
-      chunks.push(value);
-    }
-  } catch (error) {
-    if (
-      error &&
-      typeof error.code === "string" &&
-      error.code.startsWith("BODY_")
-    ) {
-      throw error;
-    }
-
-    throw makeInputError("INVALID_JSON");
-  } finally {
-    reader.releaseLock();
-  }
-
-  const bytes = new Uint8Array(totalBytes);
-  let offset = 0;
-
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-
-  let text;
-
-  try {
-    text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
-  } catch {
-    throw makeInputError("INVALID_JSON");
-  }
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw makeInputError("INVALID_JSON");
-  }
-}
-
-/**
- * Accept only complete user/assistant pairs.
- * Client-supplied history is untrusted and is never treated as system input.
- */
 function normalizeHistory(history) {
-  if (!Array.isArray(history)) return [];
-
-  const pairs = [];
-  let pendingUser = null;
-
-  for (const item of history) {
-    if (!isPlainObject(item)) continue;
-    if (typeof item.content !== "string") continue;
-
-    const content = item.content
-      .trim()
-      .slice(0, CONFIG.MAX_HISTORY_ITEM_CHARS);
-
-    if (!content) continue;
-
-    if (item.role === "user") {
-      // A new user message discards an incomplete earlier turn.
-      pendingUser = { role: "user", content };
-      continue;
-    }
-
-    if (item.role === "assistant" && pendingUser) {
-      pairs.push([
-        pendingUser,
-        { role: "assistant", content },
-      ]);
-
-      pendingUser = null;
-    }
+  if (!Array.isArray(history)) {
+    return [];
   }
 
-  return pairs
-    .slice(-Math.floor(CONFIG.MAX_HISTORY_MESSAGES / 2))
-    .flat();
+  return history
+    .filter(isPlainObject)
+    .filter(
+      (item) =>
+        item.role === "user" ||
+        item.role === "assistant"
+    )
+    .filter((item) => typeof item.content === "string")
+    .map((item) => ({
+      role: item.role,
+      content: item.content
+        .trim()
+        .slice(0, CONFIG.MAX_HISTORY_ITEM_CHARS),
+    }))
+    .filter((item) => item.content.length > 0)
+    .slice(-CONFIG.MAX_HISTORY_MESSAGES);
 }
 
 function extractReply(result) {
@@ -262,6 +217,10 @@ function extractReply(result) {
 
   if (typeof result?.response === "string") {
     return result.response.trim();
+  }
+
+  if (typeof result?.output_text === "string") {
+    return result.output_text.trim();
   }
 
   const content = result?.choices?.[0]?.message?.content;
@@ -279,22 +238,26 @@ function extractReply(result) {
       .trim();
   }
 
-  if (typeof result?.output_text === "string") {
-    return result.output_text.trim();
-  }
-
   return "";
 }
 
 function safeErrorCode(error) {
   const message =
-    typeof error?.message === "string" ? error.message : "";
+    typeof error?.message === "string"
+      ? error.message
+      : "";
 
-  if (/daily.*allocation|neurons.*limit|quota/i.test(message)) {
+  if (
+    /daily.*allocation|neurons.*limit|quota exceeded|rate limit/i
+      .test(message)
+  ) {
     return "AI_QUOTA_EXCEEDED";
   }
 
-  if (/model.*not found|unknown model|does not exist/i.test(message)) {
+  if (
+    /model.*not found|unknown model|does not exist|model.*unavailable/i
+      .test(message)
+  ) {
     return "AI_MODEL_UNAVAILABLE";
   }
 
@@ -305,82 +268,153 @@ function safeErrorCode(error) {
   return "AI_REQUEST_FAILED";
 }
 
-function errorResponse(code, status, corsHeaders, message) {
-  return jsonResponse(
-    { error: code, message },
-    status,
-    corsHeaders
-  );
+function publicErrorMessage(code) {
+  const messages = {
+    AI_QUOTA_EXCEEDED:
+      "Kuota Workers AI mungkin telah tercapai. " +
+      "Periksa penggunaan dan coba lagi setelah kuota tersedia.",
+
+    AI_MODEL_UNAVAILABLE:
+      "Model AI tidak tersedia atau ID model tidak dikenali. " +
+      "Periksa konfigurasi model di Worker.",
+
+    AI_TIMEOUT:
+      "Permintaan AI tidak selesai tepat waktu. Silakan coba lagi.",
+
+    AI_REQUEST_FAILED:
+      "Permintaan AI gagal. Periksa log Cloudflare untuk diagnosis.",
+  };
+
+  return messages[code] || messages.AI_REQUEST_FAILED;
 }
 
-async function handleChat(request, env) {
-  const corsHeaders = getCorsHeaders(request);
-  const origin = request.headers.get("Origin");
-  const requestUrl = new URL(request.url);
+async function readJsonBody(request) {
+  const contentType = request.headers.get("Content-Type") || "";
 
-  // Reject explicitly foreign browser origins.
-  // Requests without Origin are not authenticated by this check.
-  if (origin && origin !== requestUrl.origin) {
-    return errorResponse(
-      "ORIGIN_NOT_ALLOWED",
-      403,
-      corsHeaders,
-      "Origin permintaan tidak diizinkan."
-    );
+  if (!/^application\/json(?:\s*;|$)/i.test(contentType)) {
+    return {
+      ok: false,
+      status: 415,
+      code: "UNSUPPORTED_MEDIA_TYPE",
+      message: "Gunakan Content-Type: application/json.",
+    };
   }
 
-  if (request.method !== "POST") {
-    return errorResponse(
-      "METHOD_NOT_ALLOWED",
-      405,
-      corsHeaders,
-      "Gunakan metode POST untuk endpoint ini."
-    );
+  const contentLength = request.headers.get("Content-Length");
+
+  if (contentLength !== null) {
+    const declaredLength = Number(contentLength);
+
+    if (
+      !Number.isFinite(declaredLength) ||
+      declaredLength < 0
+    ) {
+      return {
+        ok: false,
+        status: 400,
+        code: "INVALID_CONTENT_LENGTH",
+        message: "Header Content-Length tidak valid.",
+      };
+    }
+
+    if (declaredLength > CONFIG.MAX_BODY_BYTES) {
+      return {
+        ok: false,
+        status: 413,
+        code: "BODY_TOO_LARGE",
+        message: "Ukuran request melebihi batas yang diizinkan.",
+      };
+    }
+  }
+
+  let rawBody;
+
+  try {
+    rawBody = await request.text();
+  } catch {
+    return {
+      ok: false,
+      status: 400,
+      code: "BODY_READ_FAILED",
+      message: "Body request tidak dapat dibaca.",
+    };
+  }
+
+  const actualBytes = new TextEncoder().encode(rawBody).byteLength;
+
+  if (actualBytes > CONFIG.MAX_BODY_BYTES) {
+    return {
+      ok: false,
+      status: 413,
+      code: "BODY_TOO_LARGE",
+      message: "Ukuran request melebihi batas yang diizinkan.",
+    };
   }
 
   let body;
 
   try {
-    body = await readJsonBody(request);
-  } catch (error) {
-    const code =
-      typeof error?.code === "string"
-        ? error.code
-        : "INVALID_JSON";
-
-    const inputErrors = {
-      UNSUPPORTED_MEDIA_TYPE: {
-        status: 415,
-        message: "Content-Type harus application/json.",
-      },
-      BODY_TOO_LARGE: {
-        status: 413,
-        message: "Ukuran request melebihi batas yang diizinkan.",
-      },
-      INVALID_JSON: {
-        status: 400,
-        message: "Body harus berupa JSON UTF-8 yang valid.",
-      },
+    body = JSON.parse(rawBody);
+  } catch {
+    return {
+      ok: false,
+      status: 400,
+      code: "INVALID_JSON",
+      message: "Body harus berupa JSON yang valid.",
     };
-
-    const details = inputErrors[code] || inputErrors.INVALID_JSON;
-
-    return errorResponse(
-      code,
-      details.status,
-      corsHeaders,
-      details.message
-    );
   }
 
   if (!isPlainObject(body)) {
-    return errorResponse(
-      "INVALID_BODY",
-      400,
-      corsHeaders,
-      "Body JSON harus berupa objek."
+    return {
+      ok: false,
+      status: 400,
+      code: "INVALID_BODY",
+      message: "Body JSON harus berupa objek.",
+    };
+  }
+
+  return {
+    ok: true,
+    body,
+  };
+}
+
+async function handleChat(request, env) {
+  const corsHeaders = getCorsHeaders(request);
+
+  if (hasInvalidOrigin(request)) {
+    return apiError(
+      "ORIGIN_NOT_ALLOWED",
+      "Origin request tidak diizinkan.",
+      403,
+      corsHeaders
     );
   }
+
+  if (request.method !== "POST") {
+    return apiError(
+      "METHOD_NOT_ALLOWED",
+      "Gunakan metode POST untuk endpoint ini.",
+      405,
+      {
+        ...corsHeaders,
+        allow: "POST, OPTIONS",
+      }
+    );
+  }
+
+  const parsed = await readJsonBody(request);
+
+  if (!parsed.ok) {
+    return apiError(
+      parsed.code,
+      parsed.message,
+      parsed.status,
+      corsHeaders
+    );
+  }
+
+  const body = parsed.body;
 
   const message =
     typeof body.message === "string"
@@ -388,31 +422,31 @@ async function handleChat(request, env) {
       : "";
 
   if (!message) {
-    return errorResponse(
+    return apiError(
       "MESSAGE_REQUIRED",
+      "Kolom message wajib diisi.",
       400,
-      corsHeaders,
-      "Kolom message wajib diisi."
+      corsHeaders
     );
   }
 
   if (message.length > CONFIG.MAX_MESSAGE_CHARS) {
-    return errorResponse(
+    return apiError(
       "MESSAGE_TOO_LONG",
+      `Pesan maksimal ${CONFIG.MAX_MESSAGE_CHARS} karakter.`,
       413,
-      corsHeaders,
-      `Pesan melebihi batas ${CONFIG.MAX_MESSAGE_CHARS} karakter.`
+      corsHeaders
     );
   }
 
   if (!env.AI || typeof env.AI.run !== "function") {
     console.error("CerdikChat configuration error: AI binding missing.");
 
-    return errorResponse(
+    return apiError(
       "AI_BINDING_MISSING",
+      "Binding Workers AI belum tersedia. Periksa konfigurasi Cloudflare.",
       500,
-      corsHeaders,
-      "Binding Workers AI belum tersedia. Periksa konfigurasi Worker."
+      corsHeaders
     );
   }
 
@@ -442,20 +476,19 @@ async function handleChat(request, env) {
     const reply = extractReply(result);
 
     if (!reply) {
-      console.error("CerdikChat model response empty or unrecognized.");
+      console.error("CerdikChat: empty or unrecognized model response.");
 
-      return errorResponse(
+      return apiError(
         "EMPTY_MODEL_RESPONSE",
+        "Model tidak mengembalikan jawaban yang dapat dibaca. Coba lagi.",
         502,
-        corsHeaders,
-        "Model tidak mengembalikan jawaban yang dapat dibaca. Coba lagi."
+        corsHeaders
       );
     }
 
     return jsonResponse(
       {
         reply,
-        // Retained for compatibility with clients using either field.
         response: reply,
         model: CONFIG.MODEL,
       },
@@ -463,31 +496,35 @@ async function handleChat(request, env) {
       corsHeaders
     );
   } catch (error) {
-    // Never log prompts, message content, API keys, or full provider errors.
+    // Never log prompts, conversation contents, secrets,
+    // or the full provider error.
     const code = safeErrorCode(error);
 
     console.error("CerdikChat Workers AI request failed:", code);
 
     const status = code === "AI_QUOTA_EXCEEDED" ? 429 : 502;
 
-    const messagesByCode = {
-      AI_QUOTA_EXCEEDED:
-        "Kuota harian Workers AI mungkin telah tercapai. Coba lagi nanti.",
-      AI_MODEL_UNAVAILABLE:
-        "Model AI tidak tersedia atau ID model tidak dikenali.",
-      AI_TIMEOUT:
-        "Permintaan ke model melewati batas waktu. Silakan coba lagi.",
-      AI_REQUEST_FAILED:
-        "Permintaan ke model gagal. Periksa Cloudflare Logs.",
-    };
-
-    return errorResponse(
+    return apiError(
       code,
+      publicErrorMessage(code),
       status,
-      corsHeaders,
-      messagesByCode[code] || messagesByCode.AI_REQUEST_FAILED
+      corsHeaders
     );
   }
+}
+
+function addSecurityHeaders(response) {
+  const headers = new Headers(response.headers);
+
+  for (const [key, value] of Object.entries(securityHeaders())) {
+    headers.set(key, value);
+  }
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 }
 
 export default {
@@ -496,14 +533,13 @@ export default {
 
     if (url.pathname === CONFIG.API_PATH) {
       const corsHeaders = getCorsHeaders(request);
-      const origin = request.headers.get("Origin");
 
-      if (origin && origin !== url.origin) {
-        return errorResponse(
+      if (hasInvalidOrigin(request)) {
+        return apiError(
           "ORIGIN_NOT_ALLOWED",
+          "Origin request tidak diizinkan.",
           403,
-          corsHeaders,
-          "Origin permintaan tidak diizinkan."
+          corsHeaders
         );
       }
 
@@ -517,15 +553,26 @@ export default {
       return handleChat(request, env);
     }
 
-    // Serve frontend and static assets through Cloudflare Assets.
+    // Never serve frontend assets for unknown API paths.
+    if (url.pathname.startsWith("/api/")) {
+      return jsonResponse(
+        {
+          error: "NOT_FOUND",
+          message: "Endpoint API tidak ditemukan.",
+        },
+        404
+      );
+    }
+
     if (env.ASSETS && typeof env.ASSETS.fetch === "function") {
-      return env.ASSETS.fetch(request);
+      const response = await env.ASSETS.fetch(request);
+      return addSecurityHeaders(response);
     }
 
     return jsonResponse(
       {
         error: "NOT_FOUND",
-        message: "Endpoint tidak ditemukan.",
+        message: "Resource tidak ditemukan.",
       },
       404
     );
