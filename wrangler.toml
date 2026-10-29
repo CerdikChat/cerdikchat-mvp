@@ -14,3 +14,11 @@ binding = "AI"
 [observability]
 enabled = true
 head_sampling_rate = 1
+
+[[ratelimits]]
+name = "CHAT_RATE_LIMITER"
+namespace_id = "2901029"
+
+[ratelimits.simple]
+limit = 20
+period = 60
