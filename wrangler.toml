@@ -22,3 +22,8 @@ namespace_id = "2901029"
 [ratelimits.simple]
 limit = 20
 period = 60
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cerdikchat-db"
+database_id = "e5116f7b-53f0-4671-afca-28bfdc366ded"
