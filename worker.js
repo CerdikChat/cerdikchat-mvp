@@ -1,115 +1,144 @@
+/**
+ * CerdikChat — Cloudflare Workers AI
+ * ATLAS-9 Strategic Intelligence System
+ * Primary model: @cf/zai-org/glm-4.7-flash
+ *
+ * Provider: Cloudflare Workers AI binding (env.AI)
+ * No Gemini/OpenAI API keys required by this Worker.
+ *
+ * Security:
+ * - Never put secrets in source code.
+ * - No external tools or actions are executed.
+ * - This Worker only generates chat responses.
+ */
+
 const CONFIG = Object.freeze({
   MODEL: "@cf/zai-org/glm-4.7-flash",
-  MAX_MESSAGE_LENGTH: 8000,
+  MAX_MESSAGE_CHARS: 8000,
   MAX_HISTORY_MESSAGES: 12,
-  MAX_HISTORY_ITEM_LENGTH: 2000,
-  MAX_OUTPUT_TOKENS: 1024
+  MAX_HISTORY_ITEM_CHARS: 2000,
+  MAX_OUTPUT_TOKENS: 1024,
 });
 
-const SYSTEM_INSTRUCTION = [
-  "Anda adalah CerdikChat, asisten AI untuk riset, analisis, penulisan, dan perencanaan.",
-  "Jawab menggunakan bahasa pengguna dengan jelas, akurat, relevan, dan terstruktur.",
-  "Jawab inti pertanyaan secara langsung sebelum memberi penjelasan tambahan.",
-  "Ikuti format, bahasa, panjang, dan jumlah poin yang diminta pengguna.",
-  "Jangan membuat klasifikasi, alasan, atau konteks yang tidak diminta.",
-  "Jangan mengarang fakta, angka, kutipan, sumber, penelitian, atau referensi.",
-  "Bedakan fakta, estimasi, asumsi, dan opini jika perbedaannya penting.",
-  "Jika informasi tidak diketahui atau tidak dapat diverifikasi, nyatakan keterbatasannya.",
-  "Jangan mengaku telah melakukan pencarian, pengujian, atau verifikasi jika belum dilakukan.",
-  "Untuk informasi yang dapat berubah, jelaskan bahwa informasi perlu diperiksa dari sumber terkini.",
-  "Untuk pertanyaan ambigu, mintalah klarifikasi jika diperlukan untuk menjawab dengan benar.",
-  "Untuk keputusan berisiko tinggi, jelaskan ketidakpastian dan sarankan verifikasi yang sesuai.",
-  "Periksa konsistensi jawaban terhadap pertanyaan sebelum merespons.",
-  "Gunakan Markdown standar. Tampilkan rumus kimia dan matematika dengan format yang mudah dibaca.",
-  "Hindari pengulangan, pembukaan yang panjang, dan kesimpulan yang tidak diperlukan."
-].join(" ");
+const SYSTEM_INSTRUCTION = `
+Anda adalah ATLAS, koordinator kecerdasan untuk CerdikChat
+dan konsep tim strategis ATLAS-9.
+
+Anda membantu pengguna dalam riset, analisis, coding,
+strategi, ekonomi, sains, dan penulisan profesional.
+
+KONTEKS TIM:
+- Pengguna adalah Human Team Leader dan pemegang keputusan akhir.
+- ATLAS: koordinasi, sintesis, perencanaan, riset, validasi.
+- NEXUS: AI, software engineering, debugging, dan coding.
+- TITAN: rekayasa, robotika, sistem fisik, dan otomasi.
+- SENTINEL: data, statistik, anomali, dan evaluasi bukti.
+- GENESIS: ilmu hayati dan sains.
+- TERRA: perikanan, pertanian, pangan, dan keamanan pangan.
+- AEGIS: hukum, keamanan, risiko, kepatuhan, dan quality assurance.
+- ORACLE: ekonomi, keuangan, bisnis, dan strategi.
+
+PENTING:
+Nama-nama tersebut merupakan peran analitis dalam satu model AI.
+Jangan mengklaim bahwa sembilan agen atau model independen sedang
+berjalan, atau bahwa spesialis benar-benar dipanggil.
+
+Jangan mengklaim telah melakukan riset web, menjalankan kode,
+mengubah repository, menguji sistem, atau melakukan deployment
+kecuali tersedia bukti bahwa tindakan tersebut benar-benar dilakukan.
+
+PRINSIP KERJA:
+1. Jawab dalam bahasa pengguna. Gunakan bahasa Indonesia secara default.
+2. Utamakan akurasi, struktur jelas, dan rekomendasi yang praktis.
+3. Bedakan fakta terverifikasi, asumsi, estimasi, dan opini.
+4. Jangan mengarang sumber, data, harga, hasil pengujian, atau kemampuan.
+5. Untuk coding, prioritaskan solusi aman, sederhana, dan mudah diuji.
+6. Jelaskan perubahan kode dan cara memverifikasi hasilnya.
+7. Untuk riset, jelaskan keterbatasan sumber dan data jika relevan.
+8. Utamakan solusi gratis atau berbiaya rendah.
+9. Jangan mengaktifkan billing, melakukan pembelian, deployment,
+   menghapus data, atau mengubah sistem eksternal tanpa persetujuan
+   eksplisit pengguna.
+10. Jangan meminta atau menampilkan API key, token, kata sandi,
+    atau informasi rahasia.
+11. Simpan rahasia dalam secret manager, bukan source code.
+12. Untuk kesehatan, keselamatan, hukum, dan keuangan, jelaskan
+    risiko dan perlunya verifikasi profesional bila diperlukan.
+13. Jika informasi penting tidak tersedia, nyatakan asumsi atau
+    ajukan pertanyaan klarifikasi yang paling menentukan.
+
+FORMAT JAWABAN:
+- Ringkasan atau diagnosis
+- Rekomendasi utama
+- Langkah implementasi atau contoh
+- Risiko, batasan, dan verifikasi bila relevan
+`.trim();
 
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
-  "x-content-type-options": "nosniff"
+  "x-content-type-options": "nosniff",
 };
 
-function json(data, status = 200) {
+function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: JSON_HEADERS
+    headers: {
+      ...JSON_HEADERS,
+      ...extraHeaders,
+    },
   });
 }
 
-function logError(event, details = {}) {
-  // Jangan mencatat isi pesan, riwayat, atau kredensial.
-  console.error(event, details);
+function getCorsHeaders(request) {
+  const origin = request.headers.get("Origin");
+  const requestUrl = new URL(request.url);
+
+  const headers = {
+    "vary": "Origin",
+    "access-control-allow-methods": "POST, OPTIONS",
+    "access-control-allow-headers": "Content-Type",
+    "access-control-max-age": "86400",
+  };
+
+  // Allow same-origin browser requests only.
+  // Do not reflect arbitrary origins.
+  if (origin && origin === requestUrl.origin) {
+    headers["access-control-allow-origin"] = origin;
+  }
+
+  return headers;
 }
 
-function makeError(code, message) {
-  const error = new Error(message);
-  error.code = code;
-  return error;
-}
-
-function validateMessage(body) {
-  if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return { error: "Format permintaan tidak valid.", status: 400 };
-  }
-
-  if (typeof body.message !== "string") {
-    return { error: "Pesan harus berupa teks.", status: 400 };
-  }
-
-  const message = body.message.trim();
-
-  if (!message) {
-    return { error: "Pesan tidak boleh kosong.", status: 400 };
-  }
-
-  if (message.length > CONFIG.MAX_MESSAGE_LENGTH) {
-    return {
-      error: "Pesan terlalu panjang. Maksimal 8.000 karakter.",
-      status: 413
-    };
-  }
-
-  return { message };
+function isPlainObject(value) {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  );
 }
 
 function normalizeHistory(history) {
-  if (!Array.isArray(history)) return [];
+  if (!Array.isArray(history)) {
+    return [];
+  }
 
   return history
-    .filter(item =>
-      item &&
-      typeof item === "object" &&
-      ["user", "assistant"].includes(item.role) &&
-      typeof item.content === "string" &&
-      item.content.trim().length > 0
+    .filter((item) => isPlainObject(item))
+    .filter(
+      (item) =>
+        item.role === "user" ||
+        item.role === "assistant"
     )
-    .slice(-CONFIG.MAX_HISTORY_MESSAGES)
-    .map(item => ({
+    .filter((item) => typeof item.content === "string")
+    .map((item) => ({
       role: item.role,
       content: item.content
         .trim()
-        .slice(0, CONFIG.MAX_HISTORY_ITEM_LENGTH)
-    }));
-}
-
-function contentToText(content) {
-  if (typeof content === "string") {
-    return content.trim();
-  }
-
-  if (!Array.isArray(content)) return "";
-
-  return content
-    .map(part => {
-      if (typeof part === "string") return part;
-      if (typeof part?.text === "string") return part.text;
-      if (typeof part?.content === "string") return part.content;
-      return "";
-    })
-    .filter(Boolean)
-    .join("\n")
-    .trim();
+        .slice(0, CONFIG.MAX_HISTORY_ITEM_CHARS),
+    }))
+    .filter((item) => item.content.length > 0)
+    .slice(-CONFIG.MAX_HISTORY_MESSAGES);
 }
 
 function extractReply(result) {
@@ -117,201 +146,263 @@ function extractReply(result) {
     return result.trim();
   }
 
-  if (!result || typeof result !== "object") {
-    return "";
-  }
-
-  // Cloudflare Workers AI response format.
-  if (typeof result.response === "string") {
+  if (typeof result?.response === "string") {
     return result.response.trim();
   }
 
-  // Chat-completions response format.
-  const choice = result.choices?.[0];
-  const choiceMessage = contentToText(choice?.message?.content);
+  const content = result?.choices?.[0]?.message?.content;
 
-  if (choiceMessage) return choiceMessage;
-
-  if (typeof choice?.text === "string") {
-    return choice.text.trim();
+  if (typeof content === "string") {
+    return content.trim();
   }
 
-  // Alternative output-text format.
-  if (typeof result.output_text === "string") {
-    return result.output_text.trim();
-  }
-
-  // Structured output format.
-  if (Array.isArray(result.output)) {
-    const text = result.output
-      .flatMap(item =>
-        Array.isArray(item?.content) ? item.content : []
+  if (Array.isArray(content)) {
+    return content
+      .map((part) =>
+        typeof part?.text === "string" ? part.text : ""
       )
-      .map(item => {
-        if (typeof item?.text === "string") return item.text;
-        if (typeof item?.content === "string") return item.content;
-        return "";
-      })
-      .filter(Boolean)
-      .join("\n")
+      .join("")
       .trim();
+  }
 
-    if (text) return text;
+  if (typeof result?.output_text === "string") {
+    return result.output_text.trim();
   }
 
   return "";
 }
 
-async function requestAI(env, history, message) {
-  if (!env.AI || typeof env.AI.run !== "function") {
-    throw makeError(
-      "AI_BINDING_MISSING",
-      "Workers AI binding belum tersedia."
-    );
+function safeErrorCode(error) {
+  const message =
+    typeof error?.message === "string"
+      ? error.message
+      : "";
+
+  if (/daily.*allocation|neurons.*limit|quota/i.test(message)) {
+    return "AI_QUOTA_EXCEEDED";
   }
 
-  const messages = [
-    { role: "system", content: SYSTEM_INSTRUCTION },
-    ...history,
-    { role: "user", content: message }
-  ];
-
-  let result;
-
-  try {
-    result = await env.AI.run(CONFIG.MODEL, {
-      messages,
-      max_tokens: CONFIG.MAX_OUTPUT_TOKENS,
-      chat_template_kwargs: {
-        enable_thinking: false
-      }
-    });
-  } catch (cause) {
-    logError("Workers AI inference failed", {
-      model: CONFIG.MODEL,
-      errorName: cause?.name || "UnknownError"
-    });
-
-    throw makeError(
-      "AI_INFERENCE_FAILED",
-      "Workers AI gagal memproses permintaan."
-    );
+  if (/model.*not found|unknown model|does not exist/i.test(message)) {
+    return "AI_MODEL_UNAVAILABLE";
   }
 
-  const reply = extractReply(result);
-
-  if (!reply) {
-    logError("Workers AI returned no extractable text", {
-      model: CONFIG.MODEL,
-      resultType: typeof result,
-      resultKeys:
-        result && typeof result === "object"
-          ? Object.keys(result).slice(0, 20)
-          : []
-    });
-
-    throw makeError(
-      "AI_EMPTY_RESPONSE",
-      "Respons model kosong atau formatnya belum dikenali."
-    );
+  if (/timeout|timed out|abort/i.test(message)) {
+    return "AI_TIMEOUT";
   }
 
-  return {
-    reply,
-    model: CONFIG.MODEL,
-    provider: "cloudflare-workers-ai"
-  };
+  return "AI_REQUEST_FAILED";
 }
 
 async function handleChat(request, env) {
+  const corsHeaders = getCorsHeaders(request);
+
+  if (request.method !== "POST") {
+    return jsonResponse(
+      {
+        error: "METHOD_NOT_ALLOWED",
+        message: "Gunakan metode POST untuk endpoint ini.",
+      },
+      405,
+      corsHeaders
+    );
+  }
+
   let body;
 
   try {
     body = await request.json();
   } catch {
-    return json({ error: "Format JSON tidak valid." }, 400);
+    return jsonResponse(
+      {
+        error: "INVALID_JSON",
+        message: "Body harus berupa JSON yang valid.",
+      },
+      400,
+      corsHeaders
+    );
   }
 
-  const validation = validateMessage(body);
+  if (!isPlainObject(body)) {
+    return jsonResponse(
+      {
+        error: "INVALID_BODY",
+        message: "Body JSON harus berupa objek.",
+      },
+      400,
+      corsHeaders
+    );
+  }
 
-  if (validation.error) {
-    return json(
-      { error: validation.error },
-      validation.status
+  const message =
+    typeof body.message === "string"
+      ? body.message.trim()
+      : "";
+
+  if (!message) {
+    return jsonResponse(
+      {
+        error: "MESSAGE_REQUIRED",
+        message: "Kolom message wajib diisi.",
+      },
+      400,
+      corsHeaders
+    );
+  }
+
+  if (message.length > CONFIG.MAX_MESSAGE_CHARS) {
+    return jsonResponse(
+      {
+        error: "MESSAGE_TOO_LONG",
+        message:
+          `Pesan melebihi batas ` +
+          `${CONFIG.MAX_MESSAGE_CHARS} karakter.`,
+      },
+      413,
+      corsHeaders
+    );
+  }
+
+  if (!env.AI || typeof env.AI.run !== "function") {
+    console.error(
+      "CerdikChat configuration error: AI binding is missing."
+    );
+
+    return jsonResponse(
+      {
+        error: "AI_BINDING_MISSING",
+        message:
+          "Binding Workers AI belum tersedia. " +
+          "Periksa konfigurasi Cloudflare.",
+      },
+      500,
+      corsHeaders
     );
   }
 
   const history = normalizeHistory(body.history);
 
+  const messages = [
+    {
+      role: "system",
+      content: SYSTEM_INSTRUCTION,
+    },
+    ...history,
+    {
+      role: "user",
+      content: message,
+    },
+  ];
+
   try {
-    const result = await requestAI(
-      env,
-      history,
-      validation.message
+    const result = await env.AI.run(CONFIG.MODEL, {
+      messages,
+      max_tokens: CONFIG.MAX_OUTPUT_TOKENS,
+      chat_template_kwargs: {
+        enable_thinking: false,
+      },
+    });
+
+    const reply = extractReply(result);
+
+    if (!reply) {
+      console.error(
+        "CerdikChat model returned an empty/unrecognized response."
+      );
+
+      return jsonResponse(
+        {
+          error: "EMPTY_MODEL_RESPONSE",
+          message:
+            "Model tidak mengembalikan jawaban yang dapat dibaca. " +
+            "Silakan coba lagi.",
+        },
+        502,
+        corsHeaders
+      );
+    }
+
+    return jsonResponse(
+      {
+        reply,
+        response: reply,
+        model: CONFIG.MODEL,
+      },
+      200,
+      corsHeaders
+    );
+  } catch (error) {
+    // Do not log prompts, message content, API keys,
+    // or full provider responses.
+    const code = safeErrorCode(error);
+
+    console.error(
+      "CerdikChat Workers AI request failed:",
+      code
     );
 
-    return json(result);
-  } catch (error) {
-    const code = error?.code || "INTERNAL_ERROR";
+    const status =
+      code === "AI_QUOTA_EXCEEDED" ? 429 : 502;
 
-    logError("Chat request failed", { code });
+    const messagesByCode = {
+      AI_QUOTA_EXCEEDED:
+        "Kuota harian Workers AI mungkin telah tercapai. " +
+        "Coba lagi setelah kuota tersedia.",
 
-    if (code === "AI_BINDING_MISSING") {
-      return json({
-        error: "Workers AI belum terhubung. Periksa binding AI."
-      }, 503);
-    }
+      AI_MODEL_UNAVAILABLE:
+        "Model AI tidak tersedia atau ID model tidak dikenali. " +
+        "Periksa ID model di konfigurasi.",
 
-    if (code === "AI_EMPTY_RESPONSE") {
-      return json({
-        error: "Model belum menghasilkan teks yang dapat dibaca. Silakan coba lagi."
-      }, 502);
-    }
+      AI_TIMEOUT:
+        "Permintaan ke model melewati batas waktu. " +
+        "Silakan coba lagi.",
 
-    if (code === "AI_INFERENCE_FAILED") {
-      return json({
-        error: "Layanan AI gagal memproses permintaan. Silakan coba lagi."
-      }, 502);
-    }
+      AI_REQUEST_FAILED:
+        "Permintaan ke model gagal. " +
+        "Periksa Cloudflare Logs untuk diagnosis lanjutan.",
+    };
 
-    return json({
-      error: "Terjadi kesalahan internal. Silakan coba lagi."
-    }, 500);
+    return jsonResponse(
+      {
+        error: code,
+        message: messagesByCode[code],
+      },
+      status,
+      corsHeaders
+    );
   }
 }
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const corsHeaders = getCorsHeaders(request);
 
-    if (url.pathname !== "/api/chat") {
-      return new Response("Not found", {
-        status: 404,
-        headers: {
-          "content-type": "text/plain; charset=utf-8",
-          "x-content-type-options": "nosniff"
-        }
-      });
+    if (url.pathname === "/api/chat") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          status: 204,
+          headers: corsHeaders,
+        });
+      }
+
+      return handleChat(request, env);
     }
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          "access-control-allow-methods": "POST, OPTIONS",
-          "access-control-allow-headers": "Content-Type",
-          "access-control-max-age": "86400"
-        }
-      });
+    // Serve frontend and static assets through Cloudflare Assets.
+    if (
+      env.ASSETS &&
+      typeof env.ASSETS.fetch === "function"
+    ) {
+      return env.ASSETS.fetch(request);
     }
 
-    if (request.method !== "POST") {
-      return json(
-        { error: "Metode tidak diizinkan." },
-        405
-      );
-    }
-
-    return handleChat(request, env);
-  }
+    return jsonResponse(
+      {
+        error: "NOT_FOUND",
+        message: "Endpoint tidak ditemukan.",
+      },
+      404
+    );
+  },
 };
+
