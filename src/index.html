@@ -568,12 +568,110 @@
     @media(max-width:360px) { .suggestions { grid-template-columns:1fr 1fr; } .suggest { min-height:96px; padding:9px; } .controls { gap:6px; } .send { min-width:76px; padding-inline:9px; } }
     @media(prefers-reduced-motion:reduce) { .suggest { transition:none; } }
 
+
+    /* ATLAS-9 mobile UX: keep navigation reachable without squeezing the workspace. */
+    .app, .main, .feed, .welcome, .suggestions { min-width: 0; }
+    .menu-toggle {
+      display: none;
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #1d527d;
+      border-radius: 11px;
+      background: #102b48;
+      color: var(--text);
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .menu-toggle:focus-visible, .nav-backdrop:focus-visible {
+      outline: 2px solid var(--mint);
+      outline-offset: 3px;
+    }
+    .nav-backdrop { display: none; }
+
+    @media (max-width: 1024px) {
+      .app { display: block; width: 100%; }
+      .side {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 30;
+        display: block;
+        width: min(320px, 88vw);
+        height: 100vh;
+        height: 100dvh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        transform: translateX(-105%);
+        transition: transform .2s ease;
+        box-shadow: 18px 0 48px #0008;
+        padding-top: max(20px, env(safe-area-inset-top));
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+      }
+      .app.nav-open .side { transform: translateX(0); }
+      .nav-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 29;
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #020817b8;
+      }
+      .nav-backdrop[hidden] { display: none; }
+      .menu-toggle { display: inline-flex; }
+      .top {
+        justify-content: flex-start;
+        gap: 10px;
+        min-height: 60px;
+        padding: 8px 12px;
+      }
+      .mobile-brand { display: flex; flex: 0 0 auto; }
+      .top > strong {
+        min-width: 0;
+        margin-left: auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 12px;
+      }
+      .account-actions { flex: 0 0 auto; }
+      .feed { width: 100%; min-height: 0; padding: 16px clamp(12px, 3vw, 24px); }
+      .welcome { width: 100%; margin: 18px auto 22px; }
+      .suggestions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .composer-wrap { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+      body.nav-open { overflow: hidden; }
+    }
+
+    @media (max-width: 480px) {
+      .top { gap: 8px; padding-inline: 10px; }
+      .menu-toggle { flex-basis: 38px; width: 38px; height: 38px; }
+      .mobile-brand { gap: 6px; font-size: 14px; }
+      .mobile-brand .logo { width: 28px; height: 28px; }
+      .top > strong { display: none; }
+      .feed { padding: 12px 12px 16px; }
+      .welcome { margin: 12px auto 16px; }
+      .welcome h1 { font-size: clamp(25px, 8vw, 34px); }
+      .suggestions { grid-template-columns: 1fr; gap: 8px; }
+      .suggest { min-height: 0; padding: 12px; }
+      .composer-wrap { padding: 8px 9px max(8px, env(safe-area-inset-bottom)); }
+      .controls { align-items: center; }
+      .hint { max-width: 68%; line-height: 1.4; }
+      .footer { padding-inline: 4px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .side { transition: none; }
+    }
+
   </style>
 </head>
 
 <body>
   <div class="app">
-    <aside class="side">
+    <aside class="side" id="sideNav" aria-label="Navigasi utama">
       <div class="brand">
         <div class="logo" aria-hidden="true">C</div>
         CerdikChat
@@ -615,8 +713,11 @@
       </div>
     </aside>
 
+    <button class="nav-backdrop" id="navBackdrop" type="button" aria-label="Tutup navigasi" hidden></button>
+
     <main class="main">
       <header class="top">
+        <button class="menu-toggle" id="menuToggle" type="button" aria-controls="sideNav" aria-expanded="false" aria-label="Buka navigasi">☰</button>
         <div class="mobile-brand">
           <div class="logo" aria-hidden="true">C</div>
           CerdikChat
@@ -702,6 +803,29 @@
     const send = document.querySelector("#send");
     const statusEl = document.querySelector("#status");
     const count = document.querySelector("#count");
+
+    const appShell = document.querySelector(".app");
+    const menuToggle = document.querySelector("#menuToggle");
+    const navBackdrop = document.querySelector("#navBackdrop");
+
+    function setNavigationOpen(open) {
+      appShell.classList.toggle("nav-open", open);
+      document.body.classList.toggle("nav-open", open);
+      menuToggle.setAttribute("aria-expanded", String(open));
+      menuToggle.setAttribute("aria-label", open ? "Tutup navigasi" : "Buka navigasi");
+      navBackdrop.hidden = !open;
+    }
+
+    menuToggle.addEventListener("click", () => {
+      setNavigationOpen(menuToggle.getAttribute("aria-expanded") !== "true");
+    });
+    navBackdrop.addEventListener("click", () => setNavigationOpen(false));
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && menuToggle.getAttribute("aria-expanded") === "true") {
+        setNavigationOpen(false);
+        menuToggle.focus();
+      }
+    });
 
     const MAX_HISTORY_MESSAGES = 12;
     const MAX_MESSAGE_LENGTH = 8000;
@@ -1116,6 +1240,7 @@
     document.querySelectorAll("[data-prompt]").forEach(button => {
       button.addEventListener("click", () => {
         usePrompt(button.dataset.prompt || "");
+        setNavigationOpen(false);
       });
     });
 
