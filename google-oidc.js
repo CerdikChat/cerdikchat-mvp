@@ -92,9 +92,10 @@ async function handleGoogleAuth(request, env) {
   }
   if (url.pathname === "/auth/google/start" && request.method === "GET") {
     const state = randomToken(), nonce = randomToken(), verifier = randomToken(48);
+    const browserBinding = randomToken();
     const challenge = b64url(await sha256(verifier));
-    await env.DB.prepare("INSERT INTO oauth_states (state_hash, nonce, verifier, expires_at) VALUES (?, ?, ?, ?)")
-      .bind(await hashToken(state), nonce, verifier, Math.floor(Date.now()/1000) + STATE_TTL).run();
+    await env.DB.prepare("INSERT INTO oauth_states (state_hash, nonce, verifier, browser_binding_hash, expires_at) VALUES (?, ?, ?, ?, ?)")
+      .bind(await hashToken(state), nonce, verifier, await hashToken(browserBinding), Math.floor(Date.now()/1000) + STATE_TTL).run();
     const target = new URL(GOOGLE_AUTH);
     target.search = new URLSearchParams({
       client_id: env.GOOGLE_CLIENT_ID, redirect_uri: env.GOOGLE_REDIRECT_URI,
@@ -111,10 +112,16 @@ async function handleGoogleAuth(request, env) {
     }
     const code = url.searchParams.get("code"), state = url.searchParams.get("state");
     if (!code || !state || code.length > 4096 || state.length > 256) return json({error:"OAUTH_RESPONSE_INVALID"},400);
-    const pending = await env.DB.prepare("SELECT nonce, verifier FROM oauth_states WHERE state_hash = ? AND expires_at > ?")
-      .bind(await hashToken(state), Math.floor(Date.now()/1000)).first();
-    await env.DB.prepare("DELETE FROM oauth_states WHERE state_hash = ?").bind(await hashToken(state)).run();
-    if (!pending) return json({error:"OAUTH_STATE_INVALID"},400);
+    const stateHash = await hashToken(state);
+    const pending = await env.DB.prepare("SELECT nonce, verifier, browser_binding_hash FROM oauth_states WHERE state_hash = ? AND expires_at > ?")
+      .bind(stateHash, Math.floor(Date.now()/1000)).first();
+    // Consume the one-time state before accepting or rejecting the callback.
+    await env.DB.prepare("DELETE FROM oauth_states WHERE state_hash = ?").bind(stateHash).run();
+    const browserBinding = readCookie(request, OAUTH_BINDING_COOKIE);
+    const suppliedBindingHash = browserBinding ? await hashToken(browserBinding) : "";
+    if (!pending || !pending.browser_binding_hash || suppliedBindingHash !== pending.browser_binding_hash) {
+      return json({error:"OAUTH_STATE_INVALID"},400,{"set-cookie":bindingCookie("",0)});
+    }
     const body = new URLSearchParams({
       code, client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET,
       redirect_uri: env.GOOGLE_REDIRECT_URI, grant_type: "authorization_code", code_verifier: pending.verifier
