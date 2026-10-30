@@ -127,7 +127,16 @@ async function handleGoogleAuth(request, env) {
   }
   if (url.pathname === "/auth/session" && request.method === "GET") {
     const session = await getSession(request, env);
-    return session ? json({authenticated:true,email:session.email}) : json({authenticated:false},401);
+    if (!session) return json({ authenticated: false }, 401);
+    const admin = await env.DB.prepare("SELECT role FROM admin_users WHERE email = ? AND active = 1")
+      .bind(session.email).first();
+    return json({
+      authenticated: true,
+      displayName: admin?.role === "super_admin"
+        ? "CerdikChat Super Administrator"
+        : "Pengguna CerdikChat",
+      isAdministrator: !!admin
+    });
   }
   return null;
 }
