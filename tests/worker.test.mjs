@@ -74,10 +74,16 @@ test("foreign Origin is rejected", async () => {
 });
 
 test("missing Origin is rejected for the browser-only chat endpoint", async () => {
-  const response = await worker.fetch(
-    post({ message: "Halo" }, { origin: null }),
-    makeEnv()
-  );
+  const request = new Request("https://cerdikchat.test/api/chat", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "sec-fetch-site": "same-origin",
+      "cf-connecting-ip": "203.0.113.10",
+    },
+    body: JSON.stringify({ message: "Halo" }),
+  });
+  const response = await worker.fetch(request, makeEnv());
   assert.equal(response.status, 403);
   assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
 });
