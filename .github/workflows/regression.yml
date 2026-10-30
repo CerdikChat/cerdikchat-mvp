@@ -2,9 +2,9 @@ name: CerdikChat regression tests
 
 on:
   pull_request:
-    branches: [main, "feature/**"]
+    branches: [main, "feature/**", "security/**"]
   push:
-    branches: [main, "qa/**"]
+    branches: [main, "qa/**", "security/**"]
 
 permissions:
   contents: read
