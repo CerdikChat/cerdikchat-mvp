@@ -243,3 +243,28 @@ test("model failure returns a sanitized 502 response", async () => {
   assert.equal(payload.error, "AI_REQUEST_FAILED");
   assert.equal(JSON.stringify(payload).includes("private provider detail"), false);
 });
+
+test("Google OIDC mode rejects chat without a valid server-side session", async () => {
+  const response = await worker.fetch(
+    post({ message: "Halo" }),
+    makeEnv({
+      GOOGLE_OIDC_ENABLED: "true",
+      GOOGLE_CLIENT_ID: "test-client-id",
+      GOOGLE_CLIENT_SECRET: "test-client-secret",
+      GOOGLE_REDIRECT_URI: "https://cerdikchat-mvp.ngyoonseong.workers.dev/auth/google/callback",
+      DB: {},
+    })
+  );
+  assert.equal(response.status, 401);
+  assert.equal((await json(response)).error, "PILOT_AUTH_REQUIRED");
+});
+
+test("Google OIDC endpoints fail closed when credentials are not configured", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/auth/google/start"),
+    makeEnv({ GOOGLE_OIDC_ENABLED: "true" })
+  );
+  assert.equal(response.status, 503);
+  assert.equal((await json(response)).error, "AUTH_NOT_CONFIGURED");
+});
+
