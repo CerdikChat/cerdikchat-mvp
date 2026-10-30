@@ -1067,7 +1067,7 @@ async function handleChat(request, env, ctx) {
       pilotEmail = null;
     }
 
-    if (!pilotEmail || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(pilotEmail)) {
+    if (!pilotEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pilotEmail)) {
       return errorResponse(
         "PILOT_IDENTITY_INVALID",
         "Identitas pengguna pilot tidak valid.",
