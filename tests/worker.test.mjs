@@ -268,3 +268,35 @@ test("Google OIDC endpoints fail closed when credentials are not configured", as
   assert.equal((await json(response)).error, "AUTH_NOT_CONFIGURED");
 });
 
+
+test("Google OIDC chat path preserves same-origin protection", async () => {
+  const request = new Request("https://cerdikchat.test/api/chat", {
+    method: "POST",
+    headers: { "content-type": "application/json", "Origin": "https://attacker.example", "Sec-Fetch-Site": "cross-site" },
+    body: JSON.stringify({ message: "Halo" }),
+  });
+  const response = await worker.fetch(
+    request,
+    makeEnv({
+      GOOGLE_OIDC_ENABLED: "true",
+      GOOGLE_CLIENT_ID: "test-client-id",
+      GOOGLE_CLIENT_SECRET: "test-client-secret",
+      GOOGLE_REDIRECT_URI: "https://cerdikchat.test/auth/google/callback",
+      DB: {},
+    })
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
+});
+
+test("Google OIDC chat path handles same-origin preflight before session lookup", async () => {
+  const request = new Request("https://cerdikchat.test/api/chat", {
+    method: "OPTIONS",
+    headers: { Origin: "https://cerdikchat.test", "Sec-Fetch-Site": "same-origin" },
+  });
+  const response = await worker.fetch(
+    request,
+    makeEnv({ GOOGLE_OIDC_ENABLED: "true" })
+  );
+  assert.equal(response.status, 204);
+});
