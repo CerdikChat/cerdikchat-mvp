@@ -1,6 +1,6 @@
 /**
- * CerdikChat — Cloudflare Workers AI
- * ATLAS-9 Strategic Intelligence System
+ * CerdikChat — ATLAS-9
+ * Cloudflare Workers AI
  *
  * Model: @cf/google/gemma-4-26b-a4b-it
  *
@@ -9,24 +9,32 @@
  *   env.ASSETS
  *   env.CHAT_RATE_LIMITER
  *
- * Security:
- * - Bounded request-body streaming
- * - JSON, method, origin and message validation
- * - Approximate per-IP rate limiting
- * - Sanitized errors and minimal logging
- * - One local allowlisted calculator tool
+ * Features:
+ * - Real-time date, year and timezone context
+ * - Deterministic calculator routing
+ * - Safe local arithmetic parser
+ * - Input validation and bounded request body
+ * - Per-IP rate limiting
+ * - Minimal, privacy-conscious observability
  *
  * Limitations:
  * - No user authentication
  * - No persistent conversation storage
- * - ATLAS-9 roles are logical roles in one model
+ * - No external live-news or financial-data retrieval
  */
 
 "use strict";
 
+/* =========================================================
+   1. CONFIGURATION
+========================================================= */
+
 const CONFIG = Object.freeze({
   MODEL: "@cf/google/gemma-4-26b-a4b-it",
   API_PATH: "/api/chat",
+
+  // Default timezone when Cloudflare does not provide one.
+  DEFAULT_TIME_ZONE: "Asia/Makassar",
 
   MAX_BODY_BYTES: 40 * 1024,
   MAX_MESSAGE_CHARS: 8000,
@@ -37,6 +45,10 @@ const CONFIG = Object.freeze({
   MAX_TOOL_CALLS: 1,
   MAX_CALC_EXPRESSION_CHARS: 120,
 });
+
+/* =========================================================
+   2. ATLAS-9 SYSTEM INSTRUCTION
+========================================================= */
 
 const SYSTEM_INSTRUCTION = `
 Anda adalah ATLAS, koordinator kecerdasan CerdikChat
@@ -56,15 +68,23 @@ PERAN ANALITIS:
 - ORACLE: ekonomi, keuangan, bisnis, strategi.
 
 TRANSPARANSI:
-Semua peran tersebut merupakan pendekatan analitis dalam
-satu model AI. Jangan mengklaim sembilan agen independen
-sedang berjalan.
+Semua peran merupakan pendekatan analitis dalam satu model AI.
+Jangan mengklaim sembilan agen independen sedang berjalan.
 
-Jangan mengklaim tool, riset web, pengujian, atau deployment
-telah dilakukan tanpa bukti nyata.
+REAL-TIME DATE AND TIME:
+- Gunakan tanggal dan waktu runtime yang diberikan sistem.
+- Jangan mengarang tanggal, hari, bulan, tahun, atau zona waktu.
+- Jika pengguna bertanya tanggal atau tahun sekarang,
+  prioritaskan runtime context.
+- Jangan menggunakan tanggal dari percakapan lama sebagai tanggal sekarang.
+- Jika timezone tidak tersedia, jelaskan zona waktu fallback.
+- Timestamp runtime bukan bukti bahwa berita, harga, kurs,
+  atau informasi internet lainnya sudah diperbarui.
+- Bedakan waktu sekarang dengan tanggal peristiwa historis
+  atau tanggal yang diberikan pengguna.
 
 PRINSIP KERJA:
-1. Jawab dalam bahasa pengguna; gunakan bahasa Indonesia default.
+1. Jawab dalam bahasa pengguna; bahasa Indonesia sebagai default.
 2. Utamakan akurasi dan struktur yang jelas.
 3. Bedakan fakta, asumsi, estimasi, dan opini.
 4. Jangan mengarang sumber, data, harga, atau hasil pengujian.
@@ -76,9 +96,9 @@ PRINSIP KERJA:
 9. Jangan meminta atau mengungkap API key, token, atau password.
 10. Untuk topik berisiko tinggi, jelaskan batasan dan perlunya verifikasi.
 11. Jika informasi tidak tersedia, nyatakan keterbatasannya.
-12. Untuk perhitungan aritmetika, gunakan calculate_expression
-    bila tool benar-benar tersedia.
-13. Jangan mengklaim kalkulator dijalankan jika tidak dieksekusi.
+12. Untuk perhitungan aritmetika, gunakan kalkulator Worker
+    jika permintaan telah diarahkan ke kalkulator.
+13. Jangan mengklaim tool dijalankan jika tidak dieksekusi.
 
 FORMAT JAWABAN:
 - Ringkasan atau diagnosis
@@ -86,6 +106,130 @@ FORMAT JAWABAN:
 - Langkah implementasi
 - Risiko dan verifikasi bila relevan
 `.trim();
+
+/* =========================================================
+   3. REAL-TIME DATE AND TIME ENGINE
+========================================================= */
+
+/**
+ * Resolve a valid timezone.
+ * Cloudflare may provide request.cf.timezone.
+ * Use configured fallback if unavailable or invalid.
+ */
+function resolveTimeZone(request) {
+  const supplied =
+    typeof request?.cf?.timezone === "string"
+      ? request.cf.timezone
+      : "";
+
+  if (supplied) {
+    try {
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: supplied,
+      });
+
+      return {
+        timeZone: supplied,
+        source: "cloudflare",
+      };
+    } catch {
+      // Continue to configured fallback.
+    }
+  }
+
+  return {
+    timeZone: CONFIG.DEFAULT_TIME_ZONE,
+    source: "configured_fallback",
+  };
+}
+
+/**
+ * Build fresh date/time context for every request.
+ *
+ * Date is generated at runtime.
+ * It is never hardcoded to a particular year.
+ */
+function getRuntimeDateContext(request) {
+  const now = new Date();
+  const resolved = resolveTimeZone(request);
+  const timeZone = resolved.timeZone;
+
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const values = {};
+
+  for (const part of parts) {
+    if (part.type !== "literal") {
+      values[part.type] = part.value;
+    }
+  }
+
+  const dateISO =
+    `${values.year}-${values.month}-${values.day}`;
+
+  const localTime =
+    `${values.hour}:${values.minute}:${values.second}`;
+
+  const localDateTime =
+    `${dateISO} ${localTime}`;
+
+  const displayDate = new Intl.DateTimeFormat("id-ID", {
+    timeZone,
+    dateStyle: "full",
+  }).format(now);
+
+  return {
+    currentDate: dateISO,
+    currentYear: Number(values.year),
+    currentWeekday: values.weekday,
+    currentTime: localTime,
+    localDateTime,
+    displayDate,
+    timeZone,
+    timeZoneSource: resolved.source,
+    utcTimestamp: now.toISOString(),
+  };
+}
+
+/**
+ * Append runtime date context to the system instruction.
+ * Rebuilt for every incoming request.
+ */
+function buildSystemInstruction(runtime) {
+  return `${SYSTEM_INSTRUCTION}
+
+=================================================
+CERDIKCHAT RUNTIME CLOCK — AUTOMATICALLY UPDATED
+=================================================
+
+Current date: ${runtime.currentDate}
+Current year: ${runtime.currentYear}
+Current weekday: ${runtime.currentWeekday}
+Current local date and time: ${runtime.localDateTime}
+Formatted date: ${runtime.displayDate}
+Timezone: ${runtime.timeZone}
+Timezone source: ${runtime.timeZoneSource}
+UTC timestamp: ${runtime.utcTimestamp}
+
+This information was generated by the Worker runtime
+for this request. Treat it as the authoritative clock
+context for questions about the present date and time.
+`;
+}
+
+/* =========================================================
+   4. STANDARD RESPONSE AND SECURITY HEADERS
+========================================================= */
 
 const JSON_HEADERS = Object.freeze({
   "content-type": "application/json; charset=utf-8",
@@ -149,7 +293,10 @@ function errorResponse(
   extraHeaders = {}
 ) {
   return jsonResponse(
-    { error: code, message },
+    {
+      error: code,
+      message,
+    },
     status,
     {
       ...corsHeaders,
@@ -158,12 +305,13 @@ function errorResponse(
   );
 }
 
-/**
- * Read request body incrementally.
- * Content-Length is only an early rejection hint.
- */
+/* =========================================================
+   5. BOUNDED REQUEST BODY READER
+========================================================= */
+
 async function readBodyLimited(request, maxBytes) {
-  const contentLength = request.headers.get("Content-Length");
+  const contentLength =
+    request.headers.get("Content-Length");
 
   if (contentLength !== null) {
     const declaredLength = Number(contentLength);
@@ -269,6 +417,10 @@ async function readBodyLimited(request, maxBytes) {
   }
 }
 
+/* =========================================================
+   6. HISTORY VALIDATION
+========================================================= */
+
 function normalizeHistory(history) {
   if (!Array.isArray(history)) return [];
 
@@ -292,6 +444,10 @@ function normalizeHistory(history) {
     .slice(-CONFIG.MAX_HISTORY_MESSAGES);
 }
 
+/* =========================================================
+   7. MODEL RESPONSE EXTRACTION
+========================================================= */
+
 function extractReply(result) {
   if (typeof result === "string") {
     return result.trim();
@@ -301,7 +457,8 @@ function extractReply(result) {
     return result.response.trim();
   }
 
-  const content = result?.choices?.[0]?.message?.content;
+  const content =
+    result?.choices?.[0]?.message?.content;
 
   if (typeof content === "string") {
     return content.trim();
@@ -324,9 +481,10 @@ function extractReply(result) {
 
   return "";
 }
-/**
- * Classify AI errors without exposing provider details.
- */
+/* =========================================================
+   8. ERROR CLASSIFICATION
+========================================================= */
+
 function safeErrorCode(error) {
   const message =
     typeof error?.message === "string"
@@ -348,17 +506,15 @@ function safeErrorCode(error) {
   return "AI_REQUEST_FAILED";
 }
 
-/**
- * Calculator Tool definition.
- *
- * The model requests the tool.
- * Worker validates and executes it locally.
- */
+/* =========================================================
+   9. CALCULATOR TOOL DEFINITION
+========================================================= */
+
 const CALCULATOR_TOOLS = [
   {
     name: "calculate_expression",
     description:
-      "Menghitung ekspresi aritmetika. Mendukung angka, +, -, *, /, dan tanda kurung. Gunakan untuk perhitungan numerik.",
+      "Menghitung ekspresi aritmetika dengan operator +, -, *, / dan tanda kurung. Gunakan untuk perhitungan numerik.",
     parameters: {
       type: "object",
       properties: {
@@ -373,9 +529,11 @@ const CALCULATOR_TOOLS = [
   },
 ];
 
+/* =========================================================
+   10. SAFE ARITHMETIC PARSER
+========================================================= */
+
 /**
- * Safe arithmetic parser.
- *
  * Supports:
  * - Addition (+)
  * - Subtraction (-)
@@ -384,7 +542,7 @@ const CALCULATOR_TOOLS = [
  * - Parentheses
  * - Unary plus/minus
  *
- * No eval(), Function(), or dynamic code execution.
+ * Does not use eval() or Function().
  */
 function calculateExpression(expression) {
   if (typeof expression !== "string") {
@@ -551,23 +709,139 @@ function calculateExpression(expression) {
   return Number(result.toFixed(10));
 }
 
+/* =========================================================
+   11. DETERMINISTIC EXPRESSION EXTRACTION
+========================================================= */
+
 /**
- * Extract tool calls from supported response shapes.
+ * Only route messages with explicit calculation intent.
+ *
+ * Dates, years, phone numbers and ordinary numeric references
+ * must not be interpreted as arithmetic automatically.
  */
+function extractDeterministicExpression(message) {
+  if (typeof message !== "string") return null;
+
+  const intentPattern =
+    /\b(hitung|perhitung(?:an)?|kalkulasi|kalkulator|calculate|calculation|compute|berapa\s+hasil|hasil\s+dari|jumlahkan|kurangkan|kalikan|bagikan)\b/i;
+
+  if (!intentPattern.test(message)) {
+    return null;
+  }
+
+  const candidates =
+    message.match(/[0-9eE.+\-*/()\s]+/g) || [];
+
+  const valid = [];
+
+  for (const candidate of candidates) {
+    const expression = candidate.trim();
+
+    if (
+      !expression ||
+      !/[+\-*/]/.test(expression)
+    ) {
+      continue;
+    }
+
+    // Protect ISO-style dates such as 2026-10-30.
+    if (
+      /^\d{4}-\d{1,2}-\d{1,2}\.?$/.test(expression)
+    ) {
+      continue;
+    }
+
+    // Protect ordinary date-like slash notation.
+    if (
+      /^\d{1,2}\/\d{1,2}\/\d{2,4}\.?$/.test(expression)
+    ) {
+      continue;
+    }
+
+    try {
+      const result = calculateExpression(expression);
+
+      valid.push({
+        expression,
+        result,
+      });
+    } catch (error) {
+      // Division by zero must be routed to the calculator
+      // so the Worker can explicitly reject it.
+      if (error?.message === "DIVISION_BY_ZERO") {
+        valid.push({
+          expression,
+          error: "DIVISION_BY_ZERO",
+        });
+      }
+    }
+  }
+
+  if (valid.length === 0) {
+    return null;
+  }
+
+  // Prefer the longest complete valid expression.
+  valid.sort(
+    (a, b) =>
+      b.expression.length - a.expression.length
+  );
+
+  return valid[0];
+}
+
+/* =========================================================
+   12. DETERMINISTIC CALCULATOR EXECUTION
+========================================================= */
+
+function executeDeterministicCalculation(calculation) {
+  if (
+    !calculation ||
+    typeof calculation !== "object"
+  ) {
+    throw new Error("INVALID_CALCULATION");
+  }
+
+  if (calculation.error === "DIVISION_BY_ZERO") {
+    throw new Error("DIVISION_BY_ZERO");
+  }
+
+  if (
+    typeof calculation.result !== "number" ||
+    !Number.isFinite(calculation.result)
+  ) {
+    throw new Error("INVALID_CALCULATION_RESULT");
+  }
+
+  return {
+    name: "calculate_expression",
+    executed: true,
+    result: calculation.result,
+    route: "deterministic",
+  };
+}
+
+/* =========================================================
+   13. MODEL-DIRECTED TOOL CALL EXTRACTION
+========================================================= */
+
 function extractToolCalls(result) {
   const calls =
     Array.isArray(result?.tool_calls)
       ? result.tool_calls
-      : Array.isArray(result?.choices?.[0]?.message?.tool_calls)
+      : Array.isArray(
+          result?.choices?.[0]?.message?.tool_calls
+        )
         ? result.choices[0].message.tool_calls
         : [];
 
   return calls.slice(0, CONFIG.MAX_TOOL_CALLS + 1);
 }
 
-/**
- * Validate and execute only explicitly allowlisted tools.
- */
+/* =========================================================
+   14. ALLOWLISTED TOOL EXECUTION
+========================================================= */
+
 function executeAllowedTool(call) {
   const functionData = call?.function || call;
 
@@ -610,21 +884,23 @@ function executeAllowedTool(call) {
     name: "calculate_expression",
     executed: true,
     result,
+    route: "model_directed",
   };
 }
 
-/**
- * Format calculator output using Indonesian conventions.
- */
+/* =========================================================
+   15. CALCULATOR RESULT FORMATTING
+========================================================= */
+
 function formatCalculatorResult(result) {
   return new Intl.NumberFormat("id-ID", {
     maximumFractionDigits: 10,
   }).format(result);
-          }
-/**
- * Apply Cloudflare Rate Limiting.
- * Fail closed if the binding is unavailable.
- */
+}
+/* =========================================================
+   16. RATE LIMITER
+========================================================= */
+
 async function applyRateLimit(request, env, corsHeaders) {
   if (
     !env.CHAT_RATE_LIMITER ||
@@ -681,9 +957,62 @@ async function applyRateLimit(request, env, corsHeaders) {
   }
 }
 
-/**
- * Main chat handler.
- */
+/* =========================================================
+   17. DETERMINISTIC CALCULATOR RESPONSE
+========================================================= */
+
+function buildCalculatorResponse(calculation, corsHeaders) {
+  try {
+    const result =
+      executeDeterministicCalculation(calculation);
+
+    console.log("CERDIKCHAT_TOOL_EXECUTION", {
+      tool: result.name,
+      executed: true,
+      route: result.route,
+    });
+
+    return jsonResponse(
+      {
+        reply: `Hasil perhitungan: ${formatCalculatorResult(
+          result.result
+        )}`,
+        model: CONFIG.MODEL,
+        tool: result,
+      },
+      200,
+      corsHeaders
+    );
+  } catch (error) {
+    const errorCode =
+      error?.message === "DIVISION_BY_ZERO"
+        ? "DIVISION_BY_ZERO"
+        : "CALCULATOR_EXECUTION_FAILED";
+
+    console.warn("CERDIKCHAT_TOOL_EXECUTION_FAILED", {
+      tool: "calculate_expression",
+      error: errorCode,
+      route: "deterministic",
+    });
+
+    const errorMessage =
+      errorCode === "DIVISION_BY_ZERO"
+        ? "Perhitungan tidak valid: pembagian dengan nol tidak diperbolehkan."
+        : "Kalkulator gagal menjalankan perhitungan.";
+
+    return errorResponse(
+      "CALCULATOR_ERROR",
+      errorMessage,
+      400,
+      corsHeaders
+    );
+  }
+}
+
+/* =========================================================
+   18. MAIN CHAT HANDLER
+========================================================= */
+
 async function handleChat(request, env) {
   const corsHeaders = getCorsHeaders(request);
 
@@ -718,6 +1047,10 @@ async function handleChat(request, env) {
     );
   }
 
+  /* -----------------------------------------------
+     RATE LIMIT
+  ----------------------------------------------- */
+
   const rateLimitError = await applyRateLimit(
     request,
     env,
@@ -725,6 +1058,10 @@ async function handleChat(request, env) {
   );
 
   if (rateLimitError) return rateLimitError;
+
+  /* -----------------------------------------------
+     REQUEST BODY
+  ----------------------------------------------- */
 
   const bodyResult = await readBodyLimited(
     request,
@@ -789,6 +1126,10 @@ async function handleChat(request, env) {
     );
   }
 
+  /* -----------------------------------------------
+     MESSAGE VALIDATION
+  ----------------------------------------------- */
+
   const message =
     typeof body.message === "string"
       ? body.message.trim()
@@ -812,6 +1153,43 @@ async function handleChat(request, env) {
     );
   }
 
+  /* -----------------------------------------------
+     REAL-TIME DATE AND TIME
+  ----------------------------------------------- */
+
+  const runtime = getRuntimeDateContext(request);
+
+  console.log("CERDIKCHAT_RUNTIME_CLOCK", {
+    currentDate: runtime.currentDate,
+    currentYear: runtime.currentYear,
+    timeZone: runtime.timeZone,
+    timeZoneSource: runtime.timeZoneSource,
+  });
+
+  /* -----------------------------------------------
+     DETERMINISTIC CALCULATOR ROUTING
+  ----------------------------------------------- */
+
+  const deterministicCalculation =
+    extractDeterministicExpression(message);
+
+  if (deterministicCalculation) {
+    console.log("CERDIKCHAT_TOOL_ROUTED", {
+      tool: "calculate_expression",
+      route: "deterministic",
+      executed: true,
+    });
+
+    return buildCalculatorResponse(
+      deterministicCalculation,
+      corsHeaders
+    );
+  }
+
+  /* -----------------------------------------------
+     AI BINDING VALIDATION
+  ----------------------------------------------- */
+
   if (!env.AI || typeof env.AI.run !== "function") {
     console.error("CERDIKCHAT_CONFIG_ERROR", {
       reason: "AI_BINDING_MISSING",
@@ -825,12 +1203,16 @@ async function handleChat(request, env) {
     );
   }
 
+  /* -----------------------------------------------
+     BUILD MODEL MESSAGES
+  ----------------------------------------------- */
+
   const history = normalizeHistory(body.history);
 
   const messages = [
     {
       role: "system",
-      content: SYSTEM_INSTRUCTION,
+      content: buildSystemInstruction(runtime),
     },
     ...history,
     {
@@ -838,6 +1220,10 @@ async function handleChat(request, env) {
       content: message,
     },
   ];
+
+  /* -----------------------------------------------
+     MODEL INFERENCE
+  ----------------------------------------------- */
 
   try {
     const result = await env.AI.run(CONFIG.MODEL, {
@@ -851,12 +1237,15 @@ async function handleChat(request, env) {
 
     const toolCalls = extractToolCalls(result);
 
-    // Safe observability: no prompts or tool arguments.
     console.log("CERDIKCHAT_TOOL_DECISION", {
       model: CONFIG.MODEL,
       toolCallDetected: toolCalls.length > 0,
       toolCallCount: toolCalls.length,
     });
+
+    /* ---------------------------------------------
+       MODEL-DIRECTED TOOL EXECUTION
+    --------------------------------------------- */
 
     if (toolCalls.length > 0) {
       if (toolCalls.length > CONFIG.MAX_TOOL_CALLS) {
@@ -881,6 +1270,7 @@ async function handleChat(request, env) {
         console.log("CERDIKCHAT_TOOL_EXECUTION", {
           tool: toolResult.name,
           executed: true,
+          route: "model_directed",
         });
       } catch (toolError) {
         const knownErrors = [
@@ -905,6 +1295,7 @@ async function handleChat(request, env) {
         console.warn("CERDIKCHAT_TOOL_EXECUTION_FAILED", {
           tool: "calculate_expression",
           error: errorCode,
+          route: "model_directed",
         });
 
         const errorMessages = {
@@ -952,6 +1343,10 @@ async function handleChat(request, env) {
         corsHeaders
       );
     }
+
+    /* ---------------------------------------------
+       NORMAL MODEL RESPONSE
+    --------------------------------------------- */
 
     console.log("CERDIKCHAT_TOOL_NOT_CALLED", {
       model: CONFIG.MODEL,
@@ -1012,9 +1407,10 @@ async function handleChat(request, env) {
   }
 }
 
-/**
- * Cloudflare Worker entry point.
- */
+/* =========================================================
+   19. CLOUDFLARE WORKER ENTRY POINT
+========================================================= */
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -1045,7 +1441,6 @@ export default {
       typeof env.ASSETS.fetch === "function"
     ) {
       const assetResponse = await env.ASSETS.fetch(request);
-
       const headers = new Headers(assetResponse.headers);
 
       headers.set("x-content-type-options", "nosniff");
