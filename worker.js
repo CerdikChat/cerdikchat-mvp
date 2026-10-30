@@ -911,7 +911,7 @@ function formatCalculatorResult(result) {
    16. RATE LIMITER
 ========================================================= */
 
-async function applyRateLimit(request, env, corsHeaders) {
+async function applyRateLimit(request, env, corsHeaders, identityEmail = null) {
   if (
     !env.CHAT_RATE_LIMITER ||
     typeof env.CHAT_RATE_LIMITER.limit !== "function"
@@ -941,7 +941,7 @@ async function applyRateLimit(request, env, corsHeaders) {
 
   try {
     const { success } = await env.CHAT_RATE_LIMITER.limit({
-      key: `chat:${ip}`,
+      key: identityEmail ? `chat:user:${identityEmail.toLowerCase()}` : `chat:ip:${ip}`,
     });
 
     if (!success) {
@@ -1023,7 +1023,7 @@ function buildCalculatorResponse(calculation, corsHeaders) {
    18. MAIN CHAT HANDLER
 ========================================================= */
 
-async function handleChat(request, env) {
+async function handleChat(request, env, ctx) {
   const corsHeaders = getCorsHeaders(request);
 
   if (request.method !== "POST") {
@@ -1045,6 +1045,38 @@ async function handleChat(request, env) {
     );
   }
 
+  // Private-pilot mode is opt-in. Enable only after Worker-level
+  // Cloudflare Access is configured for every production hostname.
+  let pilotEmail = null;
+  if (env.PILOT_ACCESS_REQUIRED === "true") {
+    if (!ctx?.access || typeof ctx.access.getIdentity !== "function") {
+      return errorResponse(
+        "PILOT_AUTH_REQUIRED",
+        "Akses pilot memerlukan autentikasi Cloudflare Access.",
+        401,
+        corsHeaders
+      );
+    }
+
+    try {
+      const identity = await ctx.access.getIdentity();
+      pilotEmail = typeof identity?.email === "string"
+        ? identity.email.trim().toLowerCase()
+        : null;
+    } catch {
+      pilotEmail = null;
+    }
+
+    if (!pilotEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pilotEmail)) {
+      return errorResponse(
+        "PILOT_IDENTITY_INVALID",
+        "Identitas pengguna pilot tidak valid.",
+        403,
+        corsHeaders
+      );
+    }
+  }
+
   const contentType =
     request.headers.get("Content-Type") || "";
 
@@ -1064,7 +1096,8 @@ async function handleChat(request, env) {
   const rateLimitError = await applyRateLimit(
     request,
     env,
-    corsHeaders
+    corsHeaders,
+    pilotEmail
   );
 
   if (rateLimitError) return rateLimitError;
@@ -1422,7 +1455,7 @@ async function handleChat(request, env) {
 ========================================================= */
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const corsHeaders = getCorsHeaders(request);
 
@@ -1443,7 +1476,7 @@ export default {
         });
       }
 
-      return handleChat(request, env);
+      return handleChat(request, env, ctx);
     }
 
     if (
