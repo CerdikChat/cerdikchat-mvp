@@ -40,6 +40,9 @@ function clearCookie() { return cookie("", 0); }
 function bindingCookie(value, maxAge) {
   return `${OAUTH_BINDING_COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 }
+function oauthError(data, status = 400, headers = {}) {
+  return json(data, status, { ...headers, "set-cookie": bindingCookie("", 0) });
+}
 function readCookie(request, name) {
   return (request.headers.get("Cookie") || "").split(";").map(v => v.trim())
     .find(v => v.startsWith(name + "="))?.slice(name.length + 1) || "";
@@ -108,10 +111,10 @@ async function handleGoogleAuth(request, env) {
     const providerError = url.searchParams.get("error");
     if (providerError) {
       const safeError = providerError === "access_denied" ? "OAUTH_ACCESS_DENIED" : "OAUTH_PROVIDER_ERROR";
-      return json({ error: safeError }, 400);
+      return oauthError({ error: safeError }, 400);
     }
     const code = url.searchParams.get("code"), state = url.searchParams.get("state");
-    if (!code || !state || code.length > 4096 || state.length > 256) return json({error:"OAUTH_RESPONSE_INVALID"},400);
+    if (!code || !state || code.length > 4096 || state.length > 256) return oauthError({error:"OAUTH_RESPONSE_INVALID"},400);
     const stateHash = await hashToken(state);
     const pending = await env.DB.prepare("SELECT nonce, verifier, browser_binding_hash FROM oauth_states WHERE state_hash = ? AND expires_at > ?")
       .bind(stateHash, Math.floor(Date.now()/1000)).first();
@@ -120,14 +123,14 @@ async function handleGoogleAuth(request, env) {
     const browserBinding = readCookie(request, OAUTH_BINDING_COOKIE);
     const suppliedBindingHash = browserBinding ? await hashToken(browserBinding) : "";
     if (!pending || !pending.browser_binding_hash || suppliedBindingHash !== pending.browser_binding_hash) {
-      return json({error:"OAUTH_STATE_INVALID"},400,{"set-cookie":bindingCookie("",0)});
+      return oauthError({error:"OAUTH_STATE_INVALID"},400);
     }
     const body = new URLSearchParams({
       code, client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET,
       redirect_uri: env.GOOGLE_REDIRECT_URI, grant_type: "authorization_code", code_verifier: pending.verifier
     });
     const tokenResponse = await fetch(GOOGLE_TOKEN, { method:"POST", headers:{"content-type":"application/x-www-form-urlencoded"}, body });
-    if (!tokenResponse.ok) return json({error:"OAUTH_EXCHANGE_FAILED"},502);
+    if (!tokenResponse.ok) return oauthError({error:"OAUTH_EXCHANGE_FAILED"},502);
     const tokenPayload = await tokenResponse.json();
     const identity = await verifyIdToken(tokenPayload.id_token, env.GOOGLE_CLIENT_ID, pending.nonce);
     const allowed = await env.DB.prepare("SELECT email, google_sub, active FROM pilot_users WHERE email = ?")
@@ -135,7 +138,7 @@ async function handleGoogleAuth(request, env) {
     if (!allowed || allowed.active !== 1 || (allowed.google_sub && allowed.google_sub !== identity.sub)) {
       await env.DB.prepare("INSERT INTO auth_audit_logs (event, email, created_at) VALUES ('DENIED', ?, ?)")
         .bind(identity.email, Math.floor(Date.now()/1000)).run();
-      return new Response("Akun ini belum diizinkan mengikuti pilot CerdikChat.", {status:403, headers:{"content-type":"text/plain; charset=utf-8","cache-control":"no-store"}});
+      return new Response("Akun ini belum diizinkan mengikuti pilot CerdikChat.", {status:403, headers:{"content-type":"text/plain; charset=utf-8","cache-control":"no-store","set-cookie":bindingCookie("",0)}});
     }
     await env.DB.prepare("UPDATE pilot_users SET google_sub = ?, last_login_at = ? WHERE email = ?")
       .bind(identity.sub, Math.floor(Date.now()/1000), identity.email).run();
