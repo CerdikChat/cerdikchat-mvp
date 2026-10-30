@@ -76,7 +76,8 @@ export async function handleAdminRoutes(request, env, session) {
 
   if (!url.pathname.startsWith("/admin/")) return null;
   if (!session?.email) return json({ error: "AUTHENTICATION_REQUIRED" }, 401);
-  const actorAdmin = await getAdmin(env.DB, session.email);\n  if (!actorAdmin) return json({ error: "ADMIN_REQUIRED" }, 403);
+  const actorAdmin = await getAdmin(env.DB, session.email);
+  if (!actorAdmin) return json({ error: "ADMIN_REQUIRED" }, 403);
 
   if (request.method === "GET" && url.pathname === "/admin/summary") {
     const [pending, users, notifications, audit] = await Promise.all([
@@ -88,9 +89,15 @@ export async function handleAdminRoutes(request, env, session) {
     return json({
       administrator: actorAdmin.role === "super_admin" ? "CerdikChat Super Administrator" : "CerdikChat Administrator",
       pendingRequests: pending.results || [],
-      users: (users.results || []).map((user) => ({\n        ...user,\n        email: user.email === session.email ? (actorAdmin.role === "super_admin" ? "CerdikChat Super Administrator" : "CerdikChat Administrator") : user.email\n      })),
+      users: (users.results || []).map((user) => ({
+        ...user,
+        email: user.email === session.email ? (actorAdmin.role === "super_admin" ? "CerdikChat Super Administrator" : "CerdikChat Administrator") : user.email
+      })),
       notifications: notifications.results || [],
-      auditLog: (audit.results || []).map((entry) => ({\n        ...entry,\n        actor_email: entry.actor_email === session.email ? (actorAdmin.role === "super_admin" ? "CerdikChat Super Administrator" : "CerdikChat Administrator") : "CerdikChat Administrator"\n      }))
+      auditLog: (audit.results || []).map((entry) => ({
+        ...entry,
+        actor_email: entry.actor_email === session.email ? (actorAdmin.role === "super_admin" ? "CerdikChat Super Administrator" : "CerdikChat Administrator") : "CerdikChat Administrator"
+      }))
     });
   }
 
