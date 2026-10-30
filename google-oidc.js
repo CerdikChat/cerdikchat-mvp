@@ -137,7 +137,10 @@ async function handleGoogleAuth(request, env) {
       .bind(sessionHash, identity.email, identity.sub, now + SESSION_TTL, now).run();
     await env.DB.prepare("INSERT INTO auth_audit_logs (event, email, created_at) VALUES ('LOGIN', ?, ?)")
       .bind(identity.email, now).run();
-    return new Response(null, {status:302, headers:{location:"/", "set-cookie":[cookie(session,SESSION_TTL), bindingCookie("",0)], "cache-control":"no-store"}});
+    const responseHeaders = new Headers({ location: "/", "cache-control": "no-store" });
+    responseHeaders.append("set-cookie", cookie(session, SESSION_TTL));
+    responseHeaders.append("set-cookie", bindingCookie("", 0));
+    return new Response(null, { status: 302, headers: responseHeaders });
   }
   if (url.pathname === "/auth/logout" && request.method === "POST") {
     const origin = request.headers.get("Origin");
