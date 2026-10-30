@@ -8,11 +8,6 @@ CREATE TABLE IF NOT EXISTS admin_users (
   created_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
 
--- Initial Super Administrator designated by the project owner.
-INSERT INTO admin_users (email, role, active)
-VALUES ('dr.ngyoonseong@gmail.com', 'super_admin', 1)
-ON CONFLICT(email) DO UPDATE SET role = 'super_admin', active = 1;
-
 CREATE TABLE IF NOT EXISTS access_requests (
   email TEXT PRIMARY KEY COLLATE NOCASE,
   status TEXT NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
@@ -45,9 +40,3 @@ CREATE TABLE IF NOT EXISTS admin_audit_logs (
 CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_created
   ON admin_audit_logs(created_at);
 
--- Ensure the designated Super Administrator can authenticate through the
--- same allowlist/session path as every other account. Google identity is
--- still verified at login; no Google subject is pre-bound here.
-INSERT INTO pilot_users (email, active)
-VALUES ('dr.ngyoonseong@gmail.com', 1)
-ON CONFLICT(email) DO UPDATE SET active = 1;
