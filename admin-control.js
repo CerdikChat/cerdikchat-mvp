@@ -89,11 +89,11 @@ export async function handleAdminRoutes(request, env, session) {
       env.DB.prepare("SELECT id, event, actor_email, subject_email, detail, created_at FROM admin_audit_logs ORDER BY created_at DESC LIMIT 100").all()
     ]);
     return json({
-      administrator: session.email,
+      administrator: "CerdikChat Super Administrator",
       pendingRequests: pending.results || [],
       users: users.results || [],
       notifications: notifications.results || [],
-      auditLog: audit.results || []
+      auditLog: (audit.results || []).map((entry) => ({\n        ...entry,\n        actor_email: entry.actor_email === ADMIN_EMAIL ? "CerdikChat Super Administrator" : entry.actor_email\n      }))
     });
   }
 
