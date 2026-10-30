@@ -25,6 +25,8 @@
 
 "use strict";
 
+import { handleGoogleAuth, getSession } from "./google-oidc.js";
+
 /* =========================================================
    1. CONFIGURATION
 ========================================================= */
@@ -1023,7 +1025,7 @@ function buildCalculatorResponse(calculation, corsHeaders) {
    18. MAIN CHAT HANDLER
 ========================================================= */
 
-async function handleChat(request, env, ctx) {
+async function handleChat(request, env, ctx, oidcSession = null) {
   const corsHeaders = getCorsHeaders(request);
 
   if (request.method !== "POST") {
@@ -1048,7 +1050,17 @@ async function handleChat(request, env, ctx) {
   // Private-pilot mode is opt-in. Enable only after Worker-level
   // Cloudflare Access is configured for every production hostname.
   let pilotEmail = null;
-  if (env.PILOT_ACCESS_REQUIRED === "true") {
+  if (env.GOOGLE_OIDC_ENABLED === "true") {
+    if (!oidcSession) {
+      return errorResponse(
+        "PILOT_AUTH_REQUIRED",
+        "Silakan masuk menggunakan akun Google yang terdaftar sebagai peserta pilot.",
+        401,
+        corsHeaders
+      );
+    }
+    pilotEmail = oidcSession.email;
+  } else if (env.PILOT_ACCESS_REQUIRED === "true") {
     if (!ctx?.access || typeof ctx.access.getIdentity !== "function") {
       return errorResponse(
         "PILOT_AUTH_REQUIRED",
@@ -1458,6 +1470,20 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const corsHeaders = getCorsHeaders(request);
+
+    if (env.GOOGLE_OIDC_ENABLED === "true") {
+      try {
+        const authResponse = await handleGoogleAuth(request, env);
+        if (authResponse) return authResponse;
+        if (url.pathname === CONFIG.API_PATH) {
+          const session = await getSession(request, env);
+          return handleChat(request, env, ctx, session);
+        }
+      } catch (error) {
+        console.error("CERDIKCHAT_OIDC_ERROR", { code: typeof error?.message === "string" ? error.message : "OIDC_FAILURE" });
+        return errorResponse("AUTHENTICATION_FAILED", "Autentikasi tidak dapat diselesaikan. Silakan coba kembali.", 502);
+      }
+    }
 
     if (url.pathname === CONFIG.API_PATH) {
       if (request.method === "OPTIONS") {
