@@ -35,7 +35,7 @@ async function getAdmin(db, email) {
 
 async function readJson(request) {
   const declaredLength = request.headers.get("Content-Length");
-  if (declaredLength && (!/^\\d+$/.test(declaredLength) || Number(declaredLength) > 4096)) return null;
+  if (declaredLength && (!/^[0-9]+$/.test(declaredLength) || Number(declaredLength) > 4096)) return null;
   if (!request.body) return null;
 
   const reader = request.body.getReader();
