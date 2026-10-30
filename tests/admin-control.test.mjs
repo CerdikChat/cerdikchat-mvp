@@ -68,3 +68,45 @@ test("unknown admin endpoint is not exposed to non-admin users", async () => {
   );
   assert.equal(response.status, 403);
 });
+
+
+test("access request rejects oversized JSON bodies even without Content-Length", async () => {
+  const response = await handleAdminRoutes(
+    request("/auth/request-access", "POST", { email: "a".repeat(5000) }),
+    { DB: emptyDb },
+    null
+  );
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, "VALID_EMAIL_REQUIRED");
+});
+
+test("admin approval enforces the 30-user cap atomically", async () => {
+  const statements = [];
+  const db = {
+    prepare(sql) {
+      statements.push(sql);
+      return {
+        bind() { return this; },
+        async first() {
+          if (sql.includes("FROM admin_users")) return { email: "admin@example.com", role: "super_admin" };
+          if (sql.includes("FROM access_requests")) return { status: "pending" };
+          throw new Error("Unexpected first() query: " + sql);
+        },
+        async run() {
+          if (sql.includes("INSERT INTO pilot_users")) return { meta: { changes: 0 } };
+          throw new Error("Unexpected run() query: " + sql);
+        }
+      };
+    }
+  };
+
+  const response = await handleAdminRoutes(
+    request("/admin/approve", "POST", { email: "new.user@example.com" }),
+    { DB: db },
+    { email: "admin@example.com" }
+  );
+  assert.equal(response.status, 409);
+  assert.equal((await response.json()).error, "PILOT_CAPACITY_REACHED");
+  assert.equal(statements.some(sql => /SELECT COUNT\\(\\*\\) FROM pilot_users WHERE active = 1/.test(sql)), true);
+  assert.equal(statements.some(sql => sql.includes("SELECT COUNT(*) AS total")), false);
+});
