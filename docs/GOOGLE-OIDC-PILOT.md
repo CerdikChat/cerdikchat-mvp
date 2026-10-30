@@ -8,7 +8,6 @@ Register this exact URI in Google Cloud Console under an OAuth Client ID of type
 ## Required Worker secrets / variables
 Set these in Workers & Pages → cerdikchat-mvp → Settings → Variables and Secrets:
 - Secret `GOOGLE_CLIENT_SECRET`: OAuth client secret (never commit it).
-- Secret `SESSION_SECRET`: generate at least 32 random bytes; current implementation reserves it for future key derivation and checks its presence.
 - Variable `GOOGLE_CLIENT_ID`: OAuth client ID.
 - Variable `GOOGLE_REDIRECT_URI`: exact callback above.
 - Variable `GOOGLE_OIDC_ENABLED`: set to `true` only after schema, credentials, allowlist, and end-to-end tests are complete.
