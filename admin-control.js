@@ -1,5 +1,3 @@
-const ADMIN_EMAIL = "dr.ngyoonseong@gmail.com";
-
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -30,10 +28,9 @@ async function notifyAdmins(db, type, subject, message) {
   ).bind(type, subject || null, message.slice(0, 300), Math.floor(Date.now() / 1000)).run();
 }
 
-async function isAdmin(db, email) {
-  const row = await db.prepare("SELECT email FROM admin_users WHERE email = ? AND active = 1")
+async function getAdmin(db, email) {
+  return db.prepare("SELECT email, role FROM admin_users WHERE email = ? AND active = 1")
     .bind(email).first();
-  return !!row;
 }
 
 async function readJson(request) {
@@ -60,7 +57,7 @@ export async function handleAdminRoutes(request, env, session) {
     const body = await readJson(request);
     const email = normalizeEmail(body?.email);
     if (!email) return json({ error: "VALID_EMAIL_REQUIRED" }, 400);
-    if (email === ADMIN_EMAIL) return json({ status: "administrator_identity_reserved" }, 200);
+    if (await getAdmin(env.DB, email)) return json({ status: "administrator_identity_reserved" }, 200);
 
     const existing = await env.DB.prepare(
       "SELECT status FROM access_requests WHERE email = ?"
@@ -79,7 +76,7 @@ export async function handleAdminRoutes(request, env, session) {
 
   if (!url.pathname.startsWith("/admin/")) return null;
   if (!session?.email) return json({ error: "AUTHENTICATION_REQUIRED" }, 401);
-  if (!(await isAdmin(env.DB, session.email))) return json({ error: "ADMIN_REQUIRED" }, 403);
+  const actorAdmin = await getAdmin(env.DB, session.email);\n  if (!actorAdmin) return json({ error: "ADMIN_REQUIRED" }, 403);
 
   if (request.method === "GET" && url.pathname === "/admin/summary") {
     const [pending, users, notifications, audit] = await Promise.all([
@@ -89,11 +86,11 @@ export async function handleAdminRoutes(request, env, session) {
       env.DB.prepare("SELECT id, event, actor_email, subject_email, detail, created_at FROM admin_audit_logs ORDER BY created_at DESC LIMIT 100").all()
     ]);
     return json({
-      administrator: "CerdikChat Super Administrator",
+      administrator: actorAdmin.role === "super_admin" ? "CerdikChat Super Administrator" : "CerdikChat Administrator",
       pendingRequests: pending.results || [],
       users: users.results || [],
       notifications: notifications.results || [],
-      auditLog: (audit.results || []).map((entry) => ({\n        ...entry,\n        actor_email: entry.actor_email === ADMIN_EMAIL ? "CerdikChat Super Administrator" : entry.actor_email\n      }))
+      auditLog: (audit.results || []).map((entry) => ({\n        ...entry,\n        actor_email: entry.actor_email === session.email ? (actorAdmin.role === "super_admin" ? "CerdikChat Super Administrator" : "CerdikChat Administrator") : "CerdikChat Administrator"\n      }))
     });
   }
 
