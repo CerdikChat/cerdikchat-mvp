@@ -3,6 +3,7 @@
  * ATLAS-9 Strategic Intelligence System
  *
  * Model: @cf/google/gemma-4-26b-a4b-it
+ *
  * Bindings:
  *   env.AI
  *   env.ASSETS
@@ -13,8 +14,9 @@
  * - JSON, HTTP method, origin, and message validation
  * - Approximate per-IP rate limiting
  * - Sanitized errors and minimal logging
- * - No provider API keys or external network/API tool execution
- * - One local allowlisted calculator tool with strict validation
+ * - No provider API keys or external network/API execution
+ * - One local allowlisted calculator tool
+ * - Safe observability without logging user prompts or arguments
  *
  * Limitations:
  * - No user authentication or persistent conversation storage
@@ -27,11 +29,13 @@
 const CONFIG = Object.freeze({
   MODEL: "@cf/google/gemma-4-26b-a4b-it",
   API_PATH: "/api/chat",
+
   MAX_BODY_BYTES: 40 * 1024,
   MAX_MESSAGE_CHARS: 8000,
   MAX_HISTORY_MESSAGES: 12,
   MAX_HISTORY_ITEM_CHARS: 2000,
   MAX_OUTPUT_TOKENS: 1024,
+
   MAX_TOOL_CALLS: 1,
   MAX_CALC_EXPRESSION_CHARS: 120,
 });
@@ -53,7 +57,7 @@ PERAN ANALITIS:
 - AEGIS: hukum, keamanan, risiko, kepatuhan, quality assurance.
 - ORACLE: ekonomi, keuangan, bisnis, strategi.
 
-Transparansi:
+TRANSPARANSI:
 Semua peran di atas merupakan pendekatan analitis dalam satu
 model AI. Jangan mengklaim sembilan agen independen sedang berjalan
 atau bahwa alat, riset web, pengujian, maupun deployment telah
@@ -72,11 +76,10 @@ PRINSIP KERJA:
 9. Jangan meminta atau mengungkap API key, token, atau kata sandi.
 10. Untuk topik berisiko tinggi, jelaskan batasan dan perlunya verifikasi.
 11. Jika informasi penting tidak tersedia, nyatakan keterbatasannya.
-12. Untuk perhitungan aritmetika, gunakan tool calculate_expression bila tersedia.
-13. Untuk permintaan hitung aritmetika, panggil calculate_expression dan jangan menebak hasilnya.
-14. Jangan mengklaim kalkulator dijalankan jika Worker tidak mengembalikan hasil eksekusi.
+12. Untuk perhitungan aritmetika, gunakan calculate_expression bila tersedia.
+13. Jangan mengklaim kalkulator dijalankan jika tool tidak dieksekusi.
 
-Format jawaban:
+FORMAT JAWABAN:
 - Ringkasan atau diagnosis
 - Rekomendasi utama
 - Langkah implementasi
@@ -106,12 +109,13 @@ function getCorsHeaders(request) {
   const requestOrigin = new URL(request.url).origin;
 
   const headers = {
-    "vary": "Origin",
+    vary: "Origin",
     "access-control-allow-methods": "POST, OPTIONS",
     "access-control-allow-headers": "Content-Type",
     "access-control-max-age": "86400",
   };
 
+  // Never reflect an arbitrary Origin.
   if (origin && origin === requestOrigin) {
     headers["access-control-allow-origin"] = origin;
   }
@@ -129,7 +133,10 @@ function isPlainObject(value) {
 
 function isSameOriginOrNoOrigin(request) {
   const origin = request.headers.get("Origin");
+
+  // Non-browser clients may omit Origin. This is not authentication.
   if (!origin) return true;
+
   return origin === new URL(request.url).origin;
 }
 
@@ -148,8 +155,8 @@ function errorResponse(
 }
 
 /**
- * Read the body incrementally and stop as soon as the byte limit
- * is exceeded. Content-Length is only an early rejection hint.
+ * Read request body incrementally.
+ * Content-Length is only an early rejection hint.
  */
 async function readBodyLimited(request, maxBytes) {
   const contentLength = request.headers.get("Content-Length");
@@ -283,6 +290,9 @@ function extractReply(result) {
 
   return "";
 }
+/**
+ * Classify AI errors without exposing provider details.
+ */
 function safeErrorCode(error) {
   const message =
     typeof error?.message === "string"
@@ -306,8 +316,7 @@ function safeErrorCode(error) {
 
 /**
  * Calculator Tool definition.
- * The model may request this tool, but the Worker validates
- * and executes the function locally.
+ * The model requests the tool; Worker validates and executes it.
  */
 const CALCULATOR_TOOLS = [
   {
@@ -330,6 +339,7 @@ const CALCULATOR_TOOLS = [
 
 /**
  * Safe arithmetic parser.
+ *
  * Supports:
  * - Addition (+)
  * - Subtraction (-)
@@ -562,21 +572,25 @@ function executeAllowedTool(call) {
 }
 
 /**
- * Format calculator output for the chatbot response.
+ * Format calculator output using Indonesian number conventions.
  */
 function formatCalculatorResult(result) {
-  const formatted = new Intl.NumberFormat("id-ID", {
+  return new Intl.NumberFormat("id-ID", {
     maximumFractionDigits: 10,
   }).format(result);
-
-  return `Hasil perhitungan: ${formatted}`;
 }
+/**
+ * Apply Cloudflare Rate Limiting.
+ * Fail closed if the binding is unavailable.
+ */
 async function applyRateLimit(request, env, corsHeaders) {
   if (
     !env.CHAT_RATE_LIMITER ||
     typeof env.CHAT_RATE_LIMITER.limit !== "function"
   ) {
-    console.error("CerdikChat configuration error: rate limiter missing.");
+    console.error("CERDIKCHAT_CONFIG_ERROR", {
+      reason: "RATE_LIMITER_MISSING",
+    });
 
     return errorResponse(
       "RATE_LIMITER_MISSING",
@@ -614,7 +628,7 @@ async function applyRateLimit(request, env, corsHeaders) {
 
     return null;
   } catch {
-    console.error("CerdikChat rate-limit check failed.");
+    console.error("CERDIKCHAT_RATE_LIMIT_ERROR");
 
     return errorResponse(
       "RATE_LIMIT_UNAVAILABLE",
@@ -625,6 +639,9 @@ async function applyRateLimit(request, env, corsHeaders) {
   }
 }
 
+/**
+ * Main chat handler.
+ */
 async function handleChat(request, env) {
   const corsHeaders = getCorsHeaders(request);
 
@@ -753,7 +770,9 @@ async function handleChat(request, env) {
   }
 
   if (!env.AI || typeof env.AI.run !== "function") {
-    console.error("CerdikChat configuration error: AI binding missing.");
+    console.error("CERDIKCHAT_CONFIG_ERROR", {
+      reason: "AI_BINDING_MISSING",
+    });
 
     return errorResponse(
       "AI_BINDING_MISSING",
@@ -785,8 +804,20 @@ async function handleChat(request, env) {
 
     const toolCalls = extractToolCalls(result);
 
+    // Safe observability: no prompts, arguments, or user data.
+    console.log("CERDIKCHAT_TOOL_DECISION", {
+      model: CONFIG.MODEL,
+      toolCallDetected: toolCalls.length > 0,
+      toolCallCount: toolCalls.length,
+    });
+
     if (toolCalls.length > 0) {
       if (toolCalls.length > CONFIG.MAX_TOOL_CALLS) {
+        console.warn("CERDIKCHAT_TOOL_REJECTED", {
+          reason: "TOO_MANY_TOOL_CALLS",
+          count: toolCalls.length,
+        });
+
         return errorResponse(
           "TOO_MANY_TOOL_CALLS",
           "Jumlah pemanggilan tool melebihi batas yang diizinkan.",
@@ -795,11 +826,78 @@ async function handleChat(request, env) {
         );
       }
 
-      const toolResult = executeAllowedTool(toolCalls[0]);
+      let toolResult;
+
+      try {
+        toolResult = executeAllowedTool(toolCalls[0]);
+
+        console.log("CERDIKCHAT_TOOL_EXECUTION", {
+          tool: toolResult.name,
+          executed: true,
+        });
+      } catch (toolError) {
+        const knownErrors = [
+          "DIVISION_BY_ZERO",
+          "INVALID_EXPRESSION",
+          "INVALID_EXPRESSION_LENGTH",
+          "INVALID_EXPRESSION_TOKEN",
+          "INVALID_EXPRESSION_SYNTAX",
+          "INVALID_TOOL_ARGUMENTS",
+          "NUMBER_OUT_OF_RANGE",
+          "RESULT_OUT_OF_RANGE",
+          "TOO_MANY_TOKENS",
+          "TOOL_NOT_ALLOWED",
+        ];
+
+        const errorCode =
+          typeof toolError?.message === "string" &&
+          knownErrors.includes(toolError.message)
+            ? toolError.message
+            : "CALCULATOR_EXECUTION_FAILED";
+
+        console.warn("CERDIKCHAT_TOOL_EXECUTION_FAILED", {
+          tool: "calculate_expression",
+          error: errorCode,
+        });
+
+        const errorMessages = {
+          DIVISION_BY_ZERO:
+            "Perhitungan tidak valid: pembagian dengan nol tidak diperbolehkan.",
+          INVALID_EXPRESSION:
+            "Ekspresi matematika tidak valid.",
+          INVALID_EXPRESSION_LENGTH:
+            "Ekspresi matematika kosong atau terlalu panjang.",
+          INVALID_EXPRESSION_TOKEN:
+            "Ekspresi mengandung karakter yang tidak didukung.",
+          INVALID_EXPRESSION_SYNTAX:
+            "Format ekspresi matematika tidak valid.",
+          INVALID_TOOL_ARGUMENTS:
+            "Parameter kalkulator tidak valid.",
+          NUMBER_OUT_OF_RANGE:
+            "Angka melebihi batas kalkulator.",
+          RESULT_OUT_OF_RANGE:
+            "Hasil perhitungan melebihi batas kalkulator.",
+          TOO_MANY_TOKENS:
+            "Ekspresi terlalu kompleks untuk kalkulator.",
+          TOOL_NOT_ALLOWED:
+            "Pemanggilan tool tidak diizinkan.",
+          CALCULATOR_EXECUTION_FAILED:
+            "Kalkulator gagal menjalankan perhitungan.",
+        };
+
+        return errorResponse(
+          "CALCULATOR_ERROR",
+          errorMessages[errorCode],
+          400,
+          corsHeaders
+        );
+      }
 
       return jsonResponse(
         {
-          reply: formatCalculatorResult(toolResult.result),
+          reply: `Hasil perhitungan: ${formatCalculatorResult(
+            toolResult.result
+          )}`,
           model: CONFIG.MODEL,
           tool: toolResult,
         },
@@ -808,10 +906,14 @@ async function handleChat(request, env) {
       );
     }
 
+    console.log("CERDIKCHAT_TOOL_NOT_CALLED", {
+      model: CONFIG.MODEL,
+    });
+
     const reply = extractReply(result);
 
     if (!reply) {
-      console.error("CerdikChat model returned an empty response.");
+      console.error("CERDIKCHAT_MODEL_EMPTY_RESPONSE");
 
       return errorResponse(
         "EMPTY_MODEL_RESPONSE",
@@ -836,7 +938,9 @@ async function handleChat(request, env) {
   } catch (error) {
     const code = safeErrorCode(error);
 
-    console.error("CerdikChat AI request failed:", code);
+    console.error("CERDIKCHAT_AI_REQUEST_FAILED", {
+      error: code,
+    });
 
     const status = code === "AI_QUOTA_EXCEEDED" ? 429 : 502;
 
@@ -860,6 +964,9 @@ async function handleChat(request, env) {
   }
 }
 
+/**
+ * Cloudflare Worker entry point.
+ */
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
