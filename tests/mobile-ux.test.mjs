@@ -14,7 +14,7 @@ test("mobile navigation has accessible controls and a labelled navigation region
 test("tablet and mobile layouts move the sidebar into an off-canvas drawer", () => {
   assert.match(html, /@media\s*\(max-width:\s*1024px\)/);
   assert.match(html, /\.app\.nav-open \.side\s*\{\s*transform:\s*translateX\(0\)/);
-  assert.match(html, /\.app\.nav-open \.nav-backdrop/);
+  assert.match(html, /\.nav-backdrop\[hidden\]\s*\{\s*display:\s*none/);\n  assert.match(html, /navBackdrop\.hidden = !open/);
   assert.match(html, /@media\s*\(max-width:\s*480px\)/);
   assert.match(html, /grid-template-columns:\s*1fr/);
 });
