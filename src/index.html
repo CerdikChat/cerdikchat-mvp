@@ -568,18 +568,87 @@
     @media(max-width:360px) { .suggestions { grid-template-columns:1fr 1fr; } .suggest { min-height:96px; padding:9px; } .controls { gap:6px; } .send { min-width:76px; padding-inline:9px; } }
     @media(prefers-reduced-motion:reduce) { .suggest { transition:none; } }
 
+
+    /* v0.2 mobile-first navigation and session history */
+    html, body { width:100%; max-width:100%; overflow-x:hidden; }
+    .new-chat {
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      width:100%; margin:18px 0 12px; padding:11px 12px;
+      border:1px solid #1d75aa; border-radius:12px;
+      background:linear-gradient(110deg,#123b62,#102a48);
+      color:var(--text); font-weight:700; cursor:pointer;
+    }
+    .new-chat:hover { border-color:var(--mint); }
+    .history-list { display:grid; gap:5px; }
+    .history-empty { color:var(--muted); font-size:12px; padding:6px 2px; }
+    .history-item {
+      width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      padding:9px 10px; border:1px solid transparent; border-radius:10px;
+      background:transparent; color:#cbdcf0; text-align:left; cursor:pointer;
+      font-size:12px;
+    }
+    .history-item:hover, .history-item[aria-current="true"] {
+      border-color:var(--line); background:var(--panel2); color:var(--text);
+    }
+    .menu-toggle {
+      display:none; align-items:center; justify-content:center;
+      width:40px; height:40px; border:1px solid var(--line);
+      border-radius:11px; background:var(--panel); color:var(--text);
+      font-size:20px; cursor:pointer;
+    }
+    .sidebar-backdrop { display:none; }
+    @media(max-width:720px) {
+      .app { display:block; width:100%; max-width:100%; min-height:100dvh; }
+      .side {
+        display:block; position:fixed; z-index:30; inset:0 auto 0 0;
+        width:min(86vw,310px); max-width:310px; overflow-y:auto;
+        padding:18px 16px max(22px,env(safe-area-inset-bottom));
+        transform:translateX(-105%); visibility:hidden;
+        transition:transform .2s ease,visibility .2s ease;
+        box-shadow:18px 0 48px #0008;
+      }
+      .side.is-open { transform:translateX(0); visibility:visible; }
+      .sidebar-backdrop.is-visible {
+        display:block; position:fixed; z-index:25; inset:0;
+        width:100%; height:100%; border:0; background:#020914b8;
+      }
+      .menu-toggle { display:inline-flex; flex:0 0 auto; }
+      .top { gap:9px; }
+      .mobile-brand { margin-right:auto; }
+      .top > strong { display:none; }
+      .feed { width:100%; min-width:0; padding:12px 13px 18px; }
+      .welcome { width:100%; margin:15px auto 18px; }
+      .suggestions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .suggest { min-width:0; }
+      .composer-wrap { position:sticky; bottom:0; width:100%; }
+      .composer { width:100%; }
+    }
+    @media(max-width:380px) {
+      .suggestions { grid-template-columns:1fr; }
+      .welcome h1 { font-size:26px; }
+      .controls { align-items:flex-end; }
+      .hint { max-width:62%; }
+    }
+    @media(prefers-reduced-motion:reduce) {
+      .side { transition:none; }
+    }
+
   </style>
 </head>
 
 <body>
   <div class="app">
-    <aside class="side">
+    <aside class="side" id="sidebar">
       <div class="brand">
         <div class="logo" aria-hidden="true">C</div>
         CerdikChat
       </div>
 
-      <div class="tag">CLOSED BETA · v0.1</div>
+      <div class="tag">CLOSED BETA · v0.2</div>
+
+      <button class="new-chat" id="newChatButton" type="button">＋ Percakapan baru</button>
+      <h2>Riwayat sesi ini</h2>
+      <div class="history-list" id="historyList" aria-label="Riwayat percakapan"><div class="history-empty">Belum ada percakapan.</div></div>
 
       <h2>Mulai dari sini</h2>
 
@@ -610,8 +679,10 @@
       </div>
     </aside>
 
+    <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Tutup navigasi"></button>
     <main class="main">
       <header class="top">
+        <button class="menu-toggle" id="menuToggle" type="button" aria-label="Buka navigasi" aria-expanded="false" aria-controls="sidebar">☰</button>
         <div class="mobile-brand">
           <div class="logo" aria-hidden="true">C</div>
           CerdikChat
@@ -681,7 +752,7 @@
         <div class="footer">
           Jawaban AI dapat keliru. Jangan kirim kata sandi, data pelanggan,
           atau informasi rahasia.
-          <span class="developer">Develop by ATLAS-9 (Dr. Steven) · Intelligence • Innovation • Impact</span>
+          <span class="developer">Developed by ATLAS-9 (Dr. Steven) · Intelligence · Innovation · Impact</span>
         </div>
       </div>
     </main>
@@ -696,12 +767,119 @@
     const send = document.querySelector("#send");
     const statusEl = document.querySelector("#status");
     const count = document.querySelector("#count");
+    const sidebar = document.querySelector("#sidebar");
+    const menuToggle = document.querySelector("#menuToggle");
+    const sidebarBackdrop = document.querySelector("#sidebarBackdrop");
+    const newChatButton = document.querySelector("#newChatButton");
+    const historyList = document.querySelector("#historyList");
+    const welcomeTemplate = document.querySelector("#welcome")?.cloneNode(true);
 
     const MAX_HISTORY_MESSAGES = 12;
     const MAX_MESSAGE_LENGTH = 8000;
+    const MAX_SESSION_CONVERSATIONS = 12;
 
     let history = [];
     let isSending = false;
+    let conversations = [];
+    let activeConversation = null;
+
+    function makeConversation() {
+      return {
+        id: `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        title: "Percakapan baru",
+        messages: [],
+        history: []
+      };
+    }
+
+    function updateHistoryList() {
+      if (!historyList) return;
+      historyList.replaceChildren();
+      if (!conversations.length) {
+        const empty = document.createElement("div");
+        empty.className = "history-empty";
+        empty.textContent = "Belum ada percakapan.";
+        historyList.append(empty);
+        return;
+      }
+      conversations.slice().reverse().forEach(conversation => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "history-item";
+        button.textContent = conversation.title;
+        button.title = conversation.title;
+        button.setAttribute("aria-current", String(conversation.id === activeConversation?.id));
+        button.addEventListener("click", () => openConversation(conversation.id));
+        historyList.append(button);
+      });
+    }
+
+    function openSidebar() {
+      sidebar?.classList.add("is-open");
+      sidebarBackdrop?.classList.add("is-visible");
+      menuToggle?.setAttribute("aria-expanded", "true");
+      menuToggle?.setAttribute("aria-label", "Tutup navigasi");
+    }
+
+    function closeSidebar() {
+      sidebar?.classList.remove("is-open");
+      sidebarBackdrop?.classList.remove("is-visible");
+      menuToggle?.setAttribute("aria-expanded", "false");
+      menuToggle?.setAttribute("aria-label", "Buka navigasi");
+    }
+
+    function openConversation(id) {
+      const selected = conversations.find(item => item.id === id);
+      if (!selected) return;
+      activeConversation = selected;
+      history = selected.history.slice();
+      feed.replaceChildren();
+      if (!selected.messages.length && welcomeTemplate) {
+        feed.append(welcomeTemplate.cloneNode(true));
+        attachPromptHandlers(feed);
+      } else {
+        selected.messages.forEach(message => {
+          const body = addMessage(message.role, message.content, false);
+          if (message.role === "assistant") renderBasicMarkdown(body, message.content);
+        });
+      }
+      updateHistoryList();
+      closeSidebar();
+      scrollToLatest();
+    }
+
+    function startNewConversation() {
+      if (isSending) return;
+      activeConversation = makeConversation();
+      conversations.push(activeConversation);
+      conversations = conversations.slice(-MAX_SESSION_CONVERSATIONS);
+      history = [];
+      feed.replaceChildren();
+      if (welcomeTemplate) {
+        feed.append(welcomeTemplate.cloneNode(true));
+        attachPromptHandlers(feed);
+      }
+      updateHistoryList();
+      closeSidebar();
+      input.value = "";
+      updateCount();
+      setStatus();
+      input.focus();
+    }
+
+    menuToggle?.addEventListener("click", () => {
+      if (sidebar?.classList.contains("is-open")) closeSidebar();
+      else openSidebar();
+    });
+    sidebarBackdrop?.addEventListener("click", closeSidebar);
+    newChatButton?.addEventListener("click", startNewConversation);
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeSidebar();
+    });
+
+    activeConversation = makeConversation();
+    conversations.push(activeConversation);
+    updateHistoryList();
 
     function updateCount() {
       count.textContent = String(input.value.length);
@@ -1066,9 +1244,17 @@
       }
     }
 
-    function addMessage(role, text) {
+    function addMessage(role, text, save = true) {
       const welcome = document.querySelector("#welcome");
       if (welcome) welcome.remove();
+
+      if (save && activeConversation) {
+        activeConversation.messages.push({ role, content: String(text) });
+        if (role === "user" && activeConversation.title === "Percakapan baru") {
+          activeConversation.title = String(text).replace(/\\s+/g, " ").slice(0, 42) || "Percakapan baru";
+        }
+        updateHistoryList();
+      }
 
       const row = document.createElement("article");
       row.className =
@@ -1107,11 +1293,17 @@
       input.focus();
     }
 
-    document.querySelectorAll("[data-prompt]").forEach(button => {
-      button.addEventListener("click", () => {
-        usePrompt(button.dataset.prompt || "");
+    function attachPromptHandlers(root = document) {
+      root.querySelectorAll("[data-prompt]").forEach(button => {
+        if (button.dataset.promptBound === "true") return;
+        button.dataset.promptBound = "true";
+        button.addEventListener("click", () => {
+          usePrompt(button.dataset.prompt || "");
+          closeSidebar();
+        });
       });
-    });
+    }
+    attachPromptHandlers();
 
     input.addEventListener("input", updateCount);
 
