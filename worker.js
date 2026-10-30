@@ -2,7 +2,7 @@
  * CerdikChat — Cloudflare Workers AI
  * ATLAS-9 Strategic Intelligence System
  *
- * Model: @cf/zai-org/glm-4.7-flash
+ * Model: @cf/google/gemma-4-26b-a4b-it
  * Bindings required:
  *   env.AI
  *   env.ASSETS
@@ -24,7 +24,7 @@
 "use strict";
 
 const CONFIG = Object.freeze({
-  MODEL: "@cf/zai-org/glm-4.7-flash",
+  MODEL: "@cf/google/gemma-4-26b-a4b-it",
   API_PATH: "/api/chat",
 
   MAX_BODY_BYTES: 40 * 1024,
