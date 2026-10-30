@@ -107,6 +107,6 @@ test("admin approval enforces the 30-user cap atomically", async () => {
   );
   assert.equal(response.status, 409);
   assert.equal((await response.json()).error, "PILOT_CAPACITY_REACHED");
-  assert.equal(statements.some(sql => /SELECT COUNT\\(\\*\\) FROM pilot_users WHERE active = 1/.test(sql)), true);
+  assert.equal(statements.some(sql => sql.includes("SELECT COUNT(*) FROM pilot_users WHERE active = 1")), true);
   assert.equal(statements.some(sql => sql.includes("SELECT COUNT(*) AS total")), false);
 });
