@@ -3,6 +3,7 @@ const GOOGLE_TOKEN = "https://oauth2.googleapis.com/token";
 const GOOGLE_JWKS = "https://www.googleapis.com/oauth2/v3/certs";
 const ISSUERS = new Set(["https://accounts.google.com", "accounts.google.com"]);
 const COOKIE = "__Host-cerdikchat_session";
+const OAUTH_BINDING_COOKIE = "__Host-cerdikchat_oauth_binding";
 const STATE_TTL = 600;
 const SESSION_TTL = 60 * 60 * 24 * 7;
 let jwksCache = { keys: null, expiresAt: 0 };
@@ -36,6 +37,13 @@ function cookie(value, maxAge) {
   return `${COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 }
 function clearCookie() { return cookie("", 0); }
+function bindingCookie(value, maxAge) {
+  return `${OAUTH_BINDING_COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
+}
+function readCookie(request, name) {
+  return (request.headers.get("Cookie") || "").split(";").map(v => v.trim())
+    .find(v => v.startsWith(name + "="))?.slice(name.length + 1) || "";
+}
 function validEmail(value) {
   return typeof value === "string" && value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -93,7 +101,7 @@ async function handleGoogleAuth(request, env) {
       response_type: "code", scope: "openid email profile", state, nonce,
       code_challenge: challenge, code_challenge_method: "S256", prompt: "select_account"
     }).toString();
-    return Response.redirect(target.toString(), 302);
+    return new Response(null, { status: 302, headers: { location: target.toString(), "set-cookie": bindingCookie(browserBinding, STATE_TTL), "cache-control": "no-store" } });
   }
   if (url.pathname === "/auth/google/callback" && request.method === "GET") {
     const providerError = url.searchParams.get("error");
@@ -129,7 +137,7 @@ async function handleGoogleAuth(request, env) {
       .bind(sessionHash, identity.email, identity.sub, now + SESSION_TTL, now).run();
     await env.DB.prepare("INSERT INTO auth_audit_logs (event, email, created_at) VALUES ('LOGIN', ?, ?)")
       .bind(identity.email, now).run();
-    return new Response(null, {status:302, headers:{location:"/", "set-cookie":cookie(session,SESSION_TTL), "cache-control":"no-store"}});
+    return new Response(null, {status:302, headers:{location:"/", "set-cookie":[cookie(session,SESSION_TTL), bindingCookie("",0)], "cache-control":"no-store"}});
   }
   if (url.pathname === "/auth/logout" && request.method === "POST") {
     const origin = request.headers.get("Origin");
