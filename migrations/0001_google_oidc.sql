@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS oauth_states (
   state_hash TEXT PRIMARY KEY,
   nonce TEXT NOT NULL,
   verifier TEXT NOT NULL,
+  browser_binding_hash TEXT NOT NULL,
   expires_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_oauth_states_expiry ON oauth_states(expires_at);
