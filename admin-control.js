@@ -88,7 +88,7 @@ export async function handleAdminRoutes(request, env, session) {
     return json({
       administrator: actorAdmin.role === "super_admin" ? "CerdikChat Super Administrator" : "CerdikChat Administrator",
       pendingRequests: pending.results || [],
-      users: users.results || [],
+      users: (users.results || []).map((user) => ({\n        ...user,\n        email: user.email === session.email ? (actorAdmin.role === "super_admin" ? "CerdikChat Super Administrator" : "CerdikChat Administrator") : user.email\n      })),
       notifications: notifications.results || [],
       auditLog: (audit.results || []).map((entry) => ({\n        ...entry,\n        actor_email: entry.actor_email === session.email ? (actorAdmin.role === "super_admin" ? "CerdikChat Super Administrator" : "CerdikChat Administrator") : "CerdikChat Administrator"\n      }))
     });
