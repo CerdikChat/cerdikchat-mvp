@@ -71,7 +71,7 @@ async function verifyIdToken(token, expectedAudience, expectedNonce) {
 }
 async function handleGoogleAuth(request, env) {
   const url = new URL(request.url);
-  if (!env.DB || !env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.GOOGLE_REDIRECT_URI || !env.SESSION_SECRET) {
+  if (!env.DB || !env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.GOOGLE_REDIRECT_URI) {
     return json({ error: "AUTH_NOT_CONFIGURED", message: "Google OIDC belum dikonfigurasi." }, 503);
   }
   if (url.pathname === "/auth/google/start" && request.method === "GET") {
