@@ -26,6 +26,7 @@
 "use strict";
 
 import { handleGoogleAuth, getSession } from "./google-oidc.js";
+import { handleAdminRoutes } from "./admin-control.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1499,6 +1500,20 @@ export default {
 
         const authResponse = await handleGoogleAuth(request, env);
         if (authResponse) return authResponse;
+
+        // Access requests are intentionally public submissions; approval is
+        // always a separate server-side administrator action.
+        if (url.pathname === "/auth/request-access") {
+          const accessResponse = await handleAdminRoutes(request, env, null);
+          if (accessResponse) return accessResponse;
+        }
+
+        if (url.pathname.startsWith("/admin/")) {
+          const adminSession = await getSession(request, env);
+          const adminResponse = await handleAdminRoutes(request, env, adminSession);
+          if (adminResponse) return adminResponse;
+        }
+
         if (url.pathname === CONFIG.API_PATH) {
           const session = await getSession(request, env);
           return handleChat(request, env, ctx, session);

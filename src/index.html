@@ -1266,7 +1266,7 @@
         loginLink.hidden = !!session.authenticated;
         accountEmail.hidden = !session.authenticated;
         logoutButton.hidden = !session.authenticated;
-        accountEmail.textContent = session.authenticated ? session.email : "";
+        accountEmail.textContent = session.authenticated ? (session.displayName || "Pengguna CerdikChat") : "";
       } catch {
         loginLink.hidden = false;
         accountEmail.hidden = true;
