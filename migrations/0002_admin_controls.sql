@@ -44,3 +44,10 @@ CREATE TABLE IF NOT EXISTS admin_audit_logs (
 );
 CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_created
   ON admin_audit_logs(created_at);
+
+-- Ensure the designated Super Administrator can authenticate through the
+-- same allowlist/session path as every other account. Google identity is
+-- still verified at login; no Google subject is pre-bound here.
+INSERT INTO pilot_users (email, active)
+VALUES ('dr.ngyoonseong@gmail.com', 1)
+ON CONFLICT(email) DO UPDATE SET active = 1;
