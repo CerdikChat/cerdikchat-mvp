@@ -125,9 +125,8 @@ export async function handleAdminRoutes(request, env, session) {
   }
 
   if (url.pathname === "/admin/disable" || url.pathname === "/admin/enable") {
-    if (email === ADMIN_EMAIL) return json({ error: "SUPER_ADMIN_PROTECTED" }, 403);
     if (email === actor) return json({ error: "SELF_MODIFICATION_BLOCKED" }, 403);
-    if (await isAdmin(env.DB, email)) return json({ error: "ADMIN_ACCOUNT_PROTECTED" }, 403);
+    if (await getAdmin(env.DB, email)) return json({ error: "ADMIN_ACCOUNT_PROTECTED" }, 403);
 
     const active = url.pathname === "/admin/enable" ? 1 : 0;
     const result = await env.DB.prepare("UPDATE pilot_users SET active = ? WHERE email = ?")
