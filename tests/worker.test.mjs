@@ -130,6 +130,51 @@ test("message over the configured character limit is rejected", async () => {
   assert.equal((await json(response)).error, "MESSAGE_TOO_LONG");
 });
 
+test("private pilot mode rejects requests without Cloudflare Access identity", async () => {
+  const response = await worker.fetch(
+    post({ message: "Halo" }),
+    makeEnv({ PILOT_ACCESS_REQUIRED: "true" })
+  );
+  assert.equal(response.status, 401);
+  assert.equal((await json(response)).error, "PILOT_AUTH_REQUIRED");
+});
+
+test("private pilot mode accepts authenticated identity and rate-limits by user", async () => {
+  let rateLimitKey;
+  const env = makeEnv({
+    PILOT_ACCESS_REQUIRED: "true",
+    CHAT_RATE_LIMITER: {
+      limit: async ({ key }) => {
+        rateLimitKey = key;
+        return { success: true };
+      },
+    },
+  });
+  const ctx = {
+    access: {
+      getIdentity: async () => ({ email: "Pilot.User@example.com" }),
+    },
+  };
+  const response = await worker.fetch(post({ message: "Halo" }), env, ctx);
+  assert.equal(response.status, 200);
+  assert.equal(rateLimitKey, "chat:user:pilot.user@example.com");
+});
+
+test("private pilot mode rejects malformed Access identity", async () => {
+  const ctx = {
+    access: {
+      getIdentity: async () => ({ email: "not-an-email" }),
+    },
+  };
+  const response = await worker.fetch(
+    post({ message: "Halo" }),
+    makeEnv({ PILOT_ACCESS_REQUIRED: "true" }),
+    ctx
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "PILOT_IDENTITY_INVALID");
+});
+
 test("rate limiter denial returns 429", async () => {
   const env = makeEnv({ CHAT_RATE_LIMITER: { limit: async () => ({ success: false }) } });
   const response = await worker.fetch(post({ message: "Halo" }), env);
