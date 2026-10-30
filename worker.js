@@ -1473,6 +1473,30 @@ export default {
 
     if (env.GOOGLE_OIDC_ENABLED === "true") {
       try {
+        // Keep the existing browser-origin / Fetch Metadata protections on
+        // the chat API before any session lookup or authenticated handling.
+        if (url.pathname === CONFIG.API_PATH) {
+          if (request.method === "OPTIONS") {
+            if (!isSameOriginOrNoOrigin(request)) {
+              return errorResponse(
+                "ORIGIN_NOT_ALLOWED",
+                "Origin permintaan tidak diizinkan.",
+                403,
+                corsHeaders
+              );
+            }
+            return new Response(null, { status: 204, headers: corsHeaders });
+          }
+          if (request.method !== "POST" || !isSameOriginOrNoOrigin(request)) {
+            return errorResponse(
+              "ORIGIN_NOT_ALLOWED",
+              "Origin permintaan tidak diizinkan.",
+              403,
+              corsHeaders
+            );
+          }
+        }
+
         const authResponse = await handleGoogleAuth(request, env);
         if (authResponse) return authResponse;
         if (url.pathname === CONFIG.API_PATH) {
