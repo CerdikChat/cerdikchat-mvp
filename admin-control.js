@@ -52,6 +52,11 @@ export async function handleAdminRoutes(request, env, session) {
   if (url.pathname === "/auth/request-access" && request.method === "POST") {
     const origin = request.headers.get("Origin");
     if (origin !== url.origin) return json({ error: "ORIGIN_NOT_ALLOWED" }, 403);
+    if (env.CHAT_RATE_LIMITER?.limit) {
+      const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+      const limit = await env.CHAT_RATE_LIMITER.limit({ key: `access-request:${ip}` });
+      if (!limit.success) return json({ error: "RATE_LIMIT_EXCEEDED" }, 429);
+    }
     const body = await readJson(request);
     const email = normalizeEmail(body?.email);
     if (!email) return json({ error: "VALID_EMAIL_REQUIRED" }, 400);
