@@ -3,17 +3,18 @@
  * ATLAS-9 Strategic Intelligence System
  *
  * Model: @cf/google/gemma-4-26b-a4b-it
- * Bindings required:
+ * Bindings:
  *   env.AI
  *   env.ASSETS
  *   env.CHAT_RATE_LIMITER
  *
- * Security controls:
+ * Security:
  * - Bounded request-body streaming
  * - JSON, HTTP method, origin, and message validation
  * - Approximate per-IP rate limiting
  * - Sanitized errors and minimal logging
- * - No provider API keys or external tool execution
+ * - No provider API keys or external network/API tool execution
+ * - One local allowlisted calculator tool with strict validation
  *
  * Limitations:
  * - No user authentication or persistent conversation storage
@@ -26,12 +27,13 @@
 const CONFIG = Object.freeze({
   MODEL: "@cf/google/gemma-4-26b-a4b-it",
   API_PATH: "/api/chat",
-
   MAX_BODY_BYTES: 40 * 1024,
   MAX_MESSAGE_CHARS: 8000,
   MAX_HISTORY_MESSAGES: 12,
   MAX_HISTORY_ITEM_CHARS: 2000,
   MAX_OUTPUT_TOKENS: 1024,
+  MAX_TOOL_CALLS: 1,
+  MAX_CALC_EXPRESSION_CHARS: 120,
 });
 
 const SYSTEM_INSTRUCTION = `
@@ -70,6 +72,9 @@ PRINSIP KERJA:
 9. Jangan meminta atau mengungkap API key, token, atau kata sandi.
 10. Untuk topik berisiko tinggi, jelaskan batasan dan perlunya verifikasi.
 11. Jika informasi penting tidak tersedia, nyatakan keterbatasannya.
+12. Untuk perhitungan aritmetika, gunakan tool calculate_expression bila tersedia.
+13. Untuk permintaan hitung aritmetika, panggil calculate_expression dan jangan menebak hasilnya.
+14. Jangan mengklaim kalkulator dijalankan jika Worker tidak mengembalikan hasil eksekusi.
 
 Format jawaban:
 - Ringkasan atau diagnosis
@@ -107,7 +112,6 @@ function getCorsHeaders(request) {
     "access-control-max-age": "86400",
   };
 
-  // Never reflect an arbitrary Origin.
   if (origin && origin === requestOrigin) {
     headers["access-control-allow-origin"] = origin;
   }
@@ -125,10 +129,7 @@ function isPlainObject(value) {
 
 function isSameOriginOrNoOrigin(request) {
   const origin = request.headers.get("Origin");
-
-  // Non-browser clients may omit Origin. This is not authentication.
   if (!origin) return true;
-
   return origin === new URL(request.url).origin;
 }
 
@@ -181,6 +182,7 @@ async function readBodyLimited(request, maxBytes) {
       const { done, value } = await reader.read();
 
       if (done) break;
+
       if (!(value instanceof Uint8Array)) {
         await reader.cancel();
         return { ok: false, reason: "INVALID_BODY" };
@@ -281,7 +283,6 @@ function extractReply(result) {
 
   return "";
 }
-
 function safeErrorCode(error) {
   const message =
     typeof error?.message === "string"
@@ -303,6 +304,273 @@ function safeErrorCode(error) {
   return "AI_REQUEST_FAILED";
 }
 
+/**
+ * Calculator Tool definition.
+ * The model may request this tool, but the Worker validates
+ * and executes the function locally.
+ */
+const CALCULATOR_TOOLS = [
+  {
+    name: "calculate_expression",
+    description:
+      "Menghitung ekspresi aritmetika. Mendukung angka, +, -, *, /, dan tanda kurung. Gunakan untuk perhitungan numerik.",
+    parameters: {
+      type: "object",
+      properties: {
+        expression: {
+          type: "string",
+          description:
+            "Ekspresi matematika, misalnya (125 * 85000) + 250000",
+        },
+      },
+      required: ["expression"],
+    },
+  },
+];
+
+/**
+ * Safe arithmetic parser.
+ * Supports:
+ * - Addition (+)
+ * - Subtraction (-)
+ * - Multiplication (*)
+ * - Division (/)
+ * - Parentheses
+ * - Unary plus/minus
+ *
+ * No eval(), Function(), or dynamic code execution.
+ */
+function calculateExpression(expression) {
+  if (typeof expression !== "string") {
+    throw new Error("INVALID_EXPRESSION");
+  }
+
+  const source = expression.trim();
+
+  if (
+    !source ||
+    source.length > CONFIG.MAX_CALC_EXPRESSION_CHARS
+  ) {
+    throw new Error("INVALID_EXPRESSION_LENGTH");
+  }
+
+  const tokens = [];
+  let index = 0;
+
+  while (index < source.length) {
+    const char = source[index];
+
+    if (/\s/.test(char)) {
+      index++;
+      continue;
+    }
+
+    if ("+-*/()".includes(char)) {
+      tokens.push(char);
+      index++;
+    } else {
+      const match = source.slice(index).match(
+        /^(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/
+      );
+
+      if (!match) {
+        throw new Error("INVALID_EXPRESSION_TOKEN");
+      }
+
+      const value = Number(match[0]);
+
+      if (!Number.isFinite(value) || Math.abs(value) > 1e12) {
+        throw new Error("NUMBER_OUT_OF_RANGE");
+      }
+
+      tokens.push(value);
+      index += match[0].length;
+    }
+
+    if (tokens.length > 64) {
+      throw new Error("TOO_MANY_TOKENS");
+    }
+  }
+
+  let position = 0;
+
+  function peek() {
+    return tokens[position];
+  }
+
+  function consume(expected) {
+    if (peek() !== expected) {
+      throw new Error("INVALID_EXPRESSION_SYNTAX");
+    }
+
+    position++;
+  }
+
+  function parsePrimary() {
+    const token = peek();
+
+    if (token === "+") {
+      position++;
+      return parsePrimary();
+    }
+
+    if (token === "-") {
+      position++;
+      return -parsePrimary();
+    }
+
+    if (token === "(") {
+      position++;
+
+      const value = parseExpression();
+
+      consume(")");
+      return value;
+    }
+
+    if (typeof token === "number") {
+      position++;
+      return token;
+    }
+
+    throw new Error("INVALID_EXPRESSION_SYNTAX");
+  }
+
+  function parseTerm() {
+    let value = parsePrimary();
+
+    while (peek() === "*" || peek() === "/") {
+      const operator = peek();
+      position++;
+
+      const right = parsePrimary();
+
+      if (operator === "*") {
+        value *= right;
+      } else {
+        if (right === 0) {
+          throw new Error("DIVISION_BY_ZERO");
+        }
+
+        value /= right;
+      }
+
+      if (!Number.isFinite(value)) {
+        throw new Error("RESULT_OUT_OF_RANGE");
+      }
+    }
+
+    return value;
+  }
+
+  function parseExpression() {
+    let value = parseTerm();
+
+    while (peek() === "+" || peek() === "-") {
+      const operator = peek();
+      position++;
+
+      const right = parseTerm();
+
+      if (operator === "+") {
+        value += right;
+      } else {
+        value -= right;
+      }
+
+      if (!Number.isFinite(value)) {
+        throw new Error("RESULT_OUT_OF_RANGE");
+      }
+    }
+
+    return value;
+  }
+
+  const result = parseExpression();
+
+  if (position !== tokens.length) {
+    throw new Error("INVALID_EXPRESSION_SYNTAX");
+  }
+
+  if (!Number.isFinite(result) || Math.abs(result) > 1e18) {
+    throw new Error("RESULT_OUT_OF_RANGE");
+  }
+
+  return Number(result.toFixed(10));
+}
+
+/**
+ * Extract tool calls from supported Workers AI response shapes.
+ */
+function extractToolCalls(result) {
+  const calls =
+    Array.isArray(result?.tool_calls)
+      ? result.tool_calls
+      : Array.isArray(result?.choices?.[0]?.message?.tool_calls)
+        ? result.choices[0].message.tool_calls
+        : [];
+
+  return calls.slice(0, CONFIG.MAX_TOOL_CALLS + 1);
+}
+
+/**
+ * Validate and execute only explicitly allowlisted tools.
+ */
+function executeAllowedTool(call) {
+  const functionData = call?.function || call;
+
+  const name =
+    typeof functionData?.name === "string"
+      ? functionData.name
+      : "";
+
+  if (name !== "calculate_expression") {
+    throw new Error("TOOL_NOT_ALLOWED");
+  }
+
+  let args = functionData.arguments;
+
+  if (typeof args === "string") {
+    try {
+      args = JSON.parse(args);
+    } catch {
+      throw new Error("INVALID_TOOL_ARGUMENTS");
+    }
+  }
+
+  if (!isPlainObject(args)) {
+    throw new Error("INVALID_TOOL_ARGUMENTS");
+  }
+
+  const keys = Object.keys(args);
+
+  if (
+    keys.length !== 1 ||
+    keys[0] !== "expression" ||
+    typeof args.expression !== "string"
+  ) {
+    throw new Error("INVALID_TOOL_ARGUMENTS");
+  }
+
+  const result = calculateExpression(args.expression);
+
+  return {
+    name: "calculate_expression",
+    executed: true,
+    result,
+  };
+}
+
+/**
+ * Format calculator output for the chatbot response.
+ */
+function formatCalculatorResult(result) {
+  const formatted = new Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: 10,
+  }).format(result);
+
+  return `Hasil perhitungan: ${formatted}`;
+}
 async function applyRateLimit(request, env, corsHeaders) {
   if (
     !env.CHAT_RATE_LIMITER ||
@@ -318,8 +586,6 @@ async function applyRateLimit(request, env, corsHeaders) {
     );
   }
 
-  // Cloudflare supplies this header to requests reaching its edge.
-  // IP-based limits can affect users sharing a mobile/Wi-Fi network.
   const ip = request.headers.get("CF-Connecting-IP");
 
   if (!ip) {
@@ -348,7 +614,6 @@ async function applyRateLimit(request, env, corsHeaders) {
 
     return null;
   } catch {
-    // Fail closed: do not silently run an unprotected AI endpoint.
     console.error("CerdikChat rate-limit check failed.");
 
     return errorResponse(
@@ -393,7 +658,6 @@ async function handleChat(request, env) {
     );
   }
 
-  // Limit requests before parsing or invoking the AI model.
   const rateLimitError = await applyRateLimit(
     request,
     env,
@@ -510,11 +774,39 @@ async function handleChat(request, env) {
   try {
     const result = await env.AI.run(CONFIG.MODEL, {
       messages,
+      tools: CALCULATOR_TOOLS,
+      tool_choice: "auto",
+      parallel_tool_calls: false,
       max_tokens: CONFIG.MAX_OUTPUT_TOKENS,
       chat_template_kwargs: {
         enable_thinking: false,
       },
     });
+
+    const toolCalls = extractToolCalls(result);
+
+    if (toolCalls.length > 0) {
+      if (toolCalls.length > CONFIG.MAX_TOOL_CALLS) {
+        return errorResponse(
+          "TOO_MANY_TOOL_CALLS",
+          "Jumlah pemanggilan tool melebihi batas yang diizinkan.",
+          400,
+          corsHeaders
+        );
+      }
+
+      const toolResult = executeAllowedTool(toolCalls[0]);
+
+      return jsonResponse(
+        {
+          reply: formatCalculatorResult(toolResult.result),
+          model: CONFIG.MODEL,
+          tool: toolResult,
+        },
+        200,
+        corsHeaders
+      );
+    }
 
     const reply = extractReply(result);
 
@@ -533,12 +825,15 @@ async function handleChat(request, env) {
       {
         reply,
         model: CONFIG.MODEL,
+        tool: {
+          name: "calculate_expression",
+          executed: false,
+        },
       },
       200,
       corsHeaders
     );
   } catch (error) {
-    // Log only a safe category, never prompts or provider response bodies.
     const code = safeErrorCode(error);
 
     console.error("CerdikChat AI request failed:", code);
@@ -590,12 +885,9 @@ export default {
       return handleChat(request, env);
     }
 
-    // The AI endpoint is the only application API handled here.
-    // All other paths are delegated to configured static assets.
     if (env.ASSETS && typeof env.ASSETS.fetch === "function") {
       const assetResponse = await env.ASSETS.fetch(request);
 
-      // Do not cache API responses. Add safe headers to static responses.
       const headers = new Headers(assetResponse.headers);
       headers.set("x-content-type-options", "nosniff");
       headers.set("referrer-policy", "no-referrer");
