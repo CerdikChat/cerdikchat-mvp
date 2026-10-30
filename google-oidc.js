@@ -39,11 +39,12 @@ function clearCookie() { return cookie("", 0); }
 function validEmail(value) {
   return typeof value === "string" && value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
-async function loadGoogleKeys() {
-  if (jwksCache.keys && jwksCache.expiresAt > Date.now()) return jwksCache.keys;
+async function loadGoogleKeys(forceRefresh = false) {
+  if (!forceRefresh && jwksCache.keys && jwksCache.expiresAt > Date.now()) return jwksCache.keys;
   const response = await fetch(GOOGLE_JWKS, { headers: { accept: "application/json" } });
   if (!response.ok) throw new Error("GOOGLE_JWKS_UNAVAILABLE");
   const data = await response.json();
+  if (!Array.isArray(data.keys)) throw new Error("GOOGLE_JWKS_INVALID");
   const cacheControl = response.headers.get("cache-control") || "";
   const match = cacheControl.match(/max-age=(\d+)/);
   jwksCache = { keys: data.keys, expiresAt: Date.now() + Math.min(Number(match?.[1] || 300), 3600) * 1000 };
@@ -56,13 +57,20 @@ async function verifyIdToken(token, expectedAudience, expectedNonce) {
   const header = JSON.parse(new TextDecoder().decode(fromB64url(parts[0])));
   const claims = JSON.parse(new TextDecoder().decode(fromB64url(parts[1])));
   if (header.alg !== "RS256" || typeof header.kid !== "string") throw new Error("INVALID_ID_TOKEN_ALGORITHM");
-  const keyData = (await loadGoogleKeys()).find(key => key.kid === header.kid && key.kty === "RSA" && key.use === "sig");
-  if (!keyData) { jwksCache.expiresAt = 0; throw new Error("GOOGLE_SIGNING_KEY_NOT_FOUND"); }
+  let keyData = (await loadGoogleKeys()).find(key => key.kid === header.kid && key.kty === "RSA" && key.use === "sig");
+  // Google rotates signing keys. Refresh JWKS once when an unfamiliar kid appears.
+  if (!keyData) {
+    keyData = (await loadGoogleKeys(true)).find(key => key.kid === header.kid && key.kty === "RSA" && key.use === "sig");
+  }
+  if (!keyData) throw new Error("GOOGLE_SIGNING_KEY_NOT_FOUND");
   const key = await crypto.subtle.importKey("jwk", keyData, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
   const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, fromB64url(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
   const now = Math.floor(Date.now() / 1000);
-  if (!valid || !ISSUERS.has(claims.iss) || claims.aud !== expectedAudience ||
-      (claims.exp || 0) <= now || (claims.iat || 0) > now + 60 ||
+  const audienceValid = claims.aud === expectedAudience ||
+    (Array.isArray(claims.aud) && claims.aud.includes(expectedAudience) && claims.azp === expectedAudience);
+  if (!valid || !ISSUERS.has(claims.iss) || !audienceValid ||
+      !Number.isFinite(claims.exp) || claims.exp <= now ||
+      !Number.isFinite(claims.iat) || claims.iat > now + 60 ||
       claims.nonce !== expectedNonce || claims.email_verified !== true ||
       !validEmail(claims.email) || typeof claims.sub !== "string" || claims.sub.length > 255) {
     throw new Error("ID_TOKEN_CLAIMS_INVALID");
@@ -88,6 +96,11 @@ async function handleGoogleAuth(request, env) {
     return Response.redirect(target.toString(), 302);
   }
   if (url.pathname === "/auth/google/callback" && request.method === "GET") {
+    const providerError = url.searchParams.get("error");
+    if (providerError) {
+      const safeError = providerError === "access_denied" ? "OAUTH_ACCESS_DENIED" : "OAUTH_PROVIDER_ERROR";
+      return json({ error: safeError }, 400);
+    }
     const code = url.searchParams.get("code"), state = url.searchParams.get("state");
     if (!code || !state || code.length > 4096 || state.length > 256) return json({error:"OAUTH_RESPONSE_INVALID"},400);
     const pending = await env.DB.prepare("SELECT nonce, verifier FROM oauth_states WHERE state_hash = ? AND expires_at > ?")
