@@ -19,6 +19,8 @@ function post(body, headers = {}) {
     method: "POST",
     headers: {
       "content-type": "application/json",
+      "origin": "https://cerdikchat.test",
+      "sec-fetch-site": "same-origin",
       "cf-connecting-ip": "203.0.113.10",
       ...headers,
     },
@@ -36,6 +38,27 @@ test("GET /api/chat is rejected with 405", async () => {
   assert.equal((await json(response)).error, "METHOD_NOT_ALLOWED");
 });
 
+test("static assets receive browser security headers", async () => {
+  const env = makeEnv({
+    ASSETS: {
+      fetch: async () => new Response("<!doctype html><title>test</title>", {
+        headers: { "content-type": "text/html; charset=utf-8" },
+      }),
+    },
+  });
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/"),
+    env
+  );
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.match(response.headers.get("content-security-policy"), /default-src 'self'/);
+  assert.match(response.headers.get("content-security-policy"), /frame-ancestors 'none'/);
+  assert.equal(response.headers.get("permissions-policy"), "camera=(), microphone=(), geolocation=()");
+  assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000; includeSubDomains");
+});
+
 test("same-origin preflight is accepted", async () => {
   const response = await worker.fetch(new Request("https://cerdikchat.test/api/chat", {
     method: "OPTIONS",
@@ -50,10 +73,39 @@ test("foreign Origin is rejected", async () => {
   assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
 });
 
+test("missing Origin is rejected for the browser-only chat endpoint", async () => {
+  const request = new Request("https://cerdikchat.test/api/chat", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "sec-fetch-site": "same-origin",
+      "cf-connecting-ip": "203.0.113.10",
+    },
+    body: JSON.stringify({ message: "Halo" }),
+  });
+  const response = await worker.fetch(request, makeEnv());
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
+});
+
+test("cross-site Fetch Metadata is rejected even when Origin is same-origin", async () => {
+  const response = await worker.fetch(
+    post({ message: "Halo" }, { "sec-fetch-site": "cross-site" }),
+    makeEnv()
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
+});
+
 test("unsupported content type is rejected", async () => {
   const response = await worker.fetch(new Request("https://cerdikchat.test/api/chat", {
     method: "POST",
-    headers: { "content-type": "text/plain" },
+    headers: {
+      "content-type": "text/plain",
+      origin: "https://cerdikchat.test",
+      "sec-fetch-site": "same-origin",
+      "cf-connecting-ip": "203.0.113.10",
+    },
     body: "hello",
   }), makeEnv());
   assert.equal(response.status, 415);
@@ -109,6 +161,7 @@ test("normal model response is returned in the expected API shape", async () => 
   assert.equal(payload.reply, "Jawaban uji dari model.");
   assert.equal(typeof payload.model, "string");
   assert.equal(payload.tool.executed, false);
+  assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000; includeSubDomains");
 });
 
 test("untrusted history roles are discarded before model inference", async () => {
