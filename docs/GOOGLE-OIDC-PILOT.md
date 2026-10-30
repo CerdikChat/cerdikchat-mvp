@@ -13,7 +13,7 @@ Set these in Workers & Pages → cerdikchat-mvp → Settings → Variables and S
 - Variable `GOOGLE_OIDC_ENABLED`: set to `true` only after schema, credentials, allowlist, and end-to-end tests are complete.
 
 ## D1 migration and allowlist
-Apply `migrations/0001_google_oidc.sql` to the existing `cerdikchat-db` database. Then insert no more than 30 approved accounts, one row per exact Google email:
+Apply `migrations/0001_google_oidc.sql` to the isolated Preview database `cerdikchat-staging` only. Never apply this pilot migration to production `cerdikchat-db` during staging. Then insert no more than 30 approved accounts into the staging `pilot_users` table, one row per exact Google email:
 ```sql
 INSERT INTO pilot_users (email, active) VALUES ('pilot.user@example.com', 1);
 ```
@@ -33,10 +33,10 @@ This implementation uses Google's identity endpoints and the existing Cloudflare
 
 ## Deployment sequence (manual approval required)
 1. Create Google OAuth Web application credentials; do not enable billing or extra APIs.
-2. Apply the D1 migration and insert approved pilot emails.
-3. Add the secrets/variables above.
+2. Apply the D1 migration to `cerdikchat-staging` only; insert approved pilot emails into that staging database.
+3. Add the secrets/variables above to the Preview environment only; do not change production variables or secrets.
 4. Run local/preview tests; verify approved, unapproved, expired-state, invalid-nonce, logout and session revocation paths.
-5. Only then enable `GOOGLE_OIDC_ENABLED=true` and deploy.
+5. Only after Preview end-to-end tests pass, consider enabling `GOOGLE_OIDC_ENABLED=true` in Preview. Production activation and deployment require separate explicit approval.
 6. Test from a private browser and verify an unlisted Google account is denied.
 
 **Important:** This PR does not create Google credentials, edit Cloudflare settings, apply migrations, enable the feature flag, or deploy production. Keep OIDC disabled until those manual prerequisites and end-to-end tests are complete.
