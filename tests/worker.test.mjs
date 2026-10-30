@@ -94,7 +94,12 @@ test("cross-site Fetch Metadata is rejected even when Origin is same-origin", as
 test("unsupported content type is rejected", async () => {
   const response = await worker.fetch(new Request("https://cerdikchat.test/api/chat", {
     method: "POST",
-    headers: { "content-type": "text/plain" },
+    headers: {
+      "content-type": "text/plain",
+      origin: "https://cerdikchat.test",
+      "sec-fetch-site": "same-origin",
+      "cf-connecting-ip": "203.0.113.10",
+    },
     body: "hello",
   }), makeEnv());
   assert.equal(response.status, 415);
