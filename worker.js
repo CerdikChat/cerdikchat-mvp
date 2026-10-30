@@ -4,24 +4,22 @@
  *
  * Model: @cf/google/gemma-4-26b-a4b-it
  *
- * Bindings:
+ * Required bindings:
  *   env.AI
  *   env.ASSETS
  *   env.CHAT_RATE_LIMITER
  *
  * Security:
  * - Bounded request-body streaming
- * - JSON, HTTP method, origin, and message validation
+ * - JSON, method, origin and message validation
  * - Approximate per-IP rate limiting
  * - Sanitized errors and minimal logging
- * - No provider API keys or external network/API execution
  * - One local allowlisted calculator tool
- * - Safe observability without logging user prompts or arguments
  *
  * Limitations:
- * - No user authentication or persistent conversation storage
- * - Rate limits are approximate and location-local
- * - ATLAS-9 roles are logical roles in one model, not independent agents
+ * - No user authentication
+ * - No persistent conversation storage
+ * - ATLAS-9 roles are logical roles in one model
  */
 
 "use strict";
@@ -58,26 +56,29 @@ PERAN ANALITIS:
 - ORACLE: ekonomi, keuangan, bisnis, strategi.
 
 TRANSPARANSI:
-Semua peran di atas merupakan pendekatan analitis dalam satu
-model AI. Jangan mengklaim sembilan agen independen sedang berjalan
-atau bahwa alat, riset web, pengujian, maupun deployment telah
-dilakukan jika tidak ada bukti nyata.
+Semua peran tersebut merupakan pendekatan analitis dalam
+satu model AI. Jangan mengklaim sembilan agen independen
+sedang berjalan.
+
+Jangan mengklaim tool, riset web, pengujian, atau deployment
+telah dilakukan tanpa bukti nyata.
 
 PRINSIP KERJA:
-1. Jawab dalam bahasa pengguna; gunakan bahasa Indonesia secara default.
-2. Utamakan akurasi, struktur jelas, dan rekomendasi praktis.
-3. Bedakan fakta terverifikasi, asumsi, estimasi, dan opini.
-4. Jangan mengarang sumber, data, harga, hasil pengujian, atau kemampuan.
-5. Untuk coding, prioritaskan solusi aman, sederhana, dan mudah diuji.
-6. Jelaskan perubahan dan cara memverifikasi hasilnya.
+1. Jawab dalam bahasa pengguna; gunakan bahasa Indonesia default.
+2. Utamakan akurasi dan struktur yang jelas.
+3. Bedakan fakta, asumsi, estimasi, dan opini.
+4. Jangan mengarang sumber, data, harga, atau hasil pengujian.
+5. Untuk coding, prioritaskan solusi aman dan mudah diuji.
+6. Jelaskan perubahan dan cara memverifikasinya.
 7. Utamakan solusi gratis atau berbiaya rendah.
-8. Jangan melakukan pembelian, mengaktifkan billing, menghapus data,
-   atau mengubah sistem eksternal tanpa persetujuan eksplisit.
-9. Jangan meminta atau mengungkap API key, token, atau kata sandi.
+8. Jangan mengaktifkan billing atau melakukan pembelian
+   tanpa persetujuan eksplisit.
+9. Jangan meminta atau mengungkap API key, token, atau password.
 10. Untuk topik berisiko tinggi, jelaskan batasan dan perlunya verifikasi.
-11. Jika informasi penting tidak tersedia, nyatakan keterbatasannya.
-12. Untuk perhitungan aritmetika, gunakan calculate_expression bila tersedia.
-13. Jangan mengklaim kalkulator dijalankan jika tool tidak dieksekusi.
+11. Jika informasi tidak tersedia, nyatakan keterbatasannya.
+12. Untuk perhitungan aritmetika, gunakan calculate_expression
+    bila tool benar-benar tersedia.
+13. Jangan mengklaim kalkulator dijalankan jika tidak dieksekusi.
 
 FORMAT JAWABAN:
 - Ringkasan atau diagnosis
@@ -115,7 +116,6 @@ function getCorsHeaders(request) {
     "access-control-max-age": "86400",
   };
 
-  // Never reflect an arbitrary Origin.
   if (origin && origin === requestOrigin) {
     headers["access-control-allow-origin"] = origin;
   }
@@ -134,7 +134,8 @@ function isPlainObject(value) {
 function isSameOriginOrNoOrigin(request) {
   const origin = request.headers.get("Origin");
 
-  // Non-browser clients may omit Origin. This is not authentication.
+  // Non-browser clients may omit Origin.
+  // This is not an authentication mechanism.
   if (!origin) return true;
 
   return origin === new URL(request.url).origin;
@@ -150,7 +151,10 @@ function errorResponse(
   return jsonResponse(
     { error: code, message },
     status,
-    { ...corsHeaders, ...extraHeaders }
+    {
+      ...corsHeaders,
+      ...extraHeaders,
+    }
   );
 }
 
@@ -168,16 +172,25 @@ async function readBodyLimited(request, maxBytes) {
       !Number.isSafeInteger(declaredLength) ||
       declaredLength < 0
     ) {
-      return { ok: false, reason: "INVALID_LENGTH" };
+      return {
+        ok: false,
+        reason: "INVALID_LENGTH",
+      };
     }
 
     if (declaredLength > maxBytes) {
-      return { ok: false, reason: "TOO_LARGE" };
+      return {
+        ok: false,
+        reason: "TOO_LARGE",
+      };
     }
   }
 
   if (!request.body) {
-    return { ok: false, reason: "EMPTY_BODY" };
+    return {
+      ok: false,
+      reason: "EMPTY_BODY",
+    };
   }
 
   const reader = request.body.getReader();
@@ -192,14 +205,22 @@ async function readBodyLimited(request, maxBytes) {
 
       if (!(value instanceof Uint8Array)) {
         await reader.cancel();
-        return { ok: false, reason: "INVALID_BODY" };
+
+        return {
+          ok: false,
+          reason: "INVALID_BODY",
+        };
       }
 
       totalBytes += value.byteLength;
 
       if (totalBytes > maxBytes) {
         await reader.cancel();
-        return { ok: false, reason: "TOO_LARGE" };
+
+        return {
+          ok: false,
+          reason: "TOO_LARGE",
+        };
       }
 
       chunks.push(value);
@@ -211,12 +232,15 @@ async function readBodyLimited(request, maxBytes) {
       // Ignore cancellation errors.
     }
 
-    return { ok: false, reason: "READ_FAILED" };
+    return {
+      ok: false,
+      reason: "READ_FAILED",
+    };
   } finally {
     try {
       reader.releaseLock();
     } catch {
-      // The stream may already be closed.
+      // Stream may already be closed.
     }
   }
 
@@ -233,9 +257,15 @@ async function readBodyLimited(request, maxBytes) {
       fatal: true,
     }).decode(bytes);
 
-    return { ok: true, text };
+    return {
+      ok: true,
+      text,
+    };
   } catch {
-    return { ok: false, reason: "INVALID_ENCODING" };
+    return {
+      ok: false,
+      reason: "INVALID_ENCODING",
+    };
   }
 }
 
@@ -249,7 +279,9 @@ function normalizeHistory(history) {
         item.role === "user" ||
         item.role === "assistant"
     )
-    .filter((item) => typeof item.content === "string")
+    .filter(
+      (item) => typeof item.content === "string"
+    )
     .map((item) => ({
       role: item.role,
       content: item.content
@@ -278,7 +310,9 @@ function extractReply(result) {
   if (Array.isArray(content)) {
     return content
       .map((part) =>
-        typeof part?.text === "string" ? part.text : ""
+        typeof part?.text === "string"
+          ? part.text
+          : ""
       )
       .join("")
       .trim();
@@ -316,7 +350,9 @@ function safeErrorCode(error) {
 
 /**
  * Calculator Tool definition.
- * The model requests the tool; Worker validates and executes it.
+ *
+ * The model requests the tool.
+ * Worker validates and executes it locally.
  */
 const CALCULATOR_TOOLS = [
   {
@@ -389,7 +425,10 @@ function calculateExpression(expression) {
 
       const value = Number(match[0]);
 
-      if (!Number.isFinite(value) || Math.abs(value) > 1e12) {
+      if (
+        !Number.isFinite(value) ||
+        Math.abs(value) > 1e12
+      ) {
         throw new Error("NUMBER_OUT_OF_RANGE");
       }
 
@@ -502,7 +541,10 @@ function calculateExpression(expression) {
     throw new Error("INVALID_EXPRESSION_SYNTAX");
   }
 
-  if (!Number.isFinite(result) || Math.abs(result) > 1e18) {
+  if (
+    !Number.isFinite(result) ||
+    Math.abs(result) > 1e18
+  ) {
     throw new Error("RESULT_OUT_OF_RANGE");
   }
 
@@ -510,7 +552,7 @@ function calculateExpression(expression) {
 }
 
 /**
- * Extract tool calls from supported Workers AI response shapes.
+ * Extract tool calls from supported response shapes.
  */
 function extractToolCalls(result) {
   const calls =
@@ -572,13 +614,13 @@ function executeAllowedTool(call) {
 }
 
 /**
- * Format calculator output using Indonesian number conventions.
+ * Format calculator output using Indonesian conventions.
  */
 function formatCalculatorResult(result) {
   return new Intl.NumberFormat("id-ID", {
     maximumFractionDigits: 10,
   }).format(result);
-}
+          }
 /**
  * Apply Cloudflare Rate Limiting.
  * Fail closed if the binding is unavailable.
@@ -664,7 +706,8 @@ async function handleChat(request, env) {
     );
   }
 
-  const contentType = request.headers.get("Content-Type") || "";
+  const contentType =
+    request.headers.get("Content-Type") || "";
 
   if (!/^application\/json(?:\s*;|$)/i.test(contentType)) {
     return errorResponse(
@@ -785,17 +828,21 @@ async function handleChat(request, env) {
   const history = normalizeHistory(body.history);
 
   const messages = [
-    { role: "system", content: SYSTEM_INSTRUCTION },
+    {
+      role: "system",
+      content: SYSTEM_INSTRUCTION,
+    },
     ...history,
-    { role: "user", content: message },
+    {
+      role: "user",
+      content: message,
+    },
   ];
 
   try {
     const result = await env.AI.run(CONFIG.MODEL, {
       messages,
       tools: CALCULATOR_TOOLS,
-      tool_choice: "auto",
-      parallel_tool_calls: false,
       max_tokens: CONFIG.MAX_OUTPUT_TOKENS,
       chat_template_kwargs: {
         enable_thinking: false,
@@ -804,7 +851,7 @@ async function handleChat(request, env) {
 
     const toolCalls = extractToolCalls(result);
 
-    // Safe observability: no prompts, arguments, or user data.
+    // Safe observability: no prompts or tool arguments.
     console.log("CERDIKCHAT_TOOL_DECISION", {
       model: CONFIG.MODEL,
       toolCallDetected: toolCalls.length > 0,
@@ -942,7 +989,8 @@ async function handleChat(request, env) {
       error: code,
     });
 
-    const status = code === "AI_QUOTA_EXCEEDED" ? 429 : 502;
+    const status =
+      code === "AI_QUOTA_EXCEEDED" ? 429 : 502;
 
     const messagesByCode = {
       AI_QUOTA_EXCEEDED:
@@ -992,10 +1040,14 @@ export default {
       return handleChat(request, env);
     }
 
-    if (env.ASSETS && typeof env.ASSETS.fetch === "function") {
+    if (
+      env.ASSETS &&
+      typeof env.ASSETS.fetch === "function"
+    ) {
       const assetResponse = await env.ASSETS.fetch(request);
 
       const headers = new Headers(assetResponse.headers);
+
       headers.set("x-content-type-options", "nosniff");
       headers.set("referrer-policy", "no-referrer");
       headers.set("x-frame-options", "DENY");
