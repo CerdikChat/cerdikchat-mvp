@@ -34,12 +34,44 @@ async function getAdmin(db, email) {
 }
 
 async function readJson(request) {
-  const length = Number(request.headers.get("Content-Length") || 0);
-  if (length > 4096) return null;
+  const declaredLength = request.headers.get("Content-Length");
+  if (declaredLength && (!/^\\d+$/.test(declaredLength) || Number(declaredLength) > 4096)) return null;
+  if (!request.body) return null;
+
+  const reader = request.body.getReader();
+  const chunks = [];
+  let total = 0;
   try {
-    const value = await request.json();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > 4096) {
+        await reader.cancel();
+        return null;
+      }
+      chunks.push(value);
+    }
+  } catch {
+    try { await reader.cancel(); } catch {}
+    return null;
+  } finally {
+    try { reader.releaseLock(); } catch {}
+  }
+
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  try {
+    const value = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
     return value && typeof value === "object" && !Array.isArray(value) ? value : null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 export async function handleAdminRoutes(request, env, session) {
@@ -111,10 +143,13 @@ export async function handleAdminRoutes(request, env, session) {
   if (url.pathname === "/admin/approve") {
     const requestRow = await env.DB.prepare("SELECT status FROM access_requests WHERE email = ?").bind(email).first();
     if (!requestRow || requestRow.status !== "pending") return json({ error: "PENDING_REQUEST_NOT_FOUND" }, 404);
-    const count = await env.DB.prepare("SELECT COUNT(*) AS total FROM pilot_users WHERE active = 1").first();
-    if ((count?.total || 0) >= 30) return json({ error: "PILOT_CAPACITY_REACHED" }, 409);
-    await env.DB.prepare("INSERT INTO pilot_users (email, active) VALUES (?, 1) ON CONFLICT(email) DO UPDATE SET active = 1")
-      .bind(email).run();
+    // Enforce the 30-user ceiling inside the same atomic SQL statement as
+    // activation, avoiding a count-then-insert race between concurrent admins.
+    const activation = await env.DB.prepare(
+      "INSERT INTO pilot_users (email, active) SELECT ?, 1 WHERE (SELECT COUNT(*) FROM pilot_users WHERE active = 1) < 30 " +
+      "ON CONFLICT(email) DO UPDATE SET active = 1"
+    ).bind(email).run();
+    if (!activation.meta?.changes) return json({ error: "PILOT_CAPACITY_REACHED" }, 409);
     await env.DB.prepare("UPDATE access_requests SET status = 'approved', decided_by = ?, updated_at = ? WHERE email = ?")
       .bind(actor, Math.floor(Date.now()/1000), email).run();
     await notifyAdmins(env.DB, "ACCESS_APPROVED", email, "Permintaan akses disetujui.");
