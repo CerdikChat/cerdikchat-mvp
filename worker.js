@@ -237,6 +237,7 @@ const JSON_HEADERS = Object.freeze({
   "x-content-type-options": "nosniff",
   "referrer-policy": "no-referrer",
   "x-frame-options": "DENY",
+  "strict-transport-security": "max-age=31536000; includeSubDomains",
 });
 
 function jsonResponse(data, status = 200, extraHeaders = {}) {
@@ -277,12 +278,21 @@ function isPlainObject(value) {
 
 function isSameOriginOrNoOrigin(request) {
   const origin = request.headers.get("Origin");
+  const fetchSite = request.headers.get("Sec-Fetch-Site");
 
-  // Non-browser clients may omit Origin.
-  // This is not an authentication mechanism.
-  if (!origin) return true;
+  // This public web UI is browser-origin scoped. Reject requests
+  // without Origin rather than treating missing Origin as trusted.
+  // Origin checks are CSRF hardening, NOT user authentication.
+  if (!origin || origin !== new URL(request.url).origin) {
+    return false;
+  }
 
-  return origin === new URL(request.url).origin;
+  // Browser fetch metadata provides a second, independent CSRF signal.
+  if (fetchSite && fetchSite !== "same-origin" && fetchSite !== "none") {
+    return false;
+  }
+
+  return true;
 }
 
 function errorResponse(
@@ -1446,6 +1456,14 @@ export default {
       headers.set("x-content-type-options", "nosniff");
       headers.set("referrer-policy", "no-referrer");
       headers.set("x-frame-options", "DENY");
+      headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
+      headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
+      headers.set("cross-origin-opener-policy", "same-origin");
+      headers.set("cross-origin-resource-policy", "same-origin");
+      headers.set(
+        "content-security-policy",
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+      );
 
       return new Response(assetResponse.body, {
         status: assetResponse.status,
