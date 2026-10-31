@@ -52,10 +52,11 @@ test("static assets receive browser security headers", async () => {
   );
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.equal(response.headers.get("cross-origin-opener-policy"), "same-origin-allow-popups");
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
   assert.match(response.headers.get("content-security-policy"), /default-src 'self'/);
-  assert.match(response.headers.get("content-security-policy"), /accounts\\.google\\.com\\/gsi\\/client/);
-  assert.match(response.headers.get("content-security-policy"), /frame-src https:\\/\\/accounts\\.google\\.com\\/gsi\\//);
+  assert.match(response.headers.get("content-security-policy"), /accounts\.google\.com\/gsi\/client/);
+  assert.match(response.headers.get("content-security-policy"), /frame-src https:\/\/accounts\.google\.com\/gsi\//);
   assert.match(response.headers.get("content-security-policy"), /frame-ancestors 'none'/);
   assert.equal(response.headers.get("permissions-policy"), "camera=(), microphone=(), geolocation=()");
   assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000; includeSubDomains");
