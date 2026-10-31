@@ -471,6 +471,12 @@ export async function requestUserAccess(request, env, options = {}) {
   }
 
   try {
+    // Never let a bootstrap-approved administrator identity enter the User queue.
+    const adminBootstrap = await env.DB.prepare(
+      "SELECT email FROM admin_bootstrap_allowlist WHERE email = ? COLLATE NOCASE LIMIT 1"
+    ).bind(identity.email).first();
+    if (adminBootstrap) return authJson({ error: "ADMIN_ACCOUNT_USE_ADMIN_PORTAL" }, 409);
+
     const existing = await env.DB.prepare(
       "SELECT google_sub, email, status, role FROM users WHERE google_sub = ? LIMIT 1"
     ).bind(identity.sub).first();
@@ -487,6 +493,14 @@ export async function requestUserAccess(request, env, options = {}) {
     ).bind(identity.email).first();
     if (emailOwner && emailOwner.google_sub !== identity.sub) {
       logAuthFailure("access_request", "identity_conflict");
+      return authJson({ error: "IDENTITY_CONFLICT" }, 403);
+    }
+
+    const requestEmailOwner = await env.DB.prepare(
+      "SELECT google_sub FROM user_access_requests WHERE email = ? COLLATE NOCASE LIMIT 1"
+    ).bind(identity.email).first();
+    if (requestEmailOwner && requestEmailOwner.google_sub !== identity.sub) {
+      logAuthFailure("access_request", "request_email_identity_conflict");
       return authJson({ error: "IDENTITY_CONFLICT" }, 403);
     }
 
