@@ -11,7 +11,7 @@ const GOOGLE_ISSUERS = new Set([
 ]);
 const SESSION_COOKIE = "__Host-cerdikchat_session";
 const CSRF_COOKIE = "__Host-cerdikchat_csrf";
-const CSRF_TTL_SECONDS = 3600;
+const CSRF_TTL_SECONDS = 8 * 60 * 60;
 const SESSION_TTL_SECONDS = 8 * 60 * 60;
 const MAX_TOKEN_LENGTH = 12_000;
 let jwksCache = { keys: null, expiresAt: 0 };
@@ -188,8 +188,11 @@ function unavailable() {
   return authJson({ error: "AUTH_UNAVAILABLE", message: "Autentikasi belum dikonfigurasi." }, 503);
 }
 
-export function authConfig(env) {
-  const csrfToken = toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
+export function authConfig(request, env) {
+  const existingToken = getCookie(request, CSRF_COOKIE);
+  const csrfToken = /^[A-Za-z0-9_-]{43}$/.test(existingToken || "")
+    ? existingToken
+    : toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
   return authJson(
     {
       clientId: env.GOOGLE_CLIENT_ID || null,
@@ -207,6 +210,18 @@ export async function googleLogin(request, env) {
   if (!sameOrigin(request)) return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
   if (!validCsrf(request)) return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
   if (!env.GOOGLE_CLIENT_ID || !env.DB) return unavailable();
+
+  const clientIp = request.headers.get("CF-Connecting-IP");
+  if (!clientIp) return authJson({ error: "CLIENT_ID_UNAVAILABLE" }, 403);
+  if (!env.CHAT_RATE_LIMITER || typeof env.CHAT_RATE_LIMITER.limit !== "function") {
+    return authJson({ error: "RATE_LIMIT_UNAVAILABLE" }, 503);
+  }
+  try {
+    const { success } = await env.CHAT_RATE_LIMITER.limit({ key: `auth:ip:${clientIp}` });
+    if (!success) return authJson({ error: "RATE_LIMIT_EXCEEDED" }, 429, { "retry-after": "60" });
+  } catch {
+    return authJson({ error: "RATE_LIMIT_UNAVAILABLE" }, 503);
+  }
 
   let body;
   try {
