@@ -1134,7 +1134,8 @@
         const expanded = form.classList.toggle("expanded");
         expandComposer.setAttribute("aria-expanded", String(expanded));
         expandComposer.textContent = expanded ? "⤡ Kecilkan kolom" : "⤢ Perbesar kolom";
-        if (expanded) input.focus({ preventScroll: true });
+        // Expanding the writing area must not open Android's keyboard.
+
       });
     }
 
