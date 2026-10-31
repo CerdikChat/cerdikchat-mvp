@@ -644,6 +644,86 @@
     @media(max-width:620px){.portal-grid{grid-template-columns:1fr}.portal-card p{min-height:0}}
     
     html[data-theme="light"] .settings-dialog{background:#fff;color:#14243a}html[data-theme="light"] .settings-section{background:#f2f6fc}
+  
+    /* ATLAS-9 UI polish: consistent cards, mobile rhythm, readable AI output */
+    .workspace { width:min(100%, 980px); padding-inline:clamp(0px,2vw,14px); }
+    .workspace-head { align-items:center; }
+    .feature-grid {
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      align-items:stretch;
+      grid-auto-rows:1fr;
+      gap:12px;
+    }
+    .feature-card {
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      min-height:132px;
+      height:100%;
+      padding:14px;
+      gap:0;
+    }
+    .feature-card strong { line-height:1.35; min-height:2.7em; }
+    .feature-card small { line-height:1.5; }
+    .feature-state { margin-top:auto; padding-top:9px; }
+    .portal-grid { align-items:stretch; }
+    .portal-card {
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      min-height:190px;
+      height:100%;
+      padding:clamp(14px,2vw,20px);
+    }
+    .portal-card p { flex:1; line-height:1.55; }
+    .portal-card .settings-button { align-self:flex-start; max-width:100%; white-space:normal; text-align:center; }
+    .content { max-width:100%; line-height:1.8; overflow-wrap:anywhere; }
+    .content p { margin:.72em 0; }
+    .content h1,.content h2,.content h3,.content h4 { scroll-margin-top:16px; }
+    .content li { padding-left:2px; }
+    .content pre,.content .table-wrap { overscroll-behavior-x:contain; }
+    .msg { gap:clamp(8px,2vw,14px); }
+    .bubble { min-width:0; }
+    @media(max-width:820px) {
+      .workspace { margin:10px auto 16px; }
+      .workspace-head { align-items:flex-start; }
+      .feature-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+      .feature-card { min-height:124px; padding:12px; }
+      .portal-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+      .portal-card { min-height:180px; }
+    }
+    @media(max-width:560px) {
+      .workspace-head { flex-direction:column; gap:8px; margin-bottom:12px; }
+      .workspace-head p { line-height:1.5; }
+      .feature-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+      .feature-card { min-height:132px; padding:11px; border-radius:13px; }
+      .feature-card strong { min-height:0; font-size:11px; }
+      .feature-card small { font-size:10px; }
+      .portal-grid { grid-template-columns:1fr; }
+      .portal-card { min-height:0; }
+      .portal-card p { margin:4px 0 14px; }
+      .portal-card .settings-button { width:100%; justify-content:center; }
+      .feed { padding:14px 13px 18px; }
+      .msg { margin:20px auto; }
+      .avatar { flex-basis:30px; width:30px; height:30px; }
+      .composer-wrap { padding-inline:10px; }
+      .composer { border-radius:16px; }
+      .content { font-size:14px; line-height:1.78; }
+      .content h1 { font-size:1.35em; }
+      .content h2 { font-size:1.2em; }
+      .content ul,.content ol { padding-left:1.3em; }
+      .content th,.content td { padding:7px 8px; }
+    }
+    @media(max-width:360px) {
+      .feature-grid { grid-template-columns:1fr; }
+      .feature-card { min-height:0; }
+      .workspace-tag { white-space:normal; }
+      .top-actions { flex-wrap:wrap; justify-content:flex-end; }
+    }
+    @media(prefers-reduced-motion:reduce) {
+      .suggest,.prompt,.send { transition:none !important; }
+    }
+
   </style>
 </head>
 
