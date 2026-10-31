@@ -243,3 +243,60 @@ test("model failure returns a sanitized 502 response", async () => {
   assert.equal(payload.error, "AI_REQUEST_FAILED");
   assert.equal(JSON.stringify(payload).includes("private provider detail"), false);
 });
+
+test("Google OIDC mode rejects chat without a valid server-side session", async () => {
+  const response = await worker.fetch(
+    post({ message: "Halo" }),
+    makeEnv({
+      GOOGLE_OIDC_ENABLED: "true",
+      GOOGLE_CLIENT_ID: "test-client-id",
+      GOOGLE_CLIENT_SECRET: "test-client-secret",
+      GOOGLE_REDIRECT_URI: "https://cerdikchat-mvp.ngyoonseong.workers.dev/auth/google/callback",
+      DB: {},
+    })
+  );
+  assert.equal(response.status, 401);
+  assert.equal((await json(response)).error, "PILOT_AUTH_REQUIRED");
+});
+
+test("Google OIDC endpoints fail closed when credentials are not configured", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/auth/google/start"),
+    makeEnv({ GOOGLE_OIDC_ENABLED: "true" })
+  );
+  assert.equal(response.status, 503);
+  assert.equal((await json(response)).error, "AUTH_NOT_CONFIGURED");
+});
+
+
+test("Google OIDC chat path preserves same-origin protection", async () => {
+  const request = new Request("https://cerdikchat.test/api/chat", {
+    method: "POST",
+    headers: { "content-type": "application/json", "Origin": "https://attacker.example", "Sec-Fetch-Site": "cross-site" },
+    body: JSON.stringify({ message: "Halo" }),
+  });
+  const response = await worker.fetch(
+    request,
+    makeEnv({
+      GOOGLE_OIDC_ENABLED: "true",
+      GOOGLE_CLIENT_ID: "test-client-id",
+      GOOGLE_CLIENT_SECRET: "test-client-secret",
+      GOOGLE_REDIRECT_URI: "https://cerdikchat.test/auth/google/callback",
+      DB: {},
+    })
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
+});
+
+test("Google OIDC chat path handles same-origin preflight before session lookup", async () => {
+  const request = new Request("https://cerdikchat.test/api/chat", {
+    method: "OPTIONS",
+    headers: { Origin: "https://cerdikchat.test", "Sec-Fetch-Site": "same-origin" },
+  });
+  const response = await worker.fetch(
+    request,
+    makeEnv({ GOOGLE_OIDC_ENABLED: "true" })
+  );
+  assert.equal(response.status, 204);
+});

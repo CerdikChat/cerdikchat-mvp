@@ -507,6 +507,14 @@
       }
     }
 
+
+    .account-actions{display:flex;align-items:center;gap:9px}
+    .login-link,.logout-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:8px 13px;border:1px solid #28608c;border-radius:11px;background:#102b48;color:#eef7ff;text-decoration:none;font-size:13px;font-weight:700;cursor:pointer}
+    .login-link:hover,.logout-button:hover{border-color:var(--mint);background:#153858}
+    .account-email{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:12px}
+    .logout-button{background:transparent}
+    @media(max-width:720px){.account-actions{gap:6px}.account-email{display:none}.login-link,.logout-button{min-height:34px;padding:6px 9px;font-size:12px}.account-actions .pill{display:none}}
+
     /* CerdikChat V2: premium, compact and responsive visual layer */
     :root { --bg:#061020; --panel:#0d1b30; --panel2:#122844; --line:#173b60; --text:#eef7ff; --muted:#9bb4d1; --blue:#29a8ff; --mint:#20e2d0; }
     body { background:radial-gradient(ellipse at 50% 0%,#10345b 0,transparent 44%),radial-gradient(ellipse at 90% 80%,#06294a 0,transparent 35%),#061020; }
@@ -610,7 +618,15 @@
         </div>
 
         <strong>AI Workspace</strong>
-        <span class="pill">● AI · Beta</span>
+        <div class="account-actions" aria-label="Akun pengguna">
+          <a class="login-link" id="loginLink" href="/auth/google/start" aria-label="Masuk dengan Google">
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17"><path fill="#4285F4" d="M21.6 12.23c0-.72-.06-1.42-.18-2.1H12v3.98h5.38a4.6 4.6 0 0 1-2 3.02v2.47h3.24c1.9-1.75 2.98-4.33 2.98-7.37Z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.4l-3.24-2.47c-.9.6-2.04.96-3.38.96-2.6 0-4.8-1.76-5.58-4.12H3.08v2.55A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.42 13.97A6 6 0 0 1 6.1 12c0-.68.12-1.34.32-1.97V7.48H3.08A10 10 0 0 0 2 12c0 1.62.39 3.15 1.08 4.52l3.34-2.55Z"/><path fill="#EA4335" d="M12 5.91c1.47 0 2.79.5 3.82 1.5l2.87-2.87A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.92 5.48l3.34 2.55C7.2 7.67 9.4 5.91 12 5.91Z"/></svg>
+            <span>Masuk</span>
+          </a>
+          <span class="account-email" id="accountEmail" hidden></span>
+          <button class="logout-button" id="logoutButton" type="button" hidden>Keluar</button>
+          <span class="pill">● AI · Beta</span>
+        </div>
       </header>
 
       <section class="feed" id="feed" aria-live="polite"
@@ -1237,6 +1253,44 @@
         scrollToLatest();
       }
     }
+
+
+    const loginLink = document.querySelector("#loginLink");
+    const accountEmail = document.querySelector("#accountEmail");
+    const logoutButton = document.querySelector("#logoutButton");
+
+    async function refreshAuthState() {
+      try {
+        const response = await fetch("/auth/session", { credentials: "same-origin", cache: "no-store" });
+        const session = response.ok ? await response.json() : { authenticated: false };
+        loginLink.hidden = !!session.authenticated;
+        accountEmail.hidden = !session.authenticated;
+        logoutButton.hidden = !session.authenticated;
+        accountEmail.textContent = session.authenticated ? session.email : "";
+      } catch {
+        loginLink.hidden = false;
+        accountEmail.hidden = true;
+        logoutButton.hidden = true;
+      }
+    }
+
+    logoutButton.addEventListener("click", async () => {
+      logoutButton.disabled = true;
+      try {
+        const response = await fetch("/auth/logout", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Accept": "application/json" }
+        });
+        if (!response.ok) throw new Error("Logout gagal.");
+        window.location.assign("/");
+      } catch {
+        logoutButton.disabled = false;
+        setStatus("Tidak dapat keluar. Silakan coba kembali.", true);
+      }
+    });
+
+    refreshAuthState();
 
     form.addEventListener("submit", sendMessage);
     updateCount();
