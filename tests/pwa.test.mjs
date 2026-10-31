@@ -27,9 +27,9 @@ test("PWA registers a same-origin root-scoped service worker over secure context
 });
 
 test("CerdikGo brand mark is used in the workspace and offline screen", () => {
-  assert.match(indexHtml, /href="\\/cerdikgo-mark\\.svg"/);
-  assert.match(indexHtml, /src="\\/cerdikgo-mark\\.svg"/);
-  assert.match(offlineHtml, /src="\\/cerdikgo-mark\\.svg"/);
+  assert.ok(indexHtml.includes('href="/cerdikgo-mark.svg"'));
+  assert.ok(indexHtml.includes('src="/cerdikgo-mark.svg"'));
+  assert.ok(offlineHtml.includes('src="/cerdikgo-mark.svg"'));
 });
 
 test("offline UI distinguishes network reachability from AI service health", () => {
@@ -39,7 +39,7 @@ test("offline UI distinguishes network reachability from AI service health", () 
 });
 
 test("service worker caches only the static app shell", () => {
-  assert.match(serviceWorker, /APP_SHELL = \["\/", "\/manifest\.webmanifest", "\/offline\.html"\]/);
+  assert.ok(serviceWorker.includes('APP_SHELL = ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg"]'));
   assert.match(serviceWorker, /cerdikgo-shell-v1/);
   assert.match(serviceWorker, /key\.startsWith\("cerdikgo-shell-"\)/);
 });
