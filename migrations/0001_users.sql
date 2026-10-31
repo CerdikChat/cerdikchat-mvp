@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
   display_name TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'active'
     CHECK (status IN ('active', 'disabled')),
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  updated_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
