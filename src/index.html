@@ -534,6 +534,11 @@
     .controls { padding:2px 4px 0; }
     .send { min-width:104px; padding:10px 18px; border-radius:12px; background:linear-gradient(110deg,#39a7ff,#21e0cb); box-shadow:0 5px 18px #14a9d944; }
     .footer { max-width:900px; margin-top:7px; color:#93abc7; font-size:11px; line-height:1.55; }
+    .auth-panel { max-width:900px; margin:12px auto; padding:12px 14px; border:1px solid #1a4c77; border-radius:14px; background:#0d1b30; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .auth-panel small { color:var(--muted); }
+    .auth-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .auth-user { color:var(--mint); font-size:12px; }
+    .auth-logout { padding:8px 12px; border:1px solid var(--line); border-radius:9px; background:var(--panel2); color:var(--text); }
     .footer .developer { display:block; margin-top:5px; color:#37d5e6; font-size:11px; font-weight:750; letter-spacing:.45px; }
     .status { max-width:900px; }
     @media(max-width:900px) { .suggestions { grid-template-columns:repeat(2,minmax(0,1fr)); } }
@@ -612,6 +617,11 @@
         <strong>AI Workspace</strong>
         <span class="pill">● AI · Beta</span>
       </header>
+
+      <section class="auth-panel" id="authPanel" hidden aria-live="polite">
+        <div><strong id="authTitle">Akses CerdikChat</strong><br><small id="authMessage">Masuk dengan akun Google yang telah diizinkan.</small></div>
+        <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
+      </section>
 
       <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
