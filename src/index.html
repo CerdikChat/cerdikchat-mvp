@@ -1068,7 +1068,7 @@
         if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
         updateAuthUI();
         setStatus("Anda telah keluar.");
-        await renderGoogleButton();
+        await renderGoogleButton("admin");\n        await renderGoogleButton("user");
       } catch (error) {
         setStatus(error instanceof Error ? error.message : "Logout gagal.", true);
       } finally {
