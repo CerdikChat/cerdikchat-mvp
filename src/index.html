@@ -2066,9 +2066,9 @@
       main.classList.add("conversation-active");
       if (featureGrid) featureGrid.classList.remove("expanded");
       if (workspace) workspace.classList.remove("workspace-expanded");
-      if (featureExpand) {
-        featureExpand.setAttribute("aria-expanded", "false");
-        featureExpand.textContent = "Lihat semua fitur ↓";
+      if (featureToggle) {
+        featureToggle.setAttribute("aria-expanded", "false");
+        featureToggle.textContent = "✦ Fitur";
       }
 
       isSending = true;
