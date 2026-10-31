@@ -297,7 +297,7 @@ export async function googleLogin(request, env, options = {}) {
       email: identity.email,
     }, 403);
   }
-  const role = user.role === "admin" ? "admin" : "user";
+  const role = user.role === "admin" || user.role === "super_admin" ? user.role : "user";
   if (portal !== role) {
     return authJson({ error: "ROLE_MISMATCH", requiredPortal: role, message: role === "admin" ? "Akun ini harus masuk melalui Administrator Portal." : "Akun ini tidak memiliki hak Administrator." }, 403);
   }
@@ -334,7 +334,7 @@ export async function currentSession(request, env) {
       "SELECT s.google_sub, u.email, u.display_name, u.role FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
     ).bind(hash, now).first();
     if (!row) return authJson({ authenticated: false }, 401, { "set-cookie": clearCookieHeader() });
-    return authJson({ authenticated: true, user: { email: row.email, displayName: row.display_name || "", role: row.role === "admin" ? "admin" : "user" } });
+    return authJson({ authenticated: true, user: { email: row.email, displayName: row.display_name || "", role: row.role === "admin" || row.role === "super_admin" ? row.role : "user" } });
   } catch {
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
   }
@@ -353,7 +353,7 @@ export async function requireSession(request, env) {
       "SELECT s.google_sub, u.email, u.role FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
     ).bind(hash, now).first();
     if (!row) return { ok: false, response: authJson({ error: "AUTH_REQUIRED" }, 401, { "set-cookie": clearCookieHeader() }) };
-    return { ok: true, subject: row.google_sub, email: row.email, role: row.role === "admin" ? "admin" : "user" };
+    return { ok: true, subject: row.google_sub, email: row.email, role: row.role === "admin" || row.role === "super_admin" ? row.role : "user" };
   } catch {
     return { ok: false, response: authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503) };
   }
@@ -362,7 +362,7 @@ export async function requireSession(request, env) {
 export async function requireAdminSession(request, env) {
   const session = await requireSession(request, env);
   if (!session.ok) return session;
-  if (session.role !== "admin") {
+  if (session.role !== "admin" && session.role !== "super_admin") {
     return { ok: false, response: authJson({ error: "ADMIN_REQUIRED" }, 403) };
   }
   return session;
