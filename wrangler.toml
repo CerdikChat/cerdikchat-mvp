@@ -41,6 +41,10 @@ binding = "AI"
 name = "CHAT_RATE_LIMITER"
 namespace_id = "2901030"
 
+[previews.ratelimits.simple]
+limit = 20
+period = 60
+
 [[previews.d1_databases]]
 binding = "DB"
 database_name = "cerdikchat-staging"
