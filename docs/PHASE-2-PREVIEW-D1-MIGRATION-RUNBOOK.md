@@ -6,6 +6,11 @@ This runbook applies schema migrations only to the isolated Cloudflare D1 databa
 
 It must not be used with `cerdikchat-db` or any Production configuration.
 
+## Current staging status (31 October 2026)
+The two numbered migrations have already been applied to the isolated staging database through the Cloudflare D1 API. The standard `d1_migrations` table records `0001_users.sql` and `0002_sessions.sql`. Verification confirmed both application tables, their indexes, and the sessions-to-users foreign key. Both application tables contain zero rows.
+
+For the current staging database, run `migrations list` first; do not manually replay SQL. The `apply` command below is intended for a fresh staging database or any future unapplied migration.
+
 ## Preflight
 1. Confirm the active branch is `atlas9/phase-2-google-auth-implementation`.
 2. Confirm `wrangler.preview-migrations.toml` still points to the staging database ID above.
