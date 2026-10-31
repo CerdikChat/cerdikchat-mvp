@@ -761,6 +761,15 @@
 
 
     /* ATLAS-9 Mobile UX: conversation-first hierarchy and compact discovery */
+    .jump-latest{display:flex;justify-content:flex-end;max-width:760px;margin:0 auto 8px}
+    .jump-latest button{min-height:40px;padding:8px 13px;border:1px solid #287b91;border-radius:999px;background:#10334a;color:#c8f7ff;font:inherit;font-size:12px;font-weight:800;box-shadow:0 5px 18px #0004}
+    .jump-latest[hidden]{display:none!important}
+    .conversation-active .workspace{margin-bottom:8px}
+    .conversation-active .workspace-head{margin-bottom:6px}
+    .conversation-active .workspace-head p{display:none}
+    .conversation-active .feature-grid:not(.expanded){display:none}
+    .conversation-active .multimodal-panel{display:none}
+    .conversation-active .feature-expand{display:block}
     .feature-expand{display:none}
     @media(max-width:720px){
       .main{display:flex;flex-direction:column}
@@ -951,6 +960,9 @@
       </section>
 
       <div class="composer-wrap">
+        <div class="jump-latest" id="jumpLatest" hidden>
+          <button type="button" id="jumpLatestButton" aria-label="Lompat ke jawaban terbaru">↓ Jawaban terbaru</button>
+        </div>
         <div class="auth-gate" id="authGate" role="status" aria-live="polite" hidden><span>Chat terkunci · Masuk melalui ⚙ Pengaturan → Akun & akses.</span><button id="authGateOpen" type="button" hidden aria-hidden="true" tabindex="-1">Buka Pengaturan</button></div>
         <form id="chatForm" class="composer">
           <textarea
@@ -1019,6 +1031,14 @@
     const send = document.querySelector("#send");
     const statusEl = document.querySelector("#status");
     const count = document.querySelector("#count");
+    const jumpLatest = document.querySelector("#jumpLatest");
+    const jumpLatestButton = document.querySelector("#jumpLatestButton");
+    const main = document.querySelector(".main");
+    const featureGrid = document.querySelector("#featureGrid");
+    const featureExpand = document.querySelector("#featureExpand");
+    let latestAnswerRow = null;
+    let userNavigatedDuringResponse = false;
+
 
     const settingsDialog = document.querySelector("#settingsDialog");
     const settingsOpen = document.querySelector("#settingsOpen");
@@ -1402,18 +1422,37 @@
       statusEl.setAttribute("role", isError ? "alert" : "status");
     }
 
-    function scrollToLatest(target = null) {
+    function scrollToLatest(target = null, block = "start") {
       window.requestAnimationFrame(() => {
         if (target && target.isConnected) {
-          target.scrollIntoView({ block: "start", behavior: "auto" });
+          target.scrollIntoView({ block, behavior: "auto" });
           return;
         }
-        window.scrollTo({
-          top: document.documentElement.scrollHeight,
-          behavior: "auto"
-        });
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "auto" });
       });
     }
+
+    function updateLatestAnswerControl() {
+      if (!latestAnswerRow || !latestAnswerRow.isConnected) {
+        jumpLatest.hidden = true;
+        return;
+      }
+      const bounds = latestAnswerRow.getBoundingClientRect();
+      const nearAnswerEnd = bounds.bottom <= window.innerHeight - 150;
+      jumpLatest.hidden = nearAnswerEnd;
+    }
+
+    jumpLatestButton.addEventListener("click", () => {
+      if (latestAnswerRow) scrollToLatest(latestAnswerRow, "end");
+    });
+    window.addEventListener("scroll", updateLatestAnswerControl, { passive: true });
+    window.addEventListener("resize", updateLatestAnswerControl, { passive: true });
+    window.addEventListener("wheel", () => {
+      if (isSending) userNavigatedDuringResponse = true;
+    }, { passive: true });
+    window.addEventListener("touchmove", () => {
+      if (isSending) userNavigatedDuringResponse = true;
+    }, { passive: true });
 
     // Safe Markdown renderer. Untrusted content is added as text nodes,
     // never interpreted as raw HTML. Links remain inactive by design.
@@ -1810,8 +1849,6 @@
       }
       row.append(avatar, wrap);
       feed.append(row);
-
-      scrollToLatest();
       return body;
     }
 
@@ -1910,6 +1947,14 @@
         editingMessageRow = null;
       }
 
+      userNavigatedDuringResponse = false;
+      main.classList.add("conversation-active");
+      if (featureGrid) featureGrid.classList.remove("expanded");
+      if (featureExpand) {
+        featureExpand.setAttribute("aria-expanded", "false");
+        featureExpand.textContent = "Lihat semua fitur ↓";
+      }
+
       isSending = true;
       send.disabled = true;
       input.disabled = true;
@@ -1928,9 +1973,8 @@
         "assistant",
         "Menyiapkan jawaban…"
       );
-      // Put the beginning of the response in the reading viewport, not merely
-      // the document footer. This is important on Android with the composer below.
-      scrollToLatest(answerElement.closest(".msg"));
+      latestAnswerRow = answerElement.closest(".msg");
+      scrollToLatest(userRow || latestAnswerRow);
 
       try {
         const response = await fetch("/api/chat", {
@@ -1986,6 +2030,7 @@
 
         renderBasicMarkdown(answerElement, answer);
         addAnswerAcceptance(answerElement);
+        latestAnswerRow = answerElement.closest(".msg");
 
         history.push(
           { role: "user", content: message },
@@ -2015,9 +2060,10 @@
         input.disabled = authRequired && !isAuthenticated;
         send.textContent = "Kirim ↑";
         form.removeAttribute("aria-busy");
-        // Keep the first part of the completed answer visible for reading.
-        // Never focus the composer or trigger Android's virtual keyboard.
-        scrollToLatest(answerElement.closest(".msg"));
+        // Respect manual reading navigation while the response was processing.
+        // Otherwise reveal the beginning of the new answer; never focus the composer.
+        if (!userNavigatedDuringResponse) scrollToLatest(answerElement.closest(".msg"));
+        updateLatestAnswerControl();
       }
     }
 
