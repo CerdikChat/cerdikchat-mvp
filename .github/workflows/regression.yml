@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, "qa/**"]
+    branches: [main, "qa/**", "atlas9/**"]
 
 permissions:
   contents: read
