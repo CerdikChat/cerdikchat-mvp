@@ -178,3 +178,17 @@ test("failed navigation fetch falls back to the cached app shell", async () => {
   assert.equal(await response.text(), "cached-app-shell");
   assert.equal(response.status, 200);
 });
+
+
+test("Administrator and User portals have separate Google sign-in surfaces", () => {
+  assert.match(indexHtml, /id="portalGate"/);
+  assert.match(indexHtml, /Administrator Portal/);
+  assert.match(indexHtml, /User Portal/);
+  assert.match(indexHtml, /id="chooseAdminPortal"/);
+  assert.match(indexHtml, /id="chooseUserPortal"/);
+  assert.match(indexHtml, /id="portalGoogleSignIn"/);
+  assert.match(indexHtml, /JSON\.stringify\(\{ credential: response\.credential, nonce, portal \}\)/);
+  assert.match(indexHtml, /ROLE_MISMATCH/);
+  assert.match(indexHtml, /id="adminPlaceholder"/);
+  assert.match(indexHtml, /fetch\("\/api\/admin\/session"/);
+});

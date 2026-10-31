@@ -96,7 +96,8 @@ test("unlisted Google account receives its verified subject for admin allowlisti
       prepare: (sql) => ({
         bind: () => ({
           first: async () => {
-            assert.match(sql, /SELECT google_sub, email, display_name, status FROM users/);
+            if (sql.includes("admin_bootstrap_allowlist")) return null;
+            assert.match(sql, /SELECT google_sub, email, display_name, status, role FROM users/);
             return null;
           }
         })
@@ -748,4 +749,41 @@ test("file analysis rejects PDF encryption names encoded with #XX escapes", asyn
   assert.equal((await json(response)).error, "ENCRYPTED_PDF_UNSUPPORTED");
   assert.equal(conversionCalls, 0);
   assert.equal(inferenceCalls, 0);
+});
+
+
+test("administrator session endpoint rejects a standard user role", async () => {
+  const response = await worker.fetch(new Request("https://cerdikchat.test/api/admin/session", {
+    headers: { cookie: "__Host-cerdikchat_session=opaque-session" }
+  }), makeEnv({
+    DB: { prepare: () => ({ bind: () => ({ first: async () => ({
+      google_sub: "12345678901234567890", email: "user@example.com", role: "user"
+    }) }) }) }
+  }));
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ADMIN_REQUIRED");
+});
+
+test("administrator session endpoint accepts only the database admin role", async () => {
+  const response = await worker.fetch(new Request("https://cerdikchat.test/api/admin/session", {
+    headers: { cookie: "__Host-cerdikchat_session=opaque-session" }
+  }), makeEnv({
+    DB: { prepare: () => ({ bind: () => ({ first: async () => ({
+      google_sub: "12345678901234567890", email: "admin@example.com", role: "admin"
+    }) }) }) }
+  }));
+  assert.equal(response.status, 200);
+  assert.equal((await json(response)).role, "admin");
+});
+
+test("administrator session endpoint fails closed when role is missing", async () => {
+  const response = await worker.fetch(new Request("https://cerdikchat.test/api/admin/session", {
+    headers: { cookie: "__Host-cerdikchat_session=opaque-session" }
+  }), makeEnv({
+    DB: { prepare: () => ({ bind: () => ({ first: async () => ({
+      google_sub: "12345678901234567890", email: "unknown@example.com"
+    }) }) }) }
+  }));
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ADMIN_REQUIRED");
 });

@@ -25,7 +25,7 @@
 
 "use strict";
 
-import { authConfig, googleLogin, currentSession, logout, requireSession } from "./auth/google-auth.js";
+import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession } from "./auth/google-auth.js";
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
 
 /* =========================================================
@@ -1495,6 +1495,15 @@ export default {
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
     if (url.pathname === "/api/auth/logout") return logout(request, env);
+
+    if (url.pathname === "/api/admin/session" && request.method === "GET") {
+      const admin = await requireAdminSession(request, env);
+      if (!admin.ok) return admin.response;
+      return jsonResponse({ authenticated: true, role: "admin", subject: admin.subject, email: admin.email }, 200, {
+        "cache-control": "no-store",
+        "x-content-type-options": "nosniff",
+      });
+    }
 
     if (url.pathname === "/api/analyze") {
       const analysisCors = {
