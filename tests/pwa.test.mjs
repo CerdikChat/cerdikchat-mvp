@@ -73,6 +73,15 @@ test("offline fallback makes no promise of offline chat or local persistence", (
 
 import vm from "node:vm";
 
+test("inline workspace JavaScript parses before browser execution", () => {
+  const inlineScripts = [...indexHtml.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
+    .filter(([, attributes, source]) => !/\\bsrc\\s*=/.test(attributes) && source.trim());
+  assert.ok(inlineScripts.length > 0, "expected at least one inline workspace script");
+  for (const [, , source] of inlineScripts) {
+    assert.doesNotThrow(() => new vm.Script(source, { filename: "src/index.html inline script" }));
+  }
+});
+
 function createServiceWorkerHarness({ networkFetch = async () => new Response("network") } = {}) {
   const listeners = new Map();
   const cacheData = new Map();
