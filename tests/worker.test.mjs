@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import worker from "../worker.js";
-import { verifyGoogleIdToken } from "../auth/google-auth.js";
+import { verifyGoogleIdToken, googleLogin } from "../auth/google-auth.js";
 
 function makeEnv(overrides = {}) {
   return {
@@ -75,6 +75,41 @@ async function makeSignedGoogleToken(overrides = {}) {
   });
   return { token, clientId, nonce, fetchJwks };
 }
+
+test("unlisted Google account receives its verified subject for admin allowlisting", async () => {
+  const fixture = await makeSignedGoogleToken();
+  const csrf = "C".repeat(43);
+  const request = new Request("https://cerdikchat.test/api/auth/google", {
+    method: "POST",
+    headers: {
+      origin: "https://cerdikchat.test",
+      "content-type": "application/json",
+      "cf-connecting-ip": "203.0.113.11",
+      cookie: `__Host-cerdikchat_csrf=${csrf}`,
+      "x-csrf-token": csrf
+    },
+    body: JSON.stringify({ credential: fixture.token, nonce: fixture.nonce })
+  });
+  const env = makeEnv({
+    GOOGLE_CLIENT_ID: fixture.clientId,
+    DB: {
+      prepare: (sql) => ({
+        bind: () => ({
+          first: async () => {
+            assert.match(sql, /SELECT google_sub, email, display_name, status FROM users/);
+            return null;
+          }
+        })
+      })
+    }
+  });
+  const response = await googleLogin(request, env, { fetch: fixture.fetchJwks });
+  const payload = await json(response);
+  assert.equal(response.status, 403);
+  assert.equal(payload.error, "USER_NOT_ALLOWLISTED");
+  assert.equal(payload.googleSub, "12345678901234567890");
+  assert.equal(payload.email, "pilot.user@example.com");
+});
 
 test("Google ID token verifies signature, audience, nonce and normalized email", async () => {
   const fixture = await makeSignedGoogleToken();
