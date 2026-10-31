@@ -1,0 +1,11 @@
+# D1 migration-only configuration.
+# This file is for applying numbered migrations to the isolated staging DB.
+# Do not use this configuration to deploy the Worker.
+name = "cerdikchat-preview-migrations"
+compatibility_date = "2026-10-27"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cerdikchat-staging"
+database_id = "79267e63-e57f-4237-8b88-f1e477397771"
+migrations_dir = "migrations"
