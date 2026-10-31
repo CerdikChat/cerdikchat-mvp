@@ -163,7 +163,7 @@ function unavailable() {
 
 export function authConfig(env) {
   if (!env.GOOGLE_CLIENT_ID) return unavailable();
-  return authJson({ clientId: env.GOOGLE_CLIENT_ID });
+  return authJson({ clientId: env.GOOGLE_CLIENT_ID, required: env.GOOGLE_AUTH_REQUIRED === "true" });
 }
 
 export async function googleLogin(request, env) {
