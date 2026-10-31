@@ -785,6 +785,10 @@
         });
         const payload = await result.json();
         if (!result.ok) {
+          if (payload.error === "USER_NOT_ALLOWLISTED") {
+            authMessage.textContent = `Akun ${payload.email || "Google"} belum diizinkan. Google sub: ${payload.googleSub || "tidak tersedia"}`;
+            throw new Error(`Akun belum masuk allowlist. Google sub: ${payload.googleSub || "tidak tersedia"}`);
+          }
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
             throw new Error("Token keamanan diperbarui. Silakan tekan tombol Google sekali lagi.");
