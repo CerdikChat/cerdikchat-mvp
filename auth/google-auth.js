@@ -424,10 +424,11 @@ export async function logout(request, env) {
 }
 
 
+
 /**
- * Self-service access request. A verified Google identity may request
- * standard-user access, but never receives a session until an administrator
- * explicitly activates the account.
+ * Self-service access request. Pending identities live in a separate queue;
+ * the users table retains its established status constraint: active|disabled.
+ * No login session is issued until an administrator approves the request.
  */
 export async function requestUserAccess(request, env, options = {}) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
@@ -470,16 +471,15 @@ export async function requestUserAccess(request, env, options = {}) {
   }
 
   try {
-    const bySubject = await env.DB.prepare(
+    const existing = await env.DB.prepare(
       "SELECT google_sub, email, status, role FROM users WHERE google_sub = ? LIMIT 1"
     ).bind(identity.sub).first();
-    if (bySubject) {
-      if (bySubject.role === "admin" || bySubject.role === "super_admin") {
+    if (existing) {
+      if (existing.role === "admin" || existing.role === "super_admin") {
         return authJson({ error: "ADMIN_ACCOUNT_USE_ADMIN_PORTAL" }, 409);
       }
-      if (bySubject.status === "active") return authJson({ error: "ACCOUNT_ALREADY_ACTIVE" }, 409);
-      if (bySubject.status === "suspended") return authJson({ error: "ACCOUNT_SUSPENDED" }, 403);
-      if (bySubject.status === "pending") return authJson({ requested: true, status: "pending", message: "Permintaan akses Anda sedang menunggu persetujuan administrator." }, 202);
+      if (existing.status === "active") return authJson({ error: "ACCOUNT_ALREADY_ACTIVE" }, 409);
+      return authJson({ error: "ACCOUNT_DISABLED" }, 403);
     }
 
     const emailOwner = await env.DB.prepare(
@@ -490,16 +490,22 @@ export async function requestUserAccess(request, env, options = {}) {
       return authJson({ error: "IDENTITY_CONFLICT" }, 403);
     }
 
-    await env.DB.prepare(
-      "INSERT OR IGNORE INTO users (google_sub, email, display_name, status, role) VALUES (?, ?, ?, 'pending', 'user')"
-    ).bind(identity.sub, identity.email, identity.name).run();
-
-    const saved = await env.DB.prepare(
-      "SELECT status, role FROM users WHERE google_sub = ? LIMIT 1"
+    const priorRequest = await env.DB.prepare(
+      "SELECT status FROM user_access_requests WHERE google_sub = ? LIMIT 1"
     ).bind(identity.sub).first();
-    if (!saved || saved.role !== "user") return authJson({ error: "ACCESS_REQUEST_REJECTED" }, 403);
-    if (saved.status === "active") return authJson({ error: "ACCOUNT_ALREADY_ACTIVE" }, 409);
-    if (saved.status !== "pending") return authJson({ error: "ACCOUNT_NOT_ELIGIBLE" }, 403);
+    if (priorRequest?.status === "pending") {
+      return authJson({ requested: true, status: "pending", message: "Permintaan akses Anda sedang menunggu persetujuan administrator." }, 202);
+    }
+    if (priorRequest?.status === "approved") {
+      return authJson({ error: "ACCOUNT_ALREADY_ACTIVE" }, 409);
+    }
+    if (priorRequest?.status === "rejected") {
+      return authJson({ error: "ACCESS_REQUEST_REJECTED" }, 403);
+    }
+
+    await env.DB.prepare(
+      "INSERT INTO user_access_requests (google_sub, email, display_name, status, requested_at) VALUES (?, ?, ?, 'pending', ?)"
+    ).bind(identity.sub, identity.email, identity.name, Math.floor(Date.now() / 1000)).run();
     return authJson({ requested: true, status: "pending", message: "Permintaan akses berhasil dikirim. Login tersedia setelah administrator menyetujui akun." }, 202);
   } catch {
     logAuthFailure("access_request", "database_operation_failed");
@@ -514,7 +520,7 @@ export async function listPendingUserAccess(request, env) {
   if (request.method !== "GET") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "GET" });
   try {
     const result = await env.DB.prepare(
-      "SELECT email, display_name, status FROM users WHERE role = 'user' AND status = 'pending' ORDER BY email COLLATE NOCASE LIMIT 100"
+      "SELECT email, display_name, status FROM user_access_requests WHERE status = 'pending' ORDER BY requested_at ASC LIMIT 100"
     ).all();
     return authJson({ users: (result.results || []).map((row) => ({
       email: row.email,
@@ -528,8 +534,9 @@ export async function listPendingUserAccess(request, env) {
 }
 
 /**
- * Approve or suspend a standard user by exact verified email.
- * This endpoint cannot create accounts, promote roles, or approve admins.
+ * Approve, reject, or suspend a standard user. Approval creates an active
+ * role=user row; it never changes an existing role. User status values remain
+ * compatible with the established active|disabled CHECK constraint.
  */
 export async function decideUserAccess(request, env) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
@@ -547,33 +554,58 @@ export async function decideUserAccess(request, env) {
   }
   const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
   const decision = body?.decision;
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["approve", "suspend"].includes(decision)) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["approve", "reject", "suspend"].includes(decision)) {
     return authJson({ error: "INVALID_ACCESS_DECISION" }, 400);
   }
 
   try {
-    const target = await env.DB.prepare(
-      "SELECT google_sub, email, status, role FROM users WHERE email = ? COLLATE NOCASE LIMIT 1"
-    ).bind(email).first();
-    if (!target || target.role !== "user") return authJson({ error: "USER_NOT_FOUND" }, 404);
-    const nextStatus = decision === "approve" ? "active" : "suspended";
-    if (decision === "approve" && target.status !== "pending") {
-      return authJson({ error: "USER_NOT_PENDING" }, 409);
-    }
-    if (decision === "suspend" && target.status !== "active") {
-      return authJson({ error: "USER_NOT_ACTIVE" }, 409);
-    }
     const now = Math.floor(Date.now() / 1000);
-    const updated = await env.DB.prepare(
-      "UPDATE users SET status = ? WHERE google_sub = ? AND role = 'user' AND status = ?"
-    ).bind(nextStatus, target.google_sub, target.status).run();
-    if (!updated.meta || updated.meta.changes !== 1) return authJson({ error: "USER_STATE_CHANGED" }, 409);
+    if (decision === "suspend") {
+      const target = await env.DB.prepare(
+        "SELECT google_sub, email, status, role FROM users WHERE email = ? COLLATE NOCASE LIMIT 1"
+      ).bind(email).first();
+      if (!target || target.role !== "user") return authJson({ error: "USER_NOT_FOUND" }, 404);
+      if (target.status !== "active") return authJson({ error: "USER_NOT_ACTIVE" }, 409);
+      const updated = await env.DB.prepare(
+        "UPDATE users SET status = 'disabled', updated_at = ? WHERE google_sub = ? AND role = 'user' AND status = 'active'"
+      ).bind(now, target.google_sub).run();
+      if (updated.meta?.changes !== 1) return authJson({ error: "USER_STATE_CHANGED" }, 409);
+      await env.DB.prepare(
+        "INSERT INTO admin_audit_log (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at) VALUES (?, ?, 'USER_SUSPENDED', 'user', 'user', ?, ?)"
+      ).bind(admin.subject, target.google_sub, JSON.stringify({ email: target.email, previousStatus: "active", newStatus: "disabled" }), now).run();
+      return authJson({ updated: true, status: "disabled", role: "user" });
+    }
 
-    await env.DB.prepare(
-      "INSERT INTO admin_audit_log (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at) VALUES (?, ?, ?, 'user', 'user', ?, ?)"
-    ).bind(admin.subject, target.google_sub, decision === "approve" ? "USER_APPROVED" : "USER_SUSPENDED", JSON.stringify({ email: target.email, previousStatus: target.status, newStatus: nextStatus }), now).run();
+    const target = await env.DB.prepare(
+      "SELECT google_sub, email, display_name, status FROM user_access_requests WHERE email = ? COLLATE NOCASE AND status = 'pending' LIMIT 1"
+    ).bind(email).first();
+    if (!target) return authJson({ error: "PENDING_REQUEST_NOT_FOUND" }, 404);
 
-    return authJson({ updated: true, status: nextStatus, role: "user" });
+    const existing = await env.DB.prepare(
+      "SELECT google_sub, role FROM users WHERE email = ? COLLATE NOCASE OR google_sub = ? LIMIT 1"
+    ).bind(target.email, target.google_sub).first();
+    if (existing && existing.google_sub !== target.google_sub) return authJson({ error: "IDENTITY_CONFLICT" }, 409);
+    if (existing) return authJson({ error: "ACCOUNT_ALREADY_EXISTS" }, 409);
+
+    const nextRequestStatus = decision === "approve" ? "approved" : "rejected";
+    const action = decision === "approve" ? "USER_APPROVED" : "USER_ACCESS_REJECTED";
+    const statements = [];
+    if (decision === "approve") {
+      statements.push(env.DB.prepare(
+        "INSERT INTO users (google_sub, email, display_name, status, role, created_at, updated_at) VALUES (?, ?, ?, 'active', 'user', ?, ?)"
+      ).bind(target.google_sub, target.email, target.display_name || "", now, now));
+    }
+    statements.push(env.DB.prepare(
+      "UPDATE user_access_requests SET status = ?, reviewed_at = ?, reviewed_by = ? WHERE google_sub = ? AND status = 'pending'"
+    ).bind(nextRequestStatus, now, admin.subject, target.google_sub));
+    statements.push(env.DB.prepare(
+      "INSERT INTO admin_audit_log (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at) VALUES (?, ?, ?, NULL, ?, ?, ?)"
+    ).bind(admin.subject, target.google_sub, action, decision === "approve" ? "user" : null, JSON.stringify({ email: target.email, requestStatus: nextRequestStatus }), now));
+
+    const results = await env.DB.batch(statements);
+    const requestResult = results[decision === "approve" ? 1 : 0];
+    if (requestResult?.meta?.changes !== 1) return authJson({ error: "USER_STATE_CHANGED" }, 409);
+    return authJson({ updated: true, status: nextRequestStatus, role: decision === "approve" ? "user" : null });
   } catch {
     logAuthFailure("user_approval", "decision_failed");
     return authJson({ error: "USER_UPDATE_UNAVAILABLE" }, 503);
