@@ -422,3 +422,160 @@ export async function logout(request, env) {
   }
   return authJson({ authenticated: false }, 200, { "set-cookie": clearCookieHeader() });
 }
+
+
+/**
+ * Self-service access request. A verified Google identity may request
+ * standard-user access, but never receives a session until an administrator
+ * explicitly activates the account.
+ */
+export async function requestUserAccess(request, env, options = {}) {
+  if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
+  if (!sameOrigin(request)) return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
+  if (!validCsrf(request)) return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
+  if (!/^application\/json(?:;|$)/i.test(request.headers.get("Content-Type") || "")) {
+    return authJson({ error: "UNSUPPORTED_MEDIA_TYPE" }, 415);
+  }
+  if (!env.GOOGLE_CLIENT_ID || !env.DB) return unavailable();
+  const clientIp = request.headers.get("CF-Connecting-IP");
+  if (!clientIp || !env.CHAT_RATE_LIMITER || typeof env.CHAT_RATE_LIMITER.limit !== "function") {
+    return authJson({ error: "RATE_LIMIT_UNAVAILABLE" }, 503);
+  }
+  try {
+    const { success } = await env.CHAT_RATE_LIMITER.limit({ key: `access-request:ip:${clientIp}` });
+    if (!success) return authJson({ error: "RATE_LIMIT_EXCEEDED" }, 429, { "retry-after": "60" });
+  } catch {
+    return authJson({ error: "RATE_LIMIT_UNAVAILABLE" }, 503);
+  }
+
+  let body;
+  try {
+    const raw = await request.text();
+    if (raw.length > 16_000) return authJson({ error: "REQUEST_TOO_LARGE" }, 413);
+    body = JSON.parse(raw);
+  } catch {
+    return authJson({ error: "INVALID_JSON" }, 400);
+  }
+  const credential = typeof body?.credential === "string" ? body.credential : "";
+  const nonce = typeof body?.nonce === "string" ? body.nonce : "";
+  if (!credential) return authJson({ error: "GOOGLE_CREDENTIAL_REQUIRED" }, 400);
+  if (!/^[A-Za-z0-9_-]{32,128}$/.test(nonce)) return authJson({ error: "GOOGLE_NONCE_REQUIRED" }, 400);
+
+  let identity;
+  try {
+    identity = await verifyGoogleIdToken(credential, env.GOOGLE_CLIENT_ID, { nonce, fetch: options.fetch || fetch });
+  } catch {
+    logAuthFailure("access_request", "google_token_rejected");
+    return authJson({ error: "GOOGLE_TOKEN_INVALID" }, 401);
+  }
+
+  try {
+    const bySubject = await env.DB.prepare(
+      "SELECT google_sub, email, status, role FROM users WHERE google_sub = ? LIMIT 1"
+    ).bind(identity.sub).first();
+    if (bySubject) {
+      if (bySubject.role === "admin" || bySubject.role === "super_admin") {
+        return authJson({ error: "ADMIN_ACCOUNT_USE_ADMIN_PORTAL" }, 409);
+      }
+      if (bySubject.status === "active") return authJson({ error: "ACCOUNT_ALREADY_ACTIVE" }, 409);
+      if (bySubject.status === "suspended") return authJson({ error: "ACCOUNT_SUSPENDED" }, 403);
+      if (bySubject.status === "pending") return authJson({ requested: true, status: "pending", message: "Permintaan akses Anda sedang menunggu persetujuan administrator." }, 202);
+    }
+
+    const emailOwner = await env.DB.prepare(
+      "SELECT google_sub FROM users WHERE email = ? COLLATE NOCASE LIMIT 1"
+    ).bind(identity.email).first();
+    if (emailOwner && emailOwner.google_sub !== identity.sub) {
+      logAuthFailure("access_request", "identity_conflict");
+      return authJson({ error: "IDENTITY_CONFLICT" }, 403);
+    }
+
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO users (google_sub, email, display_name, status, role) VALUES (?, ?, ?, 'pending', 'user')"
+    ).bind(identity.sub, identity.email, identity.name).run();
+
+    const saved = await env.DB.prepare(
+      "SELECT status, role FROM users WHERE google_sub = ? LIMIT 1"
+    ).bind(identity.sub).first();
+    if (!saved || saved.role !== "user") return authJson({ error: "ACCESS_REQUEST_REJECTED" }, 403);
+    if (saved.status === "active") return authJson({ error: "ACCOUNT_ALREADY_ACTIVE" }, 409);
+    if (saved.status !== "pending") return authJson({ error: "ACCOUNT_NOT_ELIGIBLE" }, 403);
+    return authJson({ requested: true, status: "pending", message: "Permintaan akses berhasil dikirim. Login tersedia setelah administrator menyetujui akun." }, 202);
+  } catch {
+    logAuthFailure("access_request", "database_operation_failed");
+    return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
+  }
+}
+
+/** Administrator-only list of standard-user accounts awaiting approval. */
+export async function listPendingUserAccess(request, env) {
+  const admin = await requireAdminSession(request, env);
+  if (!admin.ok) return admin.response;
+  if (request.method !== "GET") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "GET" });
+  try {
+    const result = await env.DB.prepare(
+      "SELECT email, display_name, status FROM users WHERE role = 'user' AND status = 'pending' ORDER BY email COLLATE NOCASE LIMIT 100"
+    ).all();
+    return authJson({ users: (result.results || []).map((row) => ({
+      email: row.email,
+      displayName: row.display_name || "",
+      status: "pending",
+    })) });
+  } catch {
+    logAuthFailure("user_approval", "pending_list_failed");
+    return authJson({ error: "USER_LIST_UNAVAILABLE" }, 503);
+  }
+}
+
+/**
+ * Approve or suspend a standard user by exact verified email.
+ * This endpoint cannot create accounts, promote roles, or approve admins.
+ */
+export async function decideUserAccess(request, env) {
+  if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
+  if (!validateCsrfRequest(request)) return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
+  const admin = await requireAdminSession(request, env);
+  if (!admin.ok) return admin.response;
+
+  let body;
+  try {
+    const raw = await request.text();
+    if (raw.length > 4_000) return authJson({ error: "REQUEST_TOO_LARGE" }, 413);
+    body = JSON.parse(raw);
+  } catch {
+    return authJson({ error: "INVALID_JSON" }, 400);
+  }
+  const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+  const decision = body?.decision;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["approve", "suspend"].includes(decision)) {
+    return authJson({ error: "INVALID_ACCESS_DECISION" }, 400);
+  }
+
+  try {
+    const target = await env.DB.prepare(
+      "SELECT google_sub, email, status, role FROM users WHERE email = ? COLLATE NOCASE LIMIT 1"
+    ).bind(email).first();
+    if (!target || target.role !== "user") return authJson({ error: "USER_NOT_FOUND" }, 404);
+    const nextStatus = decision === "approve" ? "active" : "suspended";
+    if (decision === "approve" && target.status !== "pending") {
+      return authJson({ error: "USER_NOT_PENDING" }, 409);
+    }
+    if (decision === "suspend" && target.status !== "active") {
+      return authJson({ error: "USER_NOT_ACTIVE" }, 409);
+    }
+    const now = Math.floor(Date.now() / 1000);
+    const updated = await env.DB.prepare(
+      "UPDATE users SET status = ? WHERE google_sub = ? AND role = 'user' AND status = ?"
+    ).bind(nextStatus, target.google_sub, target.status).run();
+    if (!updated.meta || updated.meta.changes !== 1) return authJson({ error: "USER_STATE_CHANGED" }, 409);
+
+    await env.DB.prepare(
+      "INSERT INTO admin_audit_log (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at) VALUES (?, ?, ?, 'user', 'user', ?, ?)"
+    ).bind(admin.subject, target.google_sub, decision === "approve" ? "USER_APPROVED" : "USER_SUSPENDED", JSON.stringify({ email: target.email, previousStatus: target.status, newStatus: nextStatus }), now).run();
+
+    return authJson({ updated: true, status: nextStatus, role: "user" });
+  } catch {
+    logAuthFailure("user_approval", "decision_failed");
+    return authJson({ error: "USER_UPDATE_UNAVAILABLE" }, 503);
+  }
+}
