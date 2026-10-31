@@ -115,3 +115,12 @@ Acceptance:
 - Confirm that Preview uses the intended isolated staging D1 and rate-limiter bindings; do not test with Production data.
 
 Do not enable upload UI or mark Gate 1 complete until all pending checks pass. No Production deployment, billing activation, secrets change, merge, user-data copy, or public launch is authorized.
+
+
+### Supplemental security hardening — 31 October 2026
+- Extended encrypted-PDF first-line detection to decode PDF name escapes (`#XX`), including the obfuscated `/#45ncrypt` representation of `/Encrypt`.
+- Added a regression test proving escaped encryption-name rejection occurs before conversion and inference.
+- An initial CI attempt exposed a delimiter-scanner defect; it was corrected before the final validation run.
+- Final HEAD `40f954f`: GitHub Actions run #31 passed; all 49 regression tests passed.
+- Cloudflare Preview build `e022a388-9c4b-4d9f-a4d7-9ca6b932f9af` completed successfully and deployed to the stable Preview URL; deployment-specific URL: https://775feacc-cerdikchat-mvp.ngyoonseong.workers.dev.
+- The PDF detector remains a conservative first-line guard, not a complete PDF parser or cryptographic validator. Real encrypted and malformed PDF acceptance tests remain required.
