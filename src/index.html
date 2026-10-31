@@ -852,19 +852,29 @@
     const authPanel = document.querySelector("#authPanel");
     const authTitle = document.querySelector("#authTitle");
     const authMessage = document.querySelector("#authMessage");
-    const googleSignIn = document.querySelector("#googleSignIn");\n    const googleAdminSignIn = document.querySelector("#googleAdminSignIn");\n    const googleUserSignIn = document.querySelector("#googleUserSignIn");\n    const portalGate = document.querySelector("#portalGate");\n    const adminPlaceholder = document.querySelector("#adminPlaceholder");\n    const adminLogout = document.querySelector("#adminLogout");\n    const workspace = document.querySelector(".workspace");
+    const googleSignIn = document.querySelector("#googleSignIn");
+    const googleAdminSignIn = document.querySelector("#googleAdminSignIn");
+    const googleUserSignIn = document.querySelector("#googleUserSignIn");
+    const portalGate = document.querySelector("#portalGate");
+    const adminPlaceholder = document.querySelector("#adminPlaceholder");
+    const adminLogout = document.querySelector("#adminLogout");
+    const workspace = document.querySelector(".workspace");
     const authUser = document.querySelector("#authUser");
     const authLogout = document.querySelector("#authLogout");
 
     let authRequired = false;
     let authConfigured = false;
-    let isAuthenticated = false;\n    let currentRole = "";
+    let isAuthenticated = false;
+    let currentRole = "";
     let csrfToken = "";
     let googleClientId = "";
 
     function updateAuthUI(user = null) {
       authPanel.hidden = !authRequired && !authConfigured;
-      authGate.hidden = !(authRequired && !isAuthenticated);\n      portalGate.hidden = !(authRequired && authConfigured && !isAuthenticated);\n      adminPlaceholder.hidden = !(isAuthenticated && currentRole === "admin");\n      if (workspace) workspace.hidden = authRequired && (!isAuthenticated || currentRole === "admin");
+      authGate.hidden = !(authRequired && !isAuthenticated);
+      portalGate.hidden = !(authRequired && authConfigured && !isAuthenticated);
+      adminPlaceholder.hidden = !(isAuthenticated && currentRole === "admin");
+      if (workspace) workspace.hidden = authRequired && (!isAuthenticated || currentRole === "admin");
       authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikGo";
       authMessage.textContent = isAuthenticated
         ? "Sesi aman Anda aktif."
@@ -873,7 +883,9 @@
         ? [user.displayName, user.email].filter(Boolean).join(" · ")
         : "";
       authUser.hidden = !isAuthenticated;
-      googleSignIn.hidden = true;\n      googleAdminSignIn.hidden = isAuthenticated || !authConfigured;\n      googleUserSignIn.hidden = isAuthenticated || !authConfigured;
+      googleSignIn.hidden = true;
+      googleAdminSignIn.hidden = isAuthenticated || !authConfigured;
+      googleUserSignIn.hidden = isAuthenticated || !authConfigured;
       authLogout.hidden = !isAuthenticated;
       input.disabled = authRequired && !isAuthenticated;
       send.disabled = authRequired && !isAuthenticated;
@@ -940,7 +952,10 @@
         });
         const payload = await result.json();
         if (!result.ok) {
-          if (payload.error === "ROLE_MISMATCH") {\n            const expected = payload.requiredPortal === "admin" ? "Administrator Portal" : "User Portal";\n            throw new Error("Peran akun tidak sesuai. Silakan gunakan " + expected + ".");\n          }\n          if (payload.error === "USER_NOT_ALLOWLISTED") {
+          if (payload.error === "ROLE_MISMATCH") {
+            const expected = payload.requiredPortal === "admin" ? "Administrator Portal" : "User Portal";
+            throw new Error("Peran akun tidak sesuai. Silakan gunakan " + expected + ".");\n          }
+          if (payload.error === "USER_NOT_ALLOWLISTED") {
             authMessage.textContent = "Akun Google ini belum memiliki akses. Hubungi administrator CerdikGo.";
             throw new Error("Akun Google belum memiliki akses ke CerdikGo. Hubungi administrator.");
           }
@@ -1069,7 +1084,8 @@
         if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
         updateAuthUI();
         setStatus("Anda telah keluar.");
-        await renderGoogleButton("admin");\n        await renderGoogleButton("user");
+        await renderGoogleButton("admin");
+        await renderGoogleButton("user");
       } catch (error) {
         setStatus(error instanceof Error ? error.message : "Logout gagal.", true);
       } finally {
@@ -1077,7 +1093,9 @@
       }
     }
 
-    authLogout.addEventListener("click", logoutFromCerdikChat);\n    adminLogout.addEventListener("click", logoutFromCerdikChat);\n    adminLogout.addEventListener("click", logoutFromCerdikChat);
+    authLogout.addEventListener("click", logoutFromCerdikChat);
+    adminLogout.addEventListener("click", logoutFromCerdikChat);
+    adminLogout.addEventListener("click", logoutFromCerdikChat);
 
     const MAX_HISTORY_MESSAGES = 12;
     const MAX_MESSAGE_LENGTH = 8000;
