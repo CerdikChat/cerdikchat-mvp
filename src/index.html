@@ -2051,16 +2051,15 @@
         return;
       }
 
-      if (editingHistoryIndex !== null && editingMessageRow) {
-        history = history.slice(0, editingHistoryIndex);
-        let removeFollowing = false;
-        Array.from(feed.children).forEach(messageRow => {
-          if (messageRow === editingMessageRow) removeFollowing = true;
-          if (removeFollowing) messageRow.remove();
-        });
-        editingHistoryIndex = null;
-        editingMessageRow = null;
-      }
+      // Treat an edited turn as a transaction: preserve the existing transcript
+      // until the replacement answer has been received successfully.
+      const isEditing = editingHistoryIndex !== null && editingMessageRow !== null;
+      const editIndex = editingHistoryIndex;
+      const editRow = editingMessageRow;
+      const requestHistory = isEditing ? history.slice(0, editIndex) : history.slice();
+      const priorFeedRows = isEditing ? Array.from(feed.children) : [];
+      const editRowPosition = isEditing ? priorFeedRows.indexOf(editRow) : -1;
+      const rowsToReplace = editRowPosition >= 0 ? priorFeedRows.slice(editRowPosition) : [];
 
       userNavigatedDuringResponse = false;
       main.classList.add("conversation-active");
@@ -2081,7 +2080,7 @@
 
       const userBody = addMessage("user", message);
       const userRow = userBody.closest(".msg");
-      if (userRow) userRow.dataset.historyIndex = String(history.length);
+      if (userRow) userRow.dataset.historyIndex = String(requestHistory.length);
       input.value = "";
       updateCount();
 
@@ -2101,7 +2100,7 @@
           },
           body: JSON.stringify({
             message,
-            history: history.slice(-MAX_HISTORY_MESSAGES)
+            history: requestHistory.slice(-MAX_HISTORY_MESSAGES)
           })
         });
 
@@ -2144,6 +2143,14 @@
           );
         }
 
+        // Replace the edited turn only after the server confirms success.
+        if (isEditing) {
+          rowsToReplace.forEach(row => row.remove());
+          history = requestHistory.slice();
+          editingHistoryIndex = null;
+          editingMessageRow = null;
+        }
+
         renderBasicMarkdown(answerElement, answer);
         addAnswerAcceptance(answerElement);
         latestAnswerRow = answerElement.closest(".msg");
@@ -2160,13 +2167,25 @@
         answerElement.textContent =
           "Maaf, jawaban belum berhasil diperoleh.";
 
+        // A failed edit must not leave a duplicate pending turn in the transcript.
+        if (isEditing) {
+          if (userRow) userRow.remove();
+          const failedAnswerRow = answerElement.closest(".msg");
+          if (failedAnswerRow) failedAnswerRow.remove();
+          latestAnswerRow = null;
+        }
+
+        // Never discard a customer's draft when the network or Worker fails.
+        input.value = message;
+        updateCount();
+
         const errorMessage =
           error instanceof Error
             ? error.message
             : "Terjadi kesalahan yang tidak diketahui.";
 
         setStatus(
-          `${errorMessage} Periksa koneksi dan endpoint /api/chat pada Worker.`,
+          `${errorMessage} Pesan Anda sudah dipulihkan ke kolom penulisan. Periksa koneksi dan coba kirim kembali.`,
           true
         );
 
