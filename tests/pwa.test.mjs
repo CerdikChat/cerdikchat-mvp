@@ -13,7 +13,7 @@ test("PWA registers a same-origin root-scoped service worker over secure context
   assert.match(indexHtml, /window\.isSecureContext/);
 });
 
-test("offline UI distinguishes network reachability from AI service health", () => {
+test("CerdikGo brand mark is used in the workspace and offline screen", () => {\n  assert.match(indexHtml, /href="\\/cerdikgo-mark\\.svg"/);\n  assert.match(indexHtml, /src="\\/cerdikgo-mark\\.svg"/);\n  assert.match(offlineHtml, /src="\\/cerdikgo-mark\\.svg"/);\n});\n\ntest("offline UI distinguishes network reachability from AI service health", () => {
   assert.match(indexHtml, /navigator\.onLine/);
   assert.match(indexHtml, /Layanan AI diverifikasi saat permintaan dijalankan/);
   assert.match(indexHtml, /Chat, login, dan analisis file memerlukan internet/);
@@ -79,7 +79,7 @@ test("service worker install pre-caches the app shell before activation", async 
   let pending;
   harness.listeners.get("install")({ waitUntil(promise) { pending = promise; } });
   await pending;
-  assert.deepEqual(harness.cacheData.get("shell"), ["/", "/manifest.webmanifest", "/offline.html"]);
+  assert.deepEqual(harness.cacheData.get("shell"), ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg"]);
 });
 
 test("activation removes only obsolete CerdikGo shell caches", async () => {
