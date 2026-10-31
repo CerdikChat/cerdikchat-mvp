@@ -76,7 +76,7 @@ async function makeSignedGoogleToken(overrides = {}) {
   return { token, clientId, nonce, fetchJwks };
 }
 
-test("unlisted Google account receives its verified subject for admin allowlisting", async () => {
+test("unlisted Google account receives a generic rejection without identity data", async () => {
   const fixture = await makeSignedGoogleToken();
   const csrf = "C".repeat(43);
   const request = new Request("https://cerdikchat.test/api/auth/google", {
