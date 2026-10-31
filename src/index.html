@@ -75,6 +75,7 @@
 
     * { box-sizing: border-box; }
 
+    body.nav-scroll-locked{overflow:hidden}
     body {
       margin: 0;
       min-height: 100vh;
@@ -839,13 +840,36 @@
     @media(prefers-reduced-motion:reduce){
       .feature-expand{scroll-behavior:auto;transition:none}
     }
+
+    /* Collapsible navigation drawer: mobile overlay + desktop hide/show */
+    .nav-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);font-size:12px;font-weight:750;cursor:pointer;flex:0 0 auto}
+    .nav-backdrop{display:none}
+    .app.nav-collapsed{grid-template-columns:0 minmax(0,1fr)}
+    .app.nav-collapsed>.side{display:none}
+    @media(max-width:720px){
+      .app{display:block}
+      .app>.side{display:block;position:fixed;z-index:120;inset:0 auto 0 0;width:min(84vw,310px);max-width:310px;height:100dvh;overflow-y:auto;padding:calc(18px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#081a30,#071222);border-right:1px solid #1d5278;box-shadow:18px 0 48px #0008;transform:translateX(-105%);visibility:hidden;transition:transform .22s ease,visibility .22s ease}
+      .app.nav-open>.side{transform:translateX(0);visibility:visible}
+      .app>.nav-backdrop{display:block;position:fixed;z-index:110;inset:0;width:100%;height:100%;padding:0;border:0;background:#020813a8;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
+      .app.nav-open>.nav-backdrop{opacity:1;visibility:visible}
+      .top{justify-content:flex-start;gap:8px}
+      .nav-toggle{min-height:38px;padding:7px 9px}
+      .mobile-brand{display:flex}
+      .top>strong{display:none}
+      .top-actions{margin-left:auto}
+    }
+    @media(prefers-reduced-motion:reduce){.app>.side,.app>.nav-backdrop{transition:none}}
+    html[data-theme="light"] .nav-toggle{background:#edf5ff;color:#17314b;border-color:#bfd1e2}
+    html[data-theme="light"] .app>.side{background:linear-gradient(180deg,#f4f8ff,#eaf1fa);color:#172b43;border-right-color:#c7d8e8}
+    html[data-theme="light"] .app>.side .prompt{color:#243c58}
+    html[data-theme="light"] .app>.side .prompt:hover{background:#e0ecf8}
   </style>
 </head>
 
 <body>
   <div id="networkState" class="network-state" role="status" aria-live="polite">Memeriksa konektivitas…</div>
   <div class="app">
-    <aside class="side">
+    <aside class="side" id="sideNavigation" aria-label="Navigasi utama">
       <div class="brand">
         <img class="logo" src="/cerdikgo-mark.svg" alt="" aria-hidden="true">
         <span class="product-brand">Cerdik<em>Go</em></span>
@@ -881,9 +905,11 @@
         secara mandiri. Hindari memasukkan data pribadi atau rahasia.
       </div>
     </aside>
+    <button id="navBackdrop" class="nav-backdrop" type="button" aria-label="Tutup navigasi"></button>
 
     <main class="main">
       <header class="top">
+        <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="sideNavigation" aria-label="Buka navigasi">☰ <span>Menu</span></button>
         <div class="mobile-brand">
           <img class="logo" src="/cerdikgo-mark.svg" alt="" aria-hidden="true">
           <span class="product-brand">Cerdik<em>Go</em></span>
@@ -1075,6 +1101,36 @@
     }
     applyTheme(readThemePreference());
     themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true));
+
+    const appShell = document.querySelector(".app");
+    const navToggle = document.querySelector("#navToggle");
+    const navBackdrop = document.querySelector("#navBackdrop");
+    const sideNavigation = document.querySelector("#sideNavigation");
+    const mobileNavigation = () => window.matchMedia("(max-width: 720px)").matches;
+    function closeNavigation() {
+      appShell.classList.remove("nav-open");
+      navToggle.setAttribute("aria-expanded", "false");
+      navToggle.setAttribute("aria-label", "Buka navigasi");
+      document.body.classList.remove("nav-scroll-locked");
+    }
+    navToggle.addEventListener("click", () => {
+      if (mobileNavigation()) {
+        const opened = appShell.classList.toggle("nav-open");
+        navToggle.setAttribute("aria-expanded", String(opened));
+        navToggle.setAttribute("aria-label", opened ? "Tutup navigasi" : "Buka navigasi");
+        document.body.classList.toggle("nav-scroll-locked", opened);
+      } else {
+        const collapsed = appShell.classList.toggle("nav-collapsed");
+        navToggle.setAttribute("aria-expanded", String(!collapsed));
+        navToggle.setAttribute("aria-label", collapsed ? "Tampilkan navigasi" : "Sembunyikan navigasi");
+      }
+    });
+    navBackdrop.addEventListener("click", closeNavigation);
+    sideNavigation.querySelectorAll("[data-prompt]").forEach(button => button.addEventListener("click", () => {
+      if (mobileNavigation()) closeNavigation();
+    }));
+    document.addEventListener("keydown", event => { if (event.key === "Escape") closeNavigation(); });
+    window.addEventListener("resize", () => { if (!mobileNavigation()) closeNavigation(); });
 
 
     const featureGrid = document.querySelector("#featureGrid");
