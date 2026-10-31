@@ -298,8 +298,9 @@ export async function googleLogin(request, env, options = {}) {
     }, 403);
   }
   const role = user.role === "admin" || user.role === "super_admin" ? user.role : "user";
-  if (portal !== role) {
-    return authJson({ error: "ROLE_MISMATCH", requiredPortal: role, message: role === "admin" ? "Akun ini harus masuk melalui Administrator Portal." : "Akun ini tidak memiliki hak Administrator." }, 403);
+  const requiredPortal = role === "user" ? "user" : "admin";
+  if (portal !== requiredPortal) {
+    return authJson({ error: "ROLE_MISMATCH", requiredPortal, message: requiredPortal === "admin" ? "Akun ini harus masuk melalui Administrator Portal." : "Akun ini harus masuk melalui User Portal." }, 403);
   }
 
   const random = crypto.getRandomValues(new Uint8Array(32));
