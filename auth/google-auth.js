@@ -209,6 +209,9 @@ export async function googleLogin(request, env) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
   if (!sameOrigin(request)) return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
   if (!validCsrf(request)) return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
+  if (!/^application\\/json(?:;|$)/i.test(request.headers.get("Content-Type") || "")) {
+    return authJson({ error: "UNSUPPORTED_MEDIA_TYPE" }, 415);
+  }
   if (!env.GOOGLE_CLIENT_ID || !env.DB) return unavailable();
 
   const clientIp = request.headers.get("CF-Connecting-IP");
