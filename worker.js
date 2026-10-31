@@ -25,7 +25,7 @@
 
 "use strict";
 
-import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession } from "./auth/google-auth.js";
+import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession, requestUserAccess, listPendingUserAccess, decideUserAccess } from "./auth/google-auth.js";
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
 
 /* =========================================================
@@ -1492,6 +1492,9 @@ export default {
     const corsHeaders = getCorsHeaders(request);
 
     if (url.pathname === "/api/auth/config" && request.method === "GET") return authConfig(request, env);
+    if (url.pathname === "/api/auth/request-access") return requestUserAccess(request, env);
+    if (url.pathname === "/api/admin/users/pending") return listPendingUserAccess(request, env);
+    if (url.pathname === "/api/admin/users/decision") return decideUserAccess(request, env);
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
     if (url.pathname === "/api/auth/logout") return logout(request, env);
