@@ -88,3 +88,16 @@ Acceptance:
 - Cloudflare Workers AI Gemma 4 model page: https://developers.cloudflare.com/ai/models/@cf/google/gemma-4-26b-a4b-it/
 - Cloudflare Workers AI supported rich-content formats: https://developers.cloudflare.com/workers-ai/features/markdown-conversion/supported-formats/
 - Cloudflare Workers AI model changelog: https://developers.cloudflare.com/changelog/post/2026-04-04-gemma-4-26b-a4b-workers-ai/
+
+
+## Engineering status — 31 October 2026
+
+Gate 1 implementation has started on the feature branch:
+- Added `POST /api/analyze` for one authenticated multipart upload.
+- Added same-origin + CSRF validation and D1 session enforcement.
+- Added a 10 MiB file limit, bounded multipart reader, MIME/extension allowlist, and file-signature checks.
+- Added Workers AI Markdown conversion followed by Gemma 4 analysis; extracted file content is explicitly treated as untrusted data.
+- Uploaded files are processed in memory and are not persisted by this endpoint.
+- Regression tests have been added for image/PDF flow, authentication, CSRF, cross-origin rejection, spoofed MIME/signature, and file-size limits.
+
+**Validation state:** implementation is committed, but automated test execution, current-commit Preview deployment, and Android Chrome end-to-end verification remain pending. Do not enable the upload UI or mark Gate 1 complete until those checks pass.
