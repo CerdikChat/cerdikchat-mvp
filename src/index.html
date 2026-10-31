@@ -761,6 +761,45 @@
 
 
     /* ATLAS-9 Mobile UX: conversation-first hierarchy and compact discovery */
+    .top-actions{flex-wrap:wrap}
+    .feature-nav,.request-nav{border-color:#246b82;background:linear-gradient(135deg,#123b58,#123d43);color:#d9fbff;box-shadow:0 5px 18px #0002}
+    .request-nav{border-color:#287d70;background:linear-gradient(135deg,#123c43,#145548)}
+    .feature-nav:hover,.request-nav:hover{filter:brightness(1.12)}
+    .request-feature-dialog{max-width:560px}
+    .request-label{display:block;margin:13px 0 6px;color:var(--text);font-size:12px;font-weight:750}
+    .request-feature-dialog input,.request-feature-dialog select,.request-feature-dialog textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font:inherit;font-size:14px}
+    .request-feature-dialog textarea{resize:vertical;min-height:110px}
+    .request-note,.request-feedback{color:var(--muted);font-size:11px}
+    .request-actions,.composer-actions{display:flex;align-items:center;gap:8px}
+    .expand-composer{min-height:38px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font-size:11px;font-weight:750;cursor:pointer}
+    .composer.expanded textarea{min-height:190px;max-height:360px}
+    .composer.expanded{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 18%,transparent),0 12px 36px #0002}
+    .composer.expanded .expand-composer{background:var(--panel2);border-color:var(--blue)}
+    .conversation-active .workspace:not(.workspace-expanded) .feature-grid{display:none}
+    .conversation-active .workspace:not(.workspace-expanded) .multimodal-panel{display:none}
+    .conversation-active .workspace.workspace-expanded .workspace-head{display:flex;margin:0 0 8px}
+    .conversation-active .workspace.workspace-expanded .workspace-head p{display:none}
+    html[data-theme="light"] .feature-nav,html[data-theme="light"] .request-nav{color:#12324b;background:linear-gradient(135deg,#e5f3ff,#dff8f0);border-color:#a9cddd}
+    html[data-theme="light"] .request-feature-dialog input,html[data-theme="light"] .request-feature-dialog select,html[data-theme="light"] .request-feature-dialog textarea{background:#fff;color:#14243a}
+    @media(max-width:720px){
+      .top{align-items:flex-start}
+      .top-actions{max-width:70%;gap:5px}
+      .top-actions .pill{display:none}
+      .settings-button,.theme-toggle{min-height:38px;padding:7px 9px;font-size:11px}
+      .composer textarea{min-height:64px}
+      .composer.expanded textarea{min-height:190px}
+      .controls{align-items:flex-end;flex-wrap:wrap}
+      .composer-actions{margin-left:auto}
+      .expand-composer{min-height:40px}
+    }
+    @media(max-width:380px){
+      .top-actions{max-width:74%}
+      .top-actions button{font-size:10px;padding-inline:7px}
+      .request-nav{max-width:112px}
+      .request-nav{white-space:nowrap}
+      .composer-actions{gap:5px}
+      .expand-composer{font-size:10px;padding-inline:7px}
+    }
     .feature-expand{display:none}
     @media(max-width:720px){
       .jump-latest{display:flex;justify-content:flex-end;max-width:760px;margin:0 auto 8px}
@@ -851,7 +890,7 @@
         </div>
 
         <strong>CerdikGo · Innovation Workspace</strong>
-        <div class="top-actions"><span class="pill">● AI · Beta</span><button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
+        <div class="top-actions"><span class="pill">● AI · Beta</span><button id="featureToggle" class="settings-button feature-nav" type="button" aria-expanded="true" aria-controls="featureWorkspace">✦ Fitur</button><button id="requestFeatureOpen" class="settings-button request-nav" type="button" aria-haspopup="dialog" aria-controls="requestFeatureDialog">＋ Request fitur</button><button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
       </header>
 
       <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
@@ -907,7 +946,24 @@
 
 
 
-      <section class="workspace" aria-label="CerdikGo feature workspace">
+      <dialog class="settings-dialog request-feature-dialog" id="requestFeatureDialog" aria-labelledby="requestFeatureTitle">
+        <div class="settings-head"><div><h2 id="requestFeatureTitle">Request a Feature</h2><small>Ceritakan kebutuhan fitur untuk pekerjaan atau industri Anda.</small></div><button class="settings-close" id="requestFeatureClose" type="button" aria-label="Tutup formulir">×</button></div>
+        <form id="requestFeatureForm" class="settings-body">
+          <label class="request-label" for="requestFeatureName">Nama fitur atau solusi</label>
+          <input id="requestFeatureName" name="feature" maxlength="100" required placeholder="Contoh: IoT Monitoring, Robotics, SOP / POS">
+          <label class="request-label" for="requestFeatureCategory">Kategori</label>
+          <select id="requestFeatureCategory" name="category" required>
+            <option value="">Pilih kategori</option><option>IoT & Smart Systems</option><option>Robotics & Automation</option><option>SOP, Quality & Compliance</option><option>POS & Business Operations</option><option>Research & Data Intelligence</option><option>Other / Custom Solution</option>
+          </select>
+          <label class="request-label" for="requestFeatureDetails">Kebutuhan dan masalah yang ingin diselesaikan</label>
+          <textarea id="requestFeatureDetails" name="details" rows="4" maxlength="2000" required placeholder="Jelaskan kebutuhan, pengguna, dan hasil yang diharapkan."></textarea>
+          <p class="request-note">MVP: permintaan belum dikirim ke server. Salin ringkasan di bawah untuk disampaikan kepada tim CerdikGo. Jangan masukkan kata sandi, data pribadi, atau informasi rahasia.</p>
+          <div class="request-actions"><button class="send" type="submit">Salin permintaan</button><button class="settings-button" id="requestFeatureCancel" type="button">Batal</button></div>
+          <p class="request-feedback" id="requestFeatureFeedback" role="status" aria-live="polite"></p>
+        </form>
+      </dialog>
+
+      <section class="workspace" id="featureWorkspace" aria-label="CerdikGo feature workspace">
         <div class="workspace-head">
           <div><h2>Explore your AI workspace</h2><p>One intelligent workspace. Multiple ways to create, analyze, and discover.</p></div>
           <span class="workspace-tag">CERDIKGO · PILOT</span>
@@ -922,7 +978,6 @@
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌘</div><strong>AI Tools & Agents</strong><small>Bounded tools and multi-step workflows</small><span class="feature-state soon">Coming soon</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">◷</div><strong>Conversation History</strong><small>Return to your previous work sessions</small><span class="feature-state soon">Coming soon</span></article>
         </div>
-        <button class="feature-expand" id="featureExpand" type="button" aria-expanded="false" aria-controls="featureGrid">Lihat semua fitur ↓</button>
         <div class="multimodal-panel">
           <div class="multi-top"><div><strong>Multimodal document workspace</strong><br><small>PDF · PNG · JPG · WEBP</small></div><span class="workspace-tag">VALIDATION GATE</span></div>
           <div class="upload-preview">
@@ -982,7 +1037,7 @@
             <span class="hint">
               <span id="count">0</span>/8000 karakter · Enter untuk baris baru
             </span>
-            <button class="send" id="send" type="submit" disabled>Kirim ↑</button>
+            <div class="composer-actions"><button class="expand-composer" id="expandComposer" type="button" aria-expanded="false" aria-controls="message">⤢ Perbesar kolom</button><button class="send" id="send" type="submit" disabled>Kirim ↑</button></div>
           </div>
         </form>
 
@@ -1019,14 +1074,63 @@
 
 
     const featureGrid = document.querySelector("#featureGrid");
-    const featureExpand = document.querySelector("#featureExpand");
-    const workspace = document.querySelector(".workspace");
-    if (featureGrid && featureExpand && workspace) {
-      featureExpand.addEventListener("click", () => {
-        const expanded = featureGrid.classList.toggle("expanded");
+    const featureToggle = document.querySelector("#featureToggle");
+    const workspace = document.querySelector("#featureWorkspace");
+    if (featureGrid && featureToggle && workspace) {
+      featureToggle.addEventListener("click", () => {
+        const expanded = !workspace.classList.contains("workspace-expanded");
         workspace.classList.toggle("workspace-expanded", expanded);
-        featureExpand.setAttribute("aria-expanded", String(expanded));
-        featureExpand.textContent = expanded ? "Tampilkan lebih sedikit ↑" : "Lihat semua fitur ↓";
+        featureGrid.classList.toggle("expanded", expanded);
+        featureToggle.setAttribute("aria-expanded", String(expanded));
+        featureToggle.textContent = expanded ? "✦ Tutup fitur" : "✦ Fitur";
+        if (expanded) workspace.scrollIntoView({ block: "start", behavior: "smooth" });
+      });
+    }
+
+    const requestFeatureDialog = document.querySelector("#requestFeatureDialog");
+    const requestFeatureOpen = document.querySelector("#requestFeatureOpen");
+    const requestFeatureClose = document.querySelector("#requestFeatureClose");
+    const requestFeatureCancel = document.querySelector("#requestFeatureCancel");
+    const requestFeatureForm = document.querySelector("#requestFeatureForm");
+    const requestFeatureFeedback = document.querySelector("#requestFeatureFeedback");
+    const closeFeatureRequest = () => { if (requestFeatureDialog.open) requestFeatureDialog.close(); };
+    requestFeatureOpen.addEventListener("click", () => requestFeatureDialog.showModal());
+    requestFeatureClose.addEventListener("click", closeFeatureRequest);
+    requestFeatureCancel.addEventListener("click", closeFeatureRequest);
+    requestFeatureForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const data = new FormData(requestFeatureForm);
+      const summary = [
+        "CERDIKGO — FEATURE REQUEST",
+        "Feature: " + String(data.get("feature") || "").trim(),
+        "Category: " + String(data.get("category") || "").trim(),
+        "Needs: " + String(data.get("details") || "").trim(),
+        "Source: CerdikGo workspace"
+      ].join("\n");
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(summary);
+          requestFeatureFeedback.textContent = "Ringkasan berhasil disalin. Silakan kirim kepada tim CerdikGo melalui kanal resmi.";
+        } else {
+          const fallback = document.createElement("textarea");
+          fallback.value = summary; fallback.setAttribute("readonly", "");
+          fallback.style.position = "fixed"; fallback.style.opacity = "0";
+          document.body.append(fallback); fallback.select();
+          const copied = document.execCommand("copy"); fallback.remove();
+          requestFeatureFeedback.textContent = copied ? "Ringkasan berhasil disalin. Silakan kirim kepada tim CerdikGo melalui kanal resmi." : "Salin otomatis tidak tersedia. Silakan salin isi permintaan secara manual.";
+        }
+      } catch {
+        requestFeatureFeedback.textContent = "Salin otomatis gagal. Silakan salin isi permintaan secara manual.";
+      }
+    });
+
+    const expandComposer = document.querySelector("#expandComposer");
+    if (expandComposer) {
+      expandComposer.addEventListener("click", () => {
+        const expanded = form.classList.toggle("expanded");
+        expandComposer.setAttribute("aria-expanded", String(expanded));
+        expandComposer.textContent = expanded ? "⤡ Kecilkan kolom" : "⤢ Perbesar kolom";
+        if (expanded) input.focus({ preventScroll: true });
       });
     }
 
