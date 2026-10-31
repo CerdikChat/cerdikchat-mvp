@@ -124,3 +124,32 @@ Do not enable upload UI or mark Gate 1 complete until all pending checks pass. N
 - Final HEAD `40f954f`: GitHub Actions run #31 passed; all 49 regression tests passed.
 - Cloudflare Preview build `e022a388-9c4b-4d9f-a4d7-9ca6b932f9af` completed successfully and deployed to the stable Preview URL; deployment-specific URL: https://775feacc-cerdikchat-mvp.ngyoonseong.workers.dev.
 - The PDF detector remains a conservative first-line guard, not a complete PDF parser or cryptographic validator. Real encrypted and malformed PDF acceptance tests remain required.
+
+
+## OAuth Preview blocker — 31 October 2026
+
+### Observed evidence
+- Android Chrome screenshot shows Google Identity Services error: `Error 400: origin_mismatch`.
+- The current branch uses the Google Identity Services JavaScript ID-token flow (`google.accounts.id.initialize`) with the configured `GOOGLE_CLIENT_ID`.
+- The Worker verifies the returned ID token server-side, including signature, issuer, audience, expiry, nonce, and email verification. The login endpoint additionally enforces same-origin, CSRF, rate limiting, D1 allowlisting, and session creation.
+- This error occurs at Google's browser-origin authorization gate, before the credential is posted to `/api/auth/google`. It is not evidence of a D1/session or model-inference failure.
+
+### Required Google Cloud Console configuration
+- In the Google Cloud project that owns the exact OAuth 2.0 **Web application** client ID configured for this Preview, add the Preview's exact origin to **Authorized JavaScript origins**:
+  `https://atlas9-beta-pilot-multimodal-workspace-cerdikchat-mvp.ngyoonseong.workers.dev`
+- Origin means scheme + hostname + optional port only; do not append a path or trailing slash.
+- Keep existing Production origins unchanged. Do not replace the Production client configuration with the Preview origin.
+- Confirm the Preview Worker receives the same intended Web application client ID after the Console change. Never expose or commit client secrets.
+- Save the OAuth client configuration, allow propagation, then retry from the exact Preview hostname.
+
+### Acceptance gate
+- Google popup/button must open without `origin_mismatch`.
+- Verify an allowlisted test account completes sign-in and `/api/auth/me` reports an authenticated session.
+- Verify an unlisted account is rejected without creating a session.
+- Verify logout revokes the session and subsequent `/api/auth/me` is unauthenticated.
+- Re-run CSRF, same-origin, nonce, token-audience, and session-expiry regression tests.
+- Keep upload locked and do not authorize Production, billing, or public Beta changes until these checks pass.
+
+### Change boundary
+- No OAuth client configuration could be changed through the connected GitHub/Cloudflare tools; no Google Cloud Console connector is available in this workspace.
+- This is an external OAuth client allowlist configuration step, not a code workaround. Do not weaken origin checks, token verification, CSRF, or session controls to bypass it.
