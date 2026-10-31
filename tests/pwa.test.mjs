@@ -9,7 +9,19 @@ const [serviceWorker, indexHtml, offlineHtml] = await Promise.all([
 ]);
 
 
-test("day and night mode toggle is accessible and persists locally", () => {
+
+test("account sign-in is located inside settings and not in the main workspace", () => {
+  assert.ok(indexHtml.includes('id="settingsOpen"'));
+  assert.ok(indexHtml.includes('<dialog class="settings-dialog" id="settingsDialog"'));
+  assert.ok(indexHtml.includes('aria-controls="settingsDialog"'));
+  const dialogStart = indexHtml.indexOf('id="settingsDialog"');
+  const authPanel = indexHtml.indexOf('id="authPanel"');
+  const dialogEnd = indexHtml.indexOf("</dialog>", dialogStart);
+  assert.ok(dialogStart >= 0 && authPanel > dialogStart && authPanel < dialogEnd);
+  assert.ok(!indexHtml.includes('Google sub:'));
+  assert.ok(indexHtml.includes("Akun Google belum memiliki akses ke CerdikGo."));
+});
+\ntest("day and night mode toggle is accessible and persists locally", () => {
   assert.match(indexHtml, /id="themeToggle"/);
   assert.match(indexHtml, /aria-pressed="false"/);
   assert.match(indexHtml, /THEME_STORAGE_KEY = "cerdikgo-theme"/);
