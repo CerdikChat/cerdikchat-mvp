@@ -14,6 +14,9 @@
   <title>CerdikGo — Innovation Workspace</title>
 
   <style>
+    .network-state{max-width:900px;margin:8px auto 0;padding:8px 12px;border:1px solid #246b5c;border-radius:10px;background:#0b302f;color:#8ff0d4;font-size:12px}
+    .network-state.offline{border-color:#765a28;background:#302617;color:#f2d59a}
+
 
     /* CerdikGo Innovation Workspace — visual feature layer */
     .product-brand { color:#f2fbff; font-weight:850; letter-spacing:-.4px; }
@@ -609,6 +612,7 @@
 </head>
 
 <body>
+  <div id="networkState" class="network-state" role="status" aria-live="polite">Memeriksa konektivitas…</div>
   <div class="app">
     <aside class="side">
       <div class="brand">
@@ -1549,6 +1553,22 @@
 
     form.addEventListener("submit", sendMessage);
     updateCount();
+    const networkState = document.getElementById("networkState");
+    function updateNetworkState() {
+      const online = navigator.onLine;
+      networkState.textContent = online
+        ? "ONLINE • Koneksi jaringan tersedia. Layanan AI diverifikasi saat permintaan dijalankan."
+        : "OFFLINE • App shell tersedia. Chat, login, dan analisis file memerlukan internet.";
+      networkState.classList.toggle("offline", !online);
+      networkState.setAttribute("aria-label", online ? "Status jaringan online" : "Status jaringan offline");
+    }
+    window.addEventListener("online", updateNetworkState);
+    window.addEventListener("offline", updateNetworkState);
+    updateNetworkState();
+    if ("serviceWorker" in navigator && window.isSecureContext) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .catch(() => { networkState.textContent += " • Penyimpanan offline belum aktif pada browser ini."; });
+    }
     loadAuth();
   </script>
 </body>
