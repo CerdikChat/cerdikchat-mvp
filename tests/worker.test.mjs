@@ -639,3 +639,61 @@ test("file analysis enforces the 10 MiB per-file limit", async () => {
   assert.equal(response.status, 413);
   assert.equal((await json(response)).error, "FILE_TOO_LARGE");
 });
+
+test("file analysis rejects an empty upload before invoking conversion", async () => {
+  let conversionCalls = 0;
+  const empty = new File([], "empty.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => { conversionCalls++; return { format: "markdown", data: "unexpected" }; },
+      run: async () => ({ response: "unexpected" }),
+    },
+  });
+  const response = await worker.fetch(analysisRequest(empty), env);
+  assert.equal(response.status, 400);
+  assert.equal((await json(response)).error, "EMPTY_FILE");
+  assert.equal(conversionCalls, 0);
+});
+
+test("file analysis maps document conversion errors to a controlled 422", async () => {
+  let inferenceCalls = 0;
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => ({ format: "error", error: "private conversion detail" }),
+      run: async () => { inferenceCalls++; return { response: "unexpected" }; },
+    },
+  });
+  const response = await worker.fetch(analysisRequest(png), env);
+  assert.equal(response.status, 422);
+  assert.equal((await json(response)).error, "DOCUMENT_EXTRACTION_FAILED");
+  assert.equal(inferenceCalls, 0);
+  assert.equal(JSON.stringify(await json(response)).includes("private conversion detail"), false);
+});
+
+test("file analysis maps Workers AI quota exhaustion to HTTP 429", async () => {
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => ({ format: "markdown", data: "Valid extracted content." }),
+      run: async () => { throw new Error("Daily AI allocation exceeded"); },
+    },
+  });
+  const response = await worker.fetch(analysisRequest(png), env);
+  assert.equal(response.status, 429);
+  assert.equal((await json(response)).error, "AI_QUOTA_EXCEEDED");
+});
+
+test("file analysis rejects an empty model response without exposing provider details", async () => {
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => ({ format: "markdown", data: "Valid extracted content." }),
+      run: async () => ({ response: "   " }),
+    },
+  });
+  const response = await worker.fetch(analysisRequest(png), env);
+  assert.equal(response.status, 502);
+  assert.equal((await json(response)).error, "EMPTY_MODEL_RESPONSE");
+});
+
