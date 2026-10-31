@@ -761,16 +761,18 @@
 
 
     /* ATLAS-9 Mobile UX: conversation-first hierarchy and compact discovery */
-    .jump-latest{display:flex;justify-content:flex-end;max-width:760px;margin:0 auto 8px}
-    .jump-latest button{min-height:40px;padding:8px 13px;border:1px solid #287b91;border-radius:999px;background:#10334a;color:#c8f7ff;font:inherit;font-size:12px;font-weight:800;box-shadow:0 5px 18px #0004}
-    .jump-latest[hidden]{display:none!important}
-    .conversation-active .workspace{margin-bottom:8px}
-    .conversation-active .workspace-head{margin-bottom:6px}
-    .conversation-active .workspace-head p{display:none}
-    .conversation-active .feature-grid:not(.expanded){display:none}
-    .conversation-active .multimodal-panel{display:none}
-    .conversation-active .feature-expand{display:block}
     .feature-expand{display:none}
+    @media(max-width:720px){
+      .jump-latest{display:flex;justify-content:flex-end;max-width:760px;margin:0 auto 8px}
+      .jump-latest button{min-height:40px;padding:8px 13px;border:1px solid #287b91;border-radius:999px;background:#10334a;color:#c8f7ff;font:inherit;font-size:12px;font-weight:800;box-shadow:0 5px 18px #0004}
+      .jump-latest[hidden]{display:none!important}
+      .conversation-active .workspace{margin-bottom:8px}
+      .conversation-active .workspace-head{margin-bottom:6px}
+      .conversation-active .workspace-head p{display:none}
+      .conversation-active .feature-grid:not(.expanded){display:none}
+      .conversation-active .multimodal-panel{display:none}
+      .conversation-active .feature-expand{display:block}
+    }
     @media(max-width:720px){
       .main{display:flex;flex-direction:column}
       .feed{order:1;flex:1 0 auto;padding-bottom:18px}
@@ -1034,8 +1036,6 @@
     const jumpLatest = document.querySelector("#jumpLatest");
     const jumpLatestButton = document.querySelector("#jumpLatestButton");
     const main = document.querySelector(".main");
-    const featureGrid = document.querySelector("#featureGrid");
-    const featureExpand = document.querySelector("#featureExpand");
     let latestAnswerRow = null;
     let userNavigatedDuringResponse = false;
 
@@ -1433,6 +1433,10 @@
     }
 
     function updateLatestAnswerControl() {
+      if (!window.matchMedia("(max-width: 720px)").matches) {
+        jumpLatest.hidden = true;
+        return;
+      }
       if (!latestAnswerRow || !latestAnswerRow.isConnected) {
         jumpLatest.hidden = true;
         return;
