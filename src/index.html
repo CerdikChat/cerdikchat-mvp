@@ -932,6 +932,7 @@
             disabled
             rows="2"
             maxlength="8000"
+            enterkeyhint="enter"
             placeholder="Tanyakan sesuatu kepada CerdikGo…"
             aria-label="Pesan Anda"
             required></textarea>
@@ -1775,17 +1776,8 @@
 
     input.addEventListener("input", updateCount);
 
-    input.addEventListener("keydown", event => {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-
-        if (typeof form.requestSubmit === "function") {
-          form.requestSubmit();
-        } else {
-          send.click();
-        }
-      }
-    });
+    // Keep Enter as a newline on mobile and desktop keyboards.
+    // Messages are submitted only with the visible Send button.
 
     async function sendMessage(event) {
       event.preventDefault();
