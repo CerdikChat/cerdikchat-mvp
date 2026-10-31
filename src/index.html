@@ -826,7 +826,15 @@
         </div>
         <div class="admin-identity"><strong id="adminDisplayName">Administrator</strong><span id="adminEmail">Sesi administrator aktif</span></div>
         <div class="admin-grid">
-          <article class="admin-module"><h3>User Access & Roles</h3><p>Area pengelolaan akun, allowlist, dan hak akses. Operasi administratif belum diaktifkan pada pilot ini.</p><small>Backend action not enabled</small></article>
+          <article class="admin-module" id="userApprovalModule">
+            <h3>User Access & Approval</h3>
+            <p>Permintaan akun User yang menunggu persetujuan. Persetujuan hanya mengaktifkan role User; tidak dapat mempromosikan akun menjadi Administrator.</p>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0">
+              <button class="settings-button" id="refreshPendingUsers" type="button">↻ Refresh requests</button>
+              <span id="pendingUsersStatus" role="status" aria-live="polite">Memuat status approval…</span>
+            </div>
+            <div id="pendingUsersList" aria-live="polite"></div>
+          </article>
           <article class="admin-module"><h3>Security & Audit</h3><p>Area pemantauan autentikasi dan audit trail. Data audit belum ditampilkan karena endpoint dashboard belum tersedia.</p><small>Awaiting verified API</small></article>
           <article class="admin-module"><h3>Platform Operations</h3><p>Area status layanan dan konfigurasi platform. Tidak ada metrik simulasi atau kontrol operasional palsu.</p><small>Awaiting verified API</small></article>
         </div>
@@ -952,7 +960,7 @@
     const authUnavailable = document.querySelector("#authUnavailable");
     const openSettings = () => { if (!settingsDialog.open) settingsDialog.showModal(); };
     settingsOpen.addEventListener("click", openSettings);
-    adminSettingsOpen.addEventListener("click", openSettings);
+
     settingsClose.addEventListener("click", () => settingsDialog.close());
     authGateOpen.addEventListener("click", () => { if (!settingsDialog.open) settingsDialog.showModal(); });
     settingsDialog.addEventListener("click", event => { if (event.target === settingsDialog) settingsDialog.close(); });
@@ -970,6 +978,11 @@
     const adminSettingsOpen = document.querySelector("#adminSettingsOpen");
     const adminDisplayName = document.querySelector("#adminDisplayName");
     const adminEmail = document.querySelector("#adminEmail");
+    const refreshPendingUsersButton = document.querySelector("#refreshPendingUsers");
+    const pendingUsersStatus = document.querySelector("#pendingUsersStatus");
+    const pendingUsersList = document.querySelector("#pendingUsersList");
+    adminSettingsOpen.addEventListener("click", openSettings);
+    refreshPendingUsersButton.addEventListener("click", loadPendingUsers);
     const workspace = document.querySelector(".workspace");
     const authUser = document.querySelector("#authUser");
     const authLogout = document.querySelector("#authLogout");
@@ -982,6 +995,67 @@
     let csrfToken = "";
     let googleClientId = "";
 
+    async function loadPendingUsers() {
+      if (!isAuthenticated || currentRole !== "admin") return;
+      pendingUsersStatus.textContent = "Memuat permintaan…";
+      pendingUsersList.replaceChildren();
+      try {
+        const response = await fetch("/api/admin/users/pending", {
+          method: "GET",
+          credentials: "same-origin",
+          headers: { "Accept": "application/json" }
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || payload.error || "Daftar permintaan tidak tersedia.");
+        const users = Array.isArray(payload.users) ? payload.users : [];
+        if (!users.length) {
+          pendingUsersStatus.textContent = "Tidak ada permintaan tertunda.";
+          return;
+        }
+        pendingUsersStatus.textContent = users.length + " permintaan menunggu persetujuan.";
+        for (const user of users) {
+          const row = document.createElement("div");
+          row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)";
+          const identity = document.createElement("span");
+          identity.textContent = [user.displayName, user.email].filter(Boolean).join(" · ");
+          const approve = document.createElement("button");
+          approve.type = "button";
+          approve.className = "settings-button";
+          approve.textContent = "Approve User";
+          approve.addEventListener("click", () => approvePendingUser(user.email, approve));
+          row.append(identity, approve);
+          pendingUsersList.append(row);
+        }
+      } catch (error) {
+        pendingUsersStatus.textContent = error instanceof Error ? error.message : "Gagal memuat permintaan.";
+      }
+    }
+
+    async function approvePendingUser(email, button) {
+      if (!isAuthenticated || currentRole !== "admin" || !email) return;
+      button.disabled = true;
+      try {
+        if (!csrfToken) await refreshCsrfToken();
+        const response = await fetch("/api/admin/users/decision", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-CSRF-Token": csrfToken
+          },
+          body: JSON.stringify({ email, decision: "approve" })
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || payload.error || "Persetujuan gagal.");
+        pendingUsersStatus.textContent = "Akun User berhasil disetujui.";
+        await loadPendingUsers();
+      } catch (error) {
+        pendingUsersStatus.textContent = error instanceof Error ? error.message : "Persetujuan gagal.";
+        button.disabled = false;
+      }
+    }
+
     function updateAuthUI(user = null) {
       authPanel.hidden = !authRequired && !authConfigured;
       authGate.hidden = !(authRequired && !isAuthenticated);
@@ -993,7 +1067,7 @@
       authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikGo";
       authMessage.textContent = isAuthenticated
         ? "Sesi aman Anda aktif."
-        : "Masuk dengan akun Google yang telah diizinkan.";
+        : "Masuk dengan akun Google. Jika belum terdaftar, User Portal dapat mengirim permintaan persetujuan.";
       authUser.textContent = user
         ? [user.displayName, user.email].filter(Boolean).join(" · ")
         : "";
@@ -1005,6 +1079,7 @@
       authLogout.hidden = !isAuthenticated;
       input.disabled = authRequired && !isAuthenticated;
       send.disabled = authRequired && !isAuthenticated;
+      if (isAuthenticated && currentRole === "admin") loadPendingUsers();
     }
 
     function createNonce() {
