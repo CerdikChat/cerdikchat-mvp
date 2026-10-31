@@ -754,6 +754,19 @@
       });
     }
 
+    async function refreshCsrfToken() {
+      const response = await fetch("/api/auth/config", {
+        method: "GET",
+        credentials: "same-origin",
+        headers: { "Accept": "application/json" }
+      });
+      const config = await response.json();
+      if (!response.ok || typeof config.csrfToken !== "string") {
+        throw new Error("Token keamanan tidak dapat diperbarui.");
+      }
+      csrfToken = config.csrfToken;
+    }
+
     async function handleGoogleCredential(response, nonce) {
       if (!response || typeof response.credential !== "string" || !csrfToken) {
         setStatus("Respons Google atau token keamanan tidak tersedia.", true);
@@ -772,6 +785,10 @@
         });
         const payload = await result.json();
         if (!result.ok) {
+          if (payload.error === "CSRF_VALIDATION_FAILED") {
+            await refreshCsrfToken();
+            throw new Error("Token keamanan diperbarui. Silakan tekan tombol Google sekali lagi.");
+          }
           throw new Error(payload.message || payload.error || "Google Sign-In gagal.");
         }
         isAuthenticated = true;
@@ -880,7 +897,13 @@
           }
         });
         const payload = await response.json();
-        if (!response.ok) throw new Error(payload.error || "Logout gagal.");
+        if (!response.ok) {
+          if (payload.error === "CSRF_VALIDATION_FAILED") {
+            await refreshCsrfToken();
+            throw new Error("Token keamanan diperbarui. Silakan ulangi logout.");
+          }
+          throw new Error(payload.error || "Logout gagal.");
+        }
         isAuthenticated = false;
         if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
         updateAuthUI();
