@@ -323,6 +323,25 @@ test("normal model response is returned in the expected API shape", async () => 
   assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000; includeSubDomains");
 });
 
+test("system prompt prohibits fabricated agent, integration, sync and status claims", async () => {
+  let systemPrompt = "";
+  const env = makeEnv({
+    AI: {
+      run: async (_model, input) => {
+        systemPrompt = input.messages.find((item) => item.role === "system")?.content || "";
+        return { response: "Saya siap membantu." };
+      },
+    },
+  });
+  const response = await worker.fetch(post({ message: "Halo, apakah semua modul aktif?" }), env);
+  assert.equal(response.status, 200);
+  assert.match(systemPrompt, /satu model AI/);
+  assert.match(systemPrompt, /Jangan mengarang status ONLINE/);
+  assert.match(systemPrompt, /belum diverifikasi/);
+  assert.match(systemPrompt, /Jangan menghasilkan laporan "diagnosis sistem"/);
+  assert.match(systemPrompt, /Jangan menghasilkan tag HTML/);
+});
+
 test("untrusted history roles are discarded before model inference", async () => {
   let captured;
   const env = makeEnv({
