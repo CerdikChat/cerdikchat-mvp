@@ -243,3 +243,70 @@ test("model failure returns a sanitized 502 response", async () => {
   assert.equal(payload.error, "AI_REQUEST_FAILED");
   assert.equal(JSON.stringify(payload).includes("private provider detail"), false);
 });
+
+
+test("Google auth configuration exposes only public client ID and required mode", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/config"),
+    makeEnv({ GOOGLE_CLIENT_ID: "test-client.apps.googleusercontent.com", GOOGLE_AUTH_REQUIRED: "true" })
+  );
+  const payload = await json(response);
+  assert.equal(response.status, 200);
+  assert.equal(payload.clientId, "test-client.apps.googleusercontent.com");
+  assert.equal(payload.required, true);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+});
+
+test("Google auth configuration fails closed when client ID is missing", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/config"),
+    makeEnv()
+  );
+  assert.equal(response.status, 503);
+  assert.equal((await json(response)).error, "AUTH_UNAVAILABLE");
+});
+
+test("protected chat rejects missing or unknown session before rate limiter and AI", async () => {
+  let rateLimitCalls = 0;
+  let aiCalls = 0;
+  const env = makeEnv({
+    GOOGLE_AUTH_REQUIRED: "true",
+    DB: {
+      prepare: () => ({
+        bind: () => ({ first: async () => null }),
+      }),
+    },
+    CHAT_RATE_LIMITER: { limit: async () => { rateLimitCalls++; return { success: true }; } },
+    AI: { run: async () => { aiCalls++; return { response: "should not run" }; } },
+  });
+  const response = await worker.fetch(post({ message: "Halo" }), env);
+  assert.equal(response.status, 401);
+  assert.equal((await json(response)).error, "AUTH_REQUIRED");
+  assert.equal(rateLimitCalls, 0);
+  assert.equal(aiCalls, 0);
+});
+
+test("Google login endpoint rejects cross-origin credential posts", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/google", {
+      method: "POST",
+      headers: { origin: "https://attacker.example", "content-type": "application/json" },
+      body: JSON.stringify({ credential: "not-a-real-token" }),
+    }),
+    makeEnv({ GOOGLE_CLIENT_ID: "test-client.apps.googleusercontent.com", DB: {} })
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
+});
+
+test("logout rejects cross-origin requests", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/logout", {
+      method: "POST",
+      headers: { origin: "https://attacker.example" },
+    }),
+    makeEnv()
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
+});
