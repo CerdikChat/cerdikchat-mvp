@@ -916,7 +916,8 @@
         const payload = await result.json();
         if (!result.ok) {
           if (payload.error === "USER_NOT_ALLOWLISTED") {
-            authMessage.textContent = "Akun Google ini belum memiliki akses. Hubungi administrator CerdikGo.";\n            throw new Error("Akun Google belum memiliki akses ke CerdikGo. Hubungi administrator.");
+            authMessage.textContent = "Akun Google ini belum memiliki akses. Hubungi administrator CerdikGo.";
+            throw new Error("Akun Google belum memiliki akses ke CerdikGo. Hubungi administrator.");
           }
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
@@ -971,8 +972,9 @@
         const config = await response.json();
         if (!response.ok) throw new Error(config.message || config.error || "Konfigurasi autentikasi tidak tersedia.");
         csrfToken = typeof config.csrfToken === "string" ? config.csrfToken : "";
-        authRequired = config.required === true;\n        authUnavailable.hidden = authRequired || authConfigured;
+        authRequired = config.required === true;
         authConfigured = config.configured === true && typeof config.clientId === "string";
+        authUnavailable.hidden = authRequired || authConfigured;
         googleClientId = authConfigured ? config.clientId : "";
 
         if (authRequired && (!authConfigured || !csrfToken)) {
