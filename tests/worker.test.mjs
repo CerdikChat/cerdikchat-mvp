@@ -276,6 +276,19 @@ test("Google auth configuration reports an unconfigured optional mode safely", a
 });
 
 
+test("Google auth configuration reuses a valid CSRF cookie across tabs", async () => {
+  const existing = "Z".repeat(43);
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/config", {
+      headers: { cookie: `__Host-cerdikchat_csrf=${existing}` }
+    }),
+    makeEnv()
+  );
+  const payload = await json(response);
+  assert.equal(payload.csrfToken, existing);
+  assert.match(response.headers.get("set-cookie"), new RegExp(existing));
+});
+
 test("Google auth configuration reports required mode even when client ID is missing", async () => {
   const response = await worker.fetch(
     new Request("https://cerdikchat.test/api/auth/config"),
