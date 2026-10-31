@@ -1,6 +1,6 @@
 "use strict";
 const CACHE_NAME = "cerdikgo-shell-v1";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/offline.html"];
+const APP_SHELL = ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg"];
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
