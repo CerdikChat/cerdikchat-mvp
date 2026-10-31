@@ -338,7 +338,7 @@ test("system prompt prohibits fabricated agent, integration, sync and status cla
   assert.match(systemPrompt, /satu model AI/);
   assert.match(systemPrompt, /Jangan mengarang status ONLINE/);
   assert.match(systemPrompt, /belum diverifikasi/);
-  assert.match(systemPrompt, /Jangan menghasilkan laporan "diagnosis sistem"/);
+  assert.match(systemPrompt, /Jangan membuat laporan "diagnosis sistem"/);
   assert.match(systemPrompt, /Jangan menghasilkan tag HTML/);
 });
 
