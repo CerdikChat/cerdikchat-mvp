@@ -1,6 +1,6 @@
 # ATLAS-9 Beta Pilot — Multimodal Workspace Delivery Plan
 
-Status: implementation branch opened; Preview/staging only.
+Status: implementation branch open; Preview/staging only.
 Base: `atlas9/phase-2-google-auth-implementation`
 Production changes: none authorized.
 Billing changes: none authorized.
@@ -73,6 +73,7 @@ Acceptance:
 
 - Prefer Cloudflare Free allowances and existing Workers AI allocations.
 - Workers AI is usage-priced; verify current account allowance and model pricing before pilot load testing. Do not assume a model is free merely because it is Cloudflare-hosted.
+- Current Cloudflare model catalogue lists `@cf/google/gemma-4-26b-a4b-it` at $0.10 per million input tokens and $0.30 per million output tokens. Markdown image conversion also invokes Workers AI processing models. Account-specific Free allocation and actual billable usage must be checked before load testing.
 - No paid plan, billing activation, paid resource, or quota upgrade without explicit approval.
 - Rate-limit by authenticated user and IP where appropriate; add file-specific limits to prevent abuse.
 
@@ -85,19 +86,30 @@ Acceptance:
 
 ## Evidence references
 
-- Cloudflare Workers AI Gemma 4 model page: https://developers.cloudflare.com/ai/models/@cf/google/gemma-4-26b-a4b-it/
+- Cloudflare Workers AI Gemma 4 model page: https://developers.cloudflare.com/workers-ai/models/gemma-4-26b-a4b-it/
 - Cloudflare Workers AI supported rich-content formats: https://developers.cloudflare.com/workers-ai/features/markdown-conversion/supported-formats/
-- Cloudflare Workers AI model changelog: https://developers.cloudflare.com/changelog/post/2026-04-04-gemma-4-26b-a4b-workers-ai/
-
+- Cloudflare Workers AI Markdown Conversion binding: https://developers.cloudflare.com/workers-ai/features/markdown-conversion/usage/binding/
+- Cloudflare Workers AI conversion options: https://developers.cloudflare.com/workers-ai/features/markdown-conversion/conversion-options/
+- Cloudflare Workers AI pricing: https://developers.cloudflare.com/workers-ai/platform/pricing/
 
 ## Engineering status — 31 October 2026
 
-Gate 1 implementation has started on the feature branch:
-- Added `POST /api/analyze` for one authenticated multipart upload.
-- Added same-origin + CSRF validation and D1 session enforcement.
-- Added a 10 MiB file limit, bounded multipart reader, MIME/extension allowlist, and file-signature checks.
-- Added Workers AI Markdown conversion followed by Gemma 4 analysis; extracted file content is explicitly treated as untrusted data.
-- Uploaded files are processed in memory and are not persisted by this endpoint.
-- Regression tests have been added for image/PDF flow, authentication, CSRF, cross-origin rejection, spoofed MIME/signature, and file-size limits.
+### Verified
+- `POST /api/analyze` implementation is committed on `atlas9/beta-pilot-multimodal-workspace`.
+- Endpoint requires a D1 session, same-origin request, and CSRF double-submit validation.
+- One-file multipart upload is bounded to 10 MiB plus multipart overhead; MIME, extension, and basic file signatures are checked.
+- Cloudflare Workers AI Markdown conversion is followed by Gemma 4 analysis; extracted file content is explicitly treated as untrusted data.
+- Uploaded files are processed in memory; this endpoint does not persist source files.
+- Regression tests cover successful PNG/PDF paths, authentication, CSRF, cross-origin rejection, spoofed MIME/signature, prompt-injection isolation, and file-size limits.
+- GitHub Actions run #4 on HEAD `84e7a599` completed successfully.
+- Cloudflare Preview build and deployment for HEAD `84e7a599` both succeeded. Preview URL: https://atlas9-beta-pilot-multimodal-workspace-cerdikchat-mvp.ngyoonseong.workers.dev
+- PR #22 remains open and Draft; it is not merged.
 
-**Validation state:** implementation and regression tests are committed. GitHub Actions run #2 on commit `c70ee6c` completed successfully (Node.js regression suite). Cloudflare Preview deployment for `c70ee6c` is still being processed; Android Chrome end-to-end verification remains pending. Do not enable the upload UI or mark Gate 1 complete until Preview and browser validation pass.
+### Still pending — Gate 1 is NOT complete
+- Live runtime verification of the `env.AI.toMarkdown()` binding and its actual conversion result on the deployed Preview.
+- Live Workers AI Gemma 4 inference and account-specific quota/usage verification.
+- Authenticated Android Chrome end-to-end tests using a controlled test account and non-sensitive sample files.
+- Negative-path verification for malformed/encrypted PDF, unsupported format, model quota exhaustion, and conversion failures.
+- Confirm that Preview uses the intended isolated staging D1 and rate-limiter bindings; do not test with Production data.
+
+Do not enable upload UI or mark Gate 1 complete until all pending checks pass. No Production deployment, billing activation, secrets change, merge, user-data copy, or public launch is authorized.
