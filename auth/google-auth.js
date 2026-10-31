@@ -205,7 +205,7 @@ export function authConfig(request, env) {
   );
 }
 
-export async function googleLogin(request, env) {
+export async function googleLogin(request, env, options = {}) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
   if (!sameOrigin(request)) return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
   if (!validCsrf(request)) return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
@@ -243,7 +243,7 @@ export async function googleLogin(request, env) {
 
   let identity;
   try {
-    identity = await verifyGoogleIdToken(credential, env.GOOGLE_CLIENT_ID, { nonce });
+    identity = await verifyGoogleIdToken(credential, env.GOOGLE_CLIENT_ID, { nonce, fetch: options.fetch || fetch });
   } catch (error) {
     const code = typeof error?.message === "string" ? error.message : "GOOGLE_TOKEN_INVALID";
     const status = code === "GOOGLE_JWKS_UNAVAILABLE" || code === "GOOGLE_CLIENT_ID_MISSING" ? 503 : 401;
@@ -259,7 +259,12 @@ export async function googleLogin(request, env) {
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
   }
   if (!user || user.status !== "active") {
-    return authJson({ error: "USER_NOT_ALLOWLISTED", message: "Akun ini belum diizinkan mengakses CerdikChat." }, 403);
+    return authJson({
+      error: "USER_NOT_ALLOWLISTED",
+      message: "Akun ini belum diizinkan mengakses CerdikChat.",
+      googleSub: identity.sub,
+      email: identity.email,
+    }, 403);
   }
 
   const random = crypto.getRandomValues(new Uint8Array(32));
