@@ -961,19 +961,20 @@
       }
     }
 
-    async function renderGoogleButton() {
+    async function renderGoogleButton(portal = "user") {
       if (!googleClientId || isAuthenticated) return;
       try {
         await loadGoogleIdentityServices();
         const nonce = createNonce();
+        const target = portal === "admin" ? googleAdminSignIn : googleUserSignIn;
         window.google.accounts.id.initialize({
           client_id: googleClientId,
           nonce,
           auto_select: false,
-          callback: (response) => handleGoogleCredential(response, nonce)
+          callback: (response) => handleGoogleCredential(response, nonce, portal)
         });
-        googleSignIn.replaceChildren();
-        window.google.accounts.id.renderButton(googleSignIn, {
+        target.replaceChildren();
+        window.google.accounts.id.renderButton(target, {
           type: "standard",
           theme: "outline",
           size: "large",
@@ -1115,7 +1116,8 @@
         .replace(/\\pm\b/g, "±")
         .replace(/\\leq\b|\\le\b/g, "≤")
         .replace(/\\geq\b|\\ge\b/g, "≥")
-        .replace(/\\neq\b/g, "≠")
+        .replace(/
+eq\b/g, "≠")
         .replace(/\\approx\b/g, "≈")
         .replace(/\\rightarrow\b|\\to\b/g, "→")
         .replace(/\\pi\b/g, "π")
