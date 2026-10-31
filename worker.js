@@ -25,7 +25,7 @@
 
 "use strict";
 
-import { authConfig, googleLogin, currentSession, logout, requireSession } from "./auth/google-auth.js";
+import { authConfig, googleLogin, currentSession, logout, requireSession, adminMe } from "./auth/google-auth.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1473,6 +1473,7 @@ export default {
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
     if (url.pathname === "/api/auth/logout") return logout(request, env);
+    if (url.pathname === "/api/admin/me") return adminMe(request, env);
 
     if (url.pathname === CONFIG.API_PATH) {
       if (request.method === "OPTIONS") {
