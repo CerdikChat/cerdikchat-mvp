@@ -8,7 +8,7 @@
   <meta name="description" content="CerdikGo — AI innovation workspace powered by CerdikChat core.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="CerdikChat">
+  <meta name="apple-mobile-web-app-title" content="CerdikGo">
   <meta name="color-scheme" content="dark">
   <link rel="manifest" href="/manifest.webmanifest">
   <title>CerdikGo — Innovation Workspace</title>
@@ -642,7 +642,7 @@
 
       <h2>Tentang beta</h2>
       <div class="side-note">
-        CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting
+        CerdikGo adalah workspace inovasi AI yang sedang diuji. Periksa fakta penting
         secara mandiri. Hindari memasukkan data pribadi atau rahasia.
       </div>
     </aside>
@@ -774,7 +774,7 @@
 
     function updateAuthUI(user = null) {
       authPanel.hidden = !authRequired && !authConfigured;
-      authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikChat";
+      authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikGo";
       authMessage.textContent = isAuthenticated
         ? "Sesi aman Anda aktif."
         : "Masuk dengan akun Google yang telah diizinkan.";
@@ -861,7 +861,7 @@
         }
         isAuthenticated = true;
         updateAuthUI(payload.user || null);
-        setStatus("Berhasil masuk ke CerdikChat.");
+        setStatus("Berhasil masuk ke CerdikGo.");
       } catch (error) {
         isAuthenticated = false;
         updateAuthUI();
@@ -1449,7 +1449,7 @@
       send.textContent = "Memproses…";
       form.setAttribute("aria-busy", "true");
 
-      setStatus("CerdikChat sedang menyiapkan jawaban…");
+      setStatus("CerdikGo sedang menyiapkan jawaban…");
 
       addMessage("user", message);
       input.value = "";
