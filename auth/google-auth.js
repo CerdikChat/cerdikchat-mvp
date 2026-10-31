@@ -277,11 +277,27 @@ export async function googleLogin(request, env, options = {}) {
           return authJson({ error: "IDENTITY_CONFLICT", message: "Email ini telah terikat ke identitas Google lain. Hubungi administrator." }, 403);
         }
         if (!emailOwner) {
-          await env.DB.prepare(
-            "INSERT INTO users (google_sub, email, display_name, status, role) VALUES (?, ?, ?, 'active', 'admin')"
-          ).bind(identity.sub, identity.email, identity.name).run();
+          try {
+            await env.DB.prepare(
+              "INSERT INTO users (google_sub, email, display_name, status, role) VALUES (?, ?, ?, 'active', 'admin')"
+            ).bind(identity.sub, identity.email, identity.name).run();
+          } catch (insertError) {
+            // A parallel first login may have completed the same bootstrap.
+            // Recover only by immutable Google subject; never rebind by email.
+            const racedUser = await env.DB.prepare(
+              "SELECT google_sub, email, display_name, status, role FROM users WHERE google_sub = ? LIMIT 1"
+            ).bind(identity.sub).first();
+            if (!racedUser) throw insertError;
+            if (
+              racedUser.email?.toLowerCase() !== identity.email ||
+              (racedUser.role !== "admin" && racedUser.role !== "super_admin")
+            ) {
+              return authJson({ error: "IDENTITY_CONFLICT", message: "Status identitas administrator tidak konsisten. Hubungi administrator." }, 403);
+            }
+            user = racedUser;
+          }
         }
-        user = await env.DB.prepare(
+        user = user || await env.DB.prepare(
           "SELECT google_sub, email, display_name, status, role FROM users WHERE google_sub = ? LIMIT 1"
         ).bind(identity.sub).first();
       }
