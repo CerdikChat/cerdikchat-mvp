@@ -75,6 +75,7 @@ function adminDb({ role = "admin", pending = [], target = null } = {}) {
   const db = {
     prepare(sql) {
       return {
+        all: async () => ({ results: pending }),
         bind(...values) {
           return {
             first: async () => {
