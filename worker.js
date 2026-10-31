@@ -18,7 +18,7 @@
  * - Minimal, privacy-conscious observability
  *
  * Limitations:
- * - No user authentication
+ * - Optional Google authentication (enforced when GOOGLE_AUTH_REQUIRED=true)
  * - No persistent conversation storage
  * - No external live-news or financial-data retrieval
  */
@@ -1506,11 +1506,11 @@ export default {
       headers.set("x-frame-options", "DENY");
       headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
       headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
-      headers.set("cross-origin-opener-policy", "same-origin");
+      headers.set("cross-origin-opener-policy", "same-origin-allow-popups");
       headers.set("cross-origin-resource-policy", "same-origin");
       headers.set(
         "content-security-policy",
-        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        "default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: https://*.googleusercontent.com; font-src 'self' data:; connect-src 'self' https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
       );
 
       return new Response(assetResponse.body, {
