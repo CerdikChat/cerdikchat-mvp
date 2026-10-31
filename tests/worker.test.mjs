@@ -272,6 +272,7 @@ test("Google auth configuration reports an unconfigured optional mode safely", a
   assert.equal(payload.required, false);
   assert.match(payload.csrfToken, /^[A-Za-z0-9_-]{43}$/);
   assert.match(response.headers.get("set-cookie"), /HttpOnly; Secure; SameSite=Strict/);
+  assert.match(response.headers.get("set-cookie"), new RegExp(payload.csrfToken));
 });
 
 
@@ -297,6 +298,34 @@ test("Google login rejects same-origin requests without the CSRF double-submit t
   );
   assert.equal(response.status, 403);
   assert.equal((await json(response)).error, "CSRF_VALIDATION_FAILED");
+});
+
+
+test("Google login is rate-limited by client IP before token verification", async () => {
+  const csrf = "A".repeat(43);
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/google", {
+      method: "POST",
+      headers: {
+        origin: "https://cerdikchat.test",
+        "content-type": "application/json",
+        "cf-connecting-ip": "203.0.113.10",
+        cookie: `__Host-cerdikchat_csrf=${csrf}`,
+        "x-csrf-token": csrf
+      },
+      body: JSON.stringify({ credential: "not-a-real-token", nonce: "B".repeat(43) })
+    }),
+    makeEnv({
+      GOOGLE_CLIENT_ID: "test-client.apps.googleusercontent.com",
+      DB: {},
+      CHAT_RATE_LIMITER: { limit: async ({ key }) => {
+        assert.equal(key, "auth:ip:203.0.113.10");
+        return { success: false };
+      } }
+    })
+  );
+  assert.equal(response.status, 429);
+  assert.equal((await json(response)).error, "RATE_LIMIT_EXCEEDED");
 });
 
 test("logout rejects same-origin requests without the CSRF double-submit token", async () => {
