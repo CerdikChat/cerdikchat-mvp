@@ -136,7 +136,9 @@ export async function handleFileAnalysis(request, env, corsHeaders = {}) {
     return json({ error: "INVALID_MULTIPART" }, 400, corsHeaders);
   }
 
-  const file = form.get("file");
+  const uploadedFiles = form.getAll("file");
+  if (uploadedFiles.length !== 1) return json({ error: "ONE_FILE_PER_REQUEST" }, 400, corsHeaders);
+  const file = uploadedFiles[0];
   if (!file || typeof file.arrayBuffer !== "function" || typeof file.name !== "string") {
     return json({ error: "FILE_REQUIRED" }, 400, corsHeaders);
   }
