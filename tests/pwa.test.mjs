@@ -184,8 +184,9 @@ test("Administrator and User portals have separate Google sign-in surfaces", () 
   assert.match(indexHtml, /id="portalGate"/);
   assert.match(indexHtml, /Administrator Portal/);
   assert.match(indexHtml, /User Portal/);
-  assert.match(indexHtml, /id="googleAdminSignIn"/);
-  assert.match(indexHtml, /id="googleUserSignIn"/);
+  assert.match(indexHtml, /id="chooseAdminPortal"/);
+  assert.match(indexHtml, /id="chooseUserPortal"/);
+  assert.match(indexHtml, /id="portalGoogleSignIn"/);
   assert.match(indexHtml, /JSON\.stringify\(\{ credential: response\.credential, nonce, portal \}\)/);
   assert.match(indexHtml, /ROLE_MISMATCH/);
   assert.match(indexHtml, /id="adminPlaceholder"/);
