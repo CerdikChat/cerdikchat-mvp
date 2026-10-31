@@ -21,7 +21,8 @@ test("account sign-in is located inside settings and not in the main workspace",
   assert.ok(!indexHtml.includes('Google sub:'));
   assert.ok(indexHtml.includes("Akun Google belum memiliki akses ke CerdikGo."));
 });
-\ntest("day and night mode toggle is accessible and persists locally", () => {
+
+test("day and night mode toggle is accessible and persists locally", () => {
   assert.match(indexHtml, /id="themeToggle"/);
   assert.match(indexHtml, /aria-pressed="false"/);
   assert.match(indexHtml, /THEME_STORAGE_KEY = "cerdikgo-theme"/);
