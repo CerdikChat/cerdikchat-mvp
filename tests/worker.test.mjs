@@ -697,4 +697,19 @@ test("file analysis rejects an empty model response without exposing provider de
   assert.equal(response.status, 502);
   assert.equal((await json(response)).error, "EMPTY_MODEL_RESPONSE");
 });
-
+test("file analysis rejects encrypted PDFs before conversion or inference", async () => {
+  let conversionCalls = 0;
+  let inferenceCalls = 0;
+  const pdf = new File(["%PDF-1.7\n1 0 obj << /Encrypt 2 0 R >> endobj"], "locked.pdf", { type: "application/pdf" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => { conversionCalls++; return { format: "markdown", data: "unexpected" }; },
+      run: async () => { inferenceCalls++; return { response: "unexpected" }; },
+    },
+  });
+  const response = await worker.fetch(analysisRequest(pdf), env);
+  assert.equal(response.status, 422);
+  assert.equal((await json(response)).error, "ENCRYPTED_PDF_UNSUPPORTED");
+  assert.equal(conversionCalls, 0);
+  assert.equal(inferenceCalls, 0);
+});
