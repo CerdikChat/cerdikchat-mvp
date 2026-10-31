@@ -713,3 +713,20 @@ test("file analysis rejects encrypted PDFs before conversion or inference", asyn
   assert.equal(conversionCalls, 0);
   assert.equal(inferenceCalls, 0);
 });
+
+test("file analysis rejects PDF encryption names encoded with #XX escapes", async () => {
+  let conversionCalls = 0;
+  let inferenceCalls = 0;
+  const pdf = new File(["%PDF-1.7\\n1 0 obj << /#45ncrypt 2 0 R >> endobj"], "escaped-locked.pdf", { type: "application/pdf" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => { conversionCalls++; return { format: "markdown", data: "unexpected" }; },
+      run: async () => { inferenceCalls++; return { response: "unexpected" }; },
+    },
+  });
+  const response = await worker.fetch(analysisRequest(pdf), env);
+  assert.equal(response.status, 422);
+  assert.equal((await json(response)).error, "ENCRYPTED_PDF_UNSUPPORTED");
+  assert.equal(conversionCalls, 0);
+  assert.equal(inferenceCalls, 0);
+});
