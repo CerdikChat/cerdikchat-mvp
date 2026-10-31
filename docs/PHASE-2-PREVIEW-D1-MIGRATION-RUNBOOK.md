@@ -7,12 +7,12 @@ This runbook applies schema migrations only to the isolated Cloudflare D1 databa
 It must not be used with `cerdikchat-db` or any Production configuration.
 
 ## Current staging status (31 October 2026)
-The two numbered migrations have already been applied to the isolated staging database through the Cloudflare D1 API. The standard `d1_migrations` table records `0001_users.sql` and `0002_sessions.sql`. Verification confirmed both application tables, their indexes, and the sessions-to-users foreign key. Both application tables contain zero rows.
+The first two migrations have already been applied to the isolated staging database. The RBAC migration `0003_user_roles_and_admin_audit.sql` is new in the follow-up branch and must be applied only after its code review and Preview build succeed. Check `d1_migrations` before applying anything. The existing staging `users` and `sessions` tables were previously verified empty.
 
 For the current staging database, run `migrations list` first; do not manually replay SQL. The `apply` command below is intended for a fresh staging database or any future unapplied migration.
 
 ## Preflight
-1. Confirm the active branch is `atlas9/phase-2-google-auth-implementation`.
+1. Confirm the active branch is `atlas9/phase-2-rbac-admin-bootstrap`.
 2. Confirm `wrangler.preview-migrations.toml` still points to the staging database ID above.
 3. Confirm the staging database contains no pilot user records.
 4. Do not add users until their Google immutable `sub` values have been verified.
@@ -26,14 +26,14 @@ npx wrangler d1 migrations apply cerdikchat-staging --remote --config wrangler.p
 npx wrangler d1 migrations list cerdikchat-staging --remote --config wrangler.preview-migrations.toml
 ```
 
-The expected applied migrations, in order, are:
+The expected migration sequence, in order, is:
 1. `0001_users.sql`
 2. `0002_sessions.sql`
 
 Wrangler records applied migrations in D1's `d1_migrations` table.
 
 ## Add an approved pilot user (separate approval)
-Only after the Google account has been verified and the account owner has approved access, insert its verified immutable `google_sub` and email. Do not guess or use an email address alone.
+Only after the Google account has been verified and the account owner has approved access, insert its verified immutable `google_sub` and email. Do not guess or use an email address alone. The RBAC migration adds `role` with a default of `user`; it does not promote any account. Assign `super_admin` only through a separately reviewed, explicit staging-only provisioning operation. Never expose a bootstrap or self-promotion endpoint.
 
 ```sql
 INSERT INTO users (google_sub, email, display_name, status)
@@ -59,10 +59,10 @@ WHERE type IN ('table', 'index')
 ORDER BY type, name;
 ```
 
-Expected application objects: `users`, `sessions`, and the three indexes above.
+Expected application objects include `users`, `sessions`, the existing indexes, and `admin_audit_log` with its actor/target indexes after migration 0003.
 
 ## Safety gate
 - No Production D1 migration.
 - No Production Worker variable or secret changes.
-- No seed data or pilot-user inserts in this migration step.
+- No seed data or pilot-user inserts in this migration step.\n- No account role promotion until the verified identity and role assignment are independently reviewed.\n- Administrative endpoints must enforce roles server-side; frontend visibility is not authorization.
 - Keep PR #20 Draft until Preview authentication and session lifecycle tests pass.
