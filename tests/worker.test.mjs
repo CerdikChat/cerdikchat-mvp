@@ -76,7 +76,7 @@ async function makeSignedGoogleToken(overrides = {}) {
   return { token, clientId, nonce, fetchJwks };
 }
 
-test("unlisted Google account receives its verified subject for admin allowlisting", async () => {
+test("unlisted Google account receives a generic rejection without identity data", async () => {
   const fixture = await makeSignedGoogleToken();
   const csrf = "C".repeat(43);
   const request = new Request("https://cerdikchat.test/api/auth/google", {
@@ -108,8 +108,8 @@ test("unlisted Google account receives its verified subject for admin allowlisti
   const payload = await json(response);
   assert.equal(response.status, 403);
   assert.equal(payload.error, "USER_NOT_ALLOWLISTED");
-  assert.equal(payload.googleSub, "12345678901234567890");
-  assert.equal(payload.email, "pilot.user@example.com");
+  assert.equal(payload.googleSub, undefined);
+  assert.equal(payload.email, undefined);
 });
 
 test("Google ID token verifies signature, audience, nonce and normalized email", async () => {
@@ -773,7 +773,11 @@ test("administrator session endpoint accepts only the database admin role", asyn
     }) }) }) }
   }));
   assert.equal(response.status, 200);
-  assert.equal((await json(response)).role, "admin");
+  const payload = await json(response);
+  assert.equal(payload.authenticated, true);
+  assert.equal(payload.role, "admin");
+  assert.equal(payload.subject, undefined);
+  assert.equal(payload.email, undefined);
 });
 
 test("administrator session endpoint fails closed when role is missing", async () => {
