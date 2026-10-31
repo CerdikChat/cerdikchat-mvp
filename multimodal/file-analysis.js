@@ -27,6 +27,15 @@ function json(data, status, corsHeaders) {
   });
 }
 
+function isEncryptedPdf(bytes) {
+  if (bytes.length < 5 || new TextDecoder().decode(bytes.subarray(0, 5)) !== "%PDF-") return false;
+  // PDF encryption is declared in the trailer dictionary. Treat an explicit
+  // /Encrypt entry as unsupported rather than sending password-protected data
+  // to conversion/inference where it would fail ambiguously.
+  const latin1 = Array.from(bytes, byte => String.fromCharCode(byte)).join("");
+  return /\/Encrypt(?:\s|\/|<|>|\[|$)/.test(latin1);
+}
+
 function hasSignature(bytes, kind) {
   if (kind === "pdf") return bytes.length >= 5 && new TextDecoder().decode(bytes.subarray(0, 5)) === "%PDF-";
   if (kind === "jpeg") return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
@@ -156,6 +165,9 @@ export async function handleFileAnalysis(request, env, corsHeaders = {}) {
   try { bytes = new Uint8Array(await file.arrayBuffer()); }
   catch { return json({ error: "FILE_READ_FAILED" }, 400, corsHeaders); }
   if (!hasSignature(bytes, spec.signature)) return json({ error: "FILE_SIGNATURE_MISMATCH" }, 415, corsHeaders);
+  if (spec.signature === "pdf" && isEncryptedPdf(bytes)) {
+    return json({ error: "ENCRYPTED_PDF_UNSUPPORTED" }, 422, corsHeaders);
+  }
 
   if (!env.AI || typeof env.AI.toMarkdown !== "function" || typeof env.AI.run !== "function") {
     return json({ error: "AI_BINDING_UNAVAILABLE" }, 503, corsHeaders);
