@@ -29,6 +29,7 @@ npx wrangler d1 migrations list cerdikchat-staging --remote --config wrangler.pr
 The expected migration sequence, in order, is:
 1. `0001_users.sql`
 2. `0002_sessions.sql`
+3. `0003_user_roles_and_admin_audit.sql` (only after RBAC code review and successful Preview validation)
 
 Wrangler records applied migrations in D1's `d1_migrations` table.
 
@@ -36,8 +37,8 @@ Wrangler records applied migrations in D1's `d1_migrations` table.
 Only after the Google account has been verified and the account owner has approved access, insert its verified immutable `google_sub` and email. Do not guess or use an email address alone. The RBAC migration adds `role` with a default of `user`; it does not promote any account. Assign `super_admin` only through a separately reviewed, explicit staging-only provisioning operation. Never expose a bootstrap or self-promotion endpoint.
 
 ```sql
-INSERT INTO users (google_sub, email, display_name, status)
-VALUES ('VERIFIED_GOOGLE_SUB', 'pilot@example.com', 'Pilot User', 'active');
+INSERT INTO users (google_sub, email, display_name, status, role)
+VALUES ('VERIFIED_GOOGLE_SUB', 'pilot@example.com', 'Pilot User', 'active', 'user');
 ```
 
 The login endpoint returns the verified `googleSub` and email only after Google token verification when the account is not yet allowlisted. Treat the subject as a stable personal identifier and share it only with the administrator provisioning the pilot.
@@ -64,5 +65,7 @@ Expected application objects include `users`, `sessions`, the existing indexes, 
 ## Safety gate
 - No Production D1 migration.
 - No Production Worker variable or secret changes.
-- No seed data or pilot-user inserts in this migration step.\n- No account role promotion until the verified identity and role assignment are independently reviewed.\n- Administrative endpoints must enforce roles server-side; frontend visibility is not authorization.
+- No seed data or pilot-user inserts in this migration step.
+- No account role promotion until the verified identity and role assignment are independently reviewed.
+- Administrative endpoints must enforce roles server-side; frontend visibility is not authorization.
 - Keep PR #20 Draft until Preview authentication and session lifecycle tests pass.
