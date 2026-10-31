@@ -20,12 +20,19 @@ test("day and night mode toggle is accessible and persists locally", () => {
   assert.match(indexHtml, /Aktifkan mode malam/);
   assert.match(indexHtml, /Aktifkan mode siang/);
 });
-\ntest("PWA registers a same-origin root-scoped service worker over secure contexts", () => {
+
+test("PWA registers a same-origin root-scoped service worker over secure contexts", () => {
   assert.match(indexHtml, /navigator\.serviceWorker\.register\("\/service-worker\.js", \{ scope: "\/" \}\)/);
   assert.match(indexHtml, /window\.isSecureContext/);
 });
 
-test("CerdikGo brand mark is used in the workspace and offline screen", () => {\n  assert.match(indexHtml, /href="\\/cerdikgo-mark\\.svg"/);\n  assert.match(indexHtml, /src="\\/cerdikgo-mark\\.svg"/);\n  assert.match(offlineHtml, /src="\\/cerdikgo-mark\\.svg"/);\n});\n\ntest("offline UI distinguishes network reachability from AI service health", () => {
+test("CerdikGo brand mark is used in the workspace and offline screen", () => {
+  assert.match(indexHtml, /href="\\/cerdikgo-mark\\.svg"/);
+  assert.match(indexHtml, /src="\\/cerdikgo-mark\\.svg"/);
+  assert.match(offlineHtml, /src="\\/cerdikgo-mark\\.svg"/);
+});
+
+test("offline UI distinguishes network reachability from AI service health", () => {
   assert.match(indexHtml, /navigator\.onLine/);
   assert.match(indexHtml, /Layanan AI diverifikasi saat permintaan dijalankan/);
   assert.match(indexHtml, /Chat, login, dan analisis file memerlukan internet/);
