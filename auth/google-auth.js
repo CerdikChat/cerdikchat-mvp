@@ -10,6 +10,8 @@ const GOOGLE_ISSUERS = new Set([
   "accounts.google.com",
 ]);
 const SESSION_COOKIE = "__Host-cerdikchat_session";
+const CSRF_COOKIE = "__Host-cerdikchat_csrf";
+const CSRF_TTL_SECONDS = 3600;
 const SESSION_TTL_SECONDS = 8 * 60 * 60;
 const MAX_TOKEN_LENGTH = 12_000;
 let jwksCache = { keys: null, expiresAt: 0 };
@@ -91,7 +93,11 @@ export async function verifyGoogleIdToken(token, clientId, options = {}) {
   if (!GOOGLE_ISSUERS.has(claims.iss)) throw new Error("GOOGLE_ISSUER_INVALID");
   const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
   if (!audiences.includes(clientId)) throw new Error("GOOGLE_AUDIENCE_INVALID");
+  if (audiences.length > 1 && claims.azp !== clientId) {
+    throw new Error("GOOGLE_AUTHORIZED_PARTY_INVALID");
+  }
   if (claims.azp && claims.azp !== clientId) throw new Error("GOOGLE_AUTHORIZED_PARTY_INVALID");
+  if (options.nonce && claims.nonce !== options.nonce) throw new Error("GOOGLE_NONCE_INVALID");
   if (!Number.isFinite(claims.exp) || claims.exp <= now) throw new Error("GOOGLE_TOKEN_EXPIRED");
   if (!Number.isFinite(claims.iat) || claims.iat > now + 60 || claims.iat < now - 3600) {
     throw new Error("GOOGLE_TOKEN_TIME_INVALID");
@@ -120,6 +126,27 @@ function toBase64Url(bytes) {
 async function sha256Hex(value) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function csrfCookieHeader(value, maxAge = CSRF_TTL_SECONDS) {
+  return `${CSRF_COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAge}`;
+}
+
+function constantTimeEqual(left, right) {
+  if (typeof left !== "string" || typeof right !== "string") return false;
+  if (left.length > 128 || right.length > 128) return false;
+  let difference = left.length ^ right.length;
+  const length = Math.max(left.length, right.length);
+  for (let index = 0; index < length; index++) {
+    difference |= (left.charCodeAt(index) || 0) ^ (right.charCodeAt(index) || 0);
+  }
+  return difference === 0;
+}
+
+function validCsrf(request) {
+  const cookieToken = getCookie(request, CSRF_COOKIE);
+  const headerToken = request.headers.get("X-CSRF-Token");
+  return constantTimeEqual(cookieToken, headerToken);
 }
 
 function cookieHeader(value, maxAge) {
@@ -162,13 +189,23 @@ function unavailable() {
 }
 
 export function authConfig(env) {
-  if (!env.GOOGLE_CLIENT_ID) return unavailable();
-  return authJson({ clientId: env.GOOGLE_CLIENT_ID, required: env.GOOGLE_AUTH_REQUIRED === "true" });
+  const csrfToken = toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
+  return authJson(
+    {
+      clientId: env.GOOGLE_CLIENT_ID || null,
+      required: env.GOOGLE_AUTH_REQUIRED === "true",
+      configured: Boolean(env.GOOGLE_CLIENT_ID),
+      csrfToken,
+    },
+    200,
+    { "set-cookie": csrfCookieHeader(csrfToken) }
+  );
 }
 
 export async function googleLogin(request, env) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
   if (!sameOrigin(request)) return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
+  if (!validCsrf(request)) return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
   if (!env.GOOGLE_CLIENT_ID || !env.DB) return unavailable();
 
   let body;
@@ -180,11 +217,15 @@ export async function googleLogin(request, env) {
     return authJson({ error: "INVALID_JSON" }, 400);
   }
   const credential = body && typeof body.credential === "string" ? body.credential : "";
+  const nonce = body && typeof body.nonce === "string" ? body.nonce : "";
   if (!credential) return authJson({ error: "GOOGLE_CREDENTIAL_REQUIRED" }, 400);
+  if (!/^[A-Za-z0-9_-]{32,128}$/.test(nonce)) {
+    return authJson({ error: "GOOGLE_NONCE_REQUIRED" }, 400);
+  }
 
   let identity;
   try {
-    identity = await verifyGoogleIdToken(credential, env.GOOGLE_CLIENT_ID);
+    identity = await verifyGoogleIdToken(credential, env.GOOGLE_CLIENT_ID, { nonce });
   } catch (error) {
     const code = typeof error?.message === "string" ? error.message : "GOOGLE_TOKEN_INVALID";
     const status = code === "GOOGLE_JWKS_UNAVAILABLE" || code === "GOOGLE_CLIENT_ID_MISSING" ? 503 : 401;
@@ -263,6 +304,7 @@ export async function requireSession(request, env) {
 export async function logout(request, env) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
   if (!sameOrigin(request)) return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
+  if (!validCsrf(request)) return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
   const sessionId = getCookie(request, SESSION_COOKIE);
   if (sessionId && env.DB) {
     try {
