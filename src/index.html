@@ -719,10 +719,11 @@
         <h2 id="portalTitle">Pilih portal akses</h2>
         <p>Gunakan akun Google terverifikasi. Server akan menentukan peran akun; pilihan portal ini bukan pemberian hak akses.</p>
         <div class="portal-grid">
-          <article class="portal-card"><h3>Administrator Portal</h3><p>Akses khusus administrator yang telah diprovisikan dan diverifikasi.</p><div class="portal-google" id="googleAdminSignIn"></div></article>
-          <article class="portal-card"><h3>User Portal</h3><p>Masuk ke workspace AI CerdikGo dengan akun pengguna yang diizinkan.</p><div class="portal-google" id="googleUserSignIn"></div></article>
+          <article class="portal-card"><h3>Administrator Portal</h3><p>Akses khusus administrator yang telah diprovisikan dan diverifikasi.</p><button class="settings-button" id="chooseAdminPortal" type="button">Lanjutkan sebagai Administrator</button></article>
+          <article class="portal-card"><h3>User Portal</h3><p>Masuk ke workspace AI CerdikGo dengan akun pengguna yang diizinkan.</p><button class="settings-button" id="chooseUserPortal" type="button">Lanjutkan sebagai User</button></article>
         </div>
-        <p class="portal-note">Jika memilih portal yang tidak sesuai dengan peran akun, server akan menolak login tanpa mengubah hak akses.</p>
+        <div class="portal-google" id="portalGoogleSignIn" hidden></div>
+        <p class="portal-note">Setelah memilih portal, lanjutkan dengan Google. Pilihan ini hanya menyatakan tujuan login; server tetap memeriksa peran akun.</p>
       </section>
       <section class="admin-placeholder" id="adminPlaceholder" hidden><h2>Administrator Control Center</h2><p>Autentikasi administrator terverifikasi. Modul pengelolaan belum diaktifkan; tidak ada kontrol administratif simulatif pada tahap ini.</p><button class="auth-logout" id="adminLogout" type="button">Keluar</button></section>
 
@@ -853,8 +854,9 @@
     const authTitle = document.querySelector("#authTitle");
     const authMessage = document.querySelector("#authMessage");
     const googleSignIn = document.querySelector("#googleSignIn");
-    const googleAdminSignIn = document.querySelector("#googleAdminSignIn");
-    const googleUserSignIn = document.querySelector("#googleUserSignIn");
+    const portalGoogleSignIn = document.querySelector("#portalGoogleSignIn");
+    const chooseAdminPortal = document.querySelector("#chooseAdminPortal");
+    const chooseUserPortal = document.querySelector("#chooseUserPortal");
     const portalGate = document.querySelector("#portalGate");
     const adminPlaceholder = document.querySelector("#adminPlaceholder");
     const adminLogout = document.querySelector("#adminLogout");
@@ -866,6 +868,7 @@
     let authConfigured = false;
     let isAuthenticated = false;
     let currentRole = "";
+    let selectedPortal = "user";
     let csrfToken = "";
     let googleClientId = "";
 
@@ -884,8 +887,9 @@
         : "";
       authUser.hidden = !isAuthenticated;
       googleSignIn.hidden = true;
-      googleAdminSignIn.hidden = isAuthenticated || !authConfigured;
-      googleUserSignIn.hidden = isAuthenticated || !authConfigured;
+      portalGoogleSignIn.hidden = isAuthenticated || !authConfigured || !portalGoogleSignIn.childElementCount;
+      chooseAdminPortal.hidden = isAuthenticated || !authConfigured;
+      chooseUserPortal.hidden = isAuthenticated || !authConfigured;
       authLogout.hidden = !isAuthenticated;
       input.disabled = authRequired && !isAuthenticated;
       send.disabled = authRequired && !isAuthenticated;
@@ -987,7 +991,8 @@
       try {
         await loadGoogleIdentityServices();
         const nonce = createNonce();
-        const target = portal === "admin" ? googleAdminSignIn : googleUserSignIn;
+        selectedPortal = portal;
+        const target = portalGoogleSignIn;
         window.google.accounts.id.initialize({
           client_id: googleClientId,
           nonce,
@@ -1051,7 +1056,7 @@
           } else {
             throw new Error("Status sesi tidak dapat diverifikasi.");
           }
-          if (!isAuthenticated && authConfigured) { await renderGoogleButton("admin"); await renderGoogleButton("user"); }
+          if (!isAuthenticated && authConfigured) { portalGate.hidden = false; }
         } else {
           isAuthenticated = false;
           updateAuthUI();
@@ -1092,8 +1097,7 @@
         if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
         updateAuthUI();
         setStatus("Anda telah keluar.");
-        await renderGoogleButton("admin");
-        await renderGoogleButton("user");
+        portalGate.hidden = false;
       } catch (error) {
         setStatus(error instanceof Error ? error.message : "Logout gagal.", true);
       } finally {
@@ -1101,6 +1105,8 @@
       }
     }
 
+    chooseAdminPortal.addEventListener("click", () => { selectedPortal = "admin"; portalGoogleSignIn.hidden = false; renderGoogleButton("admin"); });
+    chooseUserPortal.addEventListener("click", () => { selectedPortal = "user"; portalGoogleSignIn.hidden = false; renderGoogleButton("user"); });
     authLogout.addEventListener("click", logoutFromCerdikChat);
     adminLogout.addEventListener("click", logoutFromCerdikChat);
 
