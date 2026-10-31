@@ -253,7 +253,7 @@ export async function googleLogin(request, env, options = {}) {
   let user;
   try {
     user = await env.DB.prepare(
-      "SELECT google_sub, email, display_name, status FROM users WHERE google_sub = ? LIMIT 1"
+      "SELECT google_sub, email, display_name, status, role FROM users WHERE google_sub = ? LIMIT 1"
     ).bind(identity.sub).first();
   } catch {
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
@@ -282,7 +282,7 @@ export async function googleLogin(request, env, options = {}) {
   }
 
   return authJson(
-    { authenticated: true, user: { email: user.email, displayName: user.display_name || identity.name } },
+    { authenticated: true, user: { email: user.email, displayName: user.display_name || identity.name, role: user.role || "user" } },
     200,
     { "set-cookie": cookieHeader(sessionId, SESSION_TTL_SECONDS) }
   );
@@ -296,10 +296,10 @@ export async function currentSession(request, env) {
   const now = Math.floor(Date.now() / 1000);
   try {
     const row = await env.DB.prepare(
-      "SELECT s.google_sub, u.email, u.display_name FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
+      "SELECT s.google_sub, u.email, u.display_name, u.role FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
     ).bind(hash, now).first();
     if (!row) return authJson({ authenticated: false }, 401, { "set-cookie": clearCookieHeader() });
-    return authJson({ authenticated: true, user: { email: row.email, displayName: row.display_name || "" } });
+    return authJson({ authenticated: true, user: { email: row.email, displayName: row.display_name || "", role: row.role || "user" } });
   } catch {
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
   }
@@ -315,10 +315,10 @@ export async function requireSession(request, env) {
   const now = Math.floor(Date.now() / 1000);
   try {
     const row = await env.DB.prepare(
-      "SELECT s.google_sub, u.email FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
+      "SELECT s.google_sub, u.email, u.role FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
     ).bind(hash, now).first();
     if (!row) return { ok: false, response: authJson({ error: "AUTH_REQUIRED" }, 401, { "set-cookie": clearCookieHeader() }) };
-    return { ok: true, subject: row.google_sub, email: row.email };
+    return { ok: true, subject: row.google_sub, email: row.email, role: row.role || "user" };
   } catch {
     return { ok: false, response: authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503) };
   }
@@ -340,4 +340,35 @@ export async function logout(request, env) {
     }
   }
   return authJson({ authenticated: false }, 200, { "set-cookie": clearCookieHeader() });
+}
+
+
+/**
+ * Server-side authorization gate for administrative routes.
+ * UI visibility is never treated as an authorization control.
+ */
+export async function requireAdmin(request, env) {
+  const session = await requireSession(request, env);
+  if (!session.ok) return session;
+  if (session.role !== "admin" && session.role !== "super_admin") {
+    return {
+      ok: false,
+      response: authJson({ error: "ADMIN_REQUIRED" }, 403),
+    };
+  }
+  return session;
+}
+
+export async function adminMe(request, env) {
+  if (request.method !== "GET") {
+    return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "GET" });
+  }
+  const admin = await requireAdmin(request, env);
+  if (!admin.ok) return admin.response;
+  return authJson({
+    authenticated: true,
+    email: admin.email,
+    role: admin.role,
+    subject: admin.subject,
+  });
 }

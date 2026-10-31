@@ -96,7 +96,7 @@ test("unlisted Google account receives its verified subject for admin allowlisti
       prepare: (sql) => ({
         bind: () => ({
           first: async () => {
-            assert.match(sql, /SELECT google_sub, email, display_name, status FROM users/);
+            assert.match(sql, /SELECT google_sub, email, display_name, status, role FROM users/);
             return null;
           }
         })
@@ -507,4 +507,59 @@ test("logout rejects cross-origin requests", async () => {
   );
   assert.equal(response.status, 403);
   assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
+});
+
+
+test("admin identity endpoint rejects unauthenticated requests", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/admin/me"),
+    makeEnv({ DB: { prepare: () => ({ bind: () => ({ first: async () => null }) }) } })
+  );
+  assert.equal(response.status, 401);
+  assert.equal((await json(response)).error, "AUTH_REQUIRED");
+});
+
+test("admin identity endpoint blocks ordinary users server-side", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/admin/me", {
+      headers: { cookie: "__Host-cerdikchat_session=" + "S".repeat(43) }
+    }),
+    makeEnv({
+      DB: {
+        prepare: (sql) => ({
+          bind: () => ({
+            first: async () => sql.includes("FROM sessions")
+              ? { google_sub: "12345678901234567890", email: "user@example.com", role: "user" }
+              : null
+          })
+        })
+      }
+    })
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ADMIN_REQUIRED");
+});
+
+test("admin identity endpoint returns role only for an authorized administrator", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/admin/me", {
+      headers: { cookie: "__Host-cerdikchat_session=" + "S".repeat(43) }
+    }),
+    makeEnv({
+      DB: {
+        prepare: (sql) => ({
+          bind: () => ({
+            first: async () => sql.includes("FROM sessions")
+              ? { google_sub: "12345678901234567890", email: "admin@example.com", role: "super_admin" }
+              : null
+          })
+        })
+      }
+    })
+  );
+  const payload = await json(response);
+  assert.equal(response.status, 200);
+  assert.equal(payload.authenticated, true);
+  assert.equal(payload.role, "super_admin");
+  assert.equal(payload.email, "admin@example.com");
 });
