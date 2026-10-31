@@ -738,6 +738,35 @@
       .suggest,.prompt,.send { transition:none !important; }
     }
 
+
+    /* ATLAS-9 Mobile UX: conversation-first hierarchy and compact discovery */
+    .feature-expand{display:none}
+    @media(max-width:720px){
+      .main{display:flex;flex-direction:column}
+      .feed{order:1;flex:1 0 auto;padding-bottom:18px}
+      .workspace{order:2;margin:4px 12px 16px}
+      .composer-wrap{order:3}
+      .welcome{margin:12px auto 18px}
+      .welcome::before{width:42px;height:42px;margin-bottom:7px}
+      .suggestions{margin-top:12px}
+      .suggest{min-height:74px;padding:10px}
+      .feature-grid:not(.expanded) .feature-card:nth-child(n+4){display:none}
+      .feature-expand{display:block;width:100%;min-height:44px;margin-top:9px;padding:10px 12px;border:1px solid #245779;border-radius:11px;background:#102943;color:#bdeaff;font-weight:750}
+      .top-actions{gap:6px}
+      .settings-button,.theme-toggle{min-height:42px;padding:8px 10px}
+      .composer textarea{min-height:44px}
+      .send{min-height:42px}
+    }
+    @media(max-width:360px){
+      .top strong{display:none}
+      .top-actions{gap:5px}
+      .settings-button,.theme-toggle{font-size:11px;padding-inline:8px}
+      .welcome h1{font-size:25px}
+      .suggest{min-height:78px}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .feature-expand{scroll-behavior:auto;transition:none}
+    }
   </style>
 </head>
 
@@ -845,7 +874,7 @@
           <div><h2>Explore your AI workspace</h2><p>One intelligent workspace. Multiple ways to create, analyze, and discover.</p></div>
           <span class="workspace-tag">CERDIKGO · PILOT</span>
         </div>
-        <div class="feature-grid">
+        <div class="feature-grid" id="featureGrid">
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">✦</div><strong>AI Chat Assistant</strong><small>Natural conversation and guided assistance</small><span class="feature-state">Core available</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">▤</div><strong>PDF & Documents</strong><small>Document reading, extraction, and insight</small><span class="feature-state soon">UI preview</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">▧</div><strong>Image Intelligence</strong><small>Visual understanding and image analysis</small><span class="feature-state soon">UI preview</span></article>
@@ -855,6 +884,7 @@
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌘</div><strong>AI Tools & Agents</strong><small>Bounded tools and multi-step workflows</small><span class="feature-state soon">Coming soon</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">◷</div><strong>Conversation History</strong><small>Return to your previous work sessions</small><span class="feature-state soon">Coming soon</span></article>
         </div>
+        <button class="feature-expand" id="featureExpand" type="button" aria-expanded="false" aria-controls="featureGrid">Lihat semua fitur ↓</button>
         <div class="multimodal-panel">
           <div class="multi-top"><div><strong>Multimodal document workspace</strong><br><small>PDF · PNG · JPG · WEBP</small></div><span class="workspace-tag">VALIDATION GATE</span></div>
           <div class="upload-preview">
@@ -944,6 +974,17 @@
     }
     applyTheme(readThemePreference());
     themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true));
+
+
+    const featureGrid = document.querySelector("#featureGrid");
+    const featureExpand = document.querySelector("#featureExpand");
+    if (featureGrid && featureExpand) {
+      featureExpand.addEventListener("click", () => {
+        const expanded = featureGrid.classList.toggle("expanded");
+        featureExpand.setAttribute("aria-expanded", String(expanded));
+        featureExpand.textContent = expanded ? "Tampilkan lebih sedikit ↑" : "Lihat semua fitur ↓";
+      });
+    }
 
     const form = document.querySelector("#chatForm");
     const input = document.querySelector("#message");
