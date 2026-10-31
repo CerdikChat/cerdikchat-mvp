@@ -1806,8 +1806,7 @@
       reviseButton.addEventListener("click", () => {
         input.value = "Mohon revisi jawaban sebelumnya. Perhatikan kembali kebutuhan saya dan perbaiki bagian yang belum tepat.";
         updateCount();
-        input.focus();
-        setStatus("Instruksi revisi sudah disiapkan. Periksa lalu tekan Kirim.");
+        setStatus("Instruksi revisi sudah disiapkan. Ketuk kolom pesan untuk mengedit, lalu tekan Kirim.");
       });
 
       actions.append(acceptButton, reviseButton, note);
@@ -1819,7 +1818,7 @@
 
       input.value = prompt;
       updateCount();
-      input.focus();
+      setStatus("Contoh pertanyaan sudah dimasukkan. Ketuk kolom pesan untuk mengedit atau tekan Kirim.");
     }
 
     document.querySelectorAll("[data-prompt]").forEach(button => {
@@ -1960,7 +1959,8 @@
         input.disabled = authRequired && !isAuthenticated;
         send.textContent = "Kirim ↑";
         form.removeAttribute("aria-busy");
-        input.focus();
+        // Do not programmatically focus the composer: Android's virtual
+        // keyboard should open only after an explicit user tap on the field.
         scrollToLatest();
       }
     }
