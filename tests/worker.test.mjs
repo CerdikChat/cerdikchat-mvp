@@ -54,6 +54,8 @@ test("static assets receive browser security headers", async () => {
   assert.equal(response.headers.get("x-frame-options"), "DENY");
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
   assert.match(response.headers.get("content-security-policy"), /default-src 'self'/);
+  assert.match(response.headers.get("content-security-policy"), /accounts\\.google\\.com\\/gsi\\/client/);
+  assert.match(response.headers.get("content-security-policy"), /frame-src https:\\/\\/accounts\\.google\\.com\\/gsi\\//);
   assert.match(response.headers.get("content-security-policy"), /frame-ancestors 'none'/);
   assert.equal(response.headers.get("permissions-policy"), "camera=(), microphone=(), geolocation=()");
   assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000; includeSubDomains");
@@ -257,13 +259,55 @@ test("Google auth configuration exposes only public client ID and required mode"
   assert.equal(response.headers.get("cache-control"), "no-store");
 });
 
-test("Google auth configuration fails closed when client ID is missing", async () => {
+test("Google auth configuration reports an unconfigured optional mode safely", async () => {
   const response = await worker.fetch(
     new Request("https://cerdikchat.test/api/auth/config"),
     makeEnv()
   );
-  assert.equal(response.status, 503);
-  assert.equal((await json(response)).error, "AUTH_UNAVAILABLE");
+  const payload = await json(response);
+  assert.equal(response.status, 200);
+  assert.equal(payload.clientId, null);
+  assert.equal(payload.configured, false);
+  assert.equal(payload.required, false);
+  assert.match(payload.csrfToken, /^[A-Za-z0-9_-]{43}$/);
+  assert.match(response.headers.get("set-cookie"), /HttpOnly; Secure; SameSite=Strict/);
+});
+
+
+test("Google auth configuration reports required mode even when client ID is missing", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/config"),
+    makeEnv({ GOOGLE_AUTH_REQUIRED: "true" })
+  );
+  const payload = await json(response);
+  assert.equal(response.status, 200);
+  assert.equal(payload.required, true);
+  assert.equal(payload.configured, false);
+});
+
+test("Google login rejects same-origin requests without the CSRF double-submit token", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/google", {
+      method: "POST",
+      headers: { origin: "https://cerdikchat.test", "content-type": "application/json" },
+      body: JSON.stringify({ credential: "not-a-real-token", nonce: "a".repeat(43) }),
+    }),
+    makeEnv({ GOOGLE_CLIENT_ID: "test-client.apps.googleusercontent.com", DB: {} })
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "CSRF_VALIDATION_FAILED");
+});
+
+test("logout rejects same-origin requests without the CSRF double-submit token", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/logout", {
+      method: "POST",
+      headers: { origin: "https://cerdikchat.test" },
+    }),
+    makeEnv()
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "CSRF_VALIDATION_FAILED");
 });
 
 test("protected chat rejects missing or unknown session before rate limiter and AI", async () => {
