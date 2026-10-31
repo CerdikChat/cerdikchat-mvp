@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { googleLogin } from "../auth/google-auth.js";
+import { googleLogin, requireSession, requireAdminSession } from "../auth/google-auth.js";
 
 function b64(value) {
   return Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -46,7 +46,7 @@ async function signedToken() {
   };
 }
 
-function loginRequest(fixture) {
+function loginRequest(fixture, portal = "admin") {
   const csrf = "C".repeat(43);
   return new Request("https://cerdikchat.test/api/auth/google", {
     method: "POST",
@@ -60,7 +60,7 @@ function loginRequest(fixture) {
     body: JSON.stringify({
       credential: fixture.token,
       nonce: fixture.nonce,
-      portal: "admin",
+      portal,
     }),
   });
 }
@@ -154,4 +154,141 @@ test("bootstrap insert conflict without a matching Google subject fails closed",
   assert.equal(response.status, 503);
   assert.equal(payload.error, "AUTH_DATABASE_UNAVAILABLE");
   assert.equal(response.headers.get("set-cookie"), null);
+});
+
+
+test("allowlisted email already owned by another Google subject is rejected", async () => {
+  const fixture = await signedToken();
+  let sessionCreated = false;
+  const DB = {
+    prepare(sql) {
+      return {
+        bind() {
+          return {
+            first: async () => {
+              if (sql.includes("WHERE google_sub =")) return null;
+              if (sql.includes("admin_bootstrap_allowlist")) return { email: "admin@example.com" };
+              if (sql.includes("WHERE email =")) return {
+                google_sub: "99999999999999999999",
+                email: "admin@example.com",
+                role: "admin",
+                status: "active",
+              };
+              throw new Error(`Unexpected query: ${sql}`);
+            },
+            run: async () => {
+              if (sql.startsWith("INSERT INTO sessions")) sessionCreated = true;
+              throw new Error("Unexpected mutation");
+            },
+          };
+        },
+      };
+    },
+  };
+  const response = await googleLogin(loginRequest(fixture), {
+    GOOGLE_CLIENT_ID: fixture.clientId,
+    DB,
+    CHAT_RATE_LIMITER: { limit: async () => ({ success: true }) },
+  }, { fetch: fixture.fetchJwks });
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).error, "IDENTITY_CONFLICT");
+  assert.equal(sessionCreated, false);
+});
+
+test("standard user cannot enter administrator portal", async () => {
+  const fixture = await signedToken();
+  let sessionCreated = false;
+  const DB = {
+    prepare(sql) {
+      return {
+        bind() {
+          return {
+            first: async () => {
+              if (sql.includes("WHERE google_sub =")) return {
+                google_sub: "12345678901234567890",
+                email: "admin@example.com",
+                display_name: "Pilot User",
+                status: "active",
+                role: "user",
+              };
+              throw new Error(`Unexpected query: ${sql}`);
+            },
+            run: async () => {
+              sessionCreated = true;
+              return { success: true };
+            },
+          };
+        },
+      };
+    },
+  };
+  const response = await googleLogin(loginRequest(fixture, "admin"), {
+    GOOGLE_CLIENT_ID: fixture.clientId,
+    DB,
+    CHAT_RATE_LIMITER: { limit: async () => ({ success: true }) },
+  }, { fetch: fixture.fetchJwks });
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).error, "ROLE_MISMATCH");
+  assert.equal(sessionCreated, false);
+});
+
+test("session role is re-read from D1 on every authorization check", async () => {
+  const sessionId = "S".repeat(43);
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(sessionId));
+  const expectedHash = [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+  let role = "user";
+  const DB = {
+    prepare(sql) {
+      assert.match(sql, /JOIN users u ON u\.google_sub = s\.google_sub/);
+      return {
+        bind(hash) {
+          assert.equal(hash, expectedHash);
+          return {
+            first: async () => ({
+              google_sub: "12345678901234567890",
+              email: "admin@example.com",
+              role,
+            }),
+          };
+        },
+      };
+    },
+  };
+  const request = new Request("https://cerdikchat.test/api/auth/me", {
+    headers: { cookie: `__Host-cerdikchat_session=${sessionId}` },
+  });
+  const first = await requireSession(request, { DB });
+  assert.equal(first.ok, true);
+  assert.equal(first.role, "user");
+
+  role = "admin";
+  const second = await requireSession(request, { DB });
+  assert.equal(second.ok, true);
+  assert.equal(second.role, "admin");
+});
+
+test("super_admin is accepted by server-side administrator authorization", async () => {
+  const sessionId = "T".repeat(43);
+  const DB = {
+    prepare(sql) {
+      assert.match(sql, /SELECT s\.google_sub, u\.email, u\.role/);
+      return {
+        bind() {
+          return {
+            first: async () => ({
+              google_sub: "12345678901234567890",
+              email: "root@example.com",
+              role: "super_admin",
+            }),
+          };
+        },
+      };
+    },
+  };
+  const request = new Request("https://cerdikchat.test/api/admin/session", {
+    headers: { cookie: `__Host-cerdikchat_session=${sessionId}` },
+  });
+  const result = await requireAdminSession(request, { DB });
+  assert.equal(result.ok, true);
+  assert.equal(result.role, "super_admin");
 });
