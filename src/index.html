@@ -10,7 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="CerdikGo">
   <meta name="color-scheme" content="dark">
-  <link rel="icon" type="image/svg+xml" href="/cerdikgo-mark.svg">\n  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/cerdikgo-mark.svg">
+  <link rel="manifest" href="/manifest.webmanifest">
   <title>CerdikGo — Innovation Workspace</title>
 
   <style>
@@ -623,6 +624,17 @@
     html[data-theme="light"] .network-state{background:#e4f5ee;color:#17664e;border-color:#a4d7c2}html[data-theme="light"] .network-state.offline{background:#fff4dc;color:#805411;border-color:#e7c77e}
     html[data-theme="light"] .content blockquote{background:#edf3fa;color:#52657d}html[data-theme="light"] .content th{background:#e8eff8}html[data-theme="light"] .content td,html[data-theme="light"] .content th{border-color:#cbd7e6}html[data-theme="light"] .content code,html[data-theme="light"] .content .math,html[data-theme="light"] .content .math-block{background:#edf3fa;border-color:#cbd7e6;color:#243b55}html[data-theme="light"] .content pre{background:#f0f4f9;border-color:#cbd7e6}
     @media(max-width:720px){.top-actions{gap:6px}.theme-toggle{min-height:36px;padding:7px 9px;font-size:11px}}
+
+    .settings-dialog{width:min(560px,calc(100vw - 28px));max-height:min(82dvh,720px);overflow:auto;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--text);box-shadow:0 24px 80px #0008}
+    .settings-dialog::backdrop{background:#020817a8;backdrop-filter:blur(4px)}
+    .settings-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+    .settings-head h2{margin:0;font-size:17px}.settings-body{padding:16px 18px}
+    .settings-section{padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel2)}
+    .settings-section p{margin:5px 0 0;color:var(--muted);font-size:12px}
+    .settings-close{min-width:38px;min-height:38px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font-size:19px;cursor:pointer}
+    .settings-button{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--text);font-size:12px;font-weight:750;cursor:pointer}
+    .auth-panel{max-width:none;margin:12px 0 0;padding:0;border:0;background:transparent}.auth-actions{margin-top:10px}
+    html[data-theme="light"] .settings-dialog{background:#fff;color:#14243a}html[data-theme="light"] .settings-section{background:#f2f6fc}
   </style>
 </head>
 
@@ -674,13 +686,24 @@
         </div>
 
         <strong>CerdikGo · Innovation Workspace</strong>
-        <div class="top-actions"><span class="pill">● AI · Beta</span><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
+        <div class="top-actions"><span class="pill">● AI · Beta</span><button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
       </header>
 
-      <section class="auth-panel" id="authPanel" hidden aria-live="polite">
-        <div><strong id="authTitle">Akses CerdikGo</strong><br><small id="authMessage">Masuk dengan akun Google yang telah diizinkan.</small></div>
-        <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
-      </section>
+      <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
+        <div class="settings-head"><div><h2 id="settingsTitle">Pengaturan</h2><small>Preferensi workspace dan keamanan akun</small></div><button class="settings-close" id="settingsClose" type="button" aria-label="Tutup pengaturan">×</button></div>
+        <div class="settings-body">
+          <section class="settings-section" aria-labelledby="accountSettingsTitle">
+            <strong id="accountSettingsTitle">Akun & akses</strong>
+            <p>Kelola sesi Google Sign-In CerdikGo. Akses tetap mengikuti kebijakan allowlist administrator.</p>
+            <section class="auth-panel" id="authPanel" hidden aria-live="polite">
+              <div><strong id="authTitle">Akses CerdikGo</strong><br><small id="authMessage">Masuk dengan akun Google yang telah diizinkan.</small></div>
+              <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
+            </section>
+            <p id="authUnavailable" hidden>Konfigurasi autentikasi belum tersedia. Silakan hubungi administrator.</p>
+          </section>
+          <section class="settings-section" style="margin-top:12px"><strong>Tampilan</strong><p>Gunakan tombol Mode siang / Mode malam pada bilah atas untuk mengganti tema. Preferensi disimpan di browser ini.</p></section>
+        </div>
+      </dialog>
 
 
       <section class="workspace" aria-label="CerdikGo feature workspace">
@@ -794,6 +817,14 @@
     const statusEl = document.querySelector("#status");
     const count = document.querySelector("#count");
 
+    const settingsDialog = document.querySelector("#settingsDialog");
+    const settingsOpen = document.querySelector("#settingsOpen");
+    const settingsClose = document.querySelector("#settingsClose");
+    const authUnavailable = document.querySelector("#authUnavailable");
+    settingsOpen.addEventListener("click", () => { if (!settingsDialog.open) settingsDialog.showModal(); });
+    settingsClose.addEventListener("click", () => settingsDialog.close());
+    settingsDialog.addEventListener("click", event => { if (event.target === settingsDialog) settingsDialog.close(); });
+
     const authPanel = document.querySelector("#authPanel");
     const authTitle = document.querySelector("#authTitle");
     const authMessage = document.querySelector("#authMessage");
@@ -885,8 +916,7 @@
         const payload = await result.json();
         if (!result.ok) {
           if (payload.error === "USER_NOT_ALLOWLISTED") {
-            authMessage.textContent = `Akun ${payload.email || "Google"} belum diizinkan. Google sub: ${payload.googleSub || "tidak tersedia"}`;
-            throw new Error(`Akun belum masuk allowlist. Google sub: ${payload.googleSub || "tidak tersedia"}`);
+            authMessage.textContent = "Akun Google ini belum memiliki akses. Hubungi administrator CerdikGo.";\n            throw new Error("Akun Google belum memiliki akses ke CerdikGo. Hubungi administrator.");
           }
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
@@ -941,7 +971,7 @@
         const config = await response.json();
         if (!response.ok) throw new Error(config.message || config.error || "Konfigurasi autentikasi tidak tersedia.");
         csrfToken = typeof config.csrfToken === "string" ? config.csrfToken : "";
-        authRequired = config.required === true;
+        authRequired = config.required === true;\n        authUnavailable.hidden = authRequired || authConfigured;
         authConfigured = config.configured === true && typeof config.clientId === "string";
         googleClientId = authConfigured ? config.clientId : "";
 
