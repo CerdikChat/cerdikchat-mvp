@@ -26,6 +26,7 @@
 "use strict";
 
 import { authConfig, googleLogin, currentSession, logout, requireSession } from "./auth/google-auth.js";
+import { handleFileAnalysis } from "./multimodal/file-analysis.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1473,6 +1474,21 @@ export default {
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
     if (url.pathname === "/api/auth/logout") return logout(request, env);
+
+    if (url.pathname === "/api/analyze") {
+      const analysisCors = {
+        ...corsHeaders,
+        "access-control-allow-methods": "POST, OPTIONS",
+        "access-control-allow-headers": "Content-Type, X-CSRF-Token",
+      };
+      if (request.method === "OPTIONS") {
+        if (!isSameOriginOrNoOrigin(request)) {
+          return errorResponse("ORIGIN_NOT_ALLOWED", "Origin permintaan tidak diizinkan.", 403, analysisCors);
+        }
+        return new Response(null, { status: 204, headers: analysisCors });
+      }
+      return handleFileAnalysis(request, env, analysisCors);
+    }
 
     if (url.pathname === CONFIG.API_PATH) {
       if (request.method === "OPTIONS") {
