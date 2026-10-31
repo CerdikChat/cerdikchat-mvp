@@ -613,3 +613,29 @@ test("file analysis treats extracted content as untrusted and does not persist i
   assert.match(captured[1].content, /BEGIN UNTRUSTED FILE CONTENT/);
   assert.equal((await json(response)).persisted, false);
 });
+
+
+test("file analysis accepts a PDF signature and uses the conversion binding", async () => {
+  let convertedMime;
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async (document) => {
+        convertedMime = document.blob.type;
+        return { format: "markdown", data: "Page 1: Pilot report content." };
+      },
+      run: async () => ({ response: "PDF berhasil dianalisis." }),
+    },
+  });
+  const pdf = new File(["%PDF-1.7\\nbody"], "report.pdf", { type: "application/pdf" });
+  const response = await worker.fetch(analysisRequest(pdf), env);
+  assert.equal(response.status, 200);
+  assert.equal(convertedMime, "application/pdf");
+  assert.equal((await json(response)).reply, "PDF berhasil dianalisis.");
+});
+
+test("file analysis enforces the 10 MiB per-file limit", async () => {
+  const oversized = new File([new Uint8Array(10 * 1024 * 1024 + 1)], "large.png", { type: "image/png" });
+  const response = await worker.fetch(analysisRequest(oversized), authenticatedAnalysisEnv());
+  assert.equal(response.status, 413);
+  assert.equal((await json(response)).error, "FILE_TOO_LARGE");
+});
