@@ -666,9 +666,10 @@ test("file analysis maps document conversion errors to a controlled 422", async 
   });
   const response = await worker.fetch(analysisRequest(png), env);
   assert.equal(response.status, 422);
-  assert.equal((await json(response)).error, "DOCUMENT_EXTRACTION_FAILED");
+  const payload = await json(response);
+  assert.equal(payload.error, "DOCUMENT_EXTRACTION_FAILED");
   assert.equal(inferenceCalls, 0);
-  assert.equal(JSON.stringify(await json(response)).includes("private conversion detail"), false);
+  assert.equal(JSON.stringify(payload).includes("private conversion detail"), false);
 });
 
 test("file analysis maps Workers AI quota exhaustion to HTTP 429", async () => {
