@@ -766,12 +766,13 @@
       .jump-latest{display:flex;justify-content:flex-end;max-width:760px;margin:0 auto 8px}
       .jump-latest button{min-height:40px;padding:8px 13px;border:1px solid #287b91;border-radius:999px;background:#10334a;color:#c8f7ff;font:inherit;font-size:12px;font-weight:800;box-shadow:0 5px 18px #0004}
       .jump-latest[hidden]{display:none!important}
-      .conversation-active .workspace{margin-bottom:8px}
-      .conversation-active .workspace-head{margin-bottom:6px}
-      .conversation-active .workspace-head p{display:none}
+      .conversation-active .workspace{margin:0 12px 8px}
+      .conversation-active .workspace-head{display:none}
       .conversation-active .feature-grid:not(.expanded){display:none}
       .conversation-active .multimodal-panel{display:none}
-      .conversation-active .feature-expand{display:block}
+      .conversation-active .feature-expand{display:block;width:100%;min-height:42px;margin:0;padding:9px 14px;border:1px solid #1b5878;border-radius:12px;background:#0d2238;color:#bdeefa;font-size:12px;font-weight:800}
+      .conversation-active .workspace.workspace-expanded .workspace-head{display:flex;margin:0 0 8px}
+      .conversation-active .workspace.workspace-expanded .workspace-head p{display:none}
     }
     @media(max-width:720px){
       .main{display:flex;flex-direction:column}
@@ -1019,9 +1020,11 @@
 
     const featureGrid = document.querySelector("#featureGrid");
     const featureExpand = document.querySelector("#featureExpand");
-    if (featureGrid && featureExpand) {
+    const workspace = document.querySelector(".workspace");
+    if (featureGrid && featureExpand && workspace) {
       featureExpand.addEventListener("click", () => {
         const expanded = featureGrid.classList.toggle("expanded");
+        workspace.classList.toggle("workspace-expanded", expanded);
         featureExpand.setAttribute("aria-expanded", String(expanded));
         featureExpand.textContent = expanded ? "Tampilkan lebih sedikit ↑" : "Lihat semua fitur ↓";
       });
@@ -1954,6 +1957,7 @@
       userNavigatedDuringResponse = false;
       main.classList.add("conversation-active");
       if (featureGrid) featureGrid.classList.remove("expanded");
+      if (workspace) workspace.classList.remove("workspace-expanded");
       if (featureExpand) {
         featureExpand.setAttribute("aria-expanded", "false");
         featureExpand.textContent = "Lihat semua fitur ↓";
