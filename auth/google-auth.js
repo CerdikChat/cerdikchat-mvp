@@ -580,13 +580,15 @@ export async function decideUserAccess(request, env) {
       ).bind(email).first();
       if (!target || target.role !== "user") return authJson({ error: "USER_NOT_FOUND" }, 404);
       if (target.status !== "active") return authJson({ error: "USER_NOT_ACTIVE" }, 409);
-      const updated = await env.DB.prepare(
-        "UPDATE users SET status = 'disabled', updated_at = ? WHERE google_sub = ? AND role = 'user' AND status = 'active'"
-      ).bind(now, target.google_sub).run();
-      if (updated.meta?.changes !== 1) return authJson({ error: "USER_STATE_CHANGED" }, 409);
-      await env.DB.prepare(
-        "INSERT INTO admin_audit_log (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at) VALUES (?, ?, 'USER_SUSPENDED', 'user', 'user', ?, ?)"
-      ).bind(admin.subject, target.google_sub, JSON.stringify({ email: target.email, previousStatus: "active", newStatus: "disabled" }), now).run();
+      const results = await env.DB.batch([
+        env.DB.prepare(
+          "UPDATE users SET status = 'disabled', updated_at = ? WHERE google_sub = ? AND role = 'user' AND status = 'active'"
+        ).bind(now, target.google_sub),
+        env.DB.prepare(
+          "INSERT INTO admin_audit_log (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at) VALUES (?, ?, 'USER_SUSPENDED', 'user', 'user', ?, ?)"
+        ).bind(admin.subject, target.google_sub, JSON.stringify({ email: target.email, previousStatus: "active", newStatus: "disabled" }), now),
+      ]);
+      if (results[0]?.meta?.changes !== 1) return authJson({ error: "USER_STATE_CHANGED" }, 409);
       return authJson({ updated: true, status: "disabled", role: "user" });
     }
 
