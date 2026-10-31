@@ -5,15 +5,52 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1220">
-  <meta name="description" content="CerdikChat — asisten AI untuk riset, analisis, penulisan, dan perencanaan.">
+  <meta name="description" content="CerdikGo — AI innovation workspace powered by CerdikChat core.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="CerdikChat">
   <meta name="color-scheme" content="dark">
   <link rel="manifest" href="/manifest.webmanifest">
-  <title>CerdikChat — AI Workspace</title>
+  <title>CerdikGo — Innovation Workspace</title>
 
   <style>
+
+    /* CerdikGo Innovation Workspace — visual feature layer */
+    .product-brand { color:#f2fbff; font-weight:850; letter-spacing:-.4px; }
+    .product-brand em { color:#35d8e8; font-style:normal; }
+    .workspace { max-width:900px; margin:0 auto 20px; }
+    .workspace-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin:4px 0 14px; }
+    .workspace-head h2 { margin:0; font-size:17px; }
+    .workspace-head p { margin:3px 0 0; color:var(--muted); font-size:12px; }
+    .workspace-tag { border:1px solid #176c75; border-radius:30px; padding:4px 9px; color:#56e6d5; background:#0b302f; font-size:10px; white-space:nowrap; }
+    .feature-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+    .feature-card { min-width:0; min-height:105px; padding:12px; border:1px solid #1b4b70; border-radius:14px; background:linear-gradient(145deg,#102945,#0a192b); }
+    .feature-icon { font-size:20px; margin-bottom:7px; }
+    .feature-card strong { display:block; font-size:12px; color:#eff9ff; }
+    .feature-card small { display:block; margin-top:4px; color:#9bb4d1; font-size:10px; line-height:1.4; }
+    .feature-state { display:inline-block; margin-top:8px; color:#55ddca; font-size:9px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; }
+    .feature-state.soon { color:#f2c777; }
+    .multimodal-panel { margin-top:12px; padding:14px; border:1px solid #1c5b83; border-radius:16px; background:linear-gradient(135deg,#0e2944,#0a1a2d); }
+    .multi-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .multi-top strong { font-size:13px; }
+    .multi-top small { color:#a2bad4; font-size:10px; }
+    .upload-preview { display:flex; align-items:center; gap:12px; margin-top:12px; padding:13px; border:1px dashed #287ca2; border-radius:12px; background:#08192b; }
+    .upload-symbol { display:grid; place-items:center; width:38px; height:38px; flex:0 0 38px; border-radius:11px; background:#123d5c; font-size:19px; }
+    .upload-copy { min-width:0; flex:1; }
+    .upload-copy b { display:block; font-size:12px; }
+    .upload-copy span { color:#9bb4d1; font-size:10px; }
+    .upload-action { padding:8px 11px; border:1px solid #42647d; border-radius:9px; background:#172d43; color:#b9c9d9; font-size:10px; font-weight:750; }
+    .upload-action:disabled { opacity:.8; cursor:not-allowed; }
+    .workspace-foot { margin-top:9px; color:#819bb8; font-size:10px; }
+    @media(max-width:720px) {
+      .workspace { margin-bottom:14px; }
+      .feature-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+      .feature-card { min-height:96px; padding:10px; }
+      .workspace-head h2 { font-size:15px; }
+      .upload-preview { align-items:flex-start; flex-wrap:wrap; }
+      .upload-action { margin-left:50px; }
+    }
+
     .auth-panel[hidden] { display: none !important; }
     #googleSignIn[hidden], #authUser[hidden] { display: none !important; }
 
@@ -626,6 +663,33 @@
         <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
       </section>
 
+
+      <section class="workspace" aria-label="CerdikGo feature workspace">
+        <div class="workspace-head">
+          <div><h2>Explore your AI workspace</h2><p>One intelligent workspace. Multiple ways to create, analyze, and discover.</p></div>
+          <span class="workspace-tag">CERDIKGO · PILOT</span>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">✦</div><strong>AI Chat Assistant</strong><small>Natural conversation and guided assistance</small><span class="feature-state">Core available</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">▤</div><strong>PDF & Documents</strong><small>Document reading, extraction, and insight</small><span class="feature-state soon">UI preview</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">▧</div><strong>Image Intelligence</strong><small>Visual understanding and image analysis</small><span class="feature-state soon">UI preview</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">◉</div><strong>Voice Assistant</strong><small>Talk naturally and hear responses</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌕</div><strong>Research Studio</strong><small>Structured research and source-led insights</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">▥</div><strong>Data Analytics</strong><small>Explore metrics, patterns, and trends</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌘</div><strong>AI Tools & Agents</strong><small>Bounded tools and multi-step workflows</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">◷</div><strong>Conversation History</strong><small>Return to your previous work sessions</small><span class="feature-state soon">Coming soon</span></article>
+        </div>
+        <div class="multimodal-panel">
+          <div class="multi-top"><div><strong>Multimodal document workspace</strong><br><small>PDF · PNG · JPG · WEBP</small></div><span class="workspace-tag">VALIDATION GATE</span></div>
+          <div class="upload-preview">
+            <div class="upload-symbol" aria-hidden="true">＋</div>
+            <div class="upload-copy"><b>Attach a document or image</b><span>Secure upload interface is being prepared for the authenticated pilot.</span></div>
+            <button class="upload-action" type="button" disabled aria-disabled="true">Upload · Locked</button>
+          </div>
+          <div class="workspace-foot">Upload controls will be enabled after live AI inference, session security, and Android pilot checks pass. CerdikChat powers the shared core.</div>
+        </div>
+      </section>
+
       <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
         <div class="welcome" id="welcome">
@@ -661,7 +725,7 @@
             disabled
             rows="2"
             maxlength="8000"
-            placeholder="Tanyakan sesuatu kepada CerdikChat…"
+            placeholder="Tanyakan sesuatu kepada CerdikGo…"
             aria-label="Pesan Anda"
             required></textarea>
 
@@ -1310,7 +1374,7 @@
       const who = document.createElement("div");
       who.className = "who";
       who.textContent =
-        role === "user" ? "Anda" : "CerdikChat";
+        role === "user" ? "Anda" : "CerdikGo";
 
       const body = document.createElement("div");
       body.className = "content";
