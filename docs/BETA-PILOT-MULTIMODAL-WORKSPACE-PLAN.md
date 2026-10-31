@@ -101,8 +101,8 @@ Acceptance:
 - Cloudflare Workers AI Markdown conversion is followed by Gemma 4 analysis; extracted file content is explicitly treated as untrusted data.
 - Uploaded files are processed in memory; this endpoint does not persist source files.
 - Regression tests cover successful PNG/PDF paths, authentication, CSRF, cross-origin rejection, spoofed MIME/signature, prompt-injection isolation, and file-size limits.
-- GitHub Actions run #4 on HEAD `84e7a599` completed successfully.
-- Cloudflare Preview build and deployment for HEAD `84e7a599` both succeeded. Preview URL: https://atlas9-beta-pilot-multimodal-workspace-cerdikchat-mvp.ngyoonseong.workers.dev
+- GitHub Actions run #6 on HEAD `1e5dcf5` completed successfully (Node.js regression suite passed).
+- Cloudflare Preview build and deployment for HEAD `1e5dcf5` both succeeded. Preview URL: https://35b299f5-cerdikchat-mvp.ngyoonseong.workers.dev
 - PR #22 remains open and Draft; it is not merged.
 
 ### Still pending — Gate 1 is NOT complete
