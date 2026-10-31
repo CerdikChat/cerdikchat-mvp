@@ -601,7 +601,8 @@
       .suggest small { font-size:11px; }
       .composer-wrap { padding:8px 10px max(8px,env(safe-area-inset-bottom)); }
       .composer { padding:7px 8px; border-radius:15px; }
-      .composer textarea { min-height:38px; max-height:90px; padding:6px; font-size:15px; }
+      /* Keep mobile form controls at 16px to prevent browser focus auto-zoom. */
+      .composer textarea { min-height:38px; max-height:90px; padding:6px; font-size:16px; }
       .send { min-width:84px; padding:9px 13px; font-size:13px; }
       .hint { max-width:68%; font-size:10px; }
       .footer { font-size:10px; }
