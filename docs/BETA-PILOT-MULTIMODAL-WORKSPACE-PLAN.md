@@ -100,4 +100,4 @@ Gate 1 implementation has started on the feature branch:
 - Uploaded files are processed in memory and are not persisted by this endpoint.
 - Regression tests have been added for image/PDF flow, authentication, CSRF, cross-origin rejection, spoofed MIME/signature, and file-size limits.
 
-**Validation state:** implementation is committed, but automated test execution, current-commit Preview deployment, and Android Chrome end-to-end verification remain pending. Do not enable the upload UI or mark Gate 1 complete until those checks pass.
+**Validation state:** implementation and regression tests are committed. GitHub Actions run #2 on commit `c70ee6c` completed successfully (Node.js regression suite). Cloudflare Preview deployment for `c70ee6c` is still being processed; Android Chrome end-to-end verification remains pending. Do not enable the upload UI or mark Gate 1 complete until Preview and browser validation pass.
