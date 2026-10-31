@@ -805,7 +805,7 @@
             <p id="authUnavailable" hidden>Konfigurasi autentikasi belum tersedia. Silakan hubungi administrator.</p>
             <section class="portal-gate" id="portalGate" hidden aria-labelledby="portalTitle">
               <h3 id="portalTitle">Pilih portal akses</h3>
-              <p>Gunakan akun Google terverifikasi. Server menentukan peran akun; pilihan portal ini bukan pemberian hak akses.</p>
+              <p>Gunakan akun Google terverifikasi. Akun User yang belum aktif dapat mengajukan akses dan menunggu persetujuan administrator. Pilihan portal tidak memberikan hak akses.</p>
               <div class="portal-grid">
                 <article class="portal-card"><h4>Administrator Portal</h4><p>Akses khusus administrator yang telah diprovisikan dan diverifikasi.</p><button class="settings-button" id="chooseAdminPortal" type="button">Lanjutkan sebagai Administrator</button></article>
                 <article class="portal-card"><h4>User Portal</h4><p>Masuk ke workspace AI CerdikGo dengan akun pengguna yang diizinkan.</p><button class="settings-button" id="chooseUserPortal" type="button">Lanjutkan sebagai User</button></article>
@@ -1072,9 +1072,28 @@
             const expected = payload.requiredPortal === "admin" ? "Administrator Portal" : "User Portal";
             throw new Error("Peran akun tidak sesuai. Silakan gunakan " + expected + ".");
           }
-          if (payload.error === "USER_NOT_ALLOWLISTED") {
-            authMessage.textContent = "Akun Google ini belum memiliki akses. Hubungi administrator CerdikGo.";
-            throw new Error("Akun Google belum memiliki akses ke CerdikGo. Hubungi administrator.");
+          if (payload.error === "USER_NOT_ALLOWLISTED" && portal === "user") {
+            const accessResponse = await fetch("/api/auth/request-access", {
+              method: "POST",
+              credentials: "same-origin",
+              headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-CSRF-Token": csrfToken
+              },
+              body: JSON.stringify({ credential: response.credential, nonce })
+            });
+            const accessPayload = await accessResponse.json();
+            if (accessResponse.status === 202 && accessPayload.requested === true) {
+              authMessage.textContent = "Permintaan akses User telah dikirim dan menunggu persetujuan administrator.";
+              setStatus("Permintaan akses berhasil dikirim. Anda dapat login setelah akun disetujui.");
+              return;
+            }
+            if (accessPayload.error === "CSRF_VALIDATION_FAILED") {
+              await refreshCsrfToken();
+              throw new Error("Token keamanan diperbarui. Silakan tekan tombol Google sekali lagi.");
+            }
+            throw new Error(accessPayload.message || accessPayload.error || "Permintaan akses User gagal.");
           }
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
