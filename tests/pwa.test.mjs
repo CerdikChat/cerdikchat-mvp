@@ -37,3 +37,93 @@ test("offline fallback makes no promise of offline chat or local persistence", (
   assert.match(offlineHtml, /Chat AI, Google Sign-In, analisis dokumen, dan sinkronisasi memerlukan koneksi internet/);
   assert.match(offlineHtml, /Tidak ada pesan atau dokumen yang disimpan otomatis/);
 });
+
+
+import vm from "node:vm";
+
+function createServiceWorkerHarness({ networkFetch = async () => new Response("network") } = {}) {
+  const listeners = new Map();
+  const cacheData = new Map();
+  const deletedCaches = [];
+  const cache = {
+    async addAll(paths) { cacheData.set("shell", [...paths]); },
+    async match(key) {
+      if (key === "/" && cacheData.has("shell")) return new Response("cached-app-shell");
+      if (key === "/offline.html" && cacheData.has("shell")) return new Response("cached-offline-page");
+      return undefined;
+    },
+  };
+  const cacheStorage = {
+    async open() { return cache; },
+    async keys() { return ["cerdikgo-shell-old", "unrelated-cache", "cerdikgo-shell-v1"]; },
+    async delete(key) { deletedCaches.push(key); return true; },
+  };
+  const self = {
+    location: { origin: "https://app.test" },
+    clients: { claim: async () => {} },
+    skipWaiting: async () => {},
+    addEventListener(type, handler) { listeners.set(type, handler); },
+  };
+  vm.runInNewContext(serviceWorker, {
+    self,
+    caches: cacheStorage,
+    fetch: networkFetch,
+    URL,
+    Response,
+  });
+  return { listeners, cacheData, deletedCaches };
+}
+
+test("service worker install pre-caches the app shell before activation", async () => {
+  const harness = createServiceWorkerHarness();
+  let pending;
+  harness.listeners.get("install")({ waitUntil(promise) { pending = promise; } });
+  await pending;
+  assert.deepEqual(harness.cacheData.get("shell"), ["/", "/manifest.webmanifest", "/offline.html"]);
+});
+
+test("activation removes only obsolete CerdikGo shell caches", async () => {
+  const harness = createServiceWorkerHarness();
+  let pending;
+  harness.listeners.get("activate")({ waitUntil(promise) { pending = promise; } });
+  await pending;
+  assert.deepEqual(harness.deletedCaches, ["cerdikgo-shell-old"]);
+});
+
+test("fetch handler leaves API, cross-origin, non-GET and authorized requests untouched", () => {
+  const harness = createServiceWorkerHarness();
+  const handler = harness.listeners.get("fetch");
+  const cases = [
+    { url: "https://app.test/api/chat", method: "GET", mode: "navigate", headers: new Headers() },
+    { url: "https://other.test/page", method: "GET", mode: "navigate", headers: new Headers() },
+    { url: "https://app.test/page", method: "POST", mode: "navigate", headers: new Headers() },
+    { url: "https://app.test/page", method: "GET", mode: "navigate", headers: new Headers({ authorization: "Bearer test" }) },
+    { url: "https://app.test/app.js", method: "GET", mode: "same-origin", headers: new Headers() },
+  ];
+  for (const request of cases) {
+    let intercepted = false;
+    handler({ request, respondWith() { intercepted = true; } });
+    assert.equal(intercepted, false, request.url);
+  }
+});
+
+test("failed navigation fetch falls back to the cached app shell", async () => {
+  const harness = createServiceWorkerHarness({
+    networkFetch: async () => { throw new TypeError("offline"); },
+  });
+  // Simulate the app shell having been cached during installation.
+  harness.cacheData.set("shell", ["/", "/manifest.webmanifest", "/offline.html"]);
+  let responsePromise;
+  harness.listeners.get("fetch")({
+    request: {
+      url: "https://app.test/private-route",
+      method: "GET",
+      mode: "navigate",
+      headers: new Headers(),
+    },
+    respondWith(promise) { responsePromise = promise; },
+  });
+  const response = await responsePromise;
+  assert.equal(await response.text(), "cached-app-shell");
+  assert.equal(response.status, 200);
+});
