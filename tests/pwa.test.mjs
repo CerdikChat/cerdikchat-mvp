@@ -22,6 +22,16 @@ test("account sign-in is located inside settings and not in the main workspace",
   assert.ok(indexHtml.includes("Akun Google belum memiliki akses ke CerdikGo."));
 });
 
+test("required beta sign-in is clearly explained and opens Settings without bypassing authentication", () => {
+  assert.match(indexHtml, /id="authGate"/);
+  assert.match(indexHtml, /id="authGateOpen"/);
+  assert.match(indexHtml, /Chat terkunci/);
+  assert.match(indexHtml, /authGateOpen\.addEventListener\("click", \(\) => \{ if \(!settingsDialog\.open\) settingsDialog\.showModal\(\); \}\)/);
+  assert.match(indexHtml, /authGate\.hidden = !\(authRequired && !isAuthenticated\)/);
+  assert.match(indexHtml, /input\.disabled = authRequired && !isAuthenticated/);
+  assert.match(indexHtml, /send\.disabled = authRequired && !isAuthenticated/);
+});
+
 test("day and night mode toggle is accessible and persists locally", () => {
   assert.match(indexHtml, /id="themeToggle"/);
   assert.match(indexHtml, /aria-pressed="false"/);
