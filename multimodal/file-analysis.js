@@ -29,11 +29,37 @@ function json(data, status, corsHeaders) {
 
 function isEncryptedPdf(bytes) {
   if (bytes.length < 5 || new TextDecoder().decode(bytes.subarray(0, 5)) !== "%PDF-") return false;
-  // PDF encryption is declared in the trailer dictionary. Treat an explicit
-  // /Encrypt entry as unsupported rather than sending password-protected data
-  // to conversion/inference where it would fail ambiguously.
-  const latin1 = Array.from(bytes, byte => String.fromCharCode(byte)).join("");
-  return /\/Encrypt(?:\s|\/|<|>|\[|$)/.test(latin1);
+
+  // PDF names may encode bytes as #XX (for example /#45ncrypt == /Encrypt).
+  // Decode escaped bytes while scanning name tokens to prevent trivial
+  // obfuscation from bypassing this first-line rejection. This is not a
+  // complete PDF parser or cryptographic validation.
+  const source = Array.from(bytes, byte => String.fromCharCode(byte)).join("");
+  const isDelimiter = char => !char || /[\\s()<>\\[\\]{}/%]/.test(char);
+
+  for (let index = 0; index < source.length; index++) {
+    if (source[index] !== "/") continue;
+
+    let cursor = index + 1;
+    let decoded = "";
+    while (cursor < source.length && !isDelimiter(source[cursor])) {
+      if (
+        source[cursor] === "#" &&
+        /^[0-9a-f]{2}$/i.test(source.slice(cursor + 1, cursor + 3))
+      ) {
+        decoded += String.fromCharCode(parseInt(source.slice(cursor + 1, cursor + 3), 16));
+        cursor += 3;
+      } else {
+        decoded += source[cursor];
+        cursor++;
+      }
+    }
+
+    if (decoded === "Encrypt") return true;
+    index = cursor - 1;
+  }
+
+  return false;
 }
 
 function hasSignature(bytes, kind) {
