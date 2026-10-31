@@ -971,7 +971,7 @@
           throw new Error(payload.message || payload.error || "Google Sign-In gagal.");
         }
         isAuthenticated = true;
-        currentRole = payload.user?.role === "admin" ? "admin" : "user";
+        currentRole = (payload.user?.role === "admin" || payload.user?.role === "super_admin") ? "admin" : "user";
         updateAuthUI(payload.user || null);
         if (currentRole === "admin") {
           const check = await fetch("/api/admin/session", { credentials: "same-origin", headers: { "Accept": "application/json" } });
@@ -1048,7 +1048,7 @@
           if (sessionResponse.ok) {
             const session = await sessionResponse.json();
             isAuthenticated = session.authenticated === true;
-            currentRole = session.user?.role === "admin" ? "admin" : (isAuthenticated ? "user" : "");
+            currentRole = (session.user?.role === "admin" || session.user?.role === "super_admin") ? "admin" : (isAuthenticated ? "user" : "");
             updateAuthUI(session.user || null);
           } else if (sessionResponse.status === 401) {
             isAuthenticated = false;
