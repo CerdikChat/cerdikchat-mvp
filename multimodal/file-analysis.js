@@ -35,7 +35,7 @@ function isEncryptedPdf(bytes) {
   // obfuscation from bypassing this first-line rejection. This is not a
   // complete PDF parser or cryptographic validation.
   const source = Array.from(bytes, byte => String.fromCharCode(byte)).join("");
-  const isDelimiter = char => !char || /\\s/.test(char) || "()<>[]{}/%".includes(char);
+  const isDelimiter = char => !char || /\s/.test(char) || "()<>[]{}/%".includes(char);
 
   for (let index = 0; index < source.length; index++) {
     if (source[index] !== "/") continue;
