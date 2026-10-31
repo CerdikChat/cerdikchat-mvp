@@ -25,7 +25,8 @@
 
 "use strict";
 
-import { authConfig, googleLogin, currentSession, logout, requireSession } from "./auth/google-auth.js";
+import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession } from "./auth/google-auth.js";
+import { handleFileAnalysis } from "./multimodal/file-analysis.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -72,6 +73,27 @@ PERAN ANALITIS:
 TRANSPARANSI:
 Semua peran merupakan pendekatan analitis dalam satu model AI.
 Jangan mengklaim sembilan agen independen sedang berjalan.
+
+BATAS KLAIM STATUS DAN INTEGRASI:
+- CerdikChat/CerdikGo saat ini menggunakan satu model AI melalui
+  Workers AI. Nama ATLAS, NEXUS, TITAN, SENTINEL, GENESIS,
+  TERRA, AEGIS, dan ORACLE adalah peran konseptual, bukan bukti
+  bahwa agen atau layanan independen sedang aktif.
+- Jangan pernah menyatakan modul, agen, integrasi, koneksi,
+  sinkronisasi, monitoring, atau sistem eksternal aktif/terhubung
+  kecuali ada tool runtime yang benar-benar tersedia dan berhasil
+  dijalankan pada permintaan saat ini.
+- Jangan mengarang status ONLINE, latensi, uptime, hasil diagnosis,
+  waktu sinkronisasi, aktivitas modul, atau hasil pengujian.
+- Jam runtime hanya menunjukkan waktu Worker memproses permintaan;
+  jam tersebut bukan bukti sinkronisasi sistem lain.
+- Jika ditanya status, jelaskan hanya kemampuan yang diketahui
+  tersedia di implementasi saat ini. Nyatakan hal yang belum
+  diverifikasi sebagai belum diverifikasi.
+- Jangan membuat laporan "diagnosis sistem" atau daftar modul aktif
+  sebagai respons default untuk sapaan atau uji koneksi.
+- Jangan menghasilkan tag HTML atau atribut HTML. Gunakan teks
+  biasa atau Markdown sederhana; jangan menyimulasikan elemen UI.
 
 REAL-TIME DATE AND TIME:
 - Gunakan tanggal dan waktu runtime yang diberikan sistem.
@@ -1473,6 +1495,30 @@ export default {
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
     if (url.pathname === "/api/auth/logout") return logout(request, env);
+
+    if (url.pathname === "/api/admin/session" && request.method === "GET") {
+      const admin = await requireAdminSession(request, env);
+      if (!admin.ok) return admin.response;
+      return jsonResponse({ authenticated: true, role: "admin", subject: admin.subject, email: admin.email }, 200, {
+        "cache-control": "no-store",
+        "x-content-type-options": "nosniff",
+      });
+    }
+
+    if (url.pathname === "/api/analyze") {
+      const analysisCors = {
+        ...corsHeaders,
+        "access-control-allow-methods": "POST, OPTIONS",
+        "access-control-allow-headers": "Content-Type, X-CSRF-Token",
+      };
+      if (request.method === "OPTIONS") {
+        if (!isSameOriginOrNoOrigin(request)) {
+          return errorResponse("ORIGIN_NOT_ALLOWED", "Origin permintaan tidak diizinkan.", 403, analysisCors);
+        }
+        return new Response(null, { status: 204, headers: analysisCors });
+      }
+      return handleFileAnalysis(request, env, analysisCors);
+    }
 
     if (url.pathname === CONFIG.API_PATH) {
       if (request.method === "OPTIONS") {

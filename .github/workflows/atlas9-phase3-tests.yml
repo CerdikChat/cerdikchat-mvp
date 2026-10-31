@@ -1,0 +1,38 @@
+name: ATLAS-9 Phase 3 Regression Tests
+
+on:
+  pull_request:
+    branches:
+      - atlas9/phase-2-google-auth-implementation
+    paths:
+      - "worker.js"
+      - "auth/**"
+      - "multimodal/**"
+      - "tests/**"
+      - "package.json"
+      - ".github/workflows/atlas9-phase3-tests.yml"
+  push:
+    branches:
+      - atlas9/beta-pilot-multimodal-workspace
+
+permissions:
+  contents: read
+
+concurrency:
+  group: atlas9-phase3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    name: Node.js regression suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run regression tests
+        run: npm test

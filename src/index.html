@@ -5,15 +5,56 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1220">
-  <meta name="description" content="CerdikChat — asisten AI untuk riset, analisis, penulisan, dan perencanaan.">
+  <meta name="description" content="CerdikGo — AI innovation workspace powered by CerdikChat core.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="CerdikChat">
+  <meta name="apple-mobile-web-app-title" content="CerdikGo">
   <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/svg+xml" href="/cerdikgo-mark.svg">
   <link rel="manifest" href="/manifest.webmanifest">
-  <title>CerdikChat — AI Workspace</title>
+  <title>CerdikGo — Innovation Workspace</title>
 
   <style>
+    .network-state{max-width:900px;margin:8px auto 0;padding:8px 12px;border:1px solid #246b5c;border-radius:10px;background:#0b302f;color:#8ff0d4;font-size:12px}
+    .network-state.offline{border-color:#765a28;background:#302617;color:#f2d59a}
+
+
+    /* CerdikGo Innovation Workspace — visual feature layer */
+    .product-brand { color:#f2fbff; font-weight:850; letter-spacing:-.4px; }
+    .product-brand em { color:#35d8e8; font-style:normal; }
+    .workspace { max-width:900px; margin:0 auto 20px; }
+    .workspace-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin:4px 0 14px; }
+    .workspace-head h2 { margin:0; font-size:17px; }
+    .workspace-head p { margin:3px 0 0; color:var(--muted); font-size:12px; }
+    .workspace-tag { border:1px solid #176c75; border-radius:30px; padding:4px 9px; color:#56e6d5; background:#0b302f; font-size:10px; white-space:nowrap; }
+    .feature-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+    .feature-card { min-width:0; min-height:105px; padding:12px; border:1px solid #1b4b70; border-radius:14px; background:linear-gradient(145deg,#102945,#0a192b); }
+    .feature-icon { font-size:20px; margin-bottom:7px; }
+    .feature-card strong { display:block; font-size:12px; color:#eff9ff; }
+    .feature-card small { display:block; margin-top:4px; color:#9bb4d1; font-size:10px; line-height:1.4; }
+    .feature-state { display:inline-block; margin-top:8px; color:#55ddca; font-size:9px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; }
+    .feature-state.soon { color:#f2c777; }
+    .multimodal-panel { margin-top:12px; padding:14px; border:1px solid #1c5b83; border-radius:16px; background:linear-gradient(135deg,#0e2944,#0a1a2d); }
+    .multi-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .multi-top strong { font-size:13px; }
+    .multi-top small { color:#a2bad4; font-size:10px; }
+    .upload-preview { display:flex; align-items:center; gap:12px; margin-top:12px; padding:13px; border:1px dashed #287ca2; border-radius:12px; background:#08192b; }
+    .upload-symbol { display:grid; place-items:center; width:38px; height:38px; flex:0 0 38px; border-radius:11px; background:#123d5c; font-size:19px; }
+    .upload-copy { min-width:0; flex:1; }
+    .upload-copy b { display:block; font-size:12px; }
+    .upload-copy span { color:#9bb4d1; font-size:10px; }
+    .upload-action { padding:8px 11px; border:1px solid #42647d; border-radius:9px; background:#172d43; color:#b9c9d9; font-size:10px; font-weight:750; }
+    .upload-action:disabled { opacity:.8; cursor:not-allowed; }
+    .workspace-foot { margin-top:9px; color:#819bb8; font-size:10px; }
+    @media(max-width:720px) {
+      .workspace { margin-bottom:14px; }
+      .feature-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+      .feature-card { min-height:96px; padding:10px; }
+      .workspace-head h2 { font-size:15px; }
+      .upload-preview { align-items:flex-start; flex-wrap:wrap; }
+      .upload-action { margin-left:50px; }
+    }
+
     .auth-panel[hidden] { display: none !important; }
     #googleSignIn[hidden], #authUser[hidden] { display: none !important; }
 
@@ -520,7 +561,7 @@
     .top { min-height:68px; border-bottom-color:#15385b; background:#071426cc; }
     .feed { min-height:0; padding:18px 24px 22px; background:radial-gradient(ellipse at 50% 18%,#0d2b4b55 0,transparent 55%); }
     .welcome { max-width:900px; margin:22px auto 24px; text-align:center; }
-    .welcome::before { content:"C"; display:grid; place-items:center; width:64px; height:64px; margin:0 auto 12px; border:1px solid #1d8bdf; border-radius:22px; background:linear-gradient(145deg,#102c50,#07172c); box-shadow:0 0 34px #168bff55,inset 0 0 18px #18b6ff22; color:#39d5ff; font-size:40px; font-weight:900; line-height:1; }
+    .welcome::before { content:""; display:block; width:76px; height:76px; margin:0 auto 12px; background:url("/cerdikgo-mark.svg") center/contain no-repeat; filter:drop-shadow(0 0 22px #168bff55); }
     .eyebrow { color:#36d9e9; letter-spacing:2.2px; }
     .welcome h1 { margin:8px 0 9px; font-size:clamp(29px,4vw,44px); letter-spacing:-1.5px; }
     .welcome h1 span { color:#24c6e8; background:linear-gradient(90deg,#55aaff,#27e0d0); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
@@ -531,6 +572,7 @@
     .suggest b { color:#f0f8ff; font-size:14px; }
     .suggest small { color:#9db7d4; }
     .msg { max-width:820px; }
+    .auth-gate{max-width:900px;margin:0 auto 8px;padding:10px 12px;border:1px solid #9b7435;border-radius:12px;background:#302617;color:#f2d59a;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px}.auth-gate[hidden]{display:none!important}.auth-gate button{padding:8px 11px;border:1px solid #b18b4b;border-radius:9px;background:#49391f;color:#fff1c8;font-weight:750;cursor:pointer}
     .composer-wrap { position:sticky; bottom:0; z-index:5; padding:10px 20px max(10px,env(safe-area-inset-bottom)); border-top:1px solid #16416a; background:linear-gradient(180deg,#071426e8,#061020f7); backdrop-filter:blur(16px); }
     .composer { max-width:900px; padding:9px 12px 8px; border:1px solid #1979bd; border-radius:18px; background:linear-gradient(145deg,#0e2038,#0a1729); box-shadow:0 0 26px #087dcc1c,0 12px 30px #0004; }
     .composer textarea { min-height:42px; max-height:112px; padding:7px 8px; }
@@ -568,15 +610,50 @@
     @media(max-width:360px) { .suggestions { grid-template-columns:1fr 1fr; } .suggest { min-height:96px; padding:9px; } .controls { gap:6px; } .send { min-width:76px; padding-inline:9px; } }
     @media(prefers-reduced-motion:reduce) { .suggest { transition:none; } }
 
+
+    .theme-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--text);font-size:12px;font-weight:750;cursor:pointer}.theme-toggle:hover{border-color:var(--blue)}.top-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+    html[data-theme="light"]{color-scheme:light;--bg:#f2f6fc;--panel:#fff;--panel2:#e8eff8;--line:#cbd7e6;--text:#14243a;--muted:#52657d;--blue:#075fbd;--mint:#087f73;--danger:#b42336}
+    html[data-theme="light"] body{background:radial-gradient(ellipse at 20% 0%,#dcecff 0,transparent 42%),var(--bg);color:var(--text)}
+    html[data-theme="light"] .side{background:#eaf1faee;border-right-color:var(--line)}html[data-theme="light"] .top{background:transparent;border-bottom-color:var(--line)}
+    html[data-theme="light"] .prompt,html[data-theme="light"] .suggest{color:var(--text);background:#fff;border-color:var(--line)}
+    html[data-theme="light"] .feature-card,html[data-theme="light"] .multimodal-panel{background:linear-gradient(145deg,#fff,#edf4fc);border-color:#c8d9ec}
+    html[data-theme="light"] .feature-card strong,html[data-theme="light"] .multi-top strong,html[data-theme="light"] .upload-copy b{color:#14243a}
+    html[data-theme="light"] .feature-card small,html[data-theme="light"] .multi-top small,html[data-theme="light"] .upload-copy span,html[data-theme="light"] .workspace-head p{color:#52657d}
+    html[data-theme="light"] .upload-preview{background:#f7faff;border-color:#9bbbdc}html[data-theme="light"] .upload-action{background:#e7eef7;color:#29425e;border-color:#b9c9dc}
+    html[data-theme="light"] .composer-wrap{background:#f2f6fced;border-top-color:var(--line)}html[data-theme="light"] .composer{background:#fff;border-color:#b8cbe0;box-shadow:0 10px 28px #233c5b18}html[data-theme="light"] .composer textarea{color:#14243a}html[data-theme="light"] .composer textarea::placeholder{color:#687b92}
+    html[data-theme="light"] .pill,html[data-theme="light"] .tag,html[data-theme="light"] .workspace-tag{background:#e0f3ef;color:#087f73;border-color:#9acfc3}
+    html[data-theme="light"] .network-state{background:#e4f5ee;color:#17664e;border-color:#a4d7c2}html[data-theme="light"] .network-state.offline{background:#fff4dc;color:#805411;border-color:#e7c77e}
+    html[data-theme="light"] .content blockquote{background:#edf3fa;color:#52657d}html[data-theme="light"] .content th{background:#e8eff8}html[data-theme="light"] .content td,html[data-theme="light"] .content th{border-color:#cbd7e6}html[data-theme="light"] .content code,html[data-theme="light"] .content .math,html[data-theme="light"] .content .math-block{background:#edf3fa;border-color:#cbd7e6;color:#243b55}html[data-theme="light"] .content pre{background:#f0f4f9;border-color:#cbd7e6}
+    @media(max-width:720px){.top-actions{gap:6px}.theme-toggle{min-height:36px;padding:7px 9px;font-size:11px}}
+
+    .settings-dialog{width:min(560px,calc(100vw - 28px));max-height:min(82dvh,720px);overflow:auto;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--text);box-shadow:0 24px 80px #0008}
+    .settings-dialog::backdrop{background:#020817a8;backdrop-filter:blur(4px)}
+    .settings-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+    .settings-head h2{margin:0;font-size:17px}.settings-body{padding:16px 18px}
+    .settings-section{padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel2)}
+    .settings-section p{margin:5px 0 0;color:var(--muted);font-size:12px}
+    .settings-close{min-width:38px;min-height:38px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font-size:19px;cursor:pointer}
+    .settings-button{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--text);font-size:12px;font-weight:750;cursor:pointer}
+    .auth-panel{max-width:none;margin:12px 0 0;padding:0;border:0;background:transparent}.auth-actions{margin-top:10px}
+    .portal-gate{max-width:900px;margin:18px auto;padding:20px;border:1px solid #1a4c77;border-radius:18px;background:linear-gradient(145deg,#102b49,#0a1a2d);box-shadow:0 14px 36px #0003}
+    .portal-gate[hidden]{display:none!important}.portal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+    .portal-card{padding:18px;border:1px solid #28577e;border-radius:14px;background:#0b1d32}.portal-card h3{margin:0 0 6px}.portal-card p{min-height:38px;color:var(--muted);font-size:12px}
+    .portal-google{min-height:42px}.portal-note{font-size:11px;color:var(--muted);margin-top:12px}
+    .admin-placeholder{max-width:900px;margin:18px auto;padding:20px;border:1px solid #b18b4b;border-radius:16px;background:#302617;color:#f2d59a}
+    .admin-placeholder[hidden]{display:none!important}
+    @media(max-width:620px){.portal-grid{grid-template-columns:1fr}.portal-card p{min-height:0}}
+    
+    html[data-theme="light"] .settings-dialog{background:#fff;color:#14243a}html[data-theme="light"] .settings-section{background:#f2f6fc}
   </style>
 </head>
 
 <body>
+  <div id="networkState" class="network-state" role="status" aria-live="polite">Memeriksa konektivitas…</div>
   <div class="app">
     <aside class="side">
       <div class="brand">
-        <div class="logo" aria-hidden="true">C</div>
-        CerdikChat
+        <img class="logo" src="/cerdikgo-mark.svg" alt="" aria-hidden="true">
+        <span class="product-brand">Cerdik<em>Go</em></span>
       </div>
 
       <div class="tag">CLOSED BETA · v0.1</div>
@@ -605,7 +682,7 @@
 
       <h2>Tentang beta</h2>
       <div class="side-note">
-        CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting
+        CerdikGo adalah workspace inovasi AI yang sedang diuji. Periksa fakta penting
         secara mandiri. Hindari memasukkan data pribadi atau rahasia.
       </div>
     </aside>
@@ -613,17 +690,67 @@
     <main class="main">
       <header class="top">
         <div class="mobile-brand">
-          <div class="logo" aria-hidden="true">C</div>
-          CerdikChat
+          <img class="logo" src="/cerdikgo-mark.svg" alt="" aria-hidden="true">
+          <span class="product-brand">Cerdik<em>Go</em></span>
         </div>
 
-        <strong>AI Workspace</strong>
-        <span class="pill">● AI · Beta</span>
+        <strong>CerdikGo · Innovation Workspace</strong>
+        <div class="top-actions"><span class="pill">● AI · Beta</span><button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
       </header>
 
-      <section class="auth-panel" id="authPanel" hidden aria-live="polite">
-        <div><strong id="authTitle">Akses CerdikChat</strong><br><small id="authMessage">Masuk dengan akun Google yang telah diizinkan.</small></div>
-        <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
+      <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
+        <div class="settings-head"><div><h2 id="settingsTitle">Pengaturan</h2><small>Preferensi workspace dan keamanan akun</small></div><button class="settings-close" id="settingsClose" type="button" aria-label="Tutup pengaturan">×</button></div>
+        <div class="settings-body">
+          <section class="settings-section" aria-labelledby="accountSettingsTitle">
+            <strong id="accountSettingsTitle">Akun & akses</strong>
+            <p>Kelola sesi Google Sign-In CerdikGo. Akses tetap mengikuti kebijakan allowlist administrator.</p>
+            <section class="auth-panel" id="authPanel" hidden aria-live="polite">
+              <div><strong id="authTitle">Akses CerdikGo</strong><br><small id="authMessage">Masuk dengan akun Google yang telah diizinkan.</small></div>
+              <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
+            </section>
+            <p id="authUnavailable" hidden>Konfigurasi autentikasi belum tersedia. Silakan hubungi administrator.</p>
+          </section>
+          <section class="settings-section" style="margin-top:12px"><strong>Tampilan</strong><p>Gunakan tombol Mode siang / Mode malam pada bilah atas untuk mengganti tema. Preferensi disimpan di browser ini.</p></section>
+        </div>
+      </dialog>
+
+
+      <section class="portal-gate" id="portalGate" hidden aria-labelledby="portalTitle">
+        <h2 id="portalTitle">Pilih portal akses</h2>
+        <p>Gunakan akun Google terverifikasi. Server akan menentukan peran akun; pilihan portal ini bukan pemberian hak akses.</p>
+        <div class="portal-grid">
+          <article class="portal-card"><h3>Administrator Portal</h3><p>Akses khusus administrator yang telah diprovisikan dan diverifikasi.</p><button class="settings-button" id="chooseAdminPortal" type="button">Lanjutkan sebagai Administrator</button></article>
+          <article class="portal-card"><h3>User Portal</h3><p>Masuk ke workspace AI CerdikGo dengan akun pengguna yang diizinkan.</p><button class="settings-button" id="chooseUserPortal" type="button">Lanjutkan sebagai User</button></article>
+        </div>
+        <div class="portal-google" id="portalGoogleSignIn" hidden></div>
+        <p class="portal-note">Setelah memilih portal, lanjutkan dengan Google. Pilihan ini hanya menyatakan tujuan login; server tetap memeriksa peran akun.</p>
+      </section>
+      <section class="admin-placeholder" id="adminPlaceholder" hidden><h2>Administrator Control Center</h2><p>Autentikasi administrator terverifikasi. Modul pengelolaan belum diaktifkan; tidak ada kontrol administratif simulatif pada tahap ini.</p><button class="auth-logout" id="adminLogout" type="button">Keluar</button></section>
+
+      <section class="workspace" aria-label="CerdikGo feature workspace">
+        <div class="workspace-head">
+          <div><h2>Explore your AI workspace</h2><p>One intelligent workspace. Multiple ways to create, analyze, and discover.</p></div>
+          <span class="workspace-tag">CERDIKGO · PILOT</span>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">✦</div><strong>AI Chat Assistant</strong><small>Natural conversation and guided assistance</small><span class="feature-state">Core available</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">▤</div><strong>PDF & Documents</strong><small>Document reading, extraction, and insight</small><span class="feature-state soon">UI preview</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">▧</div><strong>Image Intelligence</strong><small>Visual understanding and image analysis</small><span class="feature-state soon">UI preview</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">◉</div><strong>Voice Assistant</strong><small>Talk naturally and hear responses</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌕</div><strong>Research Studio</strong><small>Structured research and source-led insights</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">▥</div><strong>Data Analytics</strong><small>Explore metrics, patterns, and trends</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌘</div><strong>AI Tools & Agents</strong><small>Bounded tools and multi-step workflows</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">◷</div><strong>Conversation History</strong><small>Return to your previous work sessions</small><span class="feature-state soon">Coming soon</span></article>
+        </div>
+        <div class="multimodal-panel">
+          <div class="multi-top"><div><strong>Multimodal document workspace</strong><br><small>PDF · PNG · JPG · WEBP</small></div><span class="workspace-tag">VALIDATION GATE</span></div>
+          <div class="upload-preview">
+            <div class="upload-symbol" aria-hidden="true">＋</div>
+            <div class="upload-copy"><b>Attach a document or image</b><span>Secure upload interface is being prepared for the authenticated pilot.</span></div>
+            <button class="upload-action" type="button" disabled aria-disabled="true">Upload · Locked</button>
+          </div>
+          <div class="workspace-foot">Upload controls will be enabled after live AI inference, session security, and Android pilot checks pass. CerdikChat powers the shared core.</div>
+        </div>
       </section>
 
       <section class="feed" id="feed" aria-live="polite"
@@ -655,13 +782,14 @@
       </section>
 
       <div class="composer-wrap">
+        <div class="auth-gate" id="authGate" role="status" aria-live="polite" hidden><span>Chat terkunci. Masuk dengan akun Google yang diizinkan melalui Pengaturan untuk mulai menggunakan CerdikGo.</span><button id="authGateOpen" type="button">Buka Pengaturan</button></div>
         <form id="chatForm" class="composer">
           <textarea
             id="message"
             disabled
             rows="2"
             maxlength="8000"
-            placeholder="Tanyakan sesuatu kepada CerdikChat…"
+            placeholder="Tanyakan sesuatu kepada CerdikGo…"
             aria-label="Pesan Anda"
             required></textarea>
 
@@ -688,6 +816,22 @@
   <script>
     "use strict";
 
+    const themeToggle = document.getElementById("themeToggle");
+    const THEME_STORAGE_KEY = "cerdikgo-theme";
+    function readThemePreference() {
+      try { const saved = localStorage.getItem(THEME_STORAGE_KEY); if (saved === "light" || saved === "dark") return saved; } catch { /* Storage can be blocked. */ }
+      return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    function applyTheme(theme, persist = false) {
+      const selected = theme === "light" ? "light" : "dark"; document.documentElement.dataset.theme = selected;
+      const light = selected === "light"; themeToggle.textContent = light ? "🌙 Mode malam" : "☀️ Mode siang";
+      themeToggle.setAttribute("aria-pressed", String(light)); themeToggle.setAttribute("aria-label", light ? "Aktifkan mode malam" : "Aktifkan mode siang");
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", light ? "#f2f6fc" : "#0b1220");
+      if (persist) { try { localStorage.setItem(THEME_STORAGE_KEY, selected); } catch { /* Current-page toggle remains functional. */ } }
+    }
+    applyTheme(readThemePreference());
+    themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true));
+
     const form = document.querySelector("#chatForm");
     const input = document.querySelector("#message");
     const feed = document.querySelector("#feed");
@@ -695,22 +839,46 @@
     const statusEl = document.querySelector("#status");
     const count = document.querySelector("#count");
 
+    const settingsDialog = document.querySelector("#settingsDialog");
+    const settingsOpen = document.querySelector("#settingsOpen");
+    const settingsClose = document.querySelector("#settingsClose");
+    const authGate = document.querySelector("#authGate");
+    const authGateOpen = document.querySelector("#authGateOpen");
+    const authUnavailable = document.querySelector("#authUnavailable");
+    settingsOpen.addEventListener("click", () => { if (!settingsDialog.open) settingsDialog.showModal(); });
+    settingsClose.addEventListener("click", () => settingsDialog.close());
+    authGateOpen.addEventListener("click", () => { if (!settingsDialog.open) settingsDialog.showModal(); });
+    settingsDialog.addEventListener("click", event => { if (event.target === settingsDialog) settingsDialog.close(); });
+
     const authPanel = document.querySelector("#authPanel");
     const authTitle = document.querySelector("#authTitle");
     const authMessage = document.querySelector("#authMessage");
     const googleSignIn = document.querySelector("#googleSignIn");
+    const portalGoogleSignIn = document.querySelector("#portalGoogleSignIn");
+    const chooseAdminPortal = document.querySelector("#chooseAdminPortal");
+    const chooseUserPortal = document.querySelector("#chooseUserPortal");
+    const portalGate = document.querySelector("#portalGate");
+    const adminPlaceholder = document.querySelector("#adminPlaceholder");
+    const adminLogout = document.querySelector("#adminLogout");
+    const workspace = document.querySelector(".workspace");
     const authUser = document.querySelector("#authUser");
     const authLogout = document.querySelector("#authLogout");
 
     let authRequired = false;
     let authConfigured = false;
     let isAuthenticated = false;
+    let currentRole = "";
+    let selectedPortal = "user";
     let csrfToken = "";
     let googleClientId = "";
 
     function updateAuthUI(user = null) {
       authPanel.hidden = !authRequired && !authConfigured;
-      authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikChat";
+      authGate.hidden = !(authRequired && !isAuthenticated);
+      portalGate.hidden = !(authRequired && authConfigured && !isAuthenticated);
+      adminPlaceholder.hidden = !(isAuthenticated && currentRole === "admin");
+      if (workspace) workspace.hidden = authRequired && (!isAuthenticated || currentRole === "admin");
+      authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikGo";
       authMessage.textContent = isAuthenticated
         ? "Sesi aman Anda aktif."
         : "Masuk dengan akun Google yang telah diizinkan.";
@@ -718,7 +886,10 @@
         ? [user.displayName, user.email].filter(Boolean).join(" · ")
         : "";
       authUser.hidden = !isAuthenticated;
-      googleSignIn.hidden = isAuthenticated || !authConfigured;
+      googleSignIn.hidden = true;
+      portalGoogleSignIn.hidden = isAuthenticated || !authConfigured || !portalGoogleSignIn.childElementCount;
+      chooseAdminPortal.hidden = isAuthenticated || !authConfigured;
+      chooseUserPortal.hidden = isAuthenticated || !authConfigured;
       authLogout.hidden = !isAuthenticated;
       input.disabled = authRequired && !isAuthenticated;
       send.disabled = authRequired && !isAuthenticated;
@@ -767,7 +938,7 @@
       csrfToken = config.csrfToken;
     }
 
-    async function handleGoogleCredential(response, nonce) {
+    async function handleGoogleCredential(response, nonce, portal) {
       if (!response || typeof response.credential !== "string" || !csrfToken) {
         setStatus("Respons Google atau token keamanan tidak tersedia.", true);
         return;
@@ -781,13 +952,17 @@
             "Accept": "application/json",
             "X-CSRF-Token": csrfToken
           },
-          body: JSON.stringify({ credential: response.credential, nonce })
+          body: JSON.stringify({ credential: response.credential, nonce, portal })
         });
         const payload = await result.json();
         if (!result.ok) {
+          if (payload.error === "ROLE_MISMATCH") {
+            const expected = payload.requiredPortal === "admin" ? "Administrator Portal" : "User Portal";
+            throw new Error("Peran akun tidak sesuai. Silakan gunakan " + expected + ".");
+          }
           if (payload.error === "USER_NOT_ALLOWLISTED") {
-            authMessage.textContent = `Akun ${payload.email || "Google"} belum diizinkan. Google sub: ${payload.googleSub || "tidak tersedia"}`;
-            throw new Error(`Akun belum masuk allowlist. Google sub: ${payload.googleSub || "tidak tersedia"}`);
+            authMessage.textContent = "Akun Google ini belum memiliki akses. Hubungi administrator CerdikGo.";
+            throw new Error("Akun Google belum memiliki akses ke CerdikGo. Hubungi administrator.");
           }
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
@@ -796,29 +971,36 @@
           throw new Error(payload.message || payload.error || "Google Sign-In gagal.");
         }
         isAuthenticated = true;
+        currentRole = (payload.user?.role === "admin" || payload.user?.role === "super_admin") ? "admin" : "user";
         updateAuthUI(payload.user || null);
-        setStatus("Berhasil masuk ke CerdikChat.");
+        if (currentRole === "admin") {
+          const check = await fetch("/api/admin/session", { credentials: "same-origin", headers: { "Accept": "application/json" } });
+          if (!check.ok) throw new Error("Verifikasi hak Administrator gagal.");
+        }
+        setStatus("Berhasil masuk ke CerdikGo.");
       } catch (error) {
         isAuthenticated = false;
         updateAuthUI();
         setStatus(error instanceof Error ? error.message : "Google Sign-In gagal.", true);
-        renderGoogleButton();
+        renderGoogleButton(portal);
       }
     }
 
-    async function renderGoogleButton() {
+    async function renderGoogleButton(portal = "user") {
       if (!googleClientId || isAuthenticated) return;
       try {
         await loadGoogleIdentityServices();
         const nonce = createNonce();
+        selectedPortal = portal;
+        const target = portalGoogleSignIn;
         window.google.accounts.id.initialize({
           client_id: googleClientId,
           nonce,
           auto_select: false,
-          callback: (response) => handleGoogleCredential(response, nonce)
+          callback: (response) => handleGoogleCredential(response, nonce, portal)
         });
-        googleSignIn.replaceChildren();
-        window.google.accounts.id.renderButton(googleSignIn, {
+        target.replaceChildren();
+        window.google.accounts.id.renderButton(target, {
           type: "standard",
           theme: "outline",
           size: "large",
@@ -844,6 +1026,7 @@
         csrfToken = typeof config.csrfToken === "string" ? config.csrfToken : "";
         authRequired = config.required === true;
         authConfigured = config.configured === true && typeof config.clientId === "string";
+        authUnavailable.hidden = authRequired || authConfigured;
         googleClientId = authConfigured ? config.clientId : "";
 
         if (authRequired && (!authConfigured || !csrfToken)) {
@@ -865,6 +1048,7 @@
           if (sessionResponse.ok) {
             const session = await sessionResponse.json();
             isAuthenticated = session.authenticated === true;
+            currentRole = (session.user?.role === "admin" || session.user?.role === "super_admin") ? "admin" : (isAuthenticated ? "user" : "");
             updateAuthUI(session.user || null);
           } else if (sessionResponse.status === 401) {
             isAuthenticated = false;
@@ -872,7 +1056,7 @@
           } else {
             throw new Error("Status sesi tidak dapat diverifikasi.");
           }
-          if (!isAuthenticated && authConfigured) await renderGoogleButton();
+          if (!isAuthenticated && authConfigured) { portalGate.hidden = false; }
         } else {
           isAuthenticated = false;
           updateAuthUI();
@@ -909,10 +1093,11 @@
           throw new Error(payload.error || "Logout gagal.");
         }
         isAuthenticated = false;
+        currentRole = "";
         if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
         updateAuthUI();
         setStatus("Anda telah keluar.");
-        await renderGoogleButton();
+        portalGate.hidden = false;
       } catch (error) {
         setStatus(error instanceof Error ? error.message : "Logout gagal.", true);
       } finally {
@@ -920,7 +1105,10 @@
       }
     }
 
+    chooseAdminPortal.addEventListener("click", () => { selectedPortal = "admin"; portalGoogleSignIn.hidden = false; renderGoogleButton("admin"); });
+    chooseUserPortal.addEventListener("click", () => { selectedPortal = "user"; portalGoogleSignIn.hidden = false; renderGoogleButton("user"); });
     authLogout.addEventListener("click", logoutFromCerdikChat);
+    adminLogout.addEventListener("click", logoutFromCerdikChat);
 
     const MAX_HISTORY_MESSAGES = 12;
     const MAX_MESSAGE_LENGTH = 8000;
@@ -1310,7 +1498,7 @@
       const who = document.createElement("div");
       who.className = "who";
       who.textContent =
-        role === "user" ? "Anda" : "CerdikChat";
+        role === "user" ? "Anda" : "CerdikGo";
 
       const body = document.createElement("div");
       body.className = "content";
@@ -1385,7 +1573,7 @@
       send.textContent = "Memproses…";
       form.setAttribute("aria-busy", "true");
 
-      setStatus("CerdikChat sedang menyiapkan jawaban…");
+      setStatus("CerdikGo sedang menyiapkan jawaban…");
 
       addMessage("user", message);
       input.value = "";
@@ -1485,6 +1673,22 @@
 
     form.addEventListener("submit", sendMessage);
     updateCount();
+    const networkState = document.getElementById("networkState");
+    function updateNetworkState() {
+      const online = navigator.onLine;
+      networkState.textContent = online
+        ? "ONLINE • Koneksi jaringan tersedia. Layanan AI diverifikasi saat permintaan dijalankan."
+        : "OFFLINE • App shell tersedia. Chat, login, dan analisis file memerlukan internet.";
+      networkState.classList.toggle("offline", !online);
+      networkState.setAttribute("aria-label", online ? "Status jaringan online" : "Status jaringan offline");
+    }
+    window.addEventListener("online", updateNetworkState);
+    window.addEventListener("offline", updateNetworkState);
+    updateNetworkState();
+    if ("serviceWorker" in navigator && window.isSecureContext) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .catch(() => { networkState.textContent += " • Penyimpanan offline belum aktif pada browser ini."; });
+    }
     loadAuth();
   </script>
 </body>
