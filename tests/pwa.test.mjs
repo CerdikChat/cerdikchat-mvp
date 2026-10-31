@@ -96,6 +96,22 @@ test("editing a sent message is transactional and preserves the old transcript o
   assert.match(indexHtml, /editingHistoryIndex = null;\s*editingMessageRow = null;/);
 });
 
+test("mobile navigation drawer has accessible controls and close behavior", () => {
+  assert.match(indexHtml, /id="navToggle"[^>]*aria-expanded="false"[^>]*aria-controls="sideNavigation"/);
+  assert.match(indexHtml, /id="sideNavigation"[^>]*aria-label="Navigasi utama"/);
+  assert.match(indexHtml, /id="navBackdrop"[^>]*aria-label="Tutup navigasi"/);
+  assert.match(indexHtml, /appShell\.classList\.toggle\("nav-open"\)/);
+  assert.match(indexHtml, /navBackdrop\.addEventListener\("click", closeNavigation\)/);
+  assert.match(indexHtml, /event\.key === "Escape"\) closeNavigation\(\)/);
+});
+
+test("mobile navigation respects safe areas, reduced motion, and desktop collapse", () => {
+  assert.match(indexHtml, /env\(safe-area-inset-top\)/);
+  assert.match(indexHtml, /env\(safe-area-inset-bottom\)/);
+  assert.match(indexHtml, /prefers-reduced-motion:reduce/);
+  assert.match(indexHtml, /appShell\.classList\.toggle\("nav-collapsed"\)/);
+});
+
 test("inline workspace JavaScript parses before browser execution", () => {
   const inlineScripts = [...indexHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
     .filter(([, attributes, source]) => !/\bsrc\s*=/.test(attributes) && source.trim());
