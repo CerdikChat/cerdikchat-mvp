@@ -656,6 +656,11 @@
     .portal-google{min-height:42px}.portal-note{font-size:11px;color:var(--muted);margin-top:12px}
     .admin-placeholder{max-width:1040px;margin:20px auto;padding:20px;border:1px solid #28577e;border-radius:18px;background:linear-gradient(145deg,#102b49,#081a2d);box-shadow:0 14px 36px #0003;color:var(--text)}
     .admin-placeholder[hidden]{display:none!important}
+    .settings-dialog .admin-placeholder{max-width:none;width:auto;margin:12px 0 0;padding:12px;box-sizing:border-box;box-shadow:none}
+    .settings-dialog .admin-grid{grid-template-columns:minmax(0,1fr)}
+    .settings-dialog .admin-module{padding:12px}
+    .admin-settings-section[hidden]{display:none!important}
+
     .admin-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
     .admin-head h2{margin:0;font-size:clamp(21px,3vw,28px);letter-spacing:-.5px}
     .admin-head p{margin:5px 0 0;color:var(--muted);font-size:12px}
@@ -860,13 +865,13 @@
           </section>
           <section class="settings-section" style="margin-top:12px"><strong>Tampilan</strong><p>Gunakan tombol Mode siang / Mode malam pada bilah atas untuk mengganti tema. Preferensi disimpan di browser ini.</p></section>
         </div>
-      </dialog>
-
-
-      <section class="admin-placeholder" id="adminPlaceholder" hidden aria-labelledby="adminDashboardTitle">
+          <section class="settings-section admin-settings-section" id="adminSettingsSection" hidden aria-label="Administrator tools">
+            <strong>Administrator Dashboard</strong>
+            <p>Kontrol administrator hanya ditampilkan untuk sesi dengan role admin yang diverifikasi server.</p>
+            <section class="admin-placeholder" id="adminPlaceholder" hidden aria-labelledby="adminDashboardTitle">
         <div class="admin-head">
           <div><h2 id="adminDashboardTitle">Administrator Dashboard</h2><p>Control Center CerdikGo · akses berdasarkan peran yang diverifikasi server</p></div>
-          <div class="admin-actions"><span class="admin-session">● Admin session verified</span><button class="settings-button" id="adminSettingsOpen" type="button">⚙ Akun & akses</button><button class="auth-logout" id="adminLogout" type="button">Keluar</button></div>
+          <div class="admin-actions"><span class="admin-session">● Admin session verified</span><button class="auth-logout" id="adminLogout" type="button">Keluar</button></div>
         </div>
         <div class="admin-identity"><strong id="adminDisplayName">Administrator</strong><span id="adminEmail">Sesi administrator aktif</span></div>
         <div class="admin-grid">
@@ -883,6 +888,11 @@
           <article class="admin-module"><h3>Platform Operations</h3><p>Area status layanan dan konfigurasi platform. Tidak ada metrik simulasi atau kontrol operasional palsu.</p><small>Awaiting verified API</small></article>
         </div>
       </section>
+          </section>
+      </dialog>
+
+
+
 
       <section class="workspace" aria-label="CerdikGo feature workspace">
         <div class="workspace-head">
@@ -1032,13 +1042,11 @@
     const portalGate = document.querySelector("#portalGate");
     const adminPlaceholder = document.querySelector("#adminPlaceholder");
     const adminLogout = document.querySelector("#adminLogout");
-    const adminSettingsOpen = document.querySelector("#adminSettingsOpen");
     const adminDisplayName = document.querySelector("#adminDisplayName");
     const adminEmail = document.querySelector("#adminEmail");
     const refreshPendingUsersButton = document.querySelector("#refreshPendingUsers");
     const pendingUsersStatus = document.querySelector("#pendingUsersStatus");
     const pendingUsersList = document.querySelector("#pendingUsersList");
-    adminSettingsOpen.addEventListener("click", openSettings);
     refreshPendingUsersButton.addEventListener("click", loadPendingUsers);
     const workspace = document.querySelector(".workspace");
     const authUser = document.querySelector("#authUser");
@@ -1117,10 +1125,12 @@
       authPanel.hidden = !authRequired && !authConfigured;
       authGate.hidden = !(authRequired && !isAuthenticated);
       portalGate.hidden = !(authRequired && authConfigured && !isAuthenticated);
-      adminPlaceholder.hidden = !(isAuthenticated && currentRole === "admin");
+      const isAdminSession = isAuthenticated && currentRole === "admin";
+      adminPlaceholder.hidden = !isAdminSession;
+      document.querySelector("#adminSettingsSection").hidden = !isAdminSession;
       adminDisplayName.textContent = user?.displayName || "Administrator";
       adminEmail.textContent = user?.email || "Sesi administrator aktif";
-      if (workspace) workspace.hidden = authRequired && (!isAuthenticated || currentRole === "admin");
+      if (workspace) workspace.hidden = authRequired && !isAuthenticated;
       authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikGo";
       authMessage.textContent = isAuthenticated
         ? "Sesi aman Anda aktif."
@@ -1378,6 +1388,8 @@
 
     let history = [];
     let isSending = false;
+    let editingHistoryIndex = null;
+    let editingMessageRow = null;
 
     function updateCount() {
       count.textContent = String(input.value.length);
@@ -1768,6 +1780,29 @@
       body.textContent = text;
 
       wrap.append(who, body);
+      if (role === "user") {
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "answer-action";
+        editButton.textContent = "✎ Edit";
+        editButton.setAttribute("aria-label", "Edit pesan yang telah dikirim");
+        editButton.addEventListener("click", () => {
+          const historyIndex = Number(row.dataset.historyIndex);
+          if (!Number.isInteger(historyIndex) || historyIndex < 0) {
+            setStatus("Pesan ini belum memiliki riwayat yang dapat diedit.", true);
+            return;
+          }
+          editingHistoryIndex = historyIndex;
+          editingMessageRow = row;
+          input.value = body.textContent || "";
+          updateCount();
+          setStatus("Mode edit aktif. Ubah pesan, lalu tekan Kirim untuk membuat ulang jawaban.");
+        });
+        const actions = document.createElement("div");
+        actions.className = "answer-actions";
+        actions.append(editButton);
+        wrap.append(actions);
+      }
       row.append(avatar, wrap);
       feed.append(row);
 
@@ -1859,6 +1894,17 @@
         return;
       }
 
+      if (editingHistoryIndex !== null && editingMessageRow) {
+        history = history.slice(0, editingHistoryIndex);
+        let removeFollowing = false;
+        Array.from(feed.children).forEach(messageRow => {
+          if (messageRow === editingMessageRow) removeFollowing = true;
+          if (removeFollowing) messageRow.remove();
+        });
+        editingHistoryIndex = null;
+        editingMessageRow = null;
+      }
+
       isSending = true;
       send.disabled = true;
       input.disabled = true;
@@ -1867,7 +1913,9 @@
 
       setStatus("CerdikGo sedang menyiapkan jawaban…");
 
-      addMessage("user", message);
+      const userBody = addMessage("user", message);
+      const userRow = userBody.closest(".msg");
+      if (userRow) userRow.dataset.historyIndex = String(history.length);
       input.value = "";
       updateCount();
 
