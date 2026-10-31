@@ -96,6 +96,7 @@ test("unlisted Google account receives its verified subject for admin allowlisti
       prepare: (sql) => ({
         bind: () => ({
           first: async () => {
+            if (sql.includes("admin_bootstrap_allowlist")) return null;
             assert.match(sql, /SELECT google_sub, email, display_name, status, role FROM users/);
             return null;
           }
