@@ -324,6 +324,20 @@
       white-space: normal;
     }
 
+    .answer-actions {
+      display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+      margin-top:14px; padding-top:10px; border-top:1px solid var(--line);
+    }
+    .answer-action {
+      min-height:40px; padding:8px 12px; border:1px solid var(--line);
+      border-radius:10px; background:var(--panel2); color:var(--text);
+      font:inherit; font-size:12px; font-weight:750; cursor:pointer;
+    }
+    .answer-action.accept { border-color:#237b69; color:#8ce4c5; }
+    .answer-action.accept[aria-pressed="true"] { background:#123d35; border-color:#2ca987; }
+    .answer-acceptance-note { flex-basis:100%; color:var(--muted); font-size:11px; line-height:1.45; }
+    .answer-action:focus-visible { outline:2px solid var(--mint); outline-offset:3px; }
+
     .content strong { font-weight: 800; }
     .content em { font-style: italic; }
 
@@ -940,7 +954,7 @@
 
           <div class="controls">
             <span class="hint">
-              <span id="count">0</span>/8000 karakter · Enter untuk kirim
+              <span id="count">0</span>/8000 karakter · Enter untuk baris baru
             </span>
             <button class="send" id="send" type="submit" disabled>Kirim ↑</button>
           </div>
@@ -1761,6 +1775,45 @@
       return body;
     }
 
+    function addAnswerAcceptance(answerElement) {
+      const actions = document.createElement("div");
+      actions.className = "answer-actions";
+
+      const acceptButton = document.createElement("button");
+      acceptButton.type = "button";
+      acceptButton.className = "answer-action accept";
+      acceptButton.setAttribute("aria-pressed", "false");
+      acceptButton.textContent = "✓ Terima jawaban";
+
+      const reviseButton = document.createElement("button");
+      reviseButton.type = "button";
+      reviseButton.className = "answer-action";
+      reviseButton.textContent = "↻ Perlu revisi";
+
+      const note = document.createElement("span");
+      note.className = "answer-acceptance-note";
+      note.textContent = "Penerimaan adalah konfirmasi pengguna, bukan verifikasi kebenaran faktual.";
+
+      acceptButton.addEventListener("click", () => {
+        const accepted = acceptButton.getAttribute("aria-pressed") !== "true";
+        acceptButton.setAttribute("aria-pressed", String(accepted));
+        acceptButton.textContent = accepted ? "✓ Jawaban diterima · Batalkan" : "✓ Terima jawaban";
+        note.textContent = accepted
+          ? "Anda menandai jawaban ini telah memenuhi kebutuhan Anda. Konfirmasi berlaku untuk sesi percakapan ini."
+          : "Penerimaan dibatalkan untuk sesi percakapan ini.";
+      });
+
+      reviseButton.addEventListener("click", () => {
+        input.value = "Mohon revisi jawaban sebelumnya. Perhatikan kembali kebutuhan saya dan perbaiki bagian yang belum tepat.";
+        updateCount();
+        input.focus();
+        setStatus("Instruksi revisi sudah disiapkan. Periksa lalu tekan Kirim.");
+      });
+
+      actions.append(acceptButton, reviseButton, note);
+      answerElement.parentElement.append(actions);
+    }
+
     function usePrompt(prompt) {
       if (isSending || (authRequired && !isAuthenticated)) return;
 
@@ -1877,6 +1930,7 @@
         }
 
         renderBasicMarkdown(answerElement, answer);
+        addAnswerAcceptance(answerElement);
 
         history.push(
           { role: "user", content: message },
