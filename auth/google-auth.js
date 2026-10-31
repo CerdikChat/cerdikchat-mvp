@@ -240,6 +240,7 @@ export async function googleLogin(request, env, options = {}) {
     return authJson({ error: "INVALID_JSON" }, 400);
   }
   const credential = body && typeof body.credential === "string" ? body.credential : "";
+  const portal = body && (body.portal === "admin" || body.portal === "user") ? body.portal : "user";
   const nonce = body && typeof body.nonce === "string" ? body.nonce : "";
   if (!credential) return authJson({ error: "GOOGLE_CREDENTIAL_REQUIRED" }, 400);
   if (!/^[A-Za-z0-9_-]{32,128}$/.test(nonce)) {
@@ -258,10 +259,35 @@ export async function googleLogin(request, env, options = {}) {
   let user;
   try {
     user = await env.DB.prepare(
-      "SELECT google_sub, email, display_name, status FROM users WHERE google_sub = ? LIMIT 1"
+      "SELECT google_sub, email, display_name, status, role FROM users WHERE google_sub = ? LIMIT 1"
     ).bind(identity.sub).first();
   } catch {
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
+  }
+  if (!user) {
+    try {
+      const allowlisted = await env.DB.prepare(
+        "SELECT email FROM admin_bootstrap_allowlist WHERE email = ? COLLATE NOCASE LIMIT 1"
+      ).bind(identity.email).first();
+      if (allowlisted) {
+        const emailOwner = await env.DB.prepare(
+          "SELECT google_sub, email, display_name, status, role FROM users WHERE email = ? COLLATE NOCASE LIMIT 1"
+        ).bind(identity.email).first();
+        if (emailOwner && emailOwner.google_sub !== identity.sub) {
+          return authJson({ error: "IDENTITY_CONFLICT", message: "Email ini telah terikat ke identitas Google lain. Hubungi administrator." }, 403);
+        }
+        if (!emailOwner) {
+          await env.DB.prepare(
+            "INSERT INTO users (google_sub, email, display_name, status, role) VALUES (?, ?, ?, 'active', 'admin')"
+          ).bind(identity.sub, identity.email, identity.name).run();
+        }
+        user = await env.DB.prepare(
+          "SELECT google_sub, email, display_name, status, role FROM users WHERE google_sub = ? LIMIT 1"
+        ).bind(identity.sub).first();
+      }
+    } catch {
+      return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
+    }
   }
   if (!user || user.status !== "active") {
     return authJson({
@@ -270,6 +296,10 @@ export async function googleLogin(request, env, options = {}) {
       googleSub: identity.sub,
       email: identity.email,
     }, 403);
+  }
+  const role = user.role === "admin" ? "admin" : "user";
+  if (portal !== role) {
+    return authJson({ error: "ROLE_MISMATCH", requiredPortal: role, message: role === "admin" ? "Akun ini harus masuk melalui Administrator Portal." : "Akun ini tidak memiliki hak Administrator." }, 403);
   }
 
   const random = crypto.getRandomValues(new Uint8Array(32));
@@ -287,7 +317,7 @@ export async function googleLogin(request, env, options = {}) {
   }
 
   return authJson(
-    { authenticated: true, user: { email: user.email, displayName: user.display_name || identity.name } },
+    { authenticated: true, user: { email: user.email, displayName: user.display_name || identity.name, role } },
     200,
     { "set-cookie": cookieHeader(sessionId, SESSION_TTL_SECONDS) }
   );
@@ -301,10 +331,10 @@ export async function currentSession(request, env) {
   const now = Math.floor(Date.now() / 1000);
   try {
     const row = await env.DB.prepare(
-      "SELECT s.google_sub, u.email, u.display_name FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
+      "SELECT s.google_sub, u.email, u.display_name, u.role FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
     ).bind(hash, now).first();
     if (!row) return authJson({ authenticated: false }, 401, { "set-cookie": clearCookieHeader() });
-    return authJson({ authenticated: true, user: { email: row.email, displayName: row.display_name || "" } });
+    return authJson({ authenticated: true, user: { email: row.email, displayName: row.display_name || "", role: row.role === "admin" ? "admin" : "user" } });
   } catch {
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
   }
@@ -320,13 +350,22 @@ export async function requireSession(request, env) {
   const now = Math.floor(Date.now() / 1000);
   try {
     const row = await env.DB.prepare(
-      "SELECT s.google_sub, u.email FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
+      "SELECT s.google_sub, u.email, u.role FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
     ).bind(hash, now).first();
     if (!row) return { ok: false, response: authJson({ error: "AUTH_REQUIRED" }, 401, { "set-cookie": clearCookieHeader() }) };
-    return { ok: true, subject: row.google_sub, email: row.email };
+    return { ok: true, subject: row.google_sub, email: row.email, role: row.role === "admin" ? "admin" : "user" };
   } catch {
     return { ok: false, response: authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503) };
   }
+}
+
+export async function requireAdminSession(request, env) {
+  const session = await requireSession(request, env);
+  if (!session.ok) return session;
+  if (session.role !== "admin") {
+    return { ok: false, response: authJson({ error: "ADMIN_REQUIRED" }, 403) };
+  }
+  return session;
 }
 
 export async function logout(request, env) {
