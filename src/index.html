@@ -954,7 +954,8 @@
         if (!result.ok) {
           if (payload.error === "ROLE_MISMATCH") {
             const expected = payload.requiredPortal === "admin" ? "Administrator Portal" : "User Portal";
-            throw new Error("Peran akun tidak sesuai. Silakan gunakan " + expected + ".");\n          }
+            throw new Error("Peran akun tidak sesuai. Silakan gunakan " + expected + ".");
+          }
           if (payload.error === "USER_NOT_ALLOWLISTED") {
             authMessage.textContent = "Akun Google ini belum memiliki akses. Hubungi administrator CerdikGo.";
             throw new Error("Akun Google belum memiliki akses ke CerdikGo. Hubungi administrator.");
@@ -966,7 +967,12 @@
           throw new Error(payload.message || payload.error || "Google Sign-In gagal.");
         }
         isAuthenticated = true;
+        currentRole = payload.user?.role === "admin" ? "admin" : "user";
         updateAuthUI(payload.user || null);
+        if (currentRole === "admin") {
+          const check = await fetch("/api/admin/session", { credentials: "same-origin", headers: { "Accept": "application/json" } });
+          if (!check.ok) throw new Error("Verifikasi hak Administrator gagal.");
+        }
         setStatus("Berhasil masuk ke CerdikGo.");
       } catch (error) {
         isAuthenticated = false;
@@ -1037,6 +1043,7 @@
           if (sessionResponse.ok) {
             const session = await sessionResponse.json();
             isAuthenticated = session.authenticated === true;
+            currentRole = session.user?.role === "admin" ? "admin" : (isAuthenticated ? "user" : "");
             updateAuthUI(session.user || null);
           } else if (sessionResponse.status === 401) {
             isAuthenticated = false;
@@ -1081,6 +1088,7 @@
           throw new Error(payload.error || "Logout gagal.");
         }
         isAuthenticated = false;
+        currentRole = "";
         if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
         updateAuthUI();
         setStatus("Anda telah keluar.");
@@ -1094,6 +1102,7 @@
     }
 
     authLogout.addEventListener("click", logoutFromCerdikChat);
+    adminLogout.addEventListener("click", logoutFromCerdikChat);
     adminLogout.addEventListener("click", logoutFromCerdikChat);
     adminLogout.addEventListener("click", logoutFromCerdikChat);
 
