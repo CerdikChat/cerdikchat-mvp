@@ -608,6 +608,21 @@
     @media(max-width:360px) { .suggestions { grid-template-columns:1fr 1fr; } .suggest { min-height:96px; padding:9px; } .controls { gap:6px; } .send { min-width:76px; padding-inline:9px; } }
     @media(prefers-reduced-motion:reduce) { .suggest { transition:none; } }
 
+
+    .theme-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--text);font-size:12px;font-weight:750;cursor:pointer}.theme-toggle:hover{border-color:var(--blue)}.top-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+    html[data-theme="light"]{color-scheme:light;--bg:#f2f6fc;--panel:#fff;--panel2:#e8eff8;--line:#cbd7e6;--text:#14243a;--muted:#52657d;--blue:#075fbd;--mint:#087f73;--danger:#b42336}
+    html[data-theme="light"] body{background:radial-gradient(ellipse at 20% 0%,#dcecff 0,transparent 42%),var(--bg);color:var(--text)}
+    html[data-theme="light"] .side{background:#eaf1faee;border-right-color:var(--line)}html[data-theme="light"] .top{background:transparent;border-bottom-color:var(--line)}
+    html[data-theme="light"] .prompt,html[data-theme="light"] .suggest{color:var(--text);background:#fff;border-color:var(--line)}
+    html[data-theme="light"] .feature-card,html[data-theme="light"] .multimodal-panel{background:linear-gradient(145deg,#fff,#edf4fc);border-color:#c8d9ec}
+    html[data-theme="light"] .feature-card strong,html[data-theme="light"] .multi-top strong,html[data-theme="light"] .upload-copy b{color:#14243a}
+    html[data-theme="light"] .feature-card small,html[data-theme="light"] .multi-top small,html[data-theme="light"] .upload-copy span,html[data-theme="light"] .workspace-head p{color:#52657d}
+    html[data-theme="light"] .upload-preview{background:#f7faff;border-color:#9bbbdc}html[data-theme="light"] .upload-action{background:#e7eef7;color:#29425e;border-color:#b9c9dc}
+    html[data-theme="light"] .composer-wrap{background:#f2f6fced;border-top-color:var(--line)}html[data-theme="light"] .composer{background:#fff;border-color:#b8cbe0;box-shadow:0 10px 28px #233c5b18}html[data-theme="light"] .composer textarea{color:#14243a}html[data-theme="light"] .composer textarea::placeholder{color:#687b92}
+    html[data-theme="light"] .pill,html[data-theme="light"] .tag,html[data-theme="light"] .workspace-tag{background:#e0f3ef;color:#087f73;border-color:#9acfc3}
+    html[data-theme="light"] .network-state{background:#e4f5ee;color:#17664e;border-color:#a4d7c2}html[data-theme="light"] .network-state.offline{background:#fff4dc;color:#805411;border-color:#e7c77e}
+    html[data-theme="light"] .content blockquote{background:#edf3fa;color:#52657d}html[data-theme="light"] .content th{background:#e8eff8}html[data-theme="light"] .content td,html[data-theme="light"] .content th{border-color:#cbd7e6}html[data-theme="light"] .content code,html[data-theme="light"] .content .math,html[data-theme="light"] .content .math-block{background:#edf3fa;border-color:#cbd7e6;color:#243b55}html[data-theme="light"] .content pre{background:#f0f4f9;border-color:#cbd7e6}
+    @media(max-width:720px){.top-actions{gap:6px}.theme-toggle{min-height:36px;padding:7px 9px;font-size:11px}}
   </style>
 </head>
 
@@ -659,7 +674,7 @@
         </div>
 
         <strong>CerdikGo · Innovation Workspace</strong>
-        <span class="pill">● AI · Beta</span>
+        <div class="top-actions"><span class="pill">● AI · Beta</span><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
       </header>
 
       <section class="auth-panel" id="authPanel" hidden aria-live="polite">
@@ -755,6 +770,22 @@
 
   <script>
     "use strict";
+
+    const themeToggle = document.getElementById("themeToggle");
+    const THEME_STORAGE_KEY = "cerdikgo-theme";
+    function readThemePreference() {
+      try { const saved = localStorage.getItem(THEME_STORAGE_KEY); if (saved === "light" || saved === "dark") return saved; } catch { /* Storage can be blocked. */ }
+      return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    function applyTheme(theme, persist = false) {
+      const selected = theme === "light" ? "light" : "dark"; document.documentElement.dataset.theme = selected;
+      const light = selected === "light"; themeToggle.textContent = light ? "🌙 Mode malam" : "☀️ Mode siang";
+      themeToggle.setAttribute("aria-pressed", String(light)); themeToggle.setAttribute("aria-label", light ? "Aktifkan mode malam" : "Aktifkan mode siang");
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", light ? "#f2f6fc" : "#0b1220");
+      if (persist) { try { localStorage.setItem(THEME_STORAGE_KEY, selected); } catch { /* Current-page toggle remains functional. */ } }
+    }
+    applyTheme(readThemePreference());
+    themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true));
 
     const form = document.querySelector("#chatForm");
     const input = document.querySelector("#message");
