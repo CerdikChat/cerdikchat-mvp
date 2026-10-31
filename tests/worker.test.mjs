@@ -48,7 +48,7 @@ async function makeSignedGoogleToken(overrides = {}) {
     ["sign", "verify"]
   );
   const jwk = await crypto.subtle.exportKey("jwk", pair.publicKey);
-  jwk.kid = "atlas9-test-kid";
+  jwk.kid = `atlas9-test-${crypto.randomUUID()}`;
   jwk.alg = "RS256";
   jwk.use = "sig";
   const claims = {
