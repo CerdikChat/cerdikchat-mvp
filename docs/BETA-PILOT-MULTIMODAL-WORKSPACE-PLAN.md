@@ -100,17 +100,18 @@ Acceptance:
 - One-file multipart upload is bounded to 10 MiB plus multipart overhead; MIME, extension, and basic file signatures are checked.
 - Cloudflare Workers AI Markdown conversion is followed by Gemma 4 analysis; extracted file content is explicitly treated as untrusted data.
 - Uploaded files are processed in memory; this endpoint does not persist source files.
-- Regression tests cover successful PNG/PDF paths, authentication, CSRF, cross-origin rejection, spoofed MIME/signature, prompt-injection isolation, and file-size limits.
-- GitHub Actions run #8 on HEAD `7f022bb` completed successfully: Node.js regression suite **43/43 passed, 0 failed**.
-- Cloudflare Preview build and deployment for HEAD `7f022bb` both succeeded. Preview URL: https://atlas9-beta-pilot-multimodal-workspace-cerdikchat-mvp.ngyoonseong.workers.dev (deployment-specific URL: https://d427cc73-cerdikchat-mvp.ngyoonseong.workers.dev).
-- The latest CI and Preview evidence validates the code pipeline only; it does not establish live Workers AI conversion/inference or authenticated Android browser acceptance.
+- Regression tests cover successful PNG/PDF paths, authentication, CSRF, cross-origin rejection, spoofed MIME/signature, prompt-injection isolation, file-size limits, and encrypted-PDF rejection before conversion/inference.
+- Encrypted-PDF guard returns HTTP 422 (`ENCRYPTED_PDF_UNSUPPORTED`) when an explicit `/Encrypt` entry is detected. This is a conservative first-line signature check, not comprehensive PDF cryptographic validation.
+- GitHub Actions run #23 on HEAD `945cae2` completed successfully; the Node.js regression suite job and all workflow steps passed.
+- Cloudflare Preview build and deployment for HEAD `945cae2` both succeeded (build UUID `fa69f6be-371f-4404-b3dc-cd2b0430fc44`). Preview URL: https://atlas9-beta-pilot-multimodal-workspace-cerdikchat-mvp.ngyoonseong.workers.dev (deployment-specific URL: https://2a725f2d-cerdikchat-mvp.ngyoonseong.workers.dev).
+- CI and Preview evidence validates the code pipeline only; it does not establish live Workers AI conversion/inference or authenticated Android browser acceptance.
 - PR #22 remains open and Draft; it is not merged.
 
 ### Still pending — Gate 1 is NOT complete
 - Live runtime verification of the `env.AI.toMarkdown()` binding and its actual conversion result on the deployed Preview.
 - Live Workers AI Gemma 4 inference and account-specific quota/usage verification.
 - Authenticated Android Chrome end-to-end tests using a controlled test account and non-sensitive sample files.
-- Negative-path verification for malformed/encrypted PDF, unsupported format, model quota exhaustion, and conversion failures.
+- Negative-path live verification for malformed and real password-protected/encrypted PDFs, unsupported format, model quota exhaustion, and conversion failures.
 - Confirm that Preview uses the intended isolated staging D1 and rate-limiter bindings; do not test with Production data.
 
 Do not enable upload UI or mark Gate 1 complete until all pending checks pass. No Production deployment, billing activation, secrets change, merge, user-data copy, or public launch is authorized.
