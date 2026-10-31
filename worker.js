@@ -1469,7 +1469,7 @@ export default {
     const url = new URL(request.url);
     const corsHeaders = getCorsHeaders(request);
 
-    if (url.pathname === "/api/auth/config" && request.method === "GET") return authConfig(env);
+    if (url.pathname === "/api/auth/config" && request.method === "GET") return authConfig(request, env);
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
     if (url.pathname === "/api/auth/logout") return logout(request, env);
