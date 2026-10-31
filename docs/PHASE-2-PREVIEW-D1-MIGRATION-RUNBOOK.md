@@ -32,6 +32,16 @@ The expected applied migrations, in order, are:
 
 Wrangler records applied migrations in D1's `d1_migrations` table.
 
+## Add an approved pilot user (separate approval)
+Only after the Google account has been verified and the account owner has approved access, insert its verified immutable `google_sub` and email. Do not guess or use an email address alone.
+
+```sql
+INSERT INTO users (google_sub, email, display_name, status)
+VALUES ('VERIFIED_GOOGLE_SUB', 'pilot@example.com', 'Pilot User', 'active');
+```
+
+The login endpoint returns the verified `googleSub` and email only after Google token verification when the account is not yet allowlisted. Treat the subject as a stable personal identifier and share it only with the administrator provisioning the pilot.
+
 ## Verify schema
 Execute this read-only query against `cerdikchat-staging`:
 
