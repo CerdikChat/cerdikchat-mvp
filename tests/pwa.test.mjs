@@ -8,7 +8,19 @@ const [serviceWorker, indexHtml, offlineHtml] = await Promise.all([
   readFile(new URL("../src/offline.html", import.meta.url), "utf8"),
 ]);
 
-test("PWA registers a same-origin root-scoped service worker over secure contexts", () => {
+
+test("day and night mode toggle is accessible and persists locally", () => {
+  assert.match(indexHtml, /id="themeToggle"/);
+  assert.match(indexHtml, /aria-pressed="false"/);
+  assert.match(indexHtml, /THEME_STORAGE_KEY = "cerdikgo-theme"/);
+  assert.match(indexHtml, /localStorage\.getItem\(THEME_STORAGE_KEY\)/);
+  assert.match(indexHtml, /localStorage\.setItem\(THEME_STORAGE_KEY, selected\)/);
+  assert.match(indexHtml, /prefers-color-scheme: light/);
+  assert.match(indexHtml, /data-theme="light"/);
+  assert.match(indexHtml, /Aktifkan mode malam/);
+  assert.match(indexHtml, /Aktifkan mode siang/);
+});
+\ntest("PWA registers a same-origin root-scoped service worker over secure contexts", () => {
   assert.match(indexHtml, /navigator\.serviceWorker\.register\("\/service-worker\.js", \{ scope: "\/" \}\)/);
   assert.match(indexHtml, /window\.isSecureContext/);
 });
