@@ -189,6 +189,17 @@ function authJson(data, status = 200, headers = {}) {
   });
 }
 
+// Emit fixed, non-identifying authentication telemetry only.
+// Never log email, Google subject, IP, headers, cookies, CSRF values,
+// ID tokens, session identifiers, or raw exception messages.
+function logAuthFailure(stage, code) {
+  console.warn({
+    event: "CERDIKCHAT_AUTH_FAILURE",
+    stage,
+    code,
+  });
+}
+
 function unavailable() {
   return authJson({ error: "AUTH_UNAVAILABLE", message: "Autentikasi belum dikonfigurasi." }, 503);
 }
@@ -253,6 +264,7 @@ export async function googleLogin(request, env, options = {}) {
   } catch (error) {
     const code = typeof error?.message === "string" ? error.message : "GOOGLE_TOKEN_INVALID";
     const status = code === "GOOGLE_JWKS_UNAVAILABLE" || code === "GOOGLE_CLIENT_ID_MISSING" ? 503 : 401;
+    logAuthFailure("google_token", status === 503 ? "verification_unavailable" : "token_rejected");
     return authJson({ error: status === 503 ? "GOOGLE_VERIFICATION_UNAVAILABLE" : "GOOGLE_TOKEN_INVALID" }, status);
   }
 
@@ -262,6 +274,7 @@ export async function googleLogin(request, env, options = {}) {
       "SELECT google_sub, email, display_name, status, role FROM users WHERE google_sub = ? LIMIT 1"
     ).bind(identity.sub).first();
   } catch {
+    logAuthFailure("database", "user_lookup_failed");
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
   }
   if (!user) {
@@ -274,6 +287,7 @@ export async function googleLogin(request, env, options = {}) {
           "SELECT google_sub, email, display_name, status, role FROM users WHERE email = ? COLLATE NOCASE LIMIT 1"
         ).bind(identity.email).first();
         if (emailOwner && emailOwner.google_sub !== identity.sub) {
+          logAuthFailure("allowlist", "identity_conflict");
           return authJson({ error: "IDENTITY_CONFLICT", message: "Email ini telah terikat ke identitas Google lain. Hubungi administrator." }, 403);
         }
         if (!emailOwner) {
@@ -302,20 +316,21 @@ export async function googleLogin(request, env, options = {}) {
         ).bind(identity.sub).first();
       }
     } catch {
+      logAuthFailure("database", "admin_bootstrap_failed");
       return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
     }
   }
   if (!user || user.status !== "active") {
+    logAuthFailure("allowlist", "user_not_allowlisted_or_inactive");
     return authJson({
       error: "USER_NOT_ALLOWLISTED",
       message: "Akun ini belum diizinkan mengakses CerdikChat.",
-      googleSub: identity.sub,
-      email: identity.email,
     }, 403);
   }
   const role = user.role === "admin" || user.role === "super_admin" ? user.role : "user";
   const requiredPortal = role === "user" ? "user" : "admin";
   if (portal !== requiredPortal) {
+    logAuthFailure("rbac", "portal_role_mismatch");
     return authJson({ error: "ROLE_MISMATCH", requiredPortal, message: requiredPortal === "admin" ? "Akun ini harus masuk melalui Administrator Portal." : "Akun ini harus masuk melalui User Portal." }, 403);
   }
 
@@ -330,6 +345,7 @@ export async function googleLogin(request, env, options = {}) {
       "INSERT INTO sessions (session_hash, google_sub, created_at, expires_at, revoked_at) VALUES (?, ?, ?, ?, NULL)"
     ).bind(sessionHash, identity.sub, now, expiresAt).run();
   } catch {
+    logAuthFailure("session", "session_create_failed");
     return authJson({ error: "SESSION_CREATE_FAILED" }, 503);
   }
 
@@ -353,6 +369,7 @@ export async function currentSession(request, env) {
     if (!row) return authJson({ authenticated: false }, 401, { "set-cookie": clearCookieHeader() });
     return authJson({ authenticated: true, user: { email: row.email, displayName: row.display_name || "", role: row.role === "admin" || row.role === "super_admin" ? row.role : "user" } });
   } catch {
+    logAuthFailure("database", "session_lookup_failed");
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
   }
 }
@@ -372,6 +389,7 @@ export async function requireSession(request, env) {
     if (!row) return { ok: false, response: authJson({ error: "AUTH_REQUIRED" }, 401, { "set-cookie": clearCookieHeader() }) };
     return { ok: true, subject: row.google_sub, email: row.email, role: row.role === "admin" || row.role === "super_admin" ? row.role : "user" };
   } catch {
+    logAuthFailure("database", "session_validation_failed");
     return { ok: false, response: authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503) };
   }
 }
@@ -380,6 +398,7 @@ export async function requireAdminSession(request, env) {
   const session = await requireSession(request, env);
   if (!session.ok) return session;
   if (session.role !== "admin" && session.role !== "super_admin") {
+    logAuthFailure("rbac", "administrator_required");
     return { ok: false, response: authJson({ error: "ADMIN_REQUIRED" }, 403) };
   }
   return session;
@@ -397,6 +416,7 @@ export async function logout(request, env) {
         "UPDATE sessions SET revoked_at = ? WHERE session_hash = ? AND revoked_at IS NULL"
       ).bind(Math.floor(Date.now() / 1000), hash).run();
     } catch {
+      logAuthFailure("logout", "session_revocation_failed");
       return authJson({ error: "LOGOUT_FAILED" }, 503);
     }
   }
