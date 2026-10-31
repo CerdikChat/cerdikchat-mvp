@@ -285,6 +285,7 @@
     }
 
     .msg {
+      scroll-margin-top: 16px;
       display: flex;
       gap: 12px;
       max-width: 760px;
@@ -1401,8 +1402,12 @@
       statusEl.setAttribute("role", isError ? "alert" : "status");
     }
 
-    function scrollToLatest() {
+    function scrollToLatest(target = null) {
       window.requestAnimationFrame(() => {
+        if (target && target.isConnected) {
+          target.scrollIntoView({ block: "start", behavior: "auto" });
+          return;
+        }
         window.scrollTo({
           top: document.documentElement.scrollHeight,
           behavior: "auto"
@@ -1923,6 +1928,9 @@
         "assistant",
         "Menyiapkan jawaban…"
       );
+      // Put the beginning of the response in the reading viewport, not merely
+      // the document footer. This is important on Android with the composer below.
+      scrollToLatest(answerElement.closest(".msg"));
 
       try {
         const response = await fetch("/api/chat", {
@@ -2007,9 +2015,9 @@
         input.disabled = authRequired && !isAuthenticated;
         send.textContent = "Kirim ↑";
         form.removeAttribute("aria-busy");
-        // Do not programmatically focus the composer: Android's virtual
-        // keyboard should open only after an explicit user tap on the field.
-        scrollToLatest();
+        // Keep the first part of the completed answer visible for reading.
+        // Never focus the composer or trigger Android's virtual keyboard.
+        scrollToLatest(answerElement.closest(".msg"));
       }
     }
 
