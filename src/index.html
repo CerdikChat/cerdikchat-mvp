@@ -1168,7 +1168,7 @@
               await refreshCsrfToken();
               throw new Error("Token keamanan diperbarui. Silakan tekan tombol Google sekali lagi.");
             }
-            throw new Error(accessPayload.message || accessPayload.error || "Permintaan akses User gagal.");
+            throw new Error("Akun Google belum memiliki akses ke CerdikGo. " + (accessPayload.message || accessPayload.error || "Permintaan akses User gagal."));
           }
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
