@@ -83,6 +83,19 @@ test("offline fallback makes no promise of offline chat or local persistence", (
 
 import vm from "node:vm";
 
+test("failed chat sends restore the user's draft for retry", () => {
+  assert.match(indexHtml, /input\.value = message;\s*updateCount\(\);/);
+  assert.match(indexHtml, /Pesan Anda sudah dipulihkan ke kolom penulisan/);
+  assert.match(indexHtml, /send\.disabled = true;[\s\S]*?input\.disabled = true;/);
+});
+
+test("editing a sent message is transactional and preserves the old transcript on failure", () => {
+  assert.match(indexHtml, /const requestHistory = isEditing \? history\.slice\(0, editIndex\) : history\.slice\(\);/);
+  assert.match(indexHtml, /if \(isEditing\) \{\s*rowsToReplace\.forEach\(row => row\.remove\(\)\);\s*history = requestHistory\.slice\(\);/);
+  assert.match(indexHtml, /if \(isEditing\) \{\s*if \(userRow\) userRow\.remove\(\);/);
+  assert.match(indexHtml, /editingHistoryIndex = null;\s*editingMessageRow = null;/);
+});
+
 test("inline workspace JavaScript parses before browser execution", () => {
   const inlineScripts = [...indexHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
     .filter(([, attributes, source]) => !/\bsrc\s*=/.test(attributes) && source.trim());
