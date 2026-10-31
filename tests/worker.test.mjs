@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import worker from "../worker.js";
+import { verifyGoogleIdToken } from "../auth/google-auth.js";
 
 function makeEnv(overrides = {}) {
   return {
@@ -31,6 +32,81 @@ function post(body, headers = {}) {
 async function json(response) {
   return response.json();
 }
+
+
+function base64UrlJson(value) {
+  return Buffer.from(JSON.stringify(value)).toString("base64url");
+}
+
+async function makeSignedGoogleToken(overrides = {}) {
+  const clientId = "atlas9-test.apps.googleusercontent.com";
+  const nonce = "N".repeat(43);
+  const now = Math.floor(Date.now() / 1000);
+  const pair = await crypto.subtle.generateKey(
+    { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" },
+    true,
+    ["sign", "verify"]
+  );
+  const jwk = await crypto.subtle.exportKey("jwk", pair.publicKey);
+  jwk.kid = "atlas9-test-kid";
+  jwk.alg = "RS256";
+  jwk.use = "sig";
+  const claims = {
+    iss: "https://accounts.google.com",
+    aud: clientId,
+    azp: clientId,
+    exp: now + 300,
+    iat: now,
+    sub: "12345678901234567890",
+    email_verified: true,
+    email: "Pilot.User@example.com",
+    nonce,
+    ...overrides
+  };
+  const unsigned = `${base64UrlJson({ alg: "RS256", kid: jwk.kid })}.${base64UrlJson(claims)}`;
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    pair.privateKey,
+    new TextEncoder().encode(unsigned)
+  );
+  const token = `${unsigned}.${Buffer.from(signature).toString("base64url")}`;
+  const fetchJwks = async () => new Response(JSON.stringify({ keys: [jwk] }), {
+    headers: { "cache-control": "max-age=300" }
+  });
+  return { token, clientId, nonce, fetchJwks };
+}
+
+test("Google ID token verifies signature, audience, nonce and normalized email", async () => {
+  const fixture = await makeSignedGoogleToken();
+  const identity = await verifyGoogleIdToken(fixture.token, fixture.clientId, {
+    fetch: fixture.fetchJwks,
+    nonce: fixture.nonce
+  });
+  assert.equal(identity.sub, "12345678901234567890");
+  assert.equal(identity.email, "pilot.user@example.com");
+});
+
+test("Google ID token rejects nonce mismatch", async () => {
+  const fixture = await makeSignedGoogleToken();
+  await assert.rejects(
+    verifyGoogleIdToken(fixture.token, fixture.clientId, {
+      fetch: fixture.fetchJwks,
+      nonce: "X".repeat(43)
+    }),
+    /GOOGLE_NONCE_INVALID/
+  );
+});
+
+test("Google ID token requires azp when multiple audiences are present", async () => {
+  const fixture = await makeSignedGoogleToken({ aud: ["atlas9-test.apps.googleusercontent.com", "other-client.apps.googleusercontent.com"], azp: undefined });
+  await assert.rejects(
+    verifyGoogleIdToken(fixture.token, fixture.clientId, {
+      fetch: fixture.fetchJwks,
+      nonce: fixture.nonce
+    }),
+    /GOOGLE_AUTHORIZED_PARTY_INVALID/
+  );
+});
 
 test("GET /api/chat is rejected with 405", async () => {
   const response = await worker.fetch(new Request("https://cerdikchat.test/api/chat"), makeEnv());
