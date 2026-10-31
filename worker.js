@@ -1499,7 +1499,8 @@ export default {
     if (url.pathname === "/api/admin/session" && request.method === "GET") {
       const admin = await requireAdminSession(request, env);
       if (!admin.ok) return admin.response;
-      return jsonResponse({ authenticated: true, role: "admin", subject: admin.subject, email: admin.email }, 200, {
+      // The client only needs the authorization result; keep identity data server-side.
+      return jsonResponse({ authenticated: true, role: "admin" }, 200, {
         "cache-control": "no-store",
         "x-content-type-options": "nosniff",
       });
