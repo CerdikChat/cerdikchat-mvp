@@ -1639,7 +1639,7 @@
         utterance.lang = "id-ID";
         utterance.rate = 1;
         utterance.onstart = () => { speak.textContent = "⏹ Hentikan suara"; };
-        utterance.onend = utterance.onerror = () => { speak.textContent = "🔊 Bacakan jawaban"; };
+        utterance.onend = utterance.onerror = () => { speak.dataset.playing = "false"; speak.textContent = "🔊 Bacakan jawaban"; };
         if (speak.dataset.playing === "true") {
           window.speechSynthesis.cancel();
           speak.dataset.playing = "false";
