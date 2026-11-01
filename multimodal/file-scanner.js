@@ -85,13 +85,13 @@ export async function scanUploadedFile(env, bytes, mimeType) {
   }
 
   const contentType = response.headers.get("content-type") || "";
-  if (!/^application\\/json(?:\\s*;|$)/i.test(contentType)) {
+  if (!/^application\/json(?:\s*;|$)/i.test(contentType)) {
     try { await response.body?.cancel(); } catch {}
     return { ok: false, status: 503, code: "FILE_SCAN_INVALID_RESPONSE" };
   }
 
   const declaredLength = response.headers.get("content-length");
-  if (declaredLength !== null && (!/^\\d+$/.test(declaredLength) || Number(declaredLength) > MAX_SCANNER_RESPONSE_BYTES)) {
+  if (declaredLength !== null && (!/^\d+$/.test(declaredLength) || Number(declaredLength) > MAX_SCANNER_RESPONSE_BYTES)) {
     try { await response.body?.cancel(); } catch {}
     return { ok: false, status: 503, code: "FILE_SCAN_INVALID_RESPONSE" };
   }
