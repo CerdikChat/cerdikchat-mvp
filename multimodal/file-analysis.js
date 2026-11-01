@@ -145,6 +145,9 @@ export async function handleFileAnalysis(request, env, corsHeaders = {}) {
     const status = session.response?.status || 401;
     return json({ error: status === 503 ? "AUTH_UNAVAILABLE" : "AUTH_REQUIRED" }, status, corsHeaders);
   }
+  if (session.role !== "user") {
+    return json({ error: "USER_PORTAL_REQUIRED" }, 403, corsHeaders);
+  }
 
   if (!/^multipart\/form-data\s*;/i.test(request.headers.get("content-type") || "")) {
     return json({ error: "UNSUPPORTED_MEDIA_TYPE" }, 415, corsHeaders);
