@@ -1,4 +1,5 @@
 import { requireSession, validateCsrfRequest } from "../auth/google-auth.js";
+import { scanUploadedFile } from "./file-scanner.js";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_MULTIPART_BYTES = MAX_FILE_BYTES + 64 * 1024;
@@ -191,6 +192,8 @@ export async function handleFileAnalysis(request, env, corsHeaders = {}) {
   try { bytes = new Uint8Array(await file.arrayBuffer()); }
   catch { return json({ error: "FILE_READ_FAILED" }, 400, corsHeaders); }
   if (!hasSignature(bytes, spec.signature)) return json({ error: "FILE_SIGNATURE_MISMATCH" }, 415, corsHeaders);
+  const scan = await scanUploadedFile(env, bytes, mime);
+  if (!scan.ok) return json({ error: scan.code }, scan.status, corsHeaders);
   if (spec.signature === "pdf" && isEncryptedPdf(bytes)) {
     return json({ error: "ENCRYPTED_PDF_UNSUPPORTED" }, 422, corsHeaders);
   }
