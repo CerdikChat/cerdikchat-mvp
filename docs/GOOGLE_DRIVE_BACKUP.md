@@ -31,6 +31,7 @@ Add these repository Actions secrets under **Settings → Secrets and variables 
 | `GDRIVE_CLIENT_SECRET` | OAuth client secret |
 | `GDRIVE_REFRESH_TOKEN` | OAuth refresh token |
 | `GDRIVE_FOLDER_ID` | Existing destination folder ID |
+| `GITLEAKS_LICENSE` | Gitleaks license key if the repository is owned by a GitHub organization; not required for personal-account repositories |
 
 Do not put credential values in this repository, workflow YAML, issue comments, or backup archives. Never send them in chat. Use a dedicated backup Google account/folder if possible and protect the account with strong authentication.
 
