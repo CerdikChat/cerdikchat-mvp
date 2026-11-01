@@ -50,3 +50,11 @@ period = 60
 binding = "DB"
 database_name = "cerdikchat-staging"
 database_id = "79267e63-e57f-4237-8b88-f1e477397771"
+
+[[previews.ratelimits]]
+name = "VOICE_RATE_LIMITER"
+namespace_id = "2901031"
+
+[previews.ratelimits.simple]
+limit = 3
+period = 60
