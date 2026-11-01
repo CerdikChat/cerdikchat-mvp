@@ -609,6 +609,26 @@ test("document research rejects malformed model output instead of returning fabr
   assert.equal((await json(response)).error, "RESEARCH_OUTPUT_INVALID");
 });
 
+test("document research rejects references absent from extracted source text", async () => {
+  const structured = {
+    research_question: "Apa temuan?",
+    executive_summary: "Ringkasan.",
+    findings: [{ claim: "Klaim", evidence: "Bukti", reference: "Page 99", confidence: "high", caveat: "" }],
+    methodology: "Analisis isi.",
+    limitations: [], recommendations: [], next_questions: []
+  };
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => ({ format: "markdown", data: "Page 1: Source evidence." }),
+      run: async () => ({ response: JSON.stringify(structured) })
+    }
+  });
+  const response = await worker.fetch(analysisRequest(png, { path: "/api/research/document" }), env);
+  assert.equal(response.status, 502);
+  assert.equal((await json(response)).error, "RESEARCH_OUTPUT_INVALID");
+});
+
 test("document research denies administrator sessions at the User Portal boundary", async () => {
   const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
   const env = authenticatedAnalysisEnv({
