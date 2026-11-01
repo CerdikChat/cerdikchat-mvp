@@ -118,7 +118,7 @@ function extractText(result) {
   return item.data.trim().slice(0, MAX_EXTRACTED_CHARS);
 }
 
-function parseResearchOutput(reply) {
+function parseResearchOutput(reply, extracted) {
   const cleaned = reply.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
   let value;
   try { value = JSON.parse(cleaned); } catch { return null; }
@@ -128,10 +128,14 @@ function parseResearchOutput(reply) {
       typeof value.methodology !== "string" ||
       !Array.isArray(value.findings) || !Array.isArray(value.limitations) ||
       !Array.isArray(value.recommendations) || !Array.isArray(value.next_questions)) return null;
-  if (!value.findings.every(item => item && typeof item.claim === "string" &&
+  if (value.findings.length > 20 || !value.findings.every(item => item && typeof item.claim === "string" &&
       typeof item.evidence === "string" &&
-      (item.reference === null || typeof item.reference === "string") &&
+      (item.reference === null || (typeof item.reference === "string" &&
+        item.reference.length <= 160 &&
+        extracted.toLocaleLowerCase().includes(item.reference.toLocaleLowerCase()))) &&
       ["high", "moderate", "low", "insufficient_evidence"].includes(item.confidence))) return null;
+  if (![value.limitations, value.recommendations, value.next_questions].every(list =>
+      list.length <= 20 && list.every(item => typeof item === "string" && item.length <= 1500))) return null;
   return {
     research_question: value.research_question.slice(0, 2000),
     executive_summary: value.executive_summary.slice(0, 6000),
@@ -266,7 +270,7 @@ export async function handleFileAnalysis(request, env, corsHeaders = {}, options
     const reply = modelReply(result);
     if (!reply) return json({ error: "EMPTY_MODEL_RESPONSE" }, 502, corsHeaders);
     if (researchMode) {
-      const research = parseResearchOutput(reply);
+      const research = parseResearchOutput(reply, extracted);
       if (!research) return json({ error: "RESEARCH_OUTPUT_INVALID" }, 502, corsHeaders);
       return json({
         research,
