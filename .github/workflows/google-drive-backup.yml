@@ -2,6 +2,12 @@ name: ATLAS-9 Google Drive Backup
 
 on:
   workflow_dispatch:
+    inputs:
+      upload_to_google_drive:
+        description: "Upload to Google Drive (leave off for manual ZIP download)"
+        required: false
+        type: boolean
+        default: false
   schedule:
     # 02:00 WITA (Bali) every day
     - cron: "0 2 * * *"
@@ -52,7 +58,16 @@ jobs:
           cat backup/SHA256SUMS.txt
           du -h backup/*
 
+      - name: Publish backup package for manual download
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerdikchat-full-backup-${{ github.run_id }}
+          path: backup/
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Upload verified backup files to Google Drive
+        if: github.event_name == 'workflow_dispatch' && inputs.upload_to_google_drive == true
         env:
           GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
           GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
