@@ -1509,6 +1509,21 @@ export default {
       });
     }
 
+    if (url.pathname === "/api/research/document") {
+      const researchCors = {
+        ...corsHeaders,
+        "access-control-allow-methods": "POST, OPTIONS",
+        "access-control-allow-headers": "Content-Type, X-CSRF-Token",
+      };
+      if (request.method === "OPTIONS") {
+        if (!isSameOriginOrNoOrigin(request)) {
+          return errorResponse("ORIGIN_NOT_ALLOWED", "Origin permintaan tidak diizinkan.", 403, researchCors);
+        }
+        return new Response(null, { status: 204, headers: researchCors });
+      }
+      return handleFileAnalysis(request, env, researchCors, { researchMode: true });
+    }
+
     if (url.pathname === "/api/analyze") {
       const analysisCors = {
         ...corsHeaders,
