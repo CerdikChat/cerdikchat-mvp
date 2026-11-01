@@ -60,7 +60,12 @@ test("file scanner fails closed on timeout or transport error", async () => {
 
 test("file scanner fails closed on non-success response", async () => {
   const result = await scanUploadedFile({
-    FILE_SCANNER: { fetch: async () => new Response("unavailable", { status: 503 }) },
+    FILE_SCANNER: {
+      fetch: async () => new Response("unavailable", {
+        status: 503,
+        headers: { "content-type": "application/json" },
+      }),
+    },
   }, bytes, "image/png");
   assert.deepEqual(result, { ok: false, status: 503, code: "FILE_SCAN_UNAVAILABLE" });
 });
@@ -77,11 +82,36 @@ test("file scanner rejects malformed or unverifiable verdicts", async () => {
       FILE_SCANNER: {
         fetch: async () => new Response(
           typeof body === "string" ? body : JSON.stringify(body),
-          { status: 200 },
+          { status: 200, headers: { "content-type": "application/json" } },
         ),
       },
     }, bytes, "image/png");
     assert.equal(result.ok, false);
     assert.match(result.code, /^FILE_SCAN_/);
   }
+});
+
+test("file scanner bounds response bytes even without content-length", async () => {
+  const oversized = new Uint8Array(2_049).fill(65);
+  const result = await scanUploadedFile({
+    FILE_SCANNER: {
+      fetch: async () => new Response(oversized, {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    },
+  }, bytes, "image/png");
+  assert.deepEqual(result, { ok: false, status: 503, code: "FILE_SCAN_INVALID_RESPONSE" });
+});
+
+test("file scanner rejects a non-JSON content type", async () => {
+  const result = await scanUploadedFile({
+    FILE_SCANNER: {
+      fetch: async () => new Response("{}", {
+        status: 200,
+        headers: { "content-type": "text/plain" },
+      }),
+    },
+  }, bytes, "image/png");
+  assert.deepEqual(result, { ok: false, status: 503, code: "FILE_SCAN_INVALID_RESPONSE" });
 });
