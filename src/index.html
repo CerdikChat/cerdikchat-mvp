@@ -1610,15 +1610,18 @@
     let isAnalyzingFile = false;
 
     function updateUploadControls() {
-      const canUseUpload = isAuthenticated && currentRole === "user";
-      chooseUpload.disabled = !canUseUpload || isAnalyzingFile;
-      analyzeUpload.disabled = !canUseUpload || !selectedAnalysisFile || isAnalyzingFile;
-      analysisFile.disabled = !canUseUpload || isAnalyzingFile;
+      // Admin sessions may exercise the Preview file-picker and client validation.
+      // Actual file processing remains restricted to the server-authorized User Portal role.
+      const canSelectFile = isAuthenticated && ["user", "admin"].includes(currentRole);
+      const canAnalyzeFile = isAuthenticated && currentRole === "user";
+      chooseUpload.disabled = !canSelectFile || isAnalyzingFile;
+      analyzeUpload.disabled = !canAnalyzeFile || !selectedAnalysisFile || isAnalyzingFile;
+      analysisFile.disabled = !canSelectFile || isAnalyzingFile;
     }
 
     chooseUpload.addEventListener("click", () => {
-      if (!isAuthenticated || currentRole !== "user" || isAnalyzingFile) {
-        setStatus("Masuk melalui User Portal untuk menggunakan analisis berkas.", true);
+      if (!isAuthenticated || !["user", "admin"].includes(currentRole) || isAnalyzingFile) {
+        setStatus("Silakan masuk melalui akun terverifikasi untuk memilih berkas.", true);
         return;
       }
       analysisFile.click();
@@ -1648,7 +1651,9 @@
       }
       selectedAnalysisFile = file;
       uploadFileName.textContent = file.name + " · " + (file.size / 1024 / 1024).toFixed(2) + " MB";
-      setStatus("Berkas dipilih. Siap dianalisis.");
+      setStatus(currentRole === "admin"
+        ? "Berkas berhasil dipilih. Sesi Admin hanya dapat menguji pemilih dan validasi awal; gunakan User Portal untuk pemrosesan analisis."
+        : "Berkas dipilih. Siap dianalisis.");
       updateUploadControls();
     });
 
