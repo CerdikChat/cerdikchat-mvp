@@ -868,6 +868,16 @@
     html[data-theme="light"] .app>.side{background:linear-gradient(180deg,#f4f8ff,#eaf1fa);color:#172b43;border-right-color:#c7d8e8}
     html[data-theme="light"] .app>.side .prompt{color:#243c58}
     html[data-theme="light"] .app>.side .prompt:hover{background:#e0ecf8}
+
+    .voice-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0}
+    .voice-record,.voice-review button{border:1px solid var(--border,#475569);border-radius:10px;padding:9px 12px;background:var(--surface,#172033);color:inherit;font:inherit;font-size:13px}
+    .voice-record[disabled],.voice-review button[disabled]{opacity:.5}
+    .voice-record.recording{border-color:#dc5757;color:#ff9b9b}
+    .voice-state{font-size:12px;color:var(--muted,#94a3b8)}
+    .voice-review{display:grid;gap:8px;margin:10px 0;padding:10px;border:1px solid var(--border,#475569);border-radius:12px}
+    .voice-review[hidden]{display:none}
+    .voice-review textarea{width:100%;min-height:90px;resize:vertical;border:1px solid var(--border,#475569);border-radius:8px;padding:10px;background:var(--surface,#172033);color:inherit;font:inherit}
+    .voice-review-actions{display:flex;gap:8px;flex-wrap:wrap}
   </style>
 </head>
 
@@ -1070,6 +1080,18 @@
             aria-label="Pesan Anda"
             required></textarea>
 
+          <div class="voice-controls">
+            <button class="voice-record" id="voiceRecord" type="button" disabled aria-pressed="false">🎙 Rekam Voice Note</button>
+            <span class="voice-state" id="voiceState" role="status" aria-live="polite">Masuk sebagai User untuk menggunakan Voice Note.</span>
+          </div>
+          <section class="voice-review" id="voiceReview" aria-label="Tinjau transkripsi suara" hidden>
+            <label for="voiceTranscript">Tinjau dan edit transkripsi sebelum dikirim</label>
+            <textarea id="voiceTranscript" rows="4" maxlength="12000" spellcheck="true"></textarea>
+            <div class="voice-review-actions">
+              <button id="voiceUseTranscript" type="button">Gunakan di pesan</button>
+              <button id="voiceDiscard" type="button">Buang</button>
+            </div>
+          </section>
           <div class="controls">
             <span class="hint">
               <span id="count">0</span>/8000 karakter · Enter untuk baris baru
@@ -1206,6 +1228,12 @@
     const input = document.querySelector("#message");
     const feed = document.querySelector("#feed");
     const send = document.querySelector("#send");
+    const voiceRecord = document.querySelector("#voiceRecord");
+    const voiceState = document.querySelector("#voiceState");
+    const voiceReview = document.querySelector("#voiceReview");
+    const voiceTranscript = document.querySelector("#voiceTranscript");
+    const voiceUseTranscript = document.querySelector("#voiceUseTranscript");
+    const voiceDiscard = document.querySelector("#voiceDiscard");
     const statusEl = document.querySelector("#status");
     const count = document.querySelector("#count");
     const jumpLatest = document.querySelector("#jumpLatest");
@@ -1340,6 +1368,7 @@
       chooseUserPortal.hidden = isAuthenticated || !authConfigured;
       authLogout.hidden = !isAuthenticated;
       input.disabled = authRequired && !isAuthenticated;
+      if (voiceRecord) voiceRecord.disabled = !isAuthenticated || currentRole !== "user" || isSending;
       send.disabled = authRequired && !isAuthenticated;
       if (typeof updateUploadControls === "function") updateUploadControls();
       if (isAuthenticated && currentRole === "admin") loadPendingUsers();
@@ -1596,6 +1625,150 @@
       statusEl.className = isError ? "status error" : "status";
       statusEl.setAttribute("role", isError ? "alert" : "status");
     }
+
+
+    // Voice Note: audio is held in memory only and is never persisted by this UI.
+    let voiceRecorder = null;
+    let voiceStream = null;
+    let voiceChunks = [];
+    let voiceStartedAt = 0;
+    let voiceTimer = null;
+    let voiceBusy = false;
+
+    function setVoiceState(message, isError = false) {
+      voiceState.textContent = message;
+      voiceState.style.color = isError ? "#ef7777" : "";
+    }
+
+    function stopVoiceTracks() {
+      if (voiceTimer) { clearInterval(voiceTimer); voiceTimer = null; }
+      if (voiceStream) {
+        voiceStream.getTracks().forEach(track => track.stop());
+        voiceStream = null;
+      }
+    }
+
+    function resetVoiceRecording() {
+      stopVoiceTracks();
+      voiceRecorder = null;
+      voiceChunks = [];
+      voiceRecord.classList.remove("recording");
+      voiceRecord.setAttribute("aria-pressed", "false");
+      voiceRecord.textContent = "🎙 Rekam Voice Note";
+      voiceRecord.disabled = !isAuthenticated || currentRole !== "user";
+    }
+
+    async function transcribeVoice(blob, durationMs) {
+      if (!csrfToken) await refreshCsrfToken();
+      const formData = new FormData();
+      const mime = blob.type.toLowerCase().split(";")[0];
+      const extension = mime === "audio/ogg" ? "ogg" : "webm";
+      formData.set("audio", blob, `voice-note.${extension}`);
+      formData.set("durationMs", String(durationMs));
+      const response = await fetch("/api/voice/transcribe", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Accept": "application/json", "X-CSRF-Token": csrfToken },
+        body: formData
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const messages = {
+          AUTH_REQUIRED: "Sesi login berakhir. Silakan masuk kembali.",
+          USER_PORTAL_REQUIRED: "Voice Note hanya tersedia untuk User Portal.",
+          CSRF_VALIDATION_FAILED: "Token keamanan berubah. Muat ulang halaman dan coba lagi.",
+          AI_QUOTA_EXCEEDED: "Kuota AI untuk transkripsi telah tercapai.",
+          VOICE_RATE_LIMIT_UNAVAILABLE: "Layanan Voice Note belum tersedia pada Preview.",
+          RATE_LIMIT_EXCEEDED: "Batas penggunaan Voice Note tercapai. Coba kembali nanti."
+        };
+        throw new Error(messages[payload.error] || payload.message || payload.error || "Transkripsi gagal.");
+      }
+      if (typeof payload.text !== "string" || !payload.text.trim()) throw new Error("Transkripsi kosong. Silakan rekam ulang.");
+      voiceTranscript.value = payload.text.trim();
+      voiceReview.hidden = false;
+      setVoiceState("Transkripsi siap ditinjau. Periksa dan edit sebelum dikirim.");
+      voiceTranscript.focus();
+    }
+
+    async function startVoiceRecording() {
+      if (!isAuthenticated || currentRole !== "user" || voiceBusy || isSending) return;
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+        setVoiceState("Browser ini belum mendukung perekaman audio.", true);
+        return;
+      }
+      try {
+        voiceStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+        const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"];
+        const mimeType = candidates.find(type => MediaRecorder.isTypeSupported(type));
+        voiceRecorder = mimeType ? new MediaRecorder(voiceStream, { mimeType }) : new MediaRecorder(voiceStream);
+        voiceChunks = [];
+        voiceStartedAt = Date.now();
+        voiceRecorder.addEventListener("dataavailable", event => {
+          if (event.data && event.data.size) voiceChunks.push(event.data);
+        });
+        voiceRecorder.addEventListener("stop", async () => {
+          const durationMs = Date.now() - voiceStartedAt;
+          const blob = new Blob(voiceChunks, { type: voiceRecorder?.mimeType || mimeType || "audio/webm" });
+          resetVoiceRecording();
+          if (!blob.size) { setVoiceState("Rekaman kosong. Silakan coba lagi.", true); return; }
+          if (durationMs > 60_000) { setVoiceState("Durasi maksimal 60 detik. Rekam ulang dengan durasi lebih singkat.", true); return; }
+          if (blob.size > 3 * 1024 * 1024) { setVoiceState("Audio melebihi batas 3 MB. Rekam ulang lebih singkat.", true); return; }
+          voiceBusy = true;
+          voiceRecord.disabled = true;
+          setVoiceState("Mengirim audio untuk transkripsi…");
+          try { await transcribeVoice(blob, durationMs); }
+          catch (error) { setVoiceState(error instanceof Error ? error.message : "Transkripsi gagal.", true); }
+          finally {
+            voiceBusy = false;
+            voiceRecord.disabled = !isAuthenticated || currentRole !== "user" || isSending;
+            voiceChunks = [];
+          }
+        }, { once: true });
+        voiceRecorder.start(250);
+        voiceRecord.classList.add("recording");
+        voiceRecord.setAttribute("aria-pressed", "true");
+        voiceRecord.textContent = "■ Hentikan rekaman";
+        setVoiceState("Merekam… maksimal 60 detik. Ketuk tombol untuk berhenti.");
+        voiceTimer = setInterval(() => {
+          const seconds = Math.floor((Date.now() - voiceStartedAt) / 1000);
+          voiceState.textContent = `Merekam… ${seconds}s / 60s`;
+          if (seconds >= 60 && voiceRecorder?.state === "recording") voiceRecorder.stop();
+        }, 500);
+      } catch (error) {
+        stopVoiceTracks();
+        setVoiceState(error?.name === "NotAllowedError"
+          ? "Izin mikrofon ditolak. Izinkan mikrofon di pengaturan Chrome."
+          : "Mikrofon tidak tersedia. Periksa perangkat dan izin browser.", true);
+        resetVoiceRecording();
+      }
+    }
+
+    voiceRecord.addEventListener("click", () => {
+      if (voiceRecorder?.state === "recording") {
+        voiceRecorder.stop();
+      } else {
+        startVoiceRecording();
+      }
+    });
+
+    voiceUseTranscript.addEventListener("click", () => {
+      const text = voiceTranscript.value.trim();
+      if (!text) { setVoiceState("Transkripsi masih kosong.", true); return; }
+      if (text.length > MAX_MESSAGE_LENGTH) { setVoiceState("Transkripsi melebihi batas pesan chat.", true); return; }
+      input.value = text;
+      updateCount();
+      voiceReview.hidden = true;
+      setVoiceState("Transkripsi dimasukkan ke composer. Periksa kembali, lalu tekan Kirim.");
+      input.focus();
+    });
+
+    voiceDiscard.addEventListener("click", () => {
+      voiceTranscript.value = "";
+      voiceReview.hidden = true;
+      setVoiceState("Transkripsi dibuang. Rekaman tidak disimpan.");
+    });
 
     const analysisFile = document.querySelector("#analysisFile");
     const chooseUpload = document.querySelector("#chooseUpload");
@@ -2388,6 +2561,7 @@
     }
 
     form.addEventListener("submit", sendMessage);
+    window.addEventListener("pagehide", stopVoiceTracks);
     updateCount();
     const networkState = document.getElementById("networkState");
     function updateNetworkState() {
