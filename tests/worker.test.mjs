@@ -549,6 +549,11 @@ function analysisRequest(file, options = {}) {
 
 function authenticatedAnalysisEnv(overrides = {}) {
   return makeEnv({
+    FILE_SCANNER: {
+      fetch: async () => new Response(JSON.stringify({
+        engine: "clamav", status: "clean", signatureVersion: "test-db-1"
+      }), { status: 200, headers: { "content-type": "application/json" } }),
+    },
     DB: {
       prepare: () => ({
         bind: () => ({
@@ -786,4 +791,23 @@ test("administrator session endpoint fails closed when role is missing", async (
   }));
   assert.equal(response.status, 403);
   assert.equal((await json(response)).error, "ADMIN_REQUIRED");
+});
+
+
+test("file analysis fails closed when antivirus is unavailable before AI processing", async () => {
+  let conversionCalls = 0;
+  let inferenceCalls = 0;
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    FILE_SCANNER: undefined,
+    AI: {
+      toMarkdown: async () => { conversionCalls++; return { format: "markdown", data: "must not run" }; },
+      run: async () => { inferenceCalls++; return { response: "must not run" }; },
+    },
+  });
+  const response = await worker.fetch(analysisRequest(png), env);
+  assert.equal(response.status, 503);
+  assert.equal((await json(response)).error, "FILE_SCAN_UNAVAILABLE");
+  assert.equal(conversionCalls, 0);
+  assert.equal(inferenceCalls, 0);
 });
