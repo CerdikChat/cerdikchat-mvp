@@ -535,7 +535,7 @@ function analysisRequest(file, options = {}) {
   const form = new FormData();
   if (file) form.set("file", file);
   form.set("prompt", options.prompt || "Jelaskan isi file ini.");
-  return new Request("https://cerdikchat.test/api/analyze", {
+  return new Request(`https://cerdikchat.test${options.path || "/api/analyze"}`, {
     method: "POST",
     headers: {
       origin: options.origin || "https://cerdikchat.test",
@@ -567,6 +567,84 @@ function authenticatedAnalysisEnv(overrides = {}) {
     ...overrides,
   });
 }
+
+test("document research returns validated structured evidence for an authenticated user", async () => {
+  const structured = {
+    research_question: "Apa temuan utama?",
+    executive_summary: "Ringkasan berbasis dokumen.",
+    findings: [{ claim: "Temuan A", evidence: "Bukti pada Page 1.", reference: "Page 1", confidence: "high", caveat: "" }],
+    methodology: "Analisis isi dokumen.",
+    limitations: ["Hanya satu dokumen dianalisis."],
+    recommendations: ["Verifikasi dengan sumber primer."],
+    next_questions: ["Apakah temuan ini berlaku di luar dokumen?"]
+  };
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => ({ format: "markdown", data: "Page 1: Evidence A." }),
+      run: async (_model, input) => {
+        assert.match(input.messages[0].content, /Return ONLY valid JSON/);
+        assert.match(input.messages[1].content, /BEGIN UNTRUSTED FILE CONTENT/);
+        return { response: JSON.stringify(structured) };
+      }
+    }
+  });
+  const response = await worker.fetch(analysisRequest(png, { path: "/api/research/document" }), env);
+  const payload = await json(response);
+  assert.equal(response.status, 200);
+  assert.equal(payload.research.findings[0].reference, "Page 1");
+  assert.equal(payload.persisted, false);
+});
+
+test("document research rejects malformed model output instead of returning fabricated structure", async () => {
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => ({ format: "markdown", data: "Unmarked source text." }),
+      run: async () => ({ response: "Here is a summary, no JSON." })
+    }
+  });
+  const response = await worker.fetch(analysisRequest(png, { path: "/api/research/document" }), env);
+  assert.equal(response.status, 502);
+  assert.equal((await json(response)).error, "RESEARCH_OUTPUT_INVALID");
+});
+
+test("document research rejects references absent from extracted source text", async () => {
+  const structured = {
+    research_question: "Apa temuan?",
+    executive_summary: "Ringkasan.",
+    findings: [{ claim: "Klaim", evidence: "Bukti", reference: "Page 99", confidence: "high", caveat: "" }],
+    methodology: "Analisis isi.",
+    limitations: [], recommendations: [], next_questions: []
+  };
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => ({ format: "markdown", data: "Page 1: Source evidence." }),
+      run: async () => ({ response: JSON.stringify(structured) })
+    }
+  });
+  const response = await worker.fetch(analysisRequest(png, { path: "/api/research/document" }), env);
+  assert.equal(response.status, 502);
+  assert.equal((await json(response)).error, "RESEARCH_OUTPUT_INVALID");
+});
+
+test("document research denies administrator sessions at the User Portal boundary", async () => {
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    DB: {
+      prepare: () => ({
+        bind: () => ({
+          first: async () => ({ google_sub: "12345678901234567890", email: "admin@example.com", role: "admin" })
+        })
+      })
+    },
+    AI: { toMarkdown: async () => { throw new Error("must not run"); } }
+  });
+  const response = await worker.fetch(analysisRequest(png, { path: "/api/research/document" }), env);
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "USER_PORTAL_REQUIRED");
+});
 
 test("file analysis accepts an authenticated PNG and returns a non-persistent analysis", async () => {
   const png = new File([new Uint8Array([137,80,78,71,13,10,26,10,0])], "sample.png", { type: "image/png" });

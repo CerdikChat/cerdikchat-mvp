@@ -44,6 +44,21 @@ test("day and night mode toggle is accessible and persists locally", () => {
   assert.match(indexHtml, /Aktifkan mode siang/);
 });
 
+test("document research is exposed only as a User Portal file action and uses the dedicated endpoint", () => {
+  assert.match(indexHtml, /id="researchUpload"/);
+  assert.match(indexHtml, /researchUpload\.disabled = !canUseUpload \|\| !selectedAnalysisFile \|\| isAnalyzingFile/);
+  assert.match(indexHtml, /fetch\("\/api\/research\/document"/);
+  assert.match(indexHtml, /currentRole !== "user"/);
+  assert.match(indexHtml, /X-CSRF-Token/);
+});
+
+test("document research output is rendered as text nodes, not injected HTML", () => {
+  assert.match(indexHtml, /function appendResearchResult\(row, research\)/);
+  assert.match(indexHtml, /row\.classList\.contains\("content"\) \? row : row\.querySelector\("\.content"\)/);
+  assert.match(indexHtml, /el\.textContent = value/);
+  assert.doesNotMatch(indexHtml, /appendResearchResult[\s\S]{0,5000}innerHTML\s*=/);
+});
+
 test("PWA registers a same-origin root-scoped service worker over secure contexts", () => {
   assert.match(indexHtml, /navigator\.serviceWorker\.register\("\/service-worker\.js", \{ scope: "\/" \}\)/);
   assert.match(indexHtml, /window\.isSecureContext/);
