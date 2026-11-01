@@ -1665,7 +1665,8 @@
     });
 
     function appendResearchResult(row, research) {
-      const content = row.querySelector(".content");
+      const content = row.classList.contains("content") ? row : row.querySelector(".content");
+      if (!content) throw new Error("Kontainer hasil riset tidak tersedia.");
       const heading = (tag, value) => {
         const el = document.createElement(tag);
         el.textContent = value;
