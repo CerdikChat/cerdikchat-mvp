@@ -14,6 +14,9 @@
   <title>CerdikChat — AI Workspace</title>
 
   <style>
+    .auth-panel[hidden] { display: none !important; }
+    #googleSignIn[hidden], #authUser[hidden] { display: none !important; }
+
     :root {
       color-scheme: dark;
       --bg: #0b1220;
@@ -534,6 +537,11 @@
     .controls { padding:2px 4px 0; }
     .send { min-width:104px; padding:10px 18px; border-radius:12px; background:linear-gradient(110deg,#39a7ff,#21e0cb); box-shadow:0 5px 18px #14a9d944; }
     .footer { max-width:900px; margin-top:7px; color:#93abc7; font-size:11px; line-height:1.55; }
+    .auth-panel { max-width:900px; margin:12px auto; padding:12px 14px; border:1px solid #1a4c77; border-radius:14px; background:#0d1b30; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .auth-panel small { color:var(--muted); }
+    .auth-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .auth-user { color:var(--mint); font-size:12px; }
+    .auth-logout { padding:8px 12px; border:1px solid var(--line); border-radius:9px; background:var(--panel2); color:var(--text); }
     .footer .developer { display:block; margin-top:5px; color:#37d5e6; font-size:11px; font-weight:750; letter-spacing:.45px; }
     .status { max-width:900px; }
     @media(max-width:900px) { .suggestions { grid-template-columns:repeat(2,minmax(0,1fr)); } }
@@ -613,6 +621,11 @@
         <span class="pill">● AI · Beta</span>
       </header>
 
+      <section class="auth-panel" id="authPanel" hidden aria-live="polite">
+        <div><strong id="authTitle">Akses CerdikChat</strong><br><small id="authMessage">Masuk dengan akun Google yang telah diizinkan.</small></div>
+        <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
+      </section>
+
       <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
         <div class="welcome" id="welcome">
@@ -645,6 +658,7 @@
         <form id="chatForm" class="composer">
           <textarea
             id="message"
+            disabled
             rows="2"
             maxlength="8000"
             placeholder="Tanyakan sesuatu kepada CerdikChat…"
@@ -655,7 +669,7 @@
             <span class="hint">
               <span id="count">0</span>/8000 karakter · Enter untuk kirim
             </span>
-            <button class="send" id="send" type="submit">Kirim ↑</button>
+            <button class="send" id="send" type="submit" disabled>Kirim ↑</button>
           </div>
         </form>
 
@@ -680,6 +694,233 @@
     const send = document.querySelector("#send");
     const statusEl = document.querySelector("#status");
     const count = document.querySelector("#count");
+
+    const authPanel = document.querySelector("#authPanel");
+    const authTitle = document.querySelector("#authTitle");
+    const authMessage = document.querySelector("#authMessage");
+    const googleSignIn = document.querySelector("#googleSignIn");
+    const authUser = document.querySelector("#authUser");
+    const authLogout = document.querySelector("#authLogout");
+
+    let authRequired = false;
+    let authConfigured = false;
+    let isAuthenticated = false;
+    let csrfToken = "";
+    let googleClientId = "";
+
+    function updateAuthUI(user = null) {
+      authPanel.hidden = !authRequired && !authConfigured;
+      authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikChat";
+      authMessage.textContent = isAuthenticated
+        ? "Sesi aman Anda aktif."
+        : "Masuk dengan akun Google yang telah diizinkan.";
+      authUser.textContent = user
+        ? [user.displayName, user.email].filter(Boolean).join(" · ")
+        : "";
+      authUser.hidden = !isAuthenticated;
+      googleSignIn.hidden = isAuthenticated || !authConfigured;
+      authLogout.hidden = !isAuthenticated;
+      input.disabled = authRequired && !isAuthenticated;
+      send.disabled = authRequired && !isAuthenticated;
+    }
+
+    function createNonce() {
+      const bytes = crypto.getRandomValues(new Uint8Array(32));
+      let binary = "";
+      for (const byte of bytes) binary += String.fromCharCode(byte);
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    function loadGoogleIdentityServices() {
+      return new Promise((resolve, reject) => {
+        if (window.google?.accounts?.id) {
+          resolve();
+          return;
+        }
+        const existing = document.querySelector("script[data-google-identity]");
+        if (existing) {
+          existing.addEventListener("load", resolve, { once: true });
+          existing.addEventListener("error", reject, { once: true });
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        script.dataset.googleIdentity = "true";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.append(script);
+      });
+    }
+
+    async function refreshCsrfToken() {
+      const response = await fetch("/api/auth/config", {
+        method: "GET",
+        credentials: "same-origin",
+        headers: { "Accept": "application/json" }
+      });
+      const config = await response.json();
+      if (!response.ok || typeof config.csrfToken !== "string") {
+        throw new Error("Token keamanan tidak dapat diperbarui.");
+      }
+      csrfToken = config.csrfToken;
+    }
+
+    async function handleGoogleCredential(response, nonce) {
+      if (!response || typeof response.credential !== "string" || !csrfToken) {
+        setStatus("Respons Google atau token keamanan tidak tersedia.", true);
+        return;
+      }
+      try {
+        const result = await fetch("/api/auth/google", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-CSRF-Token": csrfToken
+          },
+          body: JSON.stringify({ credential: response.credential, nonce })
+        });
+        const payload = await result.json();
+        if (!result.ok) {
+          if (payload.error === "USER_NOT_ALLOWLISTED") {
+            authMessage.textContent = `Akun ${payload.email || "Google"} belum diizinkan. Google sub: ${payload.googleSub || "tidak tersedia"}`;
+            throw new Error(`Akun belum masuk allowlist. Google sub: ${payload.googleSub || "tidak tersedia"}`);
+          }
+          if (payload.error === "CSRF_VALIDATION_FAILED") {
+            await refreshCsrfToken();
+            throw new Error("Token keamanan diperbarui. Silakan tekan tombol Google sekali lagi.");
+          }
+          throw new Error(payload.message || payload.error || "Google Sign-In gagal.");
+        }
+        isAuthenticated = true;
+        updateAuthUI(payload.user || null);
+        setStatus("Berhasil masuk ke CerdikChat.");
+      } catch (error) {
+        isAuthenticated = false;
+        updateAuthUI();
+        setStatus(error instanceof Error ? error.message : "Google Sign-In gagal.", true);
+        renderGoogleButton();
+      }
+    }
+
+    async function renderGoogleButton() {
+      if (!googleClientId || isAuthenticated) return;
+      try {
+        await loadGoogleIdentityServices();
+        const nonce = createNonce();
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          nonce,
+          auto_select: false,
+          callback: (response) => handleGoogleCredential(response, nonce)
+        });
+        googleSignIn.replaceChildren();
+        window.google.accounts.id.renderButton(googleSignIn, {
+          type: "standard",
+          theme: "outline",
+          size: "large",
+          text: "signin_with",
+          shape: "pill",
+          logo_alignment: "left",
+          width: 280
+        });
+      } catch {
+        setStatus("Google Identity Services tidak dapat dimuat. Periksa koneksi atau CSP.", true);
+      }
+    }
+
+    async function loadAuth() {
+      try {
+        const response = await fetch("/api/auth/config", {
+          method: "GET",
+          credentials: "same-origin",
+          headers: { "Accept": "application/json" }
+        });
+        const config = await response.json();
+        if (!response.ok) throw new Error(config.message || config.error || "Konfigurasi autentikasi tidak tersedia.");
+        csrfToken = typeof config.csrfToken === "string" ? config.csrfToken : "";
+        authRequired = config.required === true;
+        authConfigured = config.configured === true && typeof config.clientId === "string";
+        googleClientId = authConfigured ? config.clientId : "";
+
+        if (authRequired && (!authConfigured || !csrfToken)) {
+          updateAuthUI();
+          setStatus("Autentikasi wajib belum dikonfigurasi dengan lengkap.", true);
+          return;
+        }
+
+        if (authConfigured && !csrfToken) {
+          throw new Error("Token keamanan tidak tersedia. Muat ulang halaman.");
+        }
+
+        if (authConfigured || authRequired) {
+          authPanel.hidden = false;
+          const sessionResponse = await fetch("/api/auth/me", {
+            credentials: "same-origin",
+            headers: { "Accept": "application/json" }
+          });
+          if (sessionResponse.ok) {
+            const session = await sessionResponse.json();
+            isAuthenticated = session.authenticated === true;
+            updateAuthUI(session.user || null);
+          } else if (sessionResponse.status === 401) {
+            isAuthenticated = false;
+            updateAuthUI();
+          } else {
+            throw new Error("Status sesi tidak dapat diverifikasi.");
+          }
+          if (!isAuthenticated && authConfigured) await renderGoogleButton();
+        } else {
+          isAuthenticated = false;
+          updateAuthUI();
+        }
+      } catch (error) {
+        authRequired = true;
+        isAuthenticated = false;
+        updateAuthUI();
+        setStatus(error instanceof Error ? error.message : "Autentikasi tidak tersedia.", true);
+      }
+    }
+
+    async function logoutFromCerdikChat() {
+      if (!csrfToken) {
+        setStatus("Token keamanan tidak tersedia. Muat ulang halaman.", true);
+        return;
+      }
+      authLogout.disabled = true;
+      try {
+        const response = await fetch("/api/auth/logout", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Accept": "application/json",
+            "X-CSRF-Token": csrfToken
+          }
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          if (payload.error === "CSRF_VALIDATION_FAILED") {
+            await refreshCsrfToken();
+            throw new Error("Token keamanan diperbarui. Silakan ulangi logout.");
+          }
+          throw new Error(payload.error || "Logout gagal.");
+        }
+        isAuthenticated = false;
+        if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
+        updateAuthUI();
+        setStatus("Anda telah keluar.");
+        await renderGoogleButton();
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : "Logout gagal.", true);
+      } finally {
+        authLogout.disabled = false;
+      }
+    }
+
+    authLogout.addEventListener("click", logoutFromCerdikChat);
 
     const MAX_HISTORY_MESSAGES = 12;
     const MAX_MESSAGE_LENGTH = 8000;
@@ -1084,7 +1325,7 @@
     }
 
     function usePrompt(prompt) {
-      if (isSending) return;
+      if (isSending || (authRequired && !isAuthenticated)) return;
 
       input.value = prompt;
       updateCount();
@@ -1115,6 +1356,10 @@
       event.preventDefault();
 
       if (isSending) return;
+      if (authRequired && !isAuthenticated) {
+        setStatus("Silakan masuk menggunakan akun Google yang diizinkan.", true);
+        return;
+      }
 
       const message = input.value.trim();
 
@@ -1229,8 +1474,8 @@
 
       } finally {
         isSending = false;
-        send.disabled = false;
-        input.disabled = false;
+        send.disabled = authRequired && !isAuthenticated;
+        input.disabled = authRequired && !isAuthenticated;
         send.textContent = "Kirim ↑";
         form.removeAttribute("aria-busy");
         input.focus();
@@ -1240,6 +1485,7 @@
 
     form.addEventListener("submit", sendMessage);
     updateCount();
+    loadAuth();
   </script>
 </body>
 </html>

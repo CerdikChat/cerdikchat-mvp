@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import worker from "../worker.js";
+import { verifyGoogleIdToken, googleLogin } from "../auth/google-auth.js";
 
 function makeEnv(overrides = {}) {
   return {
@@ -32,6 +33,116 @@ async function json(response) {
   return response.json();
 }
 
+
+function base64UrlJson(value) {
+  return Buffer.from(JSON.stringify(value)).toString("base64url");
+}
+
+async function makeSignedGoogleToken(overrides = {}) {
+  const clientId = "atlas9-test.apps.googleusercontent.com";
+  const nonce = "N".repeat(43);
+  const now = Math.floor(Date.now() / 1000);
+  const pair = await crypto.subtle.generateKey(
+    { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" },
+    true,
+    ["sign", "verify"]
+  );
+  const jwk = await crypto.subtle.exportKey("jwk", pair.publicKey);
+  jwk.kid = `atlas9-test-${crypto.randomUUID()}`;
+  jwk.alg = "RS256";
+  jwk.use = "sig";
+  const claims = {
+    iss: "https://accounts.google.com",
+    aud: clientId,
+    azp: clientId,
+    exp: now + 300,
+    iat: now,
+    sub: "12345678901234567890",
+    email_verified: true,
+    email: "Pilot.User@example.com",
+    nonce,
+    ...overrides
+  };
+  const unsigned = `${base64UrlJson({ alg: "RS256", kid: jwk.kid })}.${base64UrlJson(claims)}`;
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    pair.privateKey,
+    new TextEncoder().encode(unsigned)
+  );
+  const token = `${unsigned}.${Buffer.from(signature).toString("base64url")}`;
+  const fetchJwks = async () => new Response(JSON.stringify({ keys: [jwk] }), {
+    headers: { "cache-control": "max-age=300" }
+  });
+  return { token, clientId, nonce, fetchJwks };
+}
+
+test("unlisted Google account receives its verified subject for admin allowlisting", async () => {
+  const fixture = await makeSignedGoogleToken();
+  const csrf = "C".repeat(43);
+  const request = new Request("https://cerdikchat.test/api/auth/google", {
+    method: "POST",
+    headers: {
+      origin: "https://cerdikchat.test",
+      "content-type": "application/json",
+      "cf-connecting-ip": "203.0.113.11",
+      cookie: `__Host-cerdikchat_csrf=${csrf}`,
+      "x-csrf-token": csrf
+    },
+    body: JSON.stringify({ credential: fixture.token, nonce: fixture.nonce })
+  });
+  const env = makeEnv({
+    GOOGLE_CLIENT_ID: fixture.clientId,
+    DB: {
+      prepare: (sql) => ({
+        bind: () => ({
+          first: async () => {
+            assert.match(sql, /SELECT google_sub, email, display_name, status FROM users/);
+            return null;
+          }
+        })
+      })
+    }
+  });
+  const response = await googleLogin(request, env, { fetch: fixture.fetchJwks });
+  const payload = await json(response);
+  assert.equal(response.status, 403);
+  assert.equal(payload.error, "USER_NOT_ALLOWLISTED");
+  assert.equal(payload.googleSub, "12345678901234567890");
+  assert.equal(payload.email, "pilot.user@example.com");
+});
+
+test("Google ID token verifies signature, audience, nonce and normalized email", async () => {
+  const fixture = await makeSignedGoogleToken();
+  const identity = await verifyGoogleIdToken(fixture.token, fixture.clientId, {
+    fetch: fixture.fetchJwks,
+    nonce: fixture.nonce
+  });
+  assert.equal(identity.sub, "12345678901234567890");
+  assert.equal(identity.email, "pilot.user@example.com");
+});
+
+test("Google ID token rejects nonce mismatch", async () => {
+  const fixture = await makeSignedGoogleToken();
+  await assert.rejects(
+    verifyGoogleIdToken(fixture.token, fixture.clientId, {
+      fetch: fixture.fetchJwks,
+      nonce: "X".repeat(43)
+    }),
+    /GOOGLE_NONCE_INVALID/
+  );
+});
+
+test("Google ID token requires azp when multiple audiences are present", async () => {
+  const fixture = await makeSignedGoogleToken({ aud: ["atlas9-test.apps.googleusercontent.com", "other-client.apps.googleusercontent.com"], azp: undefined });
+  await assert.rejects(
+    verifyGoogleIdToken(fixture.token, fixture.clientId, {
+      fetch: fixture.fetchJwks,
+      nonce: fixture.nonce
+    }),
+    /GOOGLE_AUTHORIZED_PARTY_INVALID/
+  );
+});
+
 test("GET /api/chat is rejected with 405", async () => {
   const response = await worker.fetch(new Request("https://cerdikchat.test/api/chat"), makeEnv());
   assert.equal(response.status, 405);
@@ -52,8 +163,11 @@ test("static assets receive browser security headers", async () => {
   );
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.equal(response.headers.get("cross-origin-opener-policy"), "same-origin-allow-popups");
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
   assert.match(response.headers.get("content-security-policy"), /default-src 'self'/);
+  assert.match(response.headers.get("content-security-policy"), /accounts\.google\.com\/gsi\/client/);
+  assert.match(response.headers.get("content-security-policy"), /frame-src https:\/\/accounts\.google\.com\/gsi\//);
   assert.match(response.headers.get("content-security-policy"), /frame-ancestors 'none'/);
   assert.equal(response.headers.get("permissions-policy"), "camera=(), microphone=(), geolocation=()");
   assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000; includeSubDomains");
@@ -242,4 +356,155 @@ test("model failure returns a sanitized 502 response", async () => {
   assert.equal(response.status, 502);
   assert.equal(payload.error, "AI_REQUEST_FAILED");
   assert.equal(JSON.stringify(payload).includes("private provider detail"), false);
+});
+
+
+test("Google auth configuration exposes only public client ID and required mode", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/config"),
+    makeEnv({ GOOGLE_CLIENT_ID: "test-client.apps.googleusercontent.com", GOOGLE_AUTH_REQUIRED: "true" })
+  );
+  const payload = await json(response);
+  assert.equal(response.status, 200);
+  assert.equal(payload.clientId, "test-client.apps.googleusercontent.com");
+  assert.equal(payload.required, true);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+});
+
+test("Google auth configuration reports an unconfigured optional mode safely", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/config"),
+    makeEnv()
+  );
+  const payload = await json(response);
+  assert.equal(response.status, 200);
+  assert.equal(payload.clientId, null);
+  assert.equal(payload.configured, false);
+  assert.equal(payload.required, false);
+  assert.match(payload.csrfToken, /^[A-Za-z0-9_-]{43}$/);
+  assert.match(response.headers.get("set-cookie"), /HttpOnly; Secure; SameSite=Strict/);
+  assert.match(response.headers.get("set-cookie"), new RegExp(payload.csrfToken));
+});
+
+
+test("Google auth configuration reuses a valid CSRF cookie across tabs", async () => {
+  const existing = "Z".repeat(43);
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/config", {
+      headers: { cookie: `__Host-cerdikchat_csrf=${existing}` }
+    }),
+    makeEnv()
+  );
+  const payload = await json(response);
+  assert.equal(payload.csrfToken, existing);
+  assert.match(response.headers.get("set-cookie"), new RegExp(existing));
+});
+
+test("Google auth configuration reports required mode even when client ID is missing", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/config"),
+    makeEnv({ GOOGLE_AUTH_REQUIRED: "true" })
+  );
+  const payload = await json(response);
+  assert.equal(response.status, 200);
+  assert.equal(payload.required, true);
+  assert.equal(payload.configured, false);
+});
+
+test("Google login rejects same-origin requests without the CSRF double-submit token", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/google", {
+      method: "POST",
+      headers: { origin: "https://cerdikchat.test", "content-type": "application/json" },
+      body: JSON.stringify({ credential: "not-a-real-token", nonce: "a".repeat(43) }),
+    }),
+    makeEnv({ GOOGLE_CLIENT_ID: "test-client.apps.googleusercontent.com", DB: {} })
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "CSRF_VALIDATION_FAILED");
+});
+
+
+test("Google login is rate-limited by client IP before token verification", async () => {
+  const csrf = "A".repeat(43);
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/google", {
+      method: "POST",
+      headers: {
+        origin: "https://cerdikchat.test",
+        "content-type": "application/json",
+        "cf-connecting-ip": "203.0.113.10",
+        cookie: `__Host-cerdikchat_csrf=${csrf}`,
+        "x-csrf-token": csrf
+      },
+      body: JSON.stringify({ credential: "not-a-real-token", nonce: "B".repeat(43) })
+    }),
+    makeEnv({
+      GOOGLE_CLIENT_ID: "test-client.apps.googleusercontent.com",
+      DB: {},
+      CHAT_RATE_LIMITER: { limit: async ({ key }) => {
+        assert.equal(key, "auth:ip:203.0.113.10");
+        return { success: false };
+      } }
+    })
+  );
+  assert.equal(response.status, 429);
+  assert.equal((await json(response)).error, "RATE_LIMIT_EXCEEDED");
+});
+
+test("logout rejects same-origin requests without the CSRF double-submit token", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/logout", {
+      method: "POST",
+      headers: { origin: "https://cerdikchat.test" },
+    }),
+    makeEnv()
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "CSRF_VALIDATION_FAILED");
+});
+
+test("protected chat rejects missing or unknown session before rate limiter and AI", async () => {
+  let rateLimitCalls = 0;
+  let aiCalls = 0;
+  const env = makeEnv({
+    GOOGLE_AUTH_REQUIRED: "true",
+    DB: {
+      prepare: () => ({
+        bind: () => ({ first: async () => null }),
+      }),
+    },
+    CHAT_RATE_LIMITER: { limit: async () => { rateLimitCalls++; return { success: true }; } },
+    AI: { run: async () => { aiCalls++; return { response: "should not run" }; } },
+  });
+  const response = await worker.fetch(post({ message: "Halo" }), env);
+  assert.equal(response.status, 401);
+  assert.equal((await json(response)).error, "AUTH_REQUIRED");
+  assert.equal(rateLimitCalls, 0);
+  assert.equal(aiCalls, 0);
+});
+
+test("Google login endpoint rejects cross-origin credential posts", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/google", {
+      method: "POST",
+      headers: { origin: "https://attacker.example", "content-type": "application/json" },
+      body: JSON.stringify({ credential: "not-a-real-token" }),
+    }),
+    makeEnv({ GOOGLE_CLIENT_ID: "test-client.apps.googleusercontent.com", DB: {} })
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
+});
+
+test("logout rejects cross-origin requests", async () => {
+  const response = await worker.fetch(
+    new Request("https://cerdikchat.test/api/auth/logout", {
+      method: "POST",
+      headers: { origin: "https://attacker.example" },
+    }),
+    makeEnv()
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
 });

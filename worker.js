@@ -18,12 +18,14 @@
  * - Minimal, privacy-conscious observability
  *
  * Limitations:
- * - No user authentication
+ * - Optional Google authentication (enforced when GOOGLE_AUTH_REQUIRED=true)
  * - No persistent conversation storage
  * - No external live-news or financial-data retrieval
  */
 
 "use strict";
+
+import { authConfig, googleLogin, currentSession, logout, requireSession } from "./auth/google-auth.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1047,7 +1049,15 @@ async function handleChat(request, env, ctx) {
 
   // Private-pilot mode is opt-in. Enable only after Worker-level
   // Cloudflare Access is configured for every production hostname.
+  let authenticatedSubject = null;
   let pilotEmail = null;
+  if (env.GOOGLE_AUTH_REQUIRED === "true") {
+    const session = await requireSession(request, env);
+    if (!session.ok) {
+      return errorResponse("AUTH_REQUIRED", "Silakan masuk menggunakan akun Google yang diizinkan.", 401, corsHeaders);
+    }
+    authenticatedSubject = session.subject;
+  }
   if (env.PILOT_ACCESS_REQUIRED === "true") {
     if (!ctx?.access || typeof ctx.access.getIdentity !== "function") {
       return errorResponse(
@@ -1097,7 +1107,7 @@ async function handleChat(request, env, ctx) {
     request,
     env,
     corsHeaders,
-    pilotEmail
+    authenticatedSubject || pilotEmail
   );
 
   if (rateLimitError) return rateLimitError;
@@ -1459,6 +1469,11 @@ export default {
     const url = new URL(request.url);
     const corsHeaders = getCorsHeaders(request);
 
+    if (url.pathname === "/api/auth/config" && request.method === "GET") return authConfig(request, env);
+    if (url.pathname === "/api/auth/google") return googleLogin(request, env);
+    if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
+    if (url.pathname === "/api/auth/logout") return logout(request, env);
+
     if (url.pathname === CONFIG.API_PATH) {
       if (request.method === "OPTIONS") {
         if (!isSameOriginOrNoOrigin(request)) {
@@ -1491,11 +1506,11 @@ export default {
       headers.set("x-frame-options", "DENY");
       headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
       headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
-      headers.set("cross-origin-opener-policy", "same-origin");
+      headers.set("cross-origin-opener-policy", "same-origin-allow-popups");
       headers.set("cross-origin-resource-policy", "same-origin");
       headers.set(
         "content-security-policy",
-        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        "default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: https://*.googleusercontent.com; font-src 'self' data:; connect-src 'self' https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
       );
 
       return new Response(assetResponse.body, {
