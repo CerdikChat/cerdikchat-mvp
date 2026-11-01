@@ -27,6 +27,7 @@
 
 import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession, requestUserAccess, listPendingUserAccess, decideUserAccess } from "./auth/google-auth.js";
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
+import { handleVoiceTranscription } from "./multimodal/voice-assistance.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1522,6 +1523,22 @@ export default {
         return new Response(null, { status: 204, headers: analysisCors });
       }
       return handleFileAnalysis(request, env, analysisCors);
+    }
+
+
+    if (url.pathname === "/api/voice/transcribe") {
+      const voiceCors = {
+        ...corsHeaders,
+        "access-control-allow-methods": "POST, OPTIONS",
+        "access-control-allow-headers": "Content-Type, X-CSRF-Token",
+      };
+      if (request.method === "OPTIONS") {
+        if (!isSameOriginOrNoOrigin(request)) {
+          return errorResponse("ORIGIN_NOT_ALLOWED", "Origin permintaan tidak diizinkan.", 403, voiceCors);
+        }
+        return new Response(null, { status: 204, headers: voiceCors });
+      }
+      return handleVoiceTranscription(request, env, voiceCors);
     }
 
     if (url.pathname === CONFIG.API_PATH) {

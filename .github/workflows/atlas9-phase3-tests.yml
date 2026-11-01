@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - atlas9/phase-2-google-auth-implementation
+      - atlas9/pdf-image-analysis-integration
     paths:
       - "worker.js"
       - "auth/**"
