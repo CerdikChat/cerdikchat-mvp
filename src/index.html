@@ -865,6 +865,7 @@
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">▥</div><strong>Data Analytics</strong><small>Explore metrics, patterns, and trends</small><span class="feature-state soon">Coming soon</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌘</div><strong>AI Tools & Agents</strong><small>Bounded tools and multi-step workflows</small><span class="feature-state soon">Coming soon</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">◷</div><strong>Conversation History</strong><small>Return to your previous work sessions</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌁</div><strong>Hybrid Connectivity</strong><small>Internet + Wi-Fi mesh + radio failover demonstration</small><button class="settings-button" id="connectivityDemoOpen" type="button" style="margin-top:auto">Open demo</button><span class="feature-state soon">Simulation</span></article>
         </div>
         <div class="multimodal-panel">
           <div class="multi-top"><div><strong>Multimodal document workspace</strong><br><small>PDF · PNG · JPG · WEBP</small></div><span class="workspace-tag">VALIDATION GATE</span></div>
@@ -1828,6 +1829,46 @@
         .catch(() => { networkState.textContent += " • Penyimpanan offline belum aktif pada browser ini."; });
     }
     loadAuth();
+
+    // Accessible mobile navigation drawer.
+    const sidebar = document.getElementById("appSidebar");
+    const menuToggle = document.getElementById("mobileMenuToggle");
+    function setMenuOpen(open) {
+      sidebar.classList.toggle("is-open", open);
+      document.body.classList.toggle("menu-open", open);
+      menuToggle.setAttribute("aria-expanded", String(open));
+    }
+    menuToggle.addEventListener("click", () => setMenuOpen(!sidebar.classList.contains("is-open")));
+    document.addEventListener("click", event => {
+      if (document.body.classList.contains("menu-open") &&
+          !sidebar.contains(event.target) && !menuToggle.contains(event.target)) setMenuOpen(false);
+    });
+    document.addEventListener("keydown", event => { if (event.key === "Escape") setMenuOpen(false); });
+    sidebar.querySelectorAll("button").forEach(button => button.addEventListener("click", () => setMenuOpen(false)));
+
+    // Buyer-facing simulator only: this never controls physical network interfaces.
+    const demoPanel = document.getElementById("connectivityDemo");
+    const demoStatus = document.getElementById("connectivityStatus");
+    const wanOrder = ["Fiber", "Cellular A", "Cellular B"];
+    const channelState = { "Fiber": true, "Cellular A": true, "Cellular B": true, "Wi-Fi Mesh": true, "LoRa Radio": true };
+    function renderConnectivityDemo() {
+      document.querySelectorAll("[data-channel]").forEach(button => {
+        const name = button.dataset.channel;
+        const available = channelState[name] === true;
+        button.setAttribute("aria-pressed", String(available));
+        button.querySelector("small").textContent = (name === "Wi-Fi Mesh" ? "Local network" : name === "LoRa Radio" ? "Telemetry" : "WAN channel") + " · " + (available ? "Available" : "Simulated outage");
+      });
+      const route = wanOrder.find(name => channelState[name]);
+      const local = channelState["Wi-Fi Mesh"] || channelState["LoRa Radio"];
+      demoStatus.textContent = route ? "Active internet route: " + route : local ? "Internet unavailable · Local network remains available" : "All simulated channels unavailable";
+      demoStatus.style.color = route || local ? "#62e5cf" : "#ff9aa5";
+    }
+    document.getElementById("connectivityDemoOpen").addEventListener("click", () => { demoPanel.hidden = false; demoPanel.scrollIntoView({behavior:"smooth",block:"center"}); });
+    document.getElementById("connectivityClose").addEventListener("click", () => { demoPanel.hidden = true; });
+    document.getElementById("connectivityReset").addEventListener("click", () => { Object.keys(channelState).forEach(key => channelState[key] = true); renderConnectivityDemo(); });
+    document.querySelectorAll("[data-channel]").forEach(button => button.addEventListener("click", () => { const key=button.dataset.channel; channelState[key]=!channelState[key]; renderConnectivityDemo(); }));
+    renderConnectivityDemo();
+
   </script>
 </body>
 </html>
