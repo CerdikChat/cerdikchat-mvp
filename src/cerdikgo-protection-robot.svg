@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 300" role="img" aria-labelledby="title desc">
+<title id="title">CerdikGo Protection Robot</title><desc id="desc">Original friendly blue and cyan CerdikGo robot with a protective shield.</desc>
+<defs>
+ <linearGradient id="body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8ffff"/><stop offset=".55" stop-color="#b7e9ff"/><stop offset="1" stop-color="#4b9fd5"/></linearGradient>
+ <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#31e7f5"/><stop offset=".55" stop-color="#1688ed"/><stop offset="1" stop-color="#07529e"/></linearGradient>
+ <linearGradient id="shield" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#55f5d0"/><stop offset="1" stop-color="#087ec9"/></linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<ellipse cx="150" cy="276" rx="105" ry="13" fill="#05bfff" opacity=".18"/>
+<path d="M79 132Q47 151 48 205l-7 34q-2 13 11 17l22 4 14-28 2-69Z" fill="url(#body)" stroke="#63dfff" stroke-width="5"/>
+<path d="M220 133q35 16 43 68l11 34q4 13-9 18l-23 7-18-28-13-72Z" fill="url(#body)" stroke="#63dfff" stroke-width="5"/>
+<path d="M104 184h102l30 73q-78 36-160 0Z" fill="url(#body)" stroke="#55cfff" stroke-width="5"/>
+<rect x="113" y="218" width="85" height="44" rx="19" fill="#0b3761" stroke="#3de3ef" stroke-width="4"/>
+<circle cx="155" cy="239" r="17" fill="#0b2343" stroke="#24dff0" stroke-width="3"/>
+<text x="155" y="245" font-family="Arial,sans-serif" font-size="17" font-weight="700" text-anchor="middle" fill="#eaffff">CG</text>
+<path d="M95 98q0-51 55-61 55 10 55 61v47q0 40-55 49-55-9-55-49Z" fill="url(#body)" stroke="#8deaff" stroke-width="6"/>
+<rect x="101" y="92" width="98" height="78" rx="29" fill="#06264b" stroke="#31c9f5" stroke-width="5" filter="url(#glow)"/>
+<path d="M120 126q13-17 26 0m13 0q13-17 26 0" fill="none" stroke="#08e4f4" stroke-width="9" stroke-linecap="round"/>
+<path d="M137 148q18 14 36 0" fill="none" stroke="#08e4f4" stroke-width="6" stroke-linecap="round"/>
+<path d="M145 37q-2-19 13-19t13 19" fill="none" stroke="#8cecff" stroke-width="7"/>
+<ellipse cx="157" cy="17" rx="17" ry="9" fill="url(#blue)" stroke="#a8faff" stroke-width="3"/>
+<path d="M86 109 60 96l-6-27 27-20 28 15" fill="none" stroke="url(#blue)" stroke-width="12" stroke-linecap="round"/>
+<path d="M218 104 245 91l8-25-24-21-29 15" fill="none" stroke="url(#blue)" stroke-width="12" stroke-linecap="round"/>
+<path d="M244 133 289 149v52q-5 40-45 62-40-22-45-62v-52Z" fill="url(#shield)" stroke="#c9ffff" stroke-width="6" filter="url(#glow)"/>
+<path d="m222 192 15 16 31-36" fill="none" stroke="#efffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M60 201q-20-5-25-22m5 31q-22-1-30-19" fill="none" stroke="#22d8ef" stroke-width="5" stroke-linecap="round"/>
+<path d="M270 96q17-10 20-28m-12 39q20-7 28-25" fill="none" stroke="#22d8ef" stroke-width="5" stroke-linecap="round"/>
+</svg>
