@@ -1,0 +1,35 @@
+name: CerdikGo UI Protection Regression
+
+on:
+  pull_request:
+    branches:
+      - atlas9/ui-polish-mobile-layout
+    paths:
+      - "src/index.html"
+      - "src/service-worker.js"
+      - "src/cerdikgo-protection-robot.svg"
+      - "tests/ui-protection.test.mjs"
+      - "package.json"
+      - ".github/workflows/cerdikgo-ui-protection.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerdikgo-ui-protection-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ui-regression:
+    name: CerdikGo UI regression tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run regression tests
+        run: npm test
