@@ -1,21 +1,21 @@
 {
   "id": "/",
-  "name": "CerdikGo — AI Workspace",
+  "name": "CerdikGo — Innovation Workspace",
   "short_name": "CerdikGo",
-  "description": "AI Workspace for Real Action — Intelligence, Action, Impact.",
+  "description": "Mobile-first AI innovation workspace for research, field operations and connectivity demonstrations.",
   "lang": "id",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0b1220",
-  "theme_color": "#0b1220",
+  "background_color": "#061020",
+  "theme_color": "#071426",
   "icons": [
     {
       "src": "/cerdikgo-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
