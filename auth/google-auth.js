@@ -196,7 +196,9 @@ export function authConfig(request, env) {
   return authJson(
     {
       clientId: env.GOOGLE_CLIENT_ID || null,
-      required: env.GOOGLE_AUTH_REQUIRED !== "false",
+      required:
+        env.GOOGLE_AUTH_REQUIRED === "true" ||
+        (env.ENVIRONMENT === "production" && env.GOOGLE_AUTH_REQUIRED !== "false"),
       configured: Boolean(env.GOOGLE_CLIENT_ID),
       csrfToken,
     },
