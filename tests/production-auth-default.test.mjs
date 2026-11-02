@@ -35,10 +35,19 @@ test("production auth config advertises authentication as required by default", 
   assert.equal(payload.configured, false);
 });
 
-test("explicit false remains available for isolated development only", async () => {
+test("production cannot disable authentication with an explicit false flag", async () => {
   const response = await worker.fetch(
     request("/api/auth/config"),
     { ENVIRONMENT: "production", GOOGLE_AUTH_REQUIRED: "false" }
+  );
+  const payload = await response.json();
+  assert.equal(payload.required, true);
+});
+
+test("explicit false remains available for isolated development only", async () => {
+  const response = await worker.fetch(
+    request("/api/auth/config"),
+    { ENVIRONMENT: "development", GOOGLE_AUTH_REQUIRED: "false" }
   );
   const payload = await response.json();
   assert.equal(payload.required, false);
