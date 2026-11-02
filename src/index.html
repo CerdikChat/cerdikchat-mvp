@@ -724,13 +724,57 @@
       .suggest,.prompt,.send { transition:none !important; }
     }
 
+
+    /* ATLAS-9 responsive repair: keep the workspace readable on phones */
+    .mobile-menu-toggle{display:none;border:1px solid #245477;border-radius:10px;background:#102b46;color:#eaf7ff;padding:8px 11px;font-weight:750}
+    .side{transition:transform .22s ease}
+    .connectivity-demo{max-width:900px;margin:14px auto 18px;padding:16px;border:1px solid #167d91;border-radius:16px;background:linear-gradient(145deg,#0d2944,#09182a);box-shadow:0 12px 32px #0003}
+    .connectivity-demo[hidden]{display:none}
+    .connectivity-demo h3{margin:0 0 5px;font-size:16px}
+    .connectivity-demo p{margin:0 0 12px;color:#a7bfd8;font-size:12px}
+    .connectivity-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .connectivity-channel{min-width:0;padding:10px;border:1px solid #245477;border-radius:11px;background:#0b1c30;color:#eaf7ff;text-align:left}
+    .connectivity-channel strong{display:block;font-size:12px}
+    .connectivity-channel small{display:block;margin-top:4px;color:#a8bfd8;font-size:10px}
+    .connectivity-channel[aria-pressed="false"]{opacity:.55;border-style:dashed}
+    .connectivity-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .connectivity-toolbar button{border:1px solid #2c7190;border-radius:9px;background:#123b59;color:#eaf7ff;padding:9px 12px;font-size:12px;font-weight:750}
+    .connectivity-status{color:#62e5cf;font-size:12px;font-weight:800}
+    .simulation-note{margin-top:10px!important;color:#f0cc83!important;font-size:10px!important}
+    .brand .logo,.mobile-brand .logo{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 0 9px #12bde877)}
+    .mobile-brand .logo{width:32px;height:32px}
+    @media(max-width:900px){
+      .app{display:block;max-width:100%;min-height:100dvh}
+      .side{position:fixed;z-index:40;inset:0 auto 0 0;width:min(82vw,290px);max-width:290px;overflow-y:auto;background:#071426;box-shadow:18px 0 45px #0008;transform:translateX(-110%);padding:22px 18px}
+      .side.is-open{transform:translateX(0)}
+      body.menu-open:before{content:"";position:fixed;inset:0;z-index:35;background:#020812b8}
+      .mobile-menu-toggle{display:inline-flex;align-items:center;gap:7px}
+      .top{gap:8px;padding:9px 12px}
+      .top>strong{display:none}
+      .mobile-brand{display:flex}
+      .top-actions{margin-left:auto;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+      .top-actions .pill{display:none}
+      .workspace{width:100%;padding-inline:12px}
+      .feed{padding:14px 13px 18px}
+      .connectivity-demo{margin-inline:12px}
+      .network-state{margin:6px 10px;font-size:11px}
+    }
+    @media(max-width:560px){
+      .top{min-height:58px}
+      .mobile-brand{font-size:14px}
+      .top-actions .settings-button,.top-actions .theme-toggle{font-size:10px;padding:7px 8px}
+      .connectivity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .connectivity-demo{padding:13px}
+    }
+    @media(prefers-reduced-motion:reduce){.side{transition:none}}
+
   </style>
 </head>
 
 <body>
   <div id="networkState" class="network-state" role="status" aria-live="polite">Memeriksa konektivitas…</div>
   <div class="app">
-    <aside class="side">
+    <aside class="side" id="appSidebar" aria-label="Menu utama">
       <div class="brand">
         <img class="logo" src="/cerdikgo-mark.svg" alt="" aria-hidden="true">
         <span class="product-brand">Cerdik<em>Go</em></span>
@@ -768,7 +812,7 @@
     </aside>
 
     <main class="main">
-      <header class="top">
+      <header class="top">\n        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-controls="appSidebar" aria-expanded="false">☰ Menu</button>
         <div class="mobile-brand">
           <img class="logo" src="/cerdikgo-mark.svg" alt="" aria-hidden="true">
           <span class="product-brand">Cerdik<em>Go</em></span>
@@ -833,7 +877,21 @@
         </div>
       </section>
 
-      <section class="feed" id="feed" aria-live="polite"
+
+      <section class="connectivity-demo" id="connectivityDemo" aria-labelledby="connectivityTitle" hidden>
+        <h3 id="connectivityTitle">Hybrid Connectivity Control Demo</h3>
+        <p>Simulasikan perpindahan kanal internet dan kontinuitas jaringan lokal.</p>
+        <div class="connectivity-grid" id="connectivityChannels">
+          <button class="connectivity-channel" type="button" data-channel="Fiber" aria-pressed="true"><strong>Fiber Internet</strong><small>Primary WAN · Available</small></button>
+          <button class="connectivity-channel" type="button" data-channel="Cellular A" aria-pressed="true"><strong>Cellular A</strong><small>Backup WAN · Available</small></button>
+          <button class="connectivity-channel" type="button" data-channel="Cellular B" aria-pressed="true"><strong>Cellular B</strong><small>Backup WAN · Available</small></button>
+          <button class="connectivity-channel" type="button" data-channel="Wi-Fi Mesh" aria-pressed="true"><strong>Wi-Fi Mesh</strong><small>Local network · Available</small></button>
+          <button class="connectivity-channel" type="button" data-channel="LoRa Radio" aria-pressed="true"><strong>LoRa Radio</strong><small>Telemetry · Available</small></button>
+        </div>
+        <div class="connectivity-toolbar"><span class="connectivity-status" id="connectivityStatus" role="status" aria-live="polite">Primary route: Fiber Internet</span><button id="connectivityReset" type="button">Reset simulation</button><button id="connectivityClose" type="button">Close</button></div>
+        <p class="simulation-note">SIMULATION ONLY — tidak mengukur jaringan nyata, tidak mengirim transmisi radio, dan tidak mengubah konfigurasi router.</p>
+      </section>
+\n      <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
         <div class="welcome" id="welcome">
           <div class="eyebrow">Pikirkan lebih jernih</div>
