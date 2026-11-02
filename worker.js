@@ -1047,12 +1047,14 @@ async function handleChat(request, env, ctx) {
     );
   }
 
-  // Fail closed: application authentication is required unless a deployment
-  // explicitly opts out with GOOGLE_AUTH_REQUIRED="false".
-  // Production must never rely on an omitted variable to remain public.
+  // Production fails closed when the flag is absent. Preview explicitly enables
+  // authentication; local/unit-test environments remain opt-in.
   let authenticatedSubject = null;
   let pilotEmail = null;
-  if (env.GOOGLE_AUTH_REQUIRED !== "false") {
+  const authRequired =
+    env.GOOGLE_AUTH_REQUIRED === "true" ||
+    (env.ENVIRONMENT === "production" && env.GOOGLE_AUTH_REQUIRED !== "false");
+  if (authRequired) {
     const session = await requireSession(request, env);
     if (!session.ok) {
       return errorResponse("AUTH_REQUIRED", "Silakan masuk menggunakan akun Google yang diizinkan.", 401, corsHeaders);
