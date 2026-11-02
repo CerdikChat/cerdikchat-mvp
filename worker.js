@@ -1052,9 +1052,9 @@ async function handleChat(request, env, ctx) {
   let authenticatedSubject = null;
   let pilotEmail = null;
   const authRequired =
-    env.GOOGLE_AUTH_REQUIRED === "true" ||
-    (env.GOOGLE_AUTH_REQUIRED !== "false" &&
-      (env.ENVIRONMENT === "production" || Boolean(env.DB)));
+    env.ENVIRONMENT === "production" ||
+    Boolean(env.DB) ||
+    env.GOOGLE_AUTH_REQUIRED === "true";
   if (authRequired) {
     const session = await requireSession(request, env);
     if (!session.ok) {
