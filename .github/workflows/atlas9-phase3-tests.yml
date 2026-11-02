@@ -3,7 +3,8 @@ name: ATLAS-9 Phase 3 Regression Tests
 on:
   pull_request:
     branches:
-      - atlas9/phase-2-google-auth-implementation
+      - main
+      - "atlas9/**"
     paths:
       - "worker.js"
       - "auth/**"
