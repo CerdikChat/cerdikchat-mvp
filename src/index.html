@@ -1152,6 +1152,37 @@
       count.textContent = String(input.value.length);
     }
 
+    // Device-native speech playback: no external TTS API, credentials, or paid service.
+    function addSpeechPlaybackControl(answerElement, answerText) {
+      if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
+      const actions = answerElement.parentElement?.querySelector(".answer-actions");
+      if (!actions) return;
+      const speak = document.createElement("button");
+      speak.type = "button";
+      speak.className = "answer-action";
+      speak.textContent = "🔊 Bacakan jawaban";
+      speak.setAttribute("aria-label", "Bacakan jawaban AI dalam bahasa Indonesia");
+      speak.addEventListener("click", () => {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(answerText);
+        utterance.lang = "id-ID";
+        utterance.rate = 1;
+        utterance.onstart = () => { speak.textContent = "⏹ Hentikan suara"; };
+        utterance.onend = utterance.onerror = () => { speak.dataset.playing = "false"; speak.textContent = "🔊 Bacakan jawaban"; };
+        if (speak.dataset.playing === "true") {
+          window.speechSynthesis.cancel();
+          speak.dataset.playing = "false";
+          speak.textContent = "🔊 Bacakan jawaban";
+          return;
+        }
+        speak.dataset.playing = "true";
+        window.speechSynthesis.speak(utterance);
+      });
+      actions.appendChild(speak);
+    }
+
+
+
     function setStatus(message = "", isError = false) {
       statusEl.textContent = message;
       statusEl.className = isError ? "status error" : "status";
@@ -1669,6 +1700,7 @@
         }
 
         renderBasicMarkdown(answerElement, answer);
+        addSpeechPlaybackControl(answerElement, answer);
 
         history.push(
           { role: "user", content: message },
