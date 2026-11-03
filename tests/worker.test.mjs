@@ -773,3 +773,12 @@ test("login and logout report failures inside the open account dialog and verify
   assert.match(html, /id="adminConsoleLink" href="\/admin" hidden/);
   assert.match(html, /payload\.role\)\s*\)/);
 });
+
+test("mobile feature request trigger opens the dialog through delegated click handling", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /document\.addEventListener\("click", \(event\) => \{/);
+  assert.match(html, /event\.target\.closest\("#featureRequestOpen"\)/);
+  assert.match(html, /requestFeatureDialog\.showModal\(\)/);
+  assert.match(html, /requestFeatureDialog\.setAttribute\("open", ""\)/);
+  assert.match(html, /requestFeatureCategory\?\.focus\(\)/);
+});
