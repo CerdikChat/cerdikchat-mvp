@@ -53,6 +53,19 @@ test("Targeted workspace refresh includes responsive dashboard and explicit cont
   assert.match(html, /@media\(max-width:720px\)/);
 });
 
+test("Protection Mode and Hybrid Connectivity have visible quick access below network status", () => {
+  const networkIndex = html.indexOf('id="networkState"');
+  const quickIndex = html.indexOf('class="quick-access"');
+  const appIndex = html.indexOf('<div class="app">');
+  assert.ok(networkIndex >= 0 && quickIndex > networkIndex && appIndex > quickIndex);
+  assert.match(html, /id="quickProtectionOpen"/);
+  assert.match(html, /id="quickConnectivityOpen"/);
+  assert.match(html, /SIMULATOR ONLY/);
+  assert.match(html, /LOGIN-VERIFIED/);
+  assert.match(html, /quickProtectionOpen.*settingsDialog\.showModal/s);
+  assert.match(html, /quickConnectivityOpen.*connectivityDemoOpen/s);
+});
+
 test("Hybrid connectivity simulator is interactive, local-only, and clearly labelled", () => {
   assert.match(html, /Local-only connectivity scenario simulator/);
   assert.match(html, /data-channel="Fiber"/);
