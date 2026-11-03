@@ -1228,36 +1228,40 @@
           </div>
           <small id="uploadHelp">Pemrosesan hanya dilanjutkan jika pemindai malware privat ClamAV aktif. Tanpa scanner, server menolak upload (fail-closed).</small>
         </div>
-        <dialog id="requestFeatureDialog" class="settings-dialog" aria-labelledby="requestFeatureTitle">
-          <form method="dialog" id="requestFeatureForm" class="settings-content">
-            <h2 id="requestFeatureTitle">Usulkan fitur</h2>
-            <label for="requestFeatureCategory">Jenis fitur yang diinginkan</label>
-            <select id="requestFeatureCategory" required>
-              <option value="">Pilih jenis fitur</option>
-              <option value="AI & Analisis">AI & Analisis</option>
-              <option value="Dokumen & Produktivitas">Dokumen & Produktivitas</option>
-              <option value="Riset & Knowledge Base">Riset & Knowledge Base</option>
-              <option value="Voice & Multimodal">Voice & Multimodal</option>
-              <option value="Business & Strategi">Business & Strategi</option>
-              <option value="IoT & Konektivitas">IoT & Konektivitas</option>
-              <option value="Keamanan & Admin">Keamanan & Admin</option>
-              <option value="UI/UX & Aksesibilitas">UI/UX & Aksesibilitas</option>
-              <option value="Lainnya">Lainnya</option>
-            </select>
-            <label for="requestFeatureName">Nama fitur yang diusulkan</label>
-            <input id="requestFeatureName" maxlength="100" required placeholder="Contoh: Ringkasan dokumen otomatis">
-            <label for="requestFeatureDetails">Deskripsi fitur</label>
-            <textarea id="requestFeatureDetails" maxlength="1200" rows="3" required placeholder="Jelaskan cara kerja fitur yang diharapkan."></textarea>
-            <label for="requestFeatureProblem">Masalah atau kebutuhan yang ingin diselesaikan</label>
-            <textarea id="requestFeatureProblem" maxlength="800" rows="3" required placeholder="Apa kendala pengguna saat ini?"></textarea>
-            <label for="requestFeatureBenefit">Manfaat yang diharapkan</label>
-            <textarea id="requestFeatureBenefit" maxlength="800" rows="2" required placeholder="Apa hasil atau dampak yang diharapkan?"></textarea>
-            <p class="tool-feedback">Formulir ini menyiapkan ringkasan usulan dan menyalinnya ke clipboard agar Anda kirim sendiri. Belum ada tiket yang dikirim atau disimpan di server.</p>
-            <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Kirim usulan</button></div>
-          </form>
-        </dialog>
+
         </section>
       </details>
+
+      <!-- Keep this modal outside the collapsed workspace-tools <details> container. -->
+      <dialog id="requestFeatureDialog" class="settings-dialog" aria-labelledby="requestFeatureTitle">
+        <form method="dialog" id="requestFeatureForm" class="settings-content">
+          <h2 id="requestFeatureTitle">Usulkan fitur</h2>
+          <label for="requestFeatureCategory">Jenis fitur yang diinginkan</label>
+          <select id="requestFeatureCategory" required>
+            <option value="">Pilih jenis fitur</option>
+            <option value="AI & Analisis">AI & Analisis</option>
+            <option value="Dokumen & Produktivitas">Dokumen & Produktivitas</option>
+            <option value="Riset & Knowledge Base">Riset & Knowledge Base</option>
+            <option value="Voice & Multimodal">Voice & Multimodal</option>
+            <option value="Business & Strategi">Business & Strategi</option>
+            <option value="IoT & Konektivitas">IoT & Konektivitas</option>
+            <option value="Keamanan & Admin">Keamanan & Admin</option>
+            <option value="UI/UX & Aksesibilitas">UI/UX & Aksesibilitas</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+          <label for="requestFeatureName">Nama fitur yang diusulkan</label>
+          <input id="requestFeatureName" maxlength="100" required placeholder="Contoh: Ringkasan dokumen otomatis">
+          <label for="requestFeatureDetails">Deskripsi fitur</label>
+          <textarea id="requestFeatureDetails" maxlength="1200" rows="3" required placeholder="Jelaskan cara kerja fitur yang diharapkan."></textarea>
+          <label for="requestFeatureProblem">Masalah atau kebutuhan yang ingin diselesaikan</label>
+          <textarea id="requestFeatureProblem" maxlength="800" rows="3" required placeholder="Apa kendala pengguna saat ini?"></textarea>
+          <label for="requestFeatureBenefit">Manfaat yang diharapkan</label>
+          <textarea id="requestFeatureBenefit" maxlength="800" rows="2" required placeholder="Apa hasil atau dampak yang diharapkan?"></textarea>
+          <p class="tool-feedback">Usulan dikirim ke server dan disimpan setelah sesi Anda diverifikasi. Jangan sertakan data rahasia atau pribadi.</p>
+          <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Kirim usulan</button></div>
+        </form>
+      </dialog>
+
 
       <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
         <div class="settings-head">
