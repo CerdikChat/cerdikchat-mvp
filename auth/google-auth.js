@@ -259,11 +259,11 @@ export async function googleLogin(request, env, options = {}) {
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
   }
   if (!user || user.status !== "active") {
+    // Do not disclose Google's stable subject identifier to end users.
+    // Identity details remain available only to authorized server-side administration.
     return authJson({
       error: "USER_NOT_ALLOWLISTED",
       message: "Akun ini belum diizinkan mengakses CerdikChat.",
-      googleSub: identity.sub,
-      email: identity.email,
     }, 403);
   }
 

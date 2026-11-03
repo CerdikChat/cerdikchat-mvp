@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import worker from "../worker.js";
 import { verifyGoogleIdToken, googleLogin } from "../auth/google-auth.js";
 
@@ -76,7 +77,7 @@ async function makeSignedGoogleToken(overrides = {}) {
   return { token, clientId, nonce, fetchJwks };
 }
 
-test("unlisted Google account receives its verified subject for admin allowlisting", async () => {
+test("unlisted Google account response does not disclose Google subject identifiers", async () => {
   const fixture = await makeSignedGoogleToken();
   const csrf = "C".repeat(43);
   const request = new Request("https://cerdikchat.test/api/auth/google", {
@@ -107,8 +108,9 @@ test("unlisted Google account receives its verified subject for admin allowlisti
   const payload = await json(response);
   assert.equal(response.status, 403);
   assert.equal(payload.error, "USER_NOT_ALLOWLISTED");
-  assert.equal(payload.googleSub, "12345678901234567890");
-  assert.equal(payload.email, "pilot.user@example.com");
+  assert.equal(Object.hasOwn(payload, "googleSub"), false);
+  assert.equal(JSON.stringify(payload).includes("12345678901234567890"), false);
+  assert.equal(payload.email, undefined);
 });
 
 test("Google ID token verifies signature, audience, nonce and normalized email", async () => {
@@ -507,4 +509,27 @@ test("logout rejects cross-origin requests", async () => {
   );
   assert.equal(response.status, 403);
   assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
+});
+
+
+test("Android workspace exposes account access without leaking Google subject identifiers", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="loginOpen"[^>]*aria-haspopup="dialog"[^>]*>Masuk \/ Akun<\/button>/);
+  assert.match(html, /loginOpen\.addEventListener\("click", openAccountDialog\)/);
+  assert.match(html, /id="settingsOpen"[^>]*aria-haspopup="dialog"/);
+  assert.match(html, /<dialog[^>]*id="settingsDialog"/);
+  assert.match(html, /id="authPanel"/);
+  assert.match(html, /id="authUnavailable"/);
+  assert.doesNotMatch(html, /googleSub|Google sub/i);
+});
+
+test("Android workspace provides an accessible mobile navigation and keyboard-aware viewport", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="navToggle"[^>]*aria-expanded="false"[^>]*aria-controls="sideNavigation"/);
+  assert.match(html, /id="sideNavigation"[^>]*aria-label="Navigasi utama"/);
+  assert.match(html, /id="navBackdrop"[^>]*aria-label="Tutup navigasi"/);
+  assert.match(html, /max-device-width:\s*720px/);
+  assert.match(html, /visualViewport/);
+  assert.match(html, /body,\.app,\.main\{min-height:var\(--app-viewport-height/);
+  assert.match(html, /prefers-reduced-motion:reduce/);
 });
