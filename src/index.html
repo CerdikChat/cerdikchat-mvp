@@ -2014,28 +2014,7 @@
     document.addEventListener("keydown", event => { if (event.key === "Escape") setMenuOpen(false); });
     sidebar.querySelectorAll("button").forEach(button => button.addEventListener("click", () => setMenuOpen(false)));
 
-    // Buyer-facing simulator only: this never controls physical network interfaces.
-    const demoPanel = document.getElementById("connectivityDemo");
-    const demoStatus = document.getElementById("connectivityStatus");
-    const wanOrder = ["Fiber", "Cellular A", "Cellular B"];
-    const channelState = { "Fiber": true, "Cellular A": true, "Cellular B": true, "Wi-Fi Mesh": true, "LoRa Radio": true };
-    function renderConnectivityDemo() {
-      document.querySelectorAll("[data-channel]").forEach(button => {
-        const name = button.dataset.channel;
-        const available = channelState[name] === true;
-        button.setAttribute("aria-pressed", String(available));
-        button.querySelector("small").textContent = (name === "Wi-Fi Mesh" ? "Local network" : name === "LoRa Radio" ? "Telemetry" : "WAN channel") + " · " + (available ? "Available" : "Simulated outage");
-      });
-      const route = wanOrder.find(name => channelState[name]);
-      const local = channelState["Wi-Fi Mesh"] || channelState["LoRa Radio"];
-      demoStatus.textContent = route ? "Active internet route: " + route : local ? "Internet unavailable · Local network remains available" : "All simulated channels unavailable";
-      demoStatus.style.color = route || local ? "#62e5cf" : "#ff9aa5";
-    }
-    document.getElementById("connectivityDemoOpen").addEventListener("click", () => { demoPanel.hidden = false; demoPanel.scrollIntoView({behavior:"smooth",block:"center"}); });
-    document.getElementById("connectivityClose").addEventListener("click", () => { demoPanel.hidden = true; });
-    document.getElementById("connectivityReset").addEventListener("click", () => { Object.keys(channelState).forEach(key => channelState[key] = true); renderConnectivityDemo(); });
-    document.querySelectorAll("[data-channel]").forEach(button => button.addEventListener("click", () => { const key=button.dataset.channel; channelState[key]=!channelState[key]; renderConnectivityDemo(); }));
-    renderConnectivityDemo();
+
 
   </script>
 </body>
