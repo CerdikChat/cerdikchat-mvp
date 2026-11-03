@@ -513,6 +513,8 @@ test("logout rejects cross-origin requests", async () => {
 
 test("Android workspace exposes account access without leaking Google subject identifiers", async () => {
   const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="loginOpen"[^>]*aria-haspopup="dialog"[^>]*>Masuk \/ Akun<\/button>/);
+  assert.match(html, /loginOpen\.addEventListener\("click", openAccountDialog\)/);
   assert.match(html, /id="settingsOpen"[^>]*aria-haspopup="dialog"/);
   assert.match(html, /<dialog[^>]*id="settingsDialog"/);
   assert.match(html, /id="authPanel"/);
