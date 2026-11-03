@@ -404,6 +404,16 @@ export async function requireAdminSession(request, env) {
   return session;
 }
 
+export async function requireSuperAdminSession(request, env) {
+  const session = await requireSession(request, env);
+  if (!session.ok) return session;
+  if (session.role !== "super_admin") {
+    logAuthFailure("rbac", "super_administrator_required");
+    return { ok: false, response: authJson({ error: "SUPER_ADMIN_REQUIRED" }, 403) };
+  }
+  return session;
+}
+
 export async function logout(request, env) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
   if (!sameOrigin(request)) return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
@@ -555,7 +565,7 @@ export async function listPendingUserAccess(request, env) {
 export async function decideUserAccess(request, env) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
   if (!validateCsrfRequest(request)) return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
-  const admin = await requireAdminSession(request, env);
+  const admin = await requireSuperAdminSession(request, env);
   if (!admin.ok) return admin.response;
 
   let body;
@@ -585,8 +595,11 @@ export async function decideUserAccess(request, env) {
           "UPDATE users SET status = 'disabled', updated_at = ? WHERE google_sub = ? AND role = 'user' AND status = 'active'"
         ).bind(now, target.google_sub),
         env.DB.prepare(
+          "UPDATE sessions SET revoked_at = ? WHERE google_sub = ? AND revoked_at IS NULL"
+        ).bind(now, target.google_sub),
+        env.DB.prepare(
           "INSERT INTO admin_audit_log (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at) VALUES (?, ?, 'USER_SUSPENDED', 'user', 'user', ?, ?)"
-        ).bind(admin.subject, target.google_sub, JSON.stringify({ email: target.email, previousStatus: "active", newStatus: "disabled" }), now),
+        ).bind(admin.subject, target.google_sub, JSON.stringify({ email: target.email, previousStatus: "active", newStatus: "disabled", sessionsRevoked: true }), now),
       ]);
       if (results[0]?.meta?.changes !== 1) return authJson({ error: "USER_STATE_CHANGED" }, 409);
       return authJson({ updated: true, status: "disabled", role: "user" });
@@ -607,20 +620,35 @@ export async function decideUserAccess(request, env) {
     const action = decision === "approve" ? "USER_APPROVED" : "USER_ACCESS_REJECTED";
     const statements = [];
     if (decision === "approve") {
+      // Capacity is enforced in the INSERT itself, not by a prior read.
+      // D1 serializes the batch; concurrent approvals cannot both consume
+      // the final seat because this conditional write re-checks active seats.
       statements.push(env.DB.prepare(
-        "INSERT INTO users (google_sub, email, display_name, status, role, created_at, updated_at) VALUES (?, ?, ?, 'active', 'user', ?, ?)"
-      ).bind(target.google_sub, target.email, target.display_name || "", now, now));
+        "INSERT INTO users (google_sub, email, display_name, status, role, created_at, updated_at) SELECT ?, ?, ?, 'active', 'user', ?, ? WHERE (SELECT COUNT(*) FROM users WHERE status = 'active') < 30 AND EXISTS (SELECT 1 FROM user_access_requests WHERE google_sub = ? AND status = 'pending')"
+      ).bind(target.google_sub, target.email, target.display_name || "", now, now, target.google_sub));
+      statements.push(env.DB.prepare(
+        "UPDATE user_access_requests SET status = 'approved', reviewed_at = ?, reviewed_by = ? WHERE google_sub = ? AND status = 'pending' AND EXISTS (SELECT 1 FROM users WHERE google_sub = ? AND status = 'active')"
+      ).bind(now, admin.subject, target.google_sub, target.google_sub));
+      statements.push(env.DB.prepare(
+        "INSERT INTO admin_audit_log (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at) SELECT ?, ?, 'USER_APPROVED', NULL, 'user', ?, ? WHERE EXISTS (SELECT 1 FROM users WHERE google_sub = ? AND status = 'active')"
+      ).bind(admin.subject, target.google_sub, JSON.stringify({ email: target.email, requestStatus: "approved" }), now, target.google_sub));
+      const results = await env.DB.batch(statements);
+      if (results[0]?.meta?.changes !== 1 || results[1]?.meta?.changes !== 1) {
+        const count = await env.DB.prepare("SELECT COUNT(*) AS active_count FROM users WHERE status = 'active'").first();
+        if (Number(count?.active_count || 0) >= 30) return authJson({ error: "PILOT_CAP_REACHED" }, 409);
+        return authJson({ error: "USER_STATE_CHANGED" }, 409);
+      }
+      return authJson({ updated: true, status: "approved", role: "user" });
     }
-    statements.push(env.DB.prepare(
-      "UPDATE user_access_requests SET status = ?, reviewed_at = ?, reviewed_by = ? WHERE google_sub = ? AND status = 'pending'"
-    ).bind(nextRequestStatus, now, admin.subject, target.google_sub));
-    statements.push(env.DB.prepare(
-      "INSERT INTO admin_audit_log (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at) VALUES (?, ?, ?, NULL, ?, ?, ?)"
-    ).bind(admin.subject, target.google_sub, action, decision === "approve" ? "user" : null, JSON.stringify({ email: target.email, requestStatus: nextRequestStatus }), now));
 
+    statements.push(env.DB.prepare(
+      "UPDATE user_access_requests SET status = 'rejected', reviewed_at = ?, reviewed_by = ? WHERE google_sub = ? AND status = 'pending'"
+    ).bind(now, admin.subject, target.google_sub));
+    statements.push(env.DB.prepare(
+      "INSERT INTO admin_audit_log (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at) VALUES (?, ?, 'USER_ACCESS_REJECTED', NULL, NULL, ?, ?)"
+    ).bind(admin.subject, target.google_sub, JSON.stringify({ email: target.email, requestStatus: "rejected" }), now));
     const results = await env.DB.batch(statements);
-    const requestResult = results[decision === "approve" ? 1 : 0];
-    if (requestResult?.meta?.changes !== 1) return authJson({ error: "USER_STATE_CHANGED" }, 409);
+    if (results[0]?.meta?.changes !== 1) return authJson({ error: "USER_STATE_CHANGED" }, 409);
     return authJson({ updated: true, status: nextRequestStatus, role: decision === "approve" ? "user" : null });
   } catch {
     logAuthFailure("user_approval", "decision_failed");
