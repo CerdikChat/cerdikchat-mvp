@@ -1270,7 +1270,7 @@
             <p>Masuk menggunakan akun Google yang telah diizinkan. Hak akses tetap diverifikasi oleh server.</p>
             <section class="auth-panel" id="authPanel" hidden aria-live="polite">
               <div><strong id="authTitle">Akses CerdikChat</strong><br><small id="authMessage">Masuk dengan akun Google yang telah diizinkan.</small></div>
-              <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
+              <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><a class="auth-logout" id="adminConsoleLink" href="/admin" hidden>Admin Console</a><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
             </section>
             <p id="authUnavailable" class="auth-unavailable" role="status" aria-live="polite" hidden></p>
           </section>
@@ -1380,6 +1380,7 @@
     const googleSignIn = document.querySelector("#googleSignIn");
     const authUser = document.querySelector("#authUser");
     const authLogout = document.querySelector("#authLogout");
+    const adminConsoleLink = document.querySelector("#adminConsoleLink");
     const authUnavailable = document.querySelector("#authUnavailable");
     const settingsDialog = document.querySelector("#settingsDialog");
     const settingsOpen = document.querySelector("#settingsOpen");
@@ -1471,6 +1472,30 @@
     let csrfToken = "";
     let googleClientId = "";
 
+    async function refreshAdminConsoleLink() {
+      if (!adminConsoleLink) return;
+      if (!isAuthenticated) {
+        adminConsoleLink.hidden = true;
+        return;
+      }
+      try {
+        const response = await fetch("/api/admin/session", {
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Accept": "application/json" }
+        });
+        const payload = await response.json().catch(() => ({}));
+        adminConsoleLink.hidden = !(
+          response.ok &&
+          payload.authenticated === true &&
+          ["admin", "super_admin"].includes(payload.role)
+        );
+      } catch {
+        adminConsoleLink.hidden = true;
+      }
+      if (!isAuthenticated) adminConsoleLink.hidden = true;
+    }
+
     function updateAuthUI(user = null) {
       authPanel.hidden = !authRequired && !authConfigured;
       authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikChat";
@@ -1483,6 +1508,8 @@
       authUser.hidden = !isAuthenticated;
       googleSignIn.hidden = isAuthenticated || !authConfigured;
       authLogout.hidden = !isAuthenticated;
+      if (!isAuthenticated) adminConsoleLink.hidden = true;
+      else void refreshAdminConsoleLink();
       input.disabled = authRequired && !isAuthenticated;
       send.disabled = authRequired && !isAuthenticated;
     }
@@ -1532,9 +1559,12 @@
 
     async function handleGoogleCredential(response, nonce) {
       if (!response || typeof response.credential !== "string" || !csrfToken) {
-        setStatus("Respons Google atau token keamanan tidak tersedia.", true);
+        const message = "Respons Google atau token keamanan tidak tersedia. Muat ulang halaman dan coba lagi.";
+        authMessage.textContent = message;
+        setStatus(message, true);
         return;
       }
+      authMessage.textContent = "Memverifikasi akun Google dan membuat sesi aman…";
       try {
         const result = await fetch("/api/auth/google", {
           method: "POST",
@@ -1546,26 +1576,41 @@
           },
           body: JSON.stringify({ credential: response.credential, nonce })
         });
-        const payload = await result.json();
+        const payload = await result.json().catch(() => ({}));
         if (!result.ok) {
           if (payload.error === "USER_NOT_ALLOWLISTED") {
-            authMessage.textContent = `Akun ${payload.email || "Google"} belum diizinkan. Hubungi administrator untuk meminta akses.`;
-            throw new Error("Akun Google belum diizinkan. Hubungi administrator untuk meminta akses.");
+            throw new Error(`Akun ${payload.email || "Google"} belum diizinkan. Hubungi administrator.`);
           }
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
-            throw new Error("Token keamanan diperbarui. Silakan tekan tombol Google sekali lagi.");
+            throw new Error("Token keamanan diperbarui. Tekan tombol Google sekali lagi.");
           }
           throw new Error(payload.message || payload.error || "Google Sign-In gagal.");
         }
+
+        // Do not show a signed-in state until the browser confirms the HttpOnly session cookie.
+        const sessionResponse = await fetch("/api/auth/me", {
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Accept": "application/json" }
+        });
+        const session = await sessionResponse.json().catch(() => ({}));
+        if (!sessionResponse.ok || session.authenticated !== true) {
+          throw new Error("Google menerima akun, tetapi sesi CerdikGo belum terverifikasi. Periksa cookie browser atau status layanan autentikasi.");
+        }
+
         isAuthenticated = true;
-        updateAuthUI(payload.user || null);
-        setStatus("Berhasil masuk ke CerdikChat.");
+        updateAuthUI(session.user || payload.user || null);
+        authMessage.textContent = "Login berhasil. Sesi aman Anda telah diverifikasi oleh server.";
+        setStatus("Berhasil masuk ke CerdikGo.");
       } catch (error) {
         isAuthenticated = false;
         updateAuthUI();
-        setStatus(error instanceof Error ? error.message : "Google Sign-In gagal.", true);
-        renderGoogleButton();
+        const message = error instanceof Error ? error.message : "Google Sign-In gagal.";
+        // Keep the reason inside the open account dialog; the page status is behind the modal.
+        authMessage.textContent = `Login gagal: ${message}`;
+        setStatus(message, true);
+        await renderGoogleButton();
       }
     }
 
@@ -1591,7 +1636,9 @@
           width: 280
         });
       } catch {
-        setStatus("Google Identity Services tidak dapat dimuat. Periksa koneksi atau CSP.", true);
+        const message = "Google Identity Services tidak dapat dimuat. Periksa koneksi atau kebijakan keamanan browser (CSP).";
+        authMessage.textContent = message;
+        setStatus(message, true);
       }
     }
 
@@ -1656,10 +1703,13 @@
 
     async function logoutFromCerdikChat() {
       if (!csrfToken) {
-        setStatus("Token keamanan tidak tersedia. Muat ulang halaman.", true);
+        const message = "Token keamanan tidak tersedia. Muat ulang halaman sebelum logout.";
+        authMessage.textContent = message;
+        setStatus(message, true);
         return;
       }
       authLogout.disabled = true;
+      authMessage.textContent = "Mengakhiri sesi dan memverifikasi pencabutan akses…";
       try {
         const response = await fetch("/api/auth/logout", {
           method: "POST",
@@ -1669,7 +1719,7 @@
             "X-CSRF-Token": csrfToken
           }
         });
-        const payload = await response.json();
+        const payload = await response.json().catch(() => ({}));
         if (!response.ok) {
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
@@ -1677,13 +1727,26 @@
           }
           throw new Error(payload.error || "Logout gagal.");
         }
+
+        const sessionCheck = await fetch("/api/auth/me", {
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Accept": "application/json" }
+        });
+        if (sessionCheck.status !== 401) {
+          throw new Error("Server belum mengonfirmasi pencabutan sesi. Jangan tutup dialog; coba lagi.");
+        }
+
         isAuthenticated = false;
         if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
         updateAuthUI();
-        setStatus("Anda telah keluar.");
+        authMessage.textContent = "Anda telah keluar. Pilih akun Google jika ingin masuk kembali.";
+        setStatus("Logout berhasil; sesi server telah dicabut.");
         await renderGoogleButton();
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : "Logout gagal.", true);
+        const message = error instanceof Error ? error.message : "Logout gagal.";
+        authMessage.textContent = `Logout gagal: ${message}`;
+        setStatus(message, true);
       } finally {
         authLogout.disabled = false;
       }
