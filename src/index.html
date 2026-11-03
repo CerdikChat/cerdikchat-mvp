@@ -1044,7 +1044,7 @@
             <label for="requestFeatureBenefit">Manfaat yang diharapkan</label>
             <textarea id="requestFeatureBenefit" maxlength="800" rows="2" required placeholder="Apa hasil atau dampak yang diharapkan?"></textarea>
             <p class="tool-feedback">Formulir ini menyiapkan ringkasan usulan dan menyalinnya ke clipboard agar Anda kirim sendiri. Belum ada tiket yang dikirim atau disimpan di server.</p>
-            <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Salin usulan</button></div>
+            <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Kirim usulan</button></div>
           </form>
         </dialog>
         </section>
@@ -2254,25 +2254,49 @@
 
     requestFeatureOpen.addEventListener("click", () => requestFeatureDialog.showModal());
     requestFeatureSubmit.addEventListener("click", async () => {
-      const category = requestFeatureCategory.value;
-      const name = requestFeatureName.value.trim();
-      const details = requestFeatureDetails.value.trim();
-      const problem = requestFeatureProblem.value.trim();
-      const benefit = requestFeatureBenefit.value.trim();
-      if (!category || !name || !details || !problem || !benefit) {
-        statusEl.textContent = "Lengkapi semua kolom usulan fitur sebelum menyalin.";
+      const payload = {
+        category: requestFeatureCategory.value,
+        name: requestFeatureName.value.trim(),
+        description: requestFeatureDetails.value.trim(),
+        problem: requestFeatureProblem.value.trim(),
+        benefit: requestFeatureBenefit.value.trim()
+      };
+      if (Object.values(payload).some(value => !value)) {
+        statusEl.textContent = "Lengkapi semua kolom usulan fitur sebelum mengirim.";
         return;
       }
-      const summary = "USULAN FITUR CERDIKGO\\nJenis: " + category + "\\nNama fitur: " + name +
-        "\\nDeskripsi: " + details + "\\nMasalah/kebutuhan: " + problem + "\\nManfaat: " + benefit;
+      if (!csrfToken) {
+        statusEl.textContent = "Sesi keamanan belum siap. Muat ulang halaman lalu coba kembali.";
+        return;
+      }
+      requestFeatureSubmit.disabled = true;
+      requestFeatureSubmit.textContent = "Mengirim…";
       try {
-        await navigator.clipboard.writeText(summary);
-        statusEl.textContent = "Ringkasan usulan disalin. Kirimkan secara manual kepada tim pengembang.";
+        const response = await fetch("/api/feature-requests", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const messages = {
+            AUTH_REQUIRED: "Silakan masuk terlebih dahulu untuk mengirim usulan.",
+            CSRF_VALIDATION_FAILED: "Validasi keamanan gagal. Muat ulang halaman.",
+            FEATURE_REQUESTS_UNAVAILABLE: "Layanan usulan belum siap. Silakan coba kembali nanti.",
+            RATE_LIMIT_EXCEEDED: "Terlalu banyak pengiriman. Tunggu sebentar lalu coba lagi."
+          };
+          throw new Error(messages[result.error] || result.message || "Usulan belum berhasil dikirim.");
+        }
+        statusEl.textContent = "Usulan berhasil diterima dengan nomor " + result.requestId + ".";
         requestFeatureDialog.close();
         requestFeatureCategory.value = ""; requestFeatureName.value = ""; requestFeatureDetails.value = "";
         requestFeatureProblem.value = ""; requestFeatureBenefit.value = "";
-      } catch {
-        statusEl.textContent = "Clipboard tidak tersedia. Usulan belum terkirim; coba salin secara manual.";
+      } catch (error) {
+        statusEl.textContent = error.message || "Usulan belum berhasil dikirim. Periksa koneksi dan coba kembali.";
+      } finally {
+        requestFeatureSubmit.disabled = false;
+        requestFeatureSubmit.textContent = "Kirim usulan";
       }
     });
 
