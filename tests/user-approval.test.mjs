@@ -76,6 +76,7 @@ function adminDb({ role = "admin", pending = [], target = null, targetUser = nul
     prepare(sql) {
       return {
         sql,
+        first: async () => sql.includes("SELECT COUNT(*) AS active_count FROM users") ? { active_count: activeCount } : null,
         all: async () => ({ results: pending }),
         bind(...values) {
           return {
