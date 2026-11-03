@@ -77,7 +77,7 @@ async function makeSignedGoogleToken(overrides = {}) {
   return { token, clientId, nonce, fetchJwks };
 }
 
-test("unlisted Google account receives its verified subject for admin allowlisting", async () => {
+test("unlisted Google account response does not disclose Google subject identifiers", async () => {
   const fixture = await makeSignedGoogleToken();
   const csrf = "C".repeat(43);
   const request = new Request("https://cerdikchat.test/api/auth/google", {
@@ -108,8 +108,9 @@ test("unlisted Google account receives its verified subject for admin allowlisti
   const payload = await json(response);
   assert.equal(response.status, 403);
   assert.equal(payload.error, "USER_NOT_ALLOWLISTED");
-  assert.equal(payload.googleSub, "12345678901234567890");
-  assert.equal(payload.email, "pilot.user@example.com");
+  assert.equal(Object.hasOwn(payload, "googleSub"), false);
+  assert.equal(JSON.stringify(payload).includes("12345678901234567890"), false);
+  assert.equal(payload.email, undefined);
 });
 
 test("Google ID token verifies signature, audience, nonce and normalized email", async () => {
