@@ -7,7 +7,7 @@ const migration = await readFile(
   "utf8"
 );
 const roleMigration = await readFile(
-  new URL("../migrations/0003_roles_admin_bootstrap.sql", import.meta.url),
+  new URL("../migrations/0003_user_roles_and_admin_audit.sql", import.meta.url),
   "utf8"
 );
 
@@ -27,7 +27,7 @@ test("RBAC reconciliation migration is safe to reapply at the SQL statement leve
 });
 
 
-test("RBAC schema migration retains the target branch migration identity", () => {
+test("RBAC schema migration matches the applied staging migration identity", () => {
   assert.match(roleMigration, /ALTER TABLE users ADD COLUMN role/i);
   assert.match(roleMigration, /CREATE TABLE IF NOT EXISTS admin_audit_log/i);
   assert.doesNotMatch(migration, /ALTER\s+TABLE\s+users/i);
