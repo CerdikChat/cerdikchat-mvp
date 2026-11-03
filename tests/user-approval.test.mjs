@@ -75,9 +75,11 @@ function adminDb({ role = "admin", pending = [], target = null } = {}) {
   const db = {
     prepare(sql) {
       return {
+        sql,
         all: async () => ({ results: pending }),
         bind(...values) {
           return {
+            sql,
             first: async () => {
               if (sql.includes("FROM sessions s JOIN users u")) {
                 return { google_sub: "admin-sub", email: "admin@example.com", role };
@@ -188,8 +190,24 @@ test("user approval requires CSRF and an administrator session", async () => {
   assert.equal((await response.json()).error, "CSRF_VALIDATION_FAILED");
 });
 
+test("ordinary administrator cannot approve, reject, or suspend users", async () => {
+  const db = adminDb({ role: "admin" });
+  const response = await decideUserAccess(
+    request("/api/admin/users/decision", {
+      method: "POST",
+      body: { email: "pilot@example.com", decision: "approve" },
+      withSession: true,
+      withCsrf: true,
+    }),
+    { DB: db }
+  );
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).error, "SUPER_ADMIN_REQUIRED");
+  assert.equal(db.calls.length, 0);
+});
+
 test("approval batches standard-user creation, queue update, and audit record", async () => {
-  const db = adminDb({
+  const db = adminDb({ role: "super_admin",
     target: {
       google_sub: "verified-google-sub",
       email: "pilot@example.com",
@@ -210,4 +228,7 @@ test("approval batches standard-user creation, queue update, and audit record", 
   assert.deepEqual(await response.json(), { updated: true, status: "approved", role: "user" });
   assert.equal(db.calls.length, 1);
   assert.equal(db.calls[0].length, 3);
+  assert.match(db.calls[0][0].sql, /COUNT\(\*\).*status = 'active'.*< 30/s);
+  assert.match(db.calls[0][0].sql, /INSERT INTO users.*SELECT/s);
+  assert.match(db.calls[0][1].sql, /EXISTS \(SELECT 1 FROM users/s);
 });
