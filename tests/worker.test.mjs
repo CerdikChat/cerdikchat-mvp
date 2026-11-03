@@ -669,3 +669,15 @@ test("workspace tools are available only from the navigation menu until clicked"
   assert.match(drawer, /id="analysisFile"/);
   assert.match(drawer, /id="analyzeUpload"/);
 });
+
+
+test("Android keyboard viewport and narrow-screen overflow protections are present", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /window\.visualViewport/);
+  assert.match(html, /keyboard-open/);
+  assert.match(html, /window\.innerHeight - viewport\.height > 140/);
+  assert.match(html, /scrollIntoView\(\{ block: "nearest", behavior: "smooth" \}\)/);
+  assert.match(html, /html,body\{max-width:100%;overflow-x:hidden\}/);
+  assert.match(html, /\.content pre\{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere/);
+  assert.match(html, /\.content table\{display:block;width:100%;overflow-x:auto\}/);
+});
