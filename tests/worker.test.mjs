@@ -654,20 +654,23 @@ test("workspace tools stay collapsed until the user opens the compact tools draw
 });
 
 
-test("workspace tools are available only from the navigation menu until clicked", async () => {
+test("workspace tools are available from the main page in a collapsed expandable panel", async () => {
   const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
   const navStart = html.indexOf('<aside class="side" id="sideNavigation"');
   const mainStart = html.indexOf('<main class="main">');
-  const drawerStart = html.indexOf('<details class="workspace-tools-drawer" id="workspaceTools">');
-  assert.ok(navStart >= 0 && mainStart > navStart && drawerStart > navStart && drawerStart < mainStart);
+  const statusStart = html.indexOf('<section class="status-deck"');
+  const drawerStart = html.indexOf('<details class="workspace-tools-drawer main-workspace-tools" id="workspaceTools">');
+  assert.ok(navStart >= 0 && mainStart > navStart && statusStart > mainStart && drawerStart > statusStart);
+  assert.doesNotMatch(html.slice(navStart, mainStart), /id="workspaceTools"/);
   const drawerEnd = html.indexOf("</details>", drawerStart);
   const drawer = html.slice(drawerStart, drawerEnd);
   assert.match(drawer, /<summary class="workspace-tools-trigger"/);
-  assert.doesNotMatch(drawer.slice(0, 100), /\sopen(?:\s|>)/);
+  assert.doesNotMatch(drawer.slice(0, 120), /\sopen(?:\s|>)/);
   assert.match(drawer, /id="themeToggle"/);
   assert.match(drawer, /id="voiceRecord"/);
   assert.match(drawer, /id="analysisFile"/);
   assert.match(drawer, /id="analyzeUpload"/);
+  assert.match(html, /\.main-workspace-tools\[open\]/);
 });
 
 
