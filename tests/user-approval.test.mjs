@@ -228,7 +228,7 @@ test("approval batches standard-user creation, queue update, and audit record", 
   assert.deepEqual(await response.json(), { updated: true, status: "approved", role: "user" });
   assert.equal(db.calls.length, 1);
   assert.equal(db.calls[0].length, 3);
-  assert.match(db.calls[0][0].sql, /COUNT\(\*\).*status = 'active'.*< 30/s);
+  assert.match(db.calls[0][0].sql, /COUNT\(\*\).*status = 'active' AND role = 'user'.*< 30/s);
   assert.match(db.calls[0][0].sql, /INSERT INTO users.*SELECT/s);
   assert.match(db.calls[0][1].sql, /EXISTS \(SELECT 1 FROM users/s);
 });
