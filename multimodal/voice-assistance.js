@@ -112,19 +112,18 @@ export async function handleVoiceTranscription(request, env, corsHeaders = {}) {
     const status = session.response?.status || 401;
     return json({ error: status === 503 ? "AUTH_UNAVAILABLE" : "AUTH_REQUIRED" }, status, corsHeaders);
   }
-  if (session.role !== "user") return json({ error: "USER_PORTAL_REQUIRED" }, 403, corsHeaders);
 
   if (!/^multipart\/form-data\s*;/i.test(request.headers.get("content-type") || "")) {
     return json({ error: "UNSUPPORTED_MEDIA_TYPE" }, 415, corsHeaders);
   }
-  if (!env.VOICE_RATE_LIMITER || typeof env.VOICE_RATE_LIMITER.limit !== "function") {
-    return json({ error: "VOICE_RATE_LIMIT_UNAVAILABLE" }, 503, corsHeaders);
+  if (!env.CHAT_RATE_LIMITER || typeof env.CHAT_RATE_LIMITER.limit !== "function") {
+    return json({ error: "RATE_LIMIT_UNAVAILABLE" }, 503, corsHeaders);
   }
   try {
-    const limited = await env.VOICE_RATE_LIMITER.limit({ key: `voice:user:${session.subject}` });
+    const limited = await env.CHAT_RATE_LIMITER.limit({ key: `voice:user:${session.subject}` });
     if (!limited.success) return json({ error: "RATE_LIMIT_EXCEEDED" }, 429, { ...corsHeaders, "retry-after": "60" });
   } catch {
-    return json({ error: "VOICE_RATE_LIMIT_UNAVAILABLE" }, 503, corsHeaders);
+    return json({ error: "RATE_LIMIT_UNAVAILABLE" }, 503, corsHeaders);
   }
 
   const body = await readBounded(request);
