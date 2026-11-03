@@ -151,3 +151,22 @@ The source/target comparison was repeated against the actual branch files, not i
 
 ### Status after this audit
 Inventory is cross-checked; feature implementation is **not complete**. The confirmed missing multimodal modules/routes and frontend controls are migration work, not cosmetic cleanup. Keep PR #49 in Draft until implementation and regression evidence are present.
+
+
+## Implementation update — controlled migration branch
+
+Implementation has started on `atlas9/cerdikgo-feature-preserving-migration`:
+
+- Added the shared `validateCsrfRequest` export to the target auth module. It enforces exact same-origin plus the existing double-submit CSRF cookie/header comparison.
+- Added the authenticated voice transcription module and `POST /api/voice/transcribe` route. It uses the existing `CHAT_RATE_LIMITER` binding; no new rate-limit namespace is assumed. Session and CSRF checks remain mandatory. Audio is bounded to 3 MiB / 60 seconds, MIME and file signature validated, and transcript is returned for user review (not auto-submitted).
+- Added document analysis route/module plus a private ClamAV service-binding scanner. Scanner absence, timeout, malformed response, or indeterminate verdict fails closed.
+- Added CerdikGo controls for theme preference, user-initiated microphone recording/transcription, clipboard-based feature requests, and document selection/analysis. The file analysis UI explains the scanner dependency; server-side scan gate remains authoritative.
+- Updated Worker Permissions-Policy to allow microphone access only from the same origin, required for browser voice recording.
+- Added `tests/multimodal-routes.test.mjs` for method, origin, CSRF, authentication, scanner fail-closed behavior, audio signature checks, and no-store responses.
+
+### Explicitly not ready / held
+- **Document analysis is not operational in Preview until a private `FILE_SCANNER` Service Binding backed by a real ClamAV service is provisioned and tested.** No scanner binding was added to Wrangler because none is verified. Current behavior is intentional fail-closed.
+- **Admin Portal and user-approval workflow remain held.** Current redesign auth/session module does not expose RBAC role claims and the inspected target users migration does not establish the required role column. Do not enable approval controls until schema migration, server-side `admin/super_admin` checks, audit logging, and regression tests are ported together.
+- PWA/service-worker runtime behavior remains a separate acceptance gate.
+- CI has not yet been observed for the latest migration commits; do not treat tests as passed until GitHub Actions reports success.
+- No D1 migration was applied; no Preview or Production deployment was performed.
