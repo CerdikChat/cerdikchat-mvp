@@ -1073,7 +1073,11 @@ async function handleChat(request, env, ctx) {
   // Cloudflare Access is configured for every production hostname.
   let authenticatedSubject = null;
   let pilotEmail = null;
-  if (env.GOOGLE_AUTH_REQUIRED === "true") {
+  const authRequired =
+    env.ENVIRONMENT === "production" ||
+    Boolean(env.DB) ||
+    env.GOOGLE_AUTH_REQUIRED === "true";
+  if (authRequired) {
     const session = await requireSession(request, env);
     if (!session.ok) {
       return errorResponse("AUTH_REQUIRED", "Silakan masuk menggunakan akun Google yang diizinkan.", 401, corsHeaders);
