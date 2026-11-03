@@ -113,3 +113,41 @@ This is a structural delta, not proof every listed ID is independently a user-fa
 - Every legacy backend route is accounted for as preserved, replaced with an equivalent, or intentionally retired with a documented reason.
 - Every test suite and security boundary relevant to the migrated capability is run against the migration branch.
 - Preview Android acceptance is completed before Production consideration.
+
+
+## Confirmed cross-branch implementation audit (3 November 2026)
+
+The source/target comparison was repeated against the actual branch files, not inferred from the inventory:
+
+| Layer | Legacy source | Redesign target | Finding |
+|---|---|---|---|
+| Worker file-analysis module | `multimodal/file-analysis.js` exists | Missing | **Not migrated** |
+| Worker voice-transcription module | `multimodal/voice-assistance.js` exists | Missing | **Not migrated** |
+| Worker import and route for `POST /api/analyze` | Present; imports `handleFileAnalysis` and dispatches route | No import and no route | **Not wired** |
+| Worker import and route for `POST /api/voice/transcribe` | Present; imports `handleVoiceTranscription` and dispatches route | No import and no route | **Not wired** |
+| Auth helper required by legacy multimodal modules | Legacy auth exports `validateCsrfRequest` | Redesign auth does not export it | **Compatibility change required before porting** |
+| Dashboard theme control | Present in legacy UI | No matching theme control in redesign UI | **Not migrated** |
+| Voice recording/transcription UI | Present in legacy UI | No recording controls or transcription endpoint reference in redesign UI | **Not migrated** |
+| File upload/analysis UI | Present in legacy UI | No upload controls or analysis endpoint reference in redesign UI | **Not migrated** |
+| Feature request UI | Present in legacy UI | No feature request UI in redesign UI | **Not migrated** |
+| Admin portal/user approval UI | Present in legacy UI | No pending-user controls in redesign UI | **Not migrated** |
+| PWA | Legacy has manifest, service worker and offline page | Manifest exists; service-worker/offline runtime still needs a dedicated verification | **Partially verified** |
+
+### Exact target-branch checks
+- Target `worker.js` imports only the current authentication module; it does not import either multimodal handler.
+- Target `worker.js` has no `/api/analyze` or `/api/voice/transcribe` dispatch route.
+- Target `auth/google-auth.js` has internal CSRF validation but does not export the `validateCsrfRequest` helper expected by the legacy multimodal modules. Do not copy those modules unchanged.
+- Target `src/index.html` (57,705 bytes at the inspected revision) contains none of the legacy anchors or endpoint references for theme, voice, file analysis, feature requests, Admin Portal/pending users, latest-answer jump, or composer expansion.
+- The legacy and redesign branches are diverged (140 commits ahead / 16 behind in the comparison response). Do not merge or wholesale cherry-pick the legacy branch.
+
+### Migration sequence and security gates
+1. Port the authenticated file-analysis and voice modules as isolated files; adapt their auth dependency to the target auth implementation without weakening same-origin, CSRF, session, role, content-signature, size, duration, or rate-limit controls.
+2. Add the two Worker routes with explicit method handling, same-origin OPTIONS handling, no-store responses, and bounded request processing.
+3. Port user-facing controls into the CerdikGo workspace without restoring the old promotional dashboard or breaking the new conversation-first layout.
+4. Restore the theme and feature-request experiences; preserve the fact that legacy feature requests are copied to clipboard, not submitted to a server ticket system.
+5. Reconcile Admin Portal/user-approval behavior against the current RBAC model. UI visibility must never grant privileges; only server-side admin/super_admin checks may authorize decisions.
+6. Add/port focused regression suites for multimodal routes, UI handlers, RBAC and PWA. Run the complete test suite on the migration branch.
+7. Verify Preview against staging D1 and Preview-only bindings, then conduct Android acceptance. No Production publish, D1 write, OAuth mutation, secret change, or billing activation is included in this migration authorization.
+
+### Status after this audit
+Inventory is cross-checked; feature implementation is **not complete**. The confirmed missing multimodal modules/routes and frontend controls are migration work, not cosmetic cleanup. Keep PR #49 in Draft until implementation and regression evidence are present.
