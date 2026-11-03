@@ -581,7 +581,7 @@ test("CerdikGo workbench sidebar exposes planned modules without claiming activa
 test("CerdikGo header uses the approved blue-green wordmark rather than a placeholder C", async () => {
   const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
   assert.ok(html.includes("Cerdik<span>Go</span>"));
-  assert.match(html, /AI WORKSPACE FOR REAL ACTION/);
+  assert.match(html, /INNOVATION WORKSPACE/);
   assert.doesNotMatch(html, /<div class="logo" aria-hidden="true">C<\/div>/);
 });
 
