@@ -605,7 +605,21 @@ test("CerdikGo light theme keeps composer text and workspace cards readable", as
   assert.match(html, /html\[data-theme="light"\]\s*\{\s*color-scheme:\s*light/);
   assert.match(html, /html\[data-theme="light"\] \.composer textarea[\s\S]*?color:#172b43!important/);
   assert.match(html, /html\[data-theme="light"\] \.composer textarea::placeholder \{color:#71839a!important;opacity:1\}/);
-  assert.match(html, /html\[data-theme="light"\] \.module-preview/);
+  assert.match(html, /\.menu-module\{[^}]*background:var\(--panel\)/);
   assert.match(html, /html\[data-theme="light"\] \.composer-wrap/);
   assert.match(html, /caret-color:#075fc8!important/);
+});
+
+
+test("SOP, Business and Hybrid modules are contained in the navigation, not the chat workspace", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  const navStart = html.indexOf('<aside id="sideNavigation"');
+  const mainStart = html.indexOf('<main class="main">');
+  assert.ok(navStart >= 0 && mainStart > navStart);
+  const nav = html.slice(navStart, mainStart);
+  const main = html.slice(mainStart);
+  assert.match(nav, /<details class="menu-module" id="sopModule"/);
+  assert.match(nav, /<details class="menu-module" id="businessModule"/);
+  assert.match(nav, /<details class="menu-module" id="hybridModule"/);
+  assert.doesNotMatch(main, /id="sopModule"|id="businessModule"|id="hybridModule"/);
 });
