@@ -598,3 +598,14 @@ test("CerdikGo branding and composer controls are accessible on mobile", async (
   assert.match(html, /class="tool-button analyze-file"/);
   assert.match(html, /analysisFile\?\.addEventListener\("change"/);
 });
+
+
+test("CerdikGo light theme keeps composer text and workspace cards readable", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /html\[data-theme="light"\]\s*\{\s*color-scheme:\s*light/);
+  assert.match(html, /html\[data-theme="light"\] \.composer textarea[\s\S]*?color:#172b43!important/);
+  assert.match(html, /html\[data-theme="light"\] \.composer textarea::placeholder \{color:#71839a!important;opacity:1\}/);
+  assert.match(html, /html\[data-theme="light"\] \.module-preview/);
+  assert.match(html, /html\[data-theme="light"\] \.composer-wrap/);
+  assert.match(html, /caret-color:#075fc8!important/);
+});
