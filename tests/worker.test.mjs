@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import worker from "../worker.js";
 import { verifyGoogleIdToken, googleLogin } from "../auth/google-auth.js";
+import { submitFeatureRequest } from "../feature-requests.js";
 
 function makeEnv(overrides = {}) {
   return {
@@ -776,6 +777,68 @@ test("login and logout report failures inside the open account dialog and verify
   assert.match(html, /sessionCheck\.status !== 401/);
   assert.match(html, /id="adminConsoleLink" href="\/admin" hidden/);
   assert.match(html, /payload\.role\)\s*\)/);
+});
+
+
+test("feature request modal remains scrollable within the live Android keyboard viewport", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /#requestFeatureDialog\.settings-dialog[\s\S]*?max-height:calc\(var\(--app-viewport-height,100vh\)/);
+  assert.match(html, /#requestFeatureDialog\.settings-dialog[\s\S]*?overflow-y:auto/);
+  assert.match(html, /overscroll-behavior:contain/);
+  assert.match(html, /visualViewport\?\.addEventListener\("resize", syncAppViewportHeight/);
+  assert.match(html, /requestFeatureDialog\.showModal\(\)/);
+});
+
+test("feature request endpoint stores a validated request and returns its server request ID", async () => {
+  const csrf = "F".repeat(43);
+  const sessionId = "test-session-id";
+  let inserted = null;
+  const env = makeEnv({
+    DB: {
+      prepare(sql) {
+        return {
+          bind(...values) {
+            if (sql.includes("SELECT s.google_sub, u.email FROM sessions")) {
+              return { first: async () => ({ google_sub: "pilot-google-sub", email: "pilot@example.test" }) };
+            }
+            if (sql.includes("INSERT INTO feature_requests")) {
+              inserted = { sql, values };
+              return { run: async () => ({ success: true, meta: { changes: 1 } }) };
+            }
+            throw new Error("Unexpected SQL in feature request test");
+          }
+        };
+      }
+    }
+  });
+  const request = new Request("https://cerdikchat.test/api/feature-requests", {
+    method: "POST",
+    headers: {
+      origin: "https://cerdikchat.test",
+      "sec-fetch-site": "same-origin",
+      "content-type": "application/json",
+      "cf-connecting-ip": "203.0.113.42",
+      cookie: "__Host-cerdikchat_session=" + sessionId + "; __Host-cerdikchat_csrf=" + csrf,
+      "x-csrf-token": csrf
+    },
+    body: JSON.stringify({
+      category: "AI & Analisis",
+      name: "Ringkasan riset",
+      description: "Menyusun ringkasan sumber dengan sitasi.",
+      problem: "Pengguna perlu merangkum banyak dokumen.",
+      benefit: "Menghemat waktu dan menjaga keterlacakan."
+    })
+  });
+  const response = await submitFeatureRequest(request, env);
+  const payload = await response.json();
+  assert.equal(response.status, 201);
+  assert.equal(payload.accepted, true);
+  assert.equal(payload.status, "submitted");
+  assert.match(payload.requestId, /^[0-9a-f-]{36}$/i);
+  assert.ok(inserted, "D1 INSERT must execute before success is returned");
+  assert.match(inserted.sql, /INSERT INTO feature_requests/);
+  assert.equal(inserted.values[0], payload.requestId);
+  assert.equal(inserted.values[1], "pilot-google-sub");
 });
 
 test("mobile feature request trigger opens the dialog through delegated click handling", async () => {
