@@ -2574,7 +2574,32 @@
       syncThemeButton();
     });
 
-    requestFeatureOpen.addEventListener("click", () => requestFeatureDialog.showModal());
+    // Delegate the feature-request trigger so it also works when the mobile navigation
+    // drawer is re-rendered or the trigger is reached through the responsive workflow list.
+    document.addEventListener("click", (event) => {
+      const trigger = event.target instanceof Element
+        ? event.target.closest("#featureRequestOpen")
+        : null;
+      if (!trigger) return;
+      event.preventDefault();
+      if (!requestFeatureDialog) {
+        statusEl.textContent = "Formulir usulan fitur tidak tersedia. Muat ulang halaman.";
+        statusEl.classList.add("error");
+        return;
+      }
+      try {
+        if (typeof requestFeatureDialog.showModal === "function") {
+          if (!requestFeatureDialog.open) requestFeatureDialog.showModal();
+        } else {
+          requestFeatureDialog.setAttribute("open", "");
+        }
+        requestFeatureCategory?.focus();
+      } catch (error) {
+        statusEl.textContent = "Formulir belum dapat dibuka. Muat ulang halaman lalu coba kembali.";
+        statusEl.classList.add("error");
+        console.error("Feature request dialog could not open:", error);
+      }
+    });
     requestFeatureSubmit.addEventListener("click", async () => {
       const payload = {
         category: requestFeatureCategory.value,
