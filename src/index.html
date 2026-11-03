@@ -75,6 +75,7 @@
 
     * { box-sizing: border-box; }
 
+    body.nav-scroll-locked{overflow:hidden}
     body {
       margin: 0;
       min-height: 100vh;
@@ -285,6 +286,7 @@
     }
 
     .msg {
+      scroll-margin-top: 16px;
       display: flex;
       gap: 12px;
       max-width: 760px;
@@ -323,6 +325,20 @@
       line-height: 1.75;
       white-space: normal;
     }
+
+    .answer-actions {
+      display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+      margin-top:14px; padding-top:10px; border-top:1px solid var(--line);
+    }
+    .answer-action {
+      min-height:40px; padding:8px 12px; border:1px solid var(--line);
+      border-radius:10px; background:var(--panel2); color:var(--text);
+      font:inherit; font-size:12px; font-weight:750; cursor:pointer;
+    }
+    .answer-action.accept { border-color:#237b69; color:#8ce4c5; }
+    .answer-action.accept[aria-pressed="true"] { background:#123d35; border-color:#2ca987; }
+    .answer-acceptance-note { flex-basis:100%; color:var(--muted); font-size:11px; line-height:1.45; }
+    .answer-action:focus-visible { outline:2px solid var(--mint); outline-offset:3px; }
 
     .content strong { font-weight: 800; }
     .content em { font-style: italic; }
@@ -601,7 +617,8 @@
       .suggest small { font-size:11px; }
       .composer-wrap { padding:8px 10px max(8px,env(safe-area-inset-bottom)); }
       .composer { padding:7px 8px; border-radius:15px; }
-      .composer textarea { min-height:38px; max-height:90px; padding:6px; font-size:15px; }
+      /* Keep mobile form controls at 16px to prevent browser focus auto-zoom. */
+      .composer textarea { min-height:38px; max-height:90px; padding:6px; font-size:16px; }
       .send { min-width:84px; padding:9px 13px; font-size:13px; }
       .hint { max-width:68%; font-size:10px; }
       .footer { font-size:10px; }
@@ -641,6 +658,11 @@
     .portal-google{min-height:42px}.portal-note{font-size:11px;color:var(--muted);margin-top:12px}
     .admin-placeholder{max-width:1040px;margin:20px auto;padding:20px;border:1px solid #28577e;border-radius:18px;background:linear-gradient(145deg,#102b49,#081a2d);box-shadow:0 14px 36px #0003;color:var(--text)}
     .admin-placeholder[hidden]{display:none!important}
+    .settings-dialog .admin-placeholder{max-width:none;width:auto;margin:12px 0 0;padding:12px;box-sizing:border-box;box-shadow:none}
+    .settings-dialog .admin-grid{grid-template-columns:minmax(0,1fr)}
+    .settings-dialog .admin-module{padding:12px}
+    .admin-settings-section[hidden]{display:none!important}
+
     .admin-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
     .admin-head h2{margin:0;font-size:clamp(21px,3vw,28px);letter-spacing:-.5px}
     .admin-head p{margin:5px 0 0;color:var(--muted);font-size:12px}
@@ -738,13 +760,116 @@
       .suggest,.prompt,.send { transition:none !important; }
     }
 
+
+    /* ATLAS-9 Mobile UX: conversation-first hierarchy and compact discovery */
+    .top-actions{flex-wrap:wrap}
+    .feature-nav,.request-nav{border-color:#246b82;background:linear-gradient(135deg,#123b58,#123d43);color:#d9fbff;box-shadow:0 5px 18px #0002}
+    .request-nav{border-color:#287d70;background:linear-gradient(135deg,#123c43,#145548)}
+    .feature-nav:hover,.request-nav:hover{filter:brightness(1.12)}
+    .request-feature-dialog{max-width:560px}
+    .request-label{display:block;margin:13px 0 6px;color:var(--text);font-size:12px;font-weight:750}
+    .request-feature-dialog input,.request-feature-dialog select,.request-feature-dialog textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font:inherit;font-size:14px}
+    .request-feature-dialog textarea{resize:vertical;min-height:110px}
+    .request-note,.request-feedback{color:var(--muted);font-size:11px}
+    .request-actions,.composer-actions{display:flex;align-items:center;gap:8px}
+    .expand-composer{min-height:38px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font-size:11px;font-weight:750;cursor:pointer}
+    .composer.expanded textarea{min-height:190px;max-height:360px}
+    .composer.expanded{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 18%,transparent),0 12px 36px #0002}
+    .composer.expanded .expand-composer{background:var(--panel2);border-color:var(--blue)}
+    .conversation-active .workspace:not(.workspace-expanded) .feature-grid{display:none}
+    .conversation-active .workspace:not(.workspace-expanded) .multimodal-panel{display:none}
+    .conversation-active .workspace.workspace-expanded .workspace-head{display:flex;margin:0 0 8px}
+    .conversation-active .workspace.workspace-expanded .workspace-head p{display:none}
+    html[data-theme="light"] .feature-nav,html[data-theme="light"] .request-nav{color:#12324b;background:linear-gradient(135deg,#e5f3ff,#dff8f0);border-color:#a9cddd}
+    html[data-theme="light"] .request-feature-dialog input,html[data-theme="light"] .request-feature-dialog select,html[data-theme="light"] .request-feature-dialog textarea{background:#fff;color:#14243a}
+    @media(max-width:720px){
+      .top{align-items:flex-start}
+      .top-actions{max-width:70%;gap:5px}
+      .top-actions .pill{display:none}
+      .settings-button,.theme-toggle{min-height:38px;padding:7px 9px;font-size:11px}
+      .composer textarea{min-height:64px}
+      .composer.expanded textarea{min-height:190px}
+      .controls{align-items:flex-end;flex-wrap:wrap}
+      .composer-actions{margin-left:auto}
+      .expand-composer{min-height:40px}
+    }
+    @media(max-width:380px){
+      .top-actions{max-width:74%}
+      .top-actions button{font-size:10px;padding-inline:7px}
+      .request-nav{max-width:112px}
+      .request-nav{white-space:nowrap}
+      .composer-actions{gap:5px}
+      .expand-composer{font-size:10px;padding-inline:7px}
+    }
+    .feature-expand{display:none}
+    @media(max-width:720px){
+      .jump-latest{display:flex;justify-content:flex-end;max-width:760px;margin:0 auto 8px}
+      .jump-latest button{min-height:40px;padding:8px 13px;border:1px solid #287b91;border-radius:999px;background:#10334a;color:#c8f7ff;font:inherit;font-size:12px;font-weight:800;box-shadow:0 5px 18px #0004}
+      .jump-latest[hidden]{display:none!important}
+      .conversation-active .workspace{margin:0 12px 8px}
+      .conversation-active .workspace-head{display:none}
+      .conversation-active .feature-grid:not(.expanded){display:none}
+      .conversation-active .multimodal-panel{display:none}
+      .conversation-active .feature-expand{display:block;width:100%;min-height:42px;margin:0;padding:9px 14px;border:1px solid #1b5878;border-radius:12px;background:#0d2238;color:#bdeefa;font-size:12px;font-weight:800}
+      .conversation-active .workspace.workspace-expanded .workspace-head{display:flex;margin:0 0 8px}
+      .conversation-active .workspace.workspace-expanded .workspace-head p{display:none}
+    }
+    @media(max-width:720px){
+      .main{display:flex;flex-direction:column}
+      .feed{order:1;flex:1 0 auto;padding-bottom:18px}
+      .workspace{order:2;margin:4px 12px 16px}
+      .composer-wrap{order:3}
+      .welcome{margin:12px auto 18px}
+      .welcome::before{width:42px;height:42px;margin-bottom:7px}
+      .suggestions{margin-top:12px}
+      .suggest{min-height:74px;padding:10px}
+      .feature-grid:not(.expanded) .feature-card:nth-child(n+4){display:none}
+      .feature-expand{display:block;width:100%;min-height:44px;margin-top:9px;padding:10px 12px;border:1px solid #245779;border-radius:11px;background:#102943;color:#bdeaff;font-weight:750}
+      .top-actions{gap:6px}
+      .settings-button,.theme-toggle{min-height:42px;padding:8px 10px}
+      .composer textarea{min-height:44px}
+      .send{min-height:42px}
+    }
+    @media(max-width:360px){
+      .top strong{display:none}
+      .top-actions{gap:5px}
+      .settings-button,.theme-toggle{font-size:11px;padding-inline:8px}
+      .welcome h1{font-size:25px}
+      .suggest{min-height:78px}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .feature-expand{scroll-behavior:auto;transition:none}
+    }
+
+    /* Collapsible navigation drawer: mobile overlay + desktop hide/show */
+    .nav-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);font-size:12px;font-weight:750;cursor:pointer;flex:0 0 auto}
+    .nav-backdrop{display:none}
+    .app.nav-collapsed{grid-template-columns:0 minmax(0,1fr)}
+    .app.nav-collapsed>.side{display:none}
+    @media(max-width:720px){
+      .app{display:block}
+      .app>.side{display:block;position:fixed;z-index:120;inset:0 auto 0 0;width:min(84vw,310px);max-width:310px;height:100dvh;overflow-y:auto;padding:calc(18px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#081a30,#071222);border-right:1px solid #1d5278;box-shadow:18px 0 48px #0008;transform:translateX(-105%);visibility:hidden;transition:transform .22s ease,visibility .22s ease}
+      .app.nav-open>.side{transform:translateX(0);visibility:visible}
+      .app>.nav-backdrop{display:block;position:fixed;z-index:110;inset:0;width:100%;height:100%;padding:0;border:0;background:#020813a8;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
+      .app.nav-open>.nav-backdrop{opacity:1;visibility:visible}
+      .top{justify-content:flex-start;gap:8px}
+      .nav-toggle{min-height:38px;padding:7px 9px}
+      .mobile-brand{display:flex}
+      .top>strong{display:none}
+      .top-actions{margin-left:auto}
+    }
+    @media(prefers-reduced-motion:reduce){.app>.side,.app>.nav-backdrop{transition:none}}
+    html[data-theme="light"] .nav-toggle{background:#edf5ff;color:#17314b;border-color:#bfd1e2}
+    html[data-theme="light"] .app>.side{background:linear-gradient(180deg,#f4f8ff,#eaf1fa);color:#172b43;border-right-color:#c7d8e8}
+    html[data-theme="light"] .app>.side .prompt{color:#243c58}
+    html[data-theme="light"] .app>.side .prompt:hover{background:#e0ecf8}
   </style>
 </head>
 
 <body>
   <div id="networkState" class="network-state" role="status" aria-live="polite">Memeriksa konektivitas…</div>
   <div class="app">
-    <aside class="side">
+    <aside class="side" id="sideNavigation" aria-label="Navigasi utama">
       <div class="brand">
         <img class="logo" src="/cerdikgo-mark.svg" alt="" aria-hidden="true">
         <span class="product-brand">Cerdik<em>Go</em></span>
@@ -780,16 +905,18 @@
         secara mandiri. Hindari memasukkan data pribadi atau rahasia.
       </div>
     </aside>
+    <button id="navBackdrop" class="nav-backdrop" type="button" aria-label="Tutup navigasi"></button>
 
     <main class="main">
       <header class="top">
+        <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="sideNavigation" aria-label="Buka navigasi">☰ <span>Menu</span></button>
         <div class="mobile-brand">
           <img class="logo" src="/cerdikgo-mark.svg" alt="" aria-hidden="true">
           <span class="product-brand">Cerdik<em>Go</em></span>
         </div>
 
         <strong>CerdikGo · Innovation Workspace</strong>
-        <div class="top-actions"><span class="pill">● AI · Beta</span><button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
+        <div class="top-actions"><span class="pill">● AI · Beta</span><button id="featureToggle" class="settings-button feature-nav" type="button" aria-expanded="true" aria-controls="featureWorkspace">✦ Fitur</button><button id="requestFeatureOpen" class="settings-button request-nav" type="button" aria-haspopup="dialog" aria-controls="requestFeatureDialog">＋ Request fitur</button><button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
       </header>
 
       <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
@@ -805,7 +932,7 @@
             <p id="authUnavailable" hidden>Konfigurasi autentikasi belum tersedia. Silakan hubungi administrator.</p>
             <section class="portal-gate" id="portalGate" hidden aria-labelledby="portalTitle">
               <h3 id="portalTitle">Pilih portal akses</h3>
-              <p>Gunakan akun Google terverifikasi. Server menentukan peran akun; pilihan portal ini bukan pemberian hak akses.</p>
+              <p>Gunakan akun Google terverifikasi. Akun User yang belum aktif dapat mengajukan akses dan menunggu persetujuan administrator. Pilihan portal tidak memberikan hak akses.</p>
               <div class="portal-grid">
                 <article class="portal-card"><h4>Administrator Portal</h4><p>Akses khusus administrator yang telah diprovisikan dan diverifikasi.</p><button class="settings-button" id="chooseAdminPortal" type="button">Lanjutkan sebagai Administrator</button></article>
                 <article class="portal-card"><h4>User Portal</h4><p>Masuk ke workspace AI CerdikGo dengan akun pengguna yang diizinkan.</p><button class="settings-button" id="chooseUserPortal" type="button">Lanjutkan sebagai User</button></article>
@@ -816,28 +943,58 @@
           </section>
           <section class="settings-section" style="margin-top:12px"><strong>Tampilan</strong><p>Gunakan tombol Mode siang / Mode malam pada bilah atas untuk mengganti tema. Preferensi disimpan di browser ini.</p></section>
         </div>
-      </dialog>
-
-
-      <section class="admin-placeholder" id="adminPlaceholder" hidden aria-labelledby="adminDashboardTitle">
+          <section class="settings-section admin-settings-section" id="adminSettingsSection" hidden aria-label="Administrator tools">
+            <strong>Administrator Dashboard</strong>
+            <p>Kontrol administrator hanya ditampilkan untuk sesi dengan role admin yang diverifikasi server.</p>
+            <section class="admin-placeholder" id="adminPlaceholder" hidden aria-labelledby="adminDashboardTitle">
         <div class="admin-head">
           <div><h2 id="adminDashboardTitle">Administrator Dashboard</h2><p>Control Center CerdikGo · akses berdasarkan peran yang diverifikasi server</p></div>
-          <div class="admin-actions"><span class="admin-session">● Admin session verified</span><button class="settings-button" id="adminSettingsOpen" type="button">⚙ Akun & akses</button><button class="auth-logout" id="adminLogout" type="button">Keluar</button></div>
+          <div class="admin-actions"><span class="admin-session">● Admin session verified</span><button class="auth-logout" id="adminLogout" type="button">Keluar</button></div>
         </div>
         <div class="admin-identity"><strong id="adminDisplayName">Administrator</strong><span id="adminEmail">Sesi administrator aktif</span></div>
         <div class="admin-grid">
-          <article class="admin-module"><h3>User Access & Roles</h3><p>Area pengelolaan akun, allowlist, dan hak akses. Operasi administratif belum diaktifkan pada pilot ini.</p><small>Backend action not enabled</small></article>
+          <article class="admin-module" id="userApprovalModule">
+            <h3>User Access & Approval</h3>
+            <p>Permintaan akun User yang menunggu persetujuan. Persetujuan hanya mengaktifkan role User; tidak dapat mempromosikan akun menjadi Administrator.</p>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0">
+              <button class="settings-button" id="refreshPendingUsers" type="button">↻ Refresh requests</button>
+              <span id="pendingUsersStatus" role="status" aria-live="polite">Memuat status approval…</span>
+            </div>
+            <div id="pendingUsersList" aria-live="polite"></div>
+          </article>
           <article class="admin-module"><h3>Security & Audit</h3><p>Area pemantauan autentikasi dan audit trail. Data audit belum ditampilkan karena endpoint dashboard belum tersedia.</p><small>Awaiting verified API</small></article>
           <article class="admin-module"><h3>Platform Operations</h3><p>Area status layanan dan konfigurasi platform. Tidak ada metrik simulasi atau kontrol operasional palsu.</p><small>Awaiting verified API</small></article>
         </div>
       </section>
+          </section>
+      </dialog>
 
-      <section class="workspace" aria-label="CerdikGo feature workspace">
+
+
+
+      <dialog class="settings-dialog request-feature-dialog" id="requestFeatureDialog" aria-labelledby="requestFeatureTitle">
+        <div class="settings-head"><div><h2 id="requestFeatureTitle">Request a Feature</h2><small>Ceritakan kebutuhan fitur untuk pekerjaan atau industri Anda.</small></div><button class="settings-close" id="requestFeatureClose" type="button" aria-label="Tutup formulir">×</button></div>
+        <form id="requestFeatureForm" class="settings-body">
+          <label class="request-label" for="requestFeatureName">Nama fitur atau solusi</label>
+          <input id="requestFeatureName" name="feature" maxlength="100" required placeholder="Contoh: IoT Monitoring, Robotics, SOP / POS">
+          <label class="request-label" for="requestFeatureCategory">Kategori</label>
+          <select id="requestFeatureCategory" name="category" required>
+            <option value="">Pilih kategori</option><option>IoT & Smart Systems</option><option>Robotics & Automation</option><option>SOP, Quality & Compliance</option><option>POS & Business Operations</option><option>Research & Data Intelligence</option><option>Other / Custom Solution</option>
+          </select>
+          <label class="request-label" for="requestFeatureDetails">Kebutuhan dan masalah yang ingin diselesaikan</label>
+          <textarea id="requestFeatureDetails" name="details" rows="4" maxlength="2000" required placeholder="Jelaskan kebutuhan, pengguna, dan hasil yang diharapkan."></textarea>
+          <p class="request-note">MVP: permintaan belum dikirim ke server. Salin ringkasan di bawah untuk disampaikan kepada tim CerdikGo. Jangan masukkan kata sandi, data pribadi, atau informasi rahasia.</p>
+          <div class="request-actions"><button class="send" type="submit">Salin permintaan</button><button class="settings-button" id="requestFeatureCancel" type="button">Batal</button></div>
+          <p class="request-feedback" id="requestFeatureFeedback" role="status" aria-live="polite"></p>
+        </form>
+      </dialog>
+
+      <section class="workspace" id="featureWorkspace" aria-label="CerdikGo feature workspace">
         <div class="workspace-head">
           <div><h2>Explore your AI workspace</h2><p>One intelligent workspace. Multiple ways to create, analyze, and discover.</p></div>
           <span class="workspace-tag">CERDIKGO · PILOT</span>
         </div>
-        <div class="feature-grid">
+        <div class="feature-grid" id="featureGrid">
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">✦</div><strong>AI Chat Assistant</strong><small>Natural conversation and guided assistance</small><span class="feature-state">Core available</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">▤</div><strong>PDF & Documents</strong><small>Document reading, extraction, and insight</small><span class="feature-state soon">UI preview</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">▧</div><strong>Image Intelligence</strong><small>Visual understanding and image analysis</small><span class="feature-state soon">UI preview</span></article>
@@ -846,6 +1003,10 @@
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">▥</div><strong>Data Analytics</strong><small>Explore metrics, patterns, and trends</small><span class="feature-state soon">Coming soon</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌘</div><strong>AI Tools & Agents</strong><small>Bounded tools and multi-step workflows</small><span class="feature-state soon">Coming soon</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">◷</div><strong>Conversation History</strong><small>Return to your previous work sessions</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌁</div><strong>IoT Intelligence</strong><small>Smart sensors, monitoring, and connected operations</small><span class="feature-state soon">Custom solution</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">⚙</div><strong>Robotics & Automation</strong><small>Robotic workflows and industrial automation integration</small><span class="feature-state soon">Custom solution</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">☷</div><strong>SOP & Quality Systems</strong><small>Procedures, audit workflows, and compliance support</small><span class="feature-state soon">Custom solution</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">▣</div><strong>POS & Business Operations</strong><small>Sales, inventory, and operational analytics integration</small><span class="feature-state soon">Custom solution</span></article>
         </div>
         <div class="multimodal-panel">
           <div class="multi-top"><div><strong>Multimodal document workspace</strong><br><small>PDF · PNG · JPG · WEBP</small></div><span class="workspace-tag">VALIDATION GATE</span></div>
@@ -887,6 +1048,9 @@
       </section>
 
       <div class="composer-wrap">
+        <div class="jump-latest" id="jumpLatest" hidden>
+          <button type="button" id="jumpLatestButton" aria-label="Lompat ke jawaban terbaru">↓ Jawaban terbaru</button>
+        </div>
         <div class="auth-gate" id="authGate" role="status" aria-live="polite" hidden><span>Chat terkunci · Masuk melalui ⚙ Pengaturan → Akun & akses.</span><button id="authGateOpen" type="button" hidden aria-hidden="true" tabindex="-1">Buka Pengaturan</button></div>
         <form id="chatForm" class="composer">
           <textarea
@@ -894,15 +1058,16 @@
             disabled
             rows="2"
             maxlength="8000"
+            enterkeyhint="enter"
             placeholder="Tanyakan sesuatu kepada CerdikGo…"
             aria-label="Pesan Anda"
             required></textarea>
 
           <div class="controls">
             <span class="hint">
-              <span id="count">0</span>/8000 karakter · Enter untuk kirim
+              <span id="count">0</span>/8000 karakter · Enter untuk baris baru
             </span>
-            <button class="send" id="send" type="submit" disabled>Kirim ↑</button>
+            <div class="composer-actions"><button class="expand-composer" id="expandComposer" type="button" aria-expanded="false" aria-controls="message">⤢ Perbesar kolom</button><button class="send" id="send" type="submit" disabled>Kirim ↑</button></div>
           </div>
         </form>
 
@@ -937,12 +1102,111 @@
     applyTheme(readThemePreference());
     themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true));
 
+    const appShell = document.querySelector(".app");
+    const navToggle = document.querySelector("#navToggle");
+    const navBackdrop = document.querySelector("#navBackdrop");
+    const sideNavigation = document.querySelector("#sideNavigation");
+    const mobileNavigation = () => window.matchMedia("(max-width: 720px)").matches;
+    function closeNavigation() {
+      appShell.classList.remove("nav-open");
+      navToggle.setAttribute("aria-expanded", "false");
+      navToggle.setAttribute("aria-label", "Buka navigasi");
+      document.body.classList.remove("nav-scroll-locked");
+    }
+    navToggle.addEventListener("click", () => {
+      if (mobileNavigation()) {
+        const opened = appShell.classList.toggle("nav-open");
+        navToggle.setAttribute("aria-expanded", String(opened));
+        navToggle.setAttribute("aria-label", opened ? "Tutup navigasi" : "Buka navigasi");
+        document.body.classList.toggle("nav-scroll-locked", opened);
+      } else {
+        const collapsed = appShell.classList.toggle("nav-collapsed");
+        navToggle.setAttribute("aria-expanded", String(!collapsed));
+        navToggle.setAttribute("aria-label", collapsed ? "Tampilkan navigasi" : "Sembunyikan navigasi");
+      }
+    });
+    navBackdrop.addEventListener("click", closeNavigation);
+    sideNavigation.querySelectorAll("[data-prompt]").forEach(button => button.addEventListener("click", () => {
+      if (mobileNavigation()) closeNavigation();
+    }));
+    document.addEventListener("keydown", event => { if (event.key === "Escape") closeNavigation(); });
+    window.addEventListener("resize", () => { if (!mobileNavigation()) closeNavigation(); });
+
+
+    const featureGrid = document.querySelector("#featureGrid");
+    const featureToggle = document.querySelector("#featureToggle");
+    const workspace = document.querySelector("#featureWorkspace");
+    if (featureGrid && featureToggle && workspace) {
+      featureToggle.addEventListener("click", () => {
+        const expanded = !workspace.classList.contains("workspace-expanded");
+        workspace.classList.toggle("workspace-expanded", expanded);
+        featureGrid.classList.toggle("expanded", expanded);
+        featureToggle.setAttribute("aria-expanded", String(expanded));
+        featureToggle.textContent = expanded ? "✦ Tutup fitur" : "✦ Fitur";
+        if (expanded) workspace.scrollIntoView({ block: "start", behavior: "smooth" });
+      });
+    }
+
+    const requestFeatureDialog = document.querySelector("#requestFeatureDialog");
+    const requestFeatureOpen = document.querySelector("#requestFeatureOpen");
+    const requestFeatureClose = document.querySelector("#requestFeatureClose");
+    const requestFeatureCancel = document.querySelector("#requestFeatureCancel");
+    const requestFeatureForm = document.querySelector("#requestFeatureForm");
+    const requestFeatureFeedback = document.querySelector("#requestFeatureFeedback");
+    const closeFeatureRequest = () => { if (requestFeatureDialog.open) requestFeatureDialog.close(); };
+    requestFeatureOpen.addEventListener("click", () => requestFeatureDialog.showModal());
+    requestFeatureClose.addEventListener("click", closeFeatureRequest);
+    requestFeatureCancel.addEventListener("click", closeFeatureRequest);
+    requestFeatureForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const data = new FormData(requestFeatureForm);
+      const summary = [
+        "CERDIKGO — FEATURE REQUEST",
+        "Feature: " + String(data.get("feature") || "").trim(),
+        "Category: " + String(data.get("category") || "").trim(),
+        "Needs: " + String(data.get("details") || "").trim(),
+        "Source: CerdikGo workspace"
+      ].join("\n");
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(summary);
+          requestFeatureFeedback.textContent = "Ringkasan berhasil disalin. Silakan kirim kepada tim CerdikGo melalui kanal resmi.";
+        } else {
+          const fallback = document.createElement("textarea");
+          fallback.value = summary; fallback.setAttribute("readonly", "");
+          fallback.style.position = "fixed"; fallback.style.opacity = "0";
+          document.body.append(fallback); fallback.select();
+          const copied = document.execCommand("copy"); fallback.remove();
+          requestFeatureFeedback.textContent = copied ? "Ringkasan berhasil disalin. Silakan kirim kepada tim CerdikGo melalui kanal resmi." : "Salin otomatis tidak tersedia. Silakan salin isi permintaan secara manual.";
+        }
+      } catch {
+        requestFeatureFeedback.textContent = "Salin otomatis gagal. Silakan salin isi permintaan secara manual.";
+      }
+    });
+
+    const expandComposer = document.querySelector("#expandComposer");
+    if (expandComposer) {
+      expandComposer.addEventListener("click", () => {
+        const expanded = form.classList.toggle("expanded");
+        expandComposer.setAttribute("aria-expanded", String(expanded));
+        expandComposer.textContent = expanded ? "⤡ Kecilkan kolom" : "⤢ Perbesar kolom";
+        // Expanding the writing area must not open Android's keyboard.
+
+      });
+    }
+
     const form = document.querySelector("#chatForm");
     const input = document.querySelector("#message");
     const feed = document.querySelector("#feed");
     const send = document.querySelector("#send");
     const statusEl = document.querySelector("#status");
     const count = document.querySelector("#count");
+    const jumpLatest = document.querySelector("#jumpLatest");
+    const jumpLatestButton = document.querySelector("#jumpLatestButton");
+    const main = document.querySelector(".main");
+    let latestAnswerRow = null;
+    let userNavigatedDuringResponse = false;
+
 
     const settingsDialog = document.querySelector("#settingsDialog");
     const settingsOpen = document.querySelector("#settingsOpen");
@@ -952,7 +1216,7 @@
     const authUnavailable = document.querySelector("#authUnavailable");
     const openSettings = () => { if (!settingsDialog.open) settingsDialog.showModal(); };
     settingsOpen.addEventListener("click", openSettings);
-    adminSettingsOpen.addEventListener("click", openSettings);
+
     settingsClose.addEventListener("click", () => settingsDialog.close());
     authGateOpen.addEventListener("click", () => { if (!settingsDialog.open) settingsDialog.showModal(); });
     settingsDialog.addEventListener("click", event => { if (event.target === settingsDialog) settingsDialog.close(); });
@@ -967,10 +1231,12 @@
     const portalGate = document.querySelector("#portalGate");
     const adminPlaceholder = document.querySelector("#adminPlaceholder");
     const adminLogout = document.querySelector("#adminLogout");
-    const adminSettingsOpen = document.querySelector("#adminSettingsOpen");
     const adminDisplayName = document.querySelector("#adminDisplayName");
     const adminEmail = document.querySelector("#adminEmail");
-    const workspace = document.querySelector(".workspace");
+    const refreshPendingUsersButton = document.querySelector("#refreshPendingUsers");
+    const pendingUsersStatus = document.querySelector("#pendingUsersStatus");
+    const pendingUsersList = document.querySelector("#pendingUsersList");
+    refreshPendingUsersButton.addEventListener("click", loadPendingUsers);
     const authUser = document.querySelector("#authUser");
     const authLogout = document.querySelector("#authLogout");
 
@@ -982,18 +1248,81 @@
     let csrfToken = "";
     let googleClientId = "";
 
+    async function loadPendingUsers() {
+      if (!isAuthenticated || currentRole !== "admin") return;
+      pendingUsersStatus.textContent = "Memuat permintaan…";
+      pendingUsersList.replaceChildren();
+      try {
+        const response = await fetch("/api/admin/users/pending", {
+          method: "GET",
+          credentials: "same-origin",
+          headers: { "Accept": "application/json" }
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || payload.error || "Daftar permintaan tidak tersedia.");
+        const users = Array.isArray(payload.users) ? payload.users : [];
+        if (!users.length) {
+          pendingUsersStatus.textContent = "Tidak ada permintaan tertunda.";
+          return;
+        }
+        pendingUsersStatus.textContent = users.length + " permintaan menunggu persetujuan.";
+        for (const user of users) {
+          const row = document.createElement("div");
+          row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)";
+          const identity = document.createElement("span");
+          identity.textContent = [user.displayName, user.email].filter(Boolean).join(" · ");
+          const approve = document.createElement("button");
+          approve.type = "button";
+          approve.className = "settings-button";
+          approve.textContent = "Approve User";
+          approve.addEventListener("click", () => approvePendingUser(user.email, approve));
+          row.append(identity, approve);
+          pendingUsersList.append(row);
+        }
+      } catch (error) {
+        pendingUsersStatus.textContent = error instanceof Error ? error.message : "Gagal memuat permintaan.";
+      }
+    }
+
+    async function approvePendingUser(email, button) {
+      if (!isAuthenticated || currentRole !== "admin" || !email) return;
+      button.disabled = true;
+      try {
+        if (!csrfToken) await refreshCsrfToken();
+        const response = await fetch("/api/admin/users/decision", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-CSRF-Token": csrfToken
+          },
+          body: JSON.stringify({ email, decision: "approve" })
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || payload.error || "Persetujuan gagal.");
+        pendingUsersStatus.textContent = "Akun User berhasil disetujui.";
+        await loadPendingUsers();
+      } catch (error) {
+        pendingUsersStatus.textContent = error instanceof Error ? error.message : "Persetujuan gagal.";
+        button.disabled = false;
+      }
+    }
+
     function updateAuthUI(user = null) {
       authPanel.hidden = !authRequired && !authConfigured;
       authGate.hidden = !(authRequired && !isAuthenticated);
       portalGate.hidden = !(authRequired && authConfigured && !isAuthenticated);
-      adminPlaceholder.hidden = !(isAuthenticated && currentRole === "admin");
+      const isAdminSession = isAuthenticated && currentRole === "admin";
+      adminPlaceholder.hidden = !isAdminSession;
+      document.querySelector("#adminSettingsSection").hidden = !isAdminSession;
       adminDisplayName.textContent = user?.displayName || "Administrator";
       adminEmail.textContent = user?.email || "Sesi administrator aktif";
-      if (workspace) workspace.hidden = authRequired && (!isAuthenticated || currentRole === "admin");
+      if (workspace) workspace.hidden = authRequired && !isAuthenticated;
       authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikGo";
       authMessage.textContent = isAuthenticated
         ? "Sesi aman Anda aktif."
-        : "Masuk dengan akun Google yang telah diizinkan.";
+        : "Masuk dengan akun Google. Jika belum terdaftar, User Portal dapat mengirim permintaan persetujuan.";
       authUser.textContent = user
         ? [user.displayName, user.email].filter(Boolean).join(" · ")
         : "";
@@ -1005,6 +1334,7 @@
       authLogout.hidden = !isAuthenticated;
       input.disabled = authRequired && !isAuthenticated;
       send.disabled = authRequired && !isAuthenticated;
+      if (isAuthenticated && currentRole === "admin") loadPendingUsers();
     }
 
     function createNonce() {
@@ -1072,9 +1402,28 @@
             const expected = payload.requiredPortal === "admin" ? "Administrator Portal" : "User Portal";
             throw new Error("Peran akun tidak sesuai. Silakan gunakan " + expected + ".");
           }
-          if (payload.error === "USER_NOT_ALLOWLISTED") {
-            authMessage.textContent = "Akun Google ini belum memiliki akses. Hubungi administrator CerdikGo.";
-            throw new Error("Akun Google belum memiliki akses ke CerdikGo. Hubungi administrator.");
+          if (payload.error === "USER_NOT_ALLOWLISTED" && portal === "user") {
+            const accessResponse = await fetch("/api/auth/request-access", {
+              method: "POST",
+              credentials: "same-origin",
+              headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-CSRF-Token": csrfToken
+              },
+              body: JSON.stringify({ credential: response.credential, nonce })
+            });
+            const accessPayload = await accessResponse.json();
+            if (accessResponse.status === 202 && accessPayload.requested === true) {
+              authMessage.textContent = "Permintaan akses User telah dikirim dan menunggu persetujuan administrator.";
+              setStatus("Permintaan akses berhasil dikirim. Anda dapat login setelah akun disetujui.");
+              return;
+            }
+            if (accessPayload.error === "CSRF_VALIDATION_FAILED") {
+              await refreshCsrfToken();
+              throw new Error("Token keamanan diperbarui. Silakan tekan tombol Google sekali lagi.");
+            }
+            throw new Error("Akun Google belum memiliki akses ke CerdikGo. " + (accessPayload.message || accessPayload.error || "Permintaan akses User gagal."));
           }
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
@@ -1227,6 +1576,8 @@
 
     let history = [];
     let isSending = false;
+    let editingHistoryIndex = null;
+    let editingMessageRow = null;
 
     function updateCount() {
       count.textContent = String(input.value.length);
@@ -1238,14 +1589,41 @@
       statusEl.setAttribute("role", isError ? "alert" : "status");
     }
 
-    function scrollToLatest() {
+    function scrollToLatest(target = null, block = "start") {
       window.requestAnimationFrame(() => {
-        window.scrollTo({
-          top: document.documentElement.scrollHeight,
-          behavior: "auto"
-        });
+        if (target && target.isConnected) {
+          target.scrollIntoView({ block, behavior: "auto" });
+          return;
+        }
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "auto" });
       });
     }
+
+    function updateLatestAnswerControl() {
+      if (!window.matchMedia("(max-width: 720px)").matches) {
+        jumpLatest.hidden = true;
+        return;
+      }
+      if (!latestAnswerRow || !latestAnswerRow.isConnected) {
+        jumpLatest.hidden = true;
+        return;
+      }
+      const bounds = latestAnswerRow.getBoundingClientRect();
+      const nearAnswerEnd = bounds.bottom <= window.innerHeight - 150;
+      jumpLatest.hidden = nearAnswerEnd;
+    }
+
+    jumpLatestButton.addEventListener("click", () => {
+      if (latestAnswerRow) scrollToLatest(latestAnswerRow, "end");
+    });
+    window.addEventListener("scroll", updateLatestAnswerControl, { passive: true });
+    window.addEventListener("resize", updateLatestAnswerControl, { passive: true });
+    window.addEventListener("wheel", () => {
+      if (isSending) userNavigatedDuringResponse = true;
+    }, { passive: true });
+    window.addEventListener("touchmove", () => {
+      if (isSending) userNavigatedDuringResponse = true;
+    }, { passive: true });
 
     // Safe Markdown renderer. Untrusted content is added as text nodes,
     // never interpreted as raw HTML. Links remain inactive by design.
@@ -1617,11 +1995,70 @@
       body.textContent = text;
 
       wrap.append(who, body);
+      if (role === "user") {
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "answer-action";
+        editButton.textContent = "✎ Edit";
+        editButton.setAttribute("aria-label", "Edit pesan yang telah dikirim");
+        editButton.addEventListener("click", () => {
+          const historyIndex = Number(row.dataset.historyIndex);
+          if (!Number.isInteger(historyIndex) || historyIndex < 0) {
+            setStatus("Pesan ini belum memiliki riwayat yang dapat diedit.", true);
+            return;
+          }
+          editingHistoryIndex = historyIndex;
+          editingMessageRow = row;
+          input.value = body.textContent || "";
+          updateCount();
+          setStatus("Mode edit aktif. Ubah pesan, lalu tekan Kirim untuk membuat ulang jawaban.");
+        });
+        const actions = document.createElement("div");
+        actions.className = "answer-actions";
+        actions.append(editButton);
+        wrap.append(actions);
+      }
       row.append(avatar, wrap);
       feed.append(row);
-
-      scrollToLatest();
       return body;
+    }
+
+    function addAnswerAcceptance(answerElement) {
+      const actions = document.createElement("div");
+      actions.className = "answer-actions";
+
+      const acceptButton = document.createElement("button");
+      acceptButton.type = "button";
+      acceptButton.className = "answer-action accept";
+      acceptButton.setAttribute("aria-pressed", "false");
+      acceptButton.textContent = "✓ Terima jawaban";
+
+      const reviseButton = document.createElement("button");
+      reviseButton.type = "button";
+      reviseButton.className = "answer-action";
+      reviseButton.textContent = "↻ Perlu revisi";
+
+      const note = document.createElement("span");
+      note.className = "answer-acceptance-note";
+      note.textContent = "Penerimaan adalah konfirmasi pengguna, bukan verifikasi kebenaran faktual.";
+
+      acceptButton.addEventListener("click", () => {
+        const accepted = acceptButton.getAttribute("aria-pressed") !== "true";
+        acceptButton.setAttribute("aria-pressed", String(accepted));
+        acceptButton.textContent = accepted ? "✓ Jawaban diterima · Batalkan" : "✓ Terima jawaban";
+        note.textContent = accepted
+          ? "Anda menandai jawaban ini telah memenuhi kebutuhan Anda. Konfirmasi berlaku untuk sesi percakapan ini."
+          : "Penerimaan dibatalkan untuk sesi percakapan ini.";
+      });
+
+      reviseButton.addEventListener("click", () => {
+        input.value = "Mohon revisi jawaban sebelumnya. Perhatikan kembali kebutuhan saya dan perbaiki bagian yang belum tepat.";
+        updateCount();
+        setStatus("Instruksi revisi sudah disiapkan. Ketuk kolom pesan untuk mengedit, lalu tekan Kirim.");
+      });
+
+      actions.append(acceptButton, reviseButton, note);
+      answerElement.parentElement.append(actions);
     }
 
     function usePrompt(prompt) {
@@ -1629,7 +2066,7 @@
 
       input.value = prompt;
       updateCount();
-      input.focus();
+      setStatus("Contoh pertanyaan sudah dimasukkan. Ketuk kolom pesan untuk mengedit atau tekan Kirim.");
     }
 
     document.querySelectorAll("[data-prompt]").forEach(button => {
@@ -1640,17 +2077,8 @@
 
     input.addEventListener("input", updateCount);
 
-    input.addEventListener("keydown", event => {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-
-        if (typeof form.requestSubmit === "function") {
-          form.requestSubmit();
-        } else {
-          send.click();
-        }
-      }
-    });
+    // Keep Enter as a newline on mobile and desktop keyboards.
+    // Messages are submitted only with the visible Send button.
 
     async function sendMessage(event) {
       event.preventDefault();
@@ -1679,6 +2107,25 @@
         return;
       }
 
+      // Treat an edited turn as a transaction: preserve the existing transcript
+      // until the replacement answer has been received successfully.
+      const isEditing = editingHistoryIndex !== null && editingMessageRow !== null;
+      const editIndex = editingHistoryIndex;
+      const editRow = editingMessageRow;
+      const requestHistory = isEditing ? history.slice(0, editIndex) : history.slice();
+      const priorFeedRows = isEditing ? Array.from(feed.children) : [];
+      const editRowPosition = isEditing ? priorFeedRows.indexOf(editRow) : -1;
+      const rowsToReplace = editRowPosition >= 0 ? priorFeedRows.slice(editRowPosition) : [];
+
+      userNavigatedDuringResponse = false;
+      main.classList.add("conversation-active");
+      if (featureGrid) featureGrid.classList.remove("expanded");
+      if (workspace) workspace.classList.remove("workspace-expanded");
+      if (featureToggle) {
+        featureToggle.setAttribute("aria-expanded", "false");
+        featureToggle.textContent = "✦ Fitur";
+      }
+
       isSending = true;
       send.disabled = true;
       input.disabled = true;
@@ -1687,7 +2134,9 @@
 
       setStatus("CerdikGo sedang menyiapkan jawaban…");
 
-      addMessage("user", message);
+      const userBody = addMessage("user", message);
+      const userRow = userBody.closest(".msg");
+      if (userRow) userRow.dataset.historyIndex = String(requestHistory.length);
       input.value = "";
       updateCount();
 
@@ -1695,6 +2144,8 @@
         "assistant",
         "Menyiapkan jawaban…"
       );
+      latestAnswerRow = answerElement.closest(".msg");
+      scrollToLatest(userRow || latestAnswerRow);
 
       try {
         const response = await fetch("/api/chat", {
@@ -1705,7 +2156,7 @@
           },
           body: JSON.stringify({
             message,
-            history: history.slice(-MAX_HISTORY_MESSAGES)
+            history: requestHistory.slice(-MAX_HISTORY_MESSAGES)
           })
         });
 
@@ -1748,7 +2199,17 @@
           );
         }
 
+        // Replace the edited turn only after the server confirms success.
+        if (isEditing) {
+          rowsToReplace.forEach(row => row.remove());
+          history = requestHistory.slice();
+          editingHistoryIndex = null;
+          editingMessageRow = null;
+        }
+
         renderBasicMarkdown(answerElement, answer);
+        addAnswerAcceptance(answerElement);
+        latestAnswerRow = answerElement.closest(".msg");
 
         history.push(
           { role: "user", content: message },
@@ -1762,13 +2223,25 @@
         answerElement.textContent =
           "Maaf, jawaban belum berhasil diperoleh.";
 
+        // A failed edit must not leave a duplicate pending turn in the transcript.
+        if (isEditing) {
+          if (userRow) userRow.remove();
+          const failedAnswerRow = answerElement.closest(".msg");
+          if (failedAnswerRow) failedAnswerRow.remove();
+          latestAnswerRow = null;
+        }
+
+        // Never discard a customer's draft when the network or Worker fails.
+        input.value = message;
+        updateCount();
+
         const errorMessage =
           error instanceof Error
             ? error.message
             : "Terjadi kesalahan yang tidak diketahui.";
 
         setStatus(
-          `${errorMessage} Periksa koneksi dan endpoint /api/chat pada Worker.`,
+          `${errorMessage} Pesan Anda sudah dipulihkan ke kolom penulisan. Periksa koneksi dan coba kirim kembali.`,
           true
         );
 
@@ -1778,8 +2251,10 @@
         input.disabled = authRequired && !isAuthenticated;
         send.textContent = "Kirim ↑";
         form.removeAttribute("aria-busy");
-        input.focus();
-        scrollToLatest();
+        // Respect manual reading navigation while the response was processing.
+        // Otherwise reveal the beginning of the new answer; never focus the composer.
+        if (!userNavigatedDuringResponse) scrollToLatest(answerElement.closest(".msg"));
+        updateLatestAnswerControl();
       }
     }
 

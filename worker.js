@@ -25,7 +25,7 @@
 
 "use strict";
 
-import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession } from "./auth/google-auth.js";
+import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession, requestUserAccess, listPendingUserAccess, decideUserAccess } from "./auth/google-auth.js";
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
 
 /* =========================================================
@@ -1073,7 +1073,11 @@ async function handleChat(request, env, ctx) {
   // Cloudflare Access is configured for every production hostname.
   let authenticatedSubject = null;
   let pilotEmail = null;
-  if (env.GOOGLE_AUTH_REQUIRED === "true") {
+  const authRequired =
+    env.ENVIRONMENT === "production" ||
+    Boolean(env.DB) ||
+    env.GOOGLE_AUTH_REQUIRED === "true";
+  if (authRequired) {
     const session = await requireSession(request, env);
     if (!session.ok) {
       return errorResponse("AUTH_REQUIRED", "Silakan masuk menggunakan akun Google yang diizinkan.", 401, corsHeaders);
@@ -1492,6 +1496,9 @@ export default {
     const corsHeaders = getCorsHeaders(request);
 
     if (url.pathname === "/api/auth/config" && request.method === "GET") return authConfig(request, env);
+    if (url.pathname === "/api/auth/request-access") return requestUserAccess(request, env);
+    if (url.pathname === "/api/admin/users/pending") return listPendingUserAccess(request, env);
+    if (url.pathname === "/api/admin/users/decision") return decideUserAccess(request, env);
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
     if (url.pathname === "/api/auth/logout") return logout(request, env);

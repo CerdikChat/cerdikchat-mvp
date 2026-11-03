@@ -2,10 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [serviceWorker, indexHtml, offlineHtml] = await Promise.all([
+const [serviceWorker, indexHtml, offlineHtml, manifest] = await Promise.all([
   readFile(new URL("../src/service-worker.js", import.meta.url), "utf8"),
   readFile(new URL("../src/index.html", import.meta.url), "utf8"),
   readFile(new URL("../src/offline.html", import.meta.url), "utf8"),
+  readFile(new URL("../src/manifest.webmanifest", import.meta.url), "utf8"),
 ]);
 
 
@@ -62,9 +63,16 @@ test("offline UI distinguishes network reachability from AI service health", () 
 });
 
 test("service worker caches only the static app shell", () => {
-  assert.ok(serviceWorker.includes('APP_SHELL = ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg"]'));
-  assert.match(serviceWorker, /cerdikgo-shell-v1/);
+  assert.ok(serviceWorker.includes('APP_SHELL = ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg", "/icons/icon-192.png", "/icons/icon-512.png"]'));
+  assert.match(serviceWorker, /cerdikgo-shell-v2/);
   assert.match(serviceWorker, /key\.startsWith\("cerdikgo-shell-"\)/);
+});
+
+test("PWA manifest declares standard Android install icon sizes", () => {
+  const data = JSON.parse(manifest);
+  assert.equal(data.short_name, "CerdikGo");
+  assert.ok(data.icons.some(icon => icon.src === "/icons/icon-192.png" && icon.sizes === "192x192"));
+  assert.ok(data.icons.some(icon => icon.src === "/icons/icon-512.png" && icon.sizes === "512x512"));
 });
 
 test("service worker never intercepts API, non-GET, cross-origin or authorized requests", () => {
@@ -130,7 +138,7 @@ test("service worker install pre-caches the app shell before activation", async 
   let pending;
   harness.listeners.get("install")({ waitUntil(promise) { pending = promise; } });
   await pending;
-  assert.deepEqual(harness.cacheData.get("shell"), ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg"]);
+  assert.deepEqual(harness.cacheData.get("shell"), ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg", "/icons/icon-192.png", "/icons/icon-512.png"]);
 });
 
 test("activation removes only obsolete CerdikGo shell caches", async () => {
@@ -138,7 +146,7 @@ test("activation removes only obsolete CerdikGo shell caches", async () => {
   let pending;
   harness.listeners.get("activate")({ waitUntil(promise) { pending = promise; } });
   await pending;
-  assert.deepEqual(harness.deletedCaches, ["cerdikgo-shell-old"]);
+  assert.deepEqual(harness.deletedCaches, ["cerdikgo-shell-old", "cerdikgo-shell-v1"]);
 });
 
 test("fetch handler leaves API, cross-origin, non-GET and authorized requests untouched", () => {
@@ -191,4 +199,34 @@ test("Administrator and User portals have separate Google sign-in surfaces", () 
   assert.match(indexHtml, /ROLE_MISMATCH/);
   assert.match(indexHtml, /id="adminPlaceholder"/);
   assert.match(indexHtml, /fetch\("\/api\/admin\/session"/);
+});
+
+
+test("failed chat sends restore the user's draft for retry", () => {
+  assert.match(indexHtml, /input\.value = message;\s*updateCount\(\);/);
+  assert.match(indexHtml, /Pesan Anda sudah dipulihkan ke kolom penulisan/);
+  assert.match(indexHtml, /send\.disabled = true;[\s\S]*?input\.disabled = true;/);
+});
+
+test("editing a sent message is transactional and preserves the old transcript on failure", () => {
+  assert.match(indexHtml, /const requestHistory = isEditing \? history\.slice\(0, editIndex\) : history\.slice\(\);/);
+  assert.match(indexHtml, /if \(isEditing\) \{\s*rowsToReplace\.forEach\(row => row\.remove\(\)\);\s*history = requestHistory\.slice\(\);/);
+  assert.match(indexHtml, /if \(isEditing\) \{\s*if \(userRow\) userRow\.remove\(\);/);
+  assert.match(indexHtml, /editingHistoryIndex = null;\s*editingMessageRow = null;/);
+});
+
+test("mobile navigation drawer has accessible controls and close behavior", () => {
+  assert.match(indexHtml, /id="navToggle"[^>]*aria-expanded="false"[^>]*aria-controls="sideNavigation"/);
+  assert.match(indexHtml, /id="sideNavigation"[^>]*aria-label="Navigasi utama"/);
+  assert.match(indexHtml, /id="navBackdrop"[^>]*aria-label="Tutup navigasi"/);
+  assert.match(indexHtml, /appShell\.classList\.toggle\("nav-open"\)/);
+  assert.match(indexHtml, /navBackdrop\.addEventListener\("click", closeNavigation\)/);
+  assert.match(indexHtml, /event\.key === "Escape"\) closeNavigation\(\)/);
+});
+
+test("mobile navigation respects safe areas, reduced motion, and desktop collapse", () => {
+  assert.match(indexHtml, /env\(safe-area-inset-top\)/);
+  assert.match(indexHtml, /env\(safe-area-inset-bottom\)/);
+  assert.match(indexHtml, /prefers-reduced-motion:reduce/);
+  assert.match(indexHtml, /appShell\.classList\.toggle\("nav-collapsed"\)/);
 });
