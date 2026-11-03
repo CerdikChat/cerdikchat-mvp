@@ -1089,6 +1089,33 @@
       setNavigationOpen(navToggle.getAttribute("aria-expanded") !== "true");
     });
     navBackdrop.addEventListener("click", () => setNavigationOpen(false));
+
+    // Mobile edge-swipe navigation: reveal from the left edge, dismiss by swiping left.
+    let navTouchStart = null;
+    const navSwipeThreshold = 68;
+    document.addEventListener("touchstart", event => {
+      if (event.touches.length !== 1) { navTouchStart = null; return; }
+      const touch = event.touches[0];
+      const drawerOpen = appShell.classList.contains("nav-open");
+      if ((!drawerOpen && touch.clientX <= 26) || (drawerOpen && sideNavigation.contains(event.target))) {
+        navTouchStart = { x: touch.clientX, y: touch.clientY, drawerOpen };
+      } else {
+        navTouchStart = null;
+      }
+    }, { passive: true });
+    document.addEventListener("touchend", event => {
+      if (!navTouchStart || event.changedTouches.length !== 1) return;
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - navTouchStart.x;
+      const dy = Math.abs(touch.clientY - navTouchStart.y);
+      if (dy < 76 && Math.abs(dx) >= navSwipeThreshold) {
+        if (!navTouchStart.drawerOpen && dx > 0) setNavigationOpen(true, false);
+        else if (navTouchStart.drawerOpen && dx < 0) setNavigationOpen(false, false);
+      }
+      navTouchStart = null;
+    }, { passive: true });
+    document.addEventListener("touchcancel", () => { navTouchStart = null; }, { passive: true });
+
     sideNavigation.addEventListener("click", event => {
       if (event.target.closest("[data-prompt]") && appShell.classList.contains("nav-open")) {
         setNavigationOpen(false, false);
