@@ -525,7 +525,7 @@ test("Android workspace provides an accessible mobile navigation and keyboard-aw
   assert.match(html, /id="navToggle"[^>]*aria-expanded="false"[^>]*aria-controls="sideNavigation"/);
   assert.match(html, /id="sideNavigation"[^>]*aria-label="Navigasi utama"/);
   assert.match(html, /id="navBackdrop"[^>]*aria-label="Tutup navigasi"/);
-  assert.match(html, /max-device-width:\\s*720px/);
+  assert.match(html, /max-device-width:\s*720px/);
   assert.match(html, /visualViewport/);
   assert.match(html, /prefers-reduced-motion:reduce/);
 });
