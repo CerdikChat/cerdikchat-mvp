@@ -17,6 +17,19 @@
   <style>
     .network-state{max-width:900px;margin:8px auto 0;padding:8px 12px;border:1px solid #246b5c;border-radius:10px;background:#0b302f;color:#8ff0d4;font-size:12px}
     .network-state.offline{border-color:#765a28;background:#302617;color:#f2d59a}
+    .quick-access{max-width:1440px;margin:8px auto 10px;padding:0 18px;display:grid;grid-template-columns:1fr 1.15fr;gap:10px}
+    .quick-access-card{display:flex;align-items:center;gap:12px;min-width:0;padding:11px 14px;border:1px solid #1d5278;border-radius:15px;background:linear-gradient(120deg,#102b49,#0a1a2d);color:#eef7ff;text-align:left;cursor:pointer}
+    .quick-access-card.protection{border-color:#238b67;background:linear-gradient(120deg,#0d302e,#0b1c2c)}
+    .quick-access-icon{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:10px;background:#123e5b;color:#43d9e8;font-size:19px}
+    .protection .quick-access-icon{background:#124536;color:#55e6a5}
+    .quick-access-copy{min-width:0;flex:1}
+    .quick-access-copy strong{display:block;font-size:13px}
+    .quick-access-copy small{display:block;margin-top:2px;color:#a6bdd7;font-size:10px;line-height:1.35}
+    .quick-access-state{display:inline-block;margin-top:3px;color:#57e5d1;font-size:9px;font-weight:800;letter-spacing:.45px}
+    .quick-access-action{flex:0 0 auto;padding:7px 9px;border:1px solid #285778;border-radius:9px;background:#122c47;color:#d9f5ff;font-size:10px;font-weight:750}
+    .quick-access-card:focus-visible{outline:2px solid #20e2d0;outline-offset:3px}
+    @media(max-width:720px){.quick-access{padding:0 10px;gap:7px}.quick-access-card{gap:8px;padding:9px;border-radius:12px}.quick-access-icon{flex-basis:28px;width:28px;height:28px;font-size:16px}.quick-access-copy strong{font-size:11px}.quick-access-copy small{font-size:9px}.quick-access-action{padding:6px;font-size:9px}}
+    @media(max-width:390px){.quick-access{grid-template-columns:1fr}.quick-access-card{min-height:58px}}
 
 
     /* CerdikGo Innovation Workspace — visual feature layer */
@@ -724,13 +737,124 @@
       .suggest,.prompt,.send { transition:none !important; }
     }
 
+
+    /* Cerdik Protection Mode — original CerdikGo identity, not third-party robot branding */
+    .protection-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:18px;max-width:1120px;margin:12px auto 16px;padding:18px 22px;border:1px solid #168acb;border-radius:20px;background:radial-gradient(ellipse at 80% 20%,#075b8a88,transparent 42%),linear-gradient(120deg,#071b34,#0a3150 58%,#062239);box-shadow:0 0 28px #00b9ff2b,inset 0 1px #b7f5ff2b;overflow:hidden;max-height:260px;opacity:1;transform:translateY(0);transition:max-height .35s ease,opacity .25s ease,transform .35s ease,padding .35s ease,margin .35s ease,border-width .35s ease}
+    .protection-banner[hidden]{display:none!important}
+    .protection-banner.is-collapsed{max-height:0;opacity:0;transform:translateY(-12px);padding-top:0;padding-bottom:0;margin-top:0;margin-bottom:0;border-width:0;pointer-events:none}
+    .protection-copy{position:relative;z-index:1;min-width:0}
+    .protection-kicker{display:flex;align-items:center;gap:8px;color:#55e9ee;font-size:10px;font-weight:850;letter-spacing:1.5px;text-transform:uppercase}
+    .protection-copy h2{margin:5px 0 5px;color:#f2fbff;font-size:clamp(20px,3vw,30px);line-height:1.12}
+    .protection-copy p{margin:0;color:#b6d6ed;font-size:12px;max-width:560px}
+    .protection-points{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+    .protection-points span{padding:5px 9px;border:1px solid #176d83;border-radius:30px;background:#062d43;color:#c8f8f2;font-size:10px;font-weight:750}
+    .protection-robot{position:relative;display:grid;place-items:center;flex:0 0 116px;width:116px;height:116px;border-radius:28px;background:linear-gradient(145deg,#123e65,#07182e);border:1px solid #45dff0;box-shadow:0 0 26px #05c7f255}
+    .protection-robot img{width:82px;height:82px;object-fit:contain;filter:drop-shadow(0 0 12px #20dfff88)}
+    .protection-shield{position:absolute;right:-7px;bottom:-5px;display:grid;place-items:center;width:43px;height:47px;clip-path:polygon(50% 0,94% 18%,88% 68%,50% 100%,12% 68%,6% 18%);background:linear-gradient(145deg,#4df4d0,#078bca);color:#04243a;font-size:23px;font-weight:900;filter:drop-shadow(0 0 8px #22e6d0)}
+    .protection-toggle{position:absolute;left:50%;bottom:-13px;z-index:4;transform:translateX(-50%);width:38px;height:27px;border:1px solid #27c8ee;border-radius:20px;background:#092844;color:#dffaff;font-size:17px;line-height:1;cursor:pointer;box-shadow:0 0 14px #00bfff55}
+    .protection-fab{position:fixed;right:17px;bottom:100px;z-index:30;display:none;place-items:center;width:54px;height:54px;border:1px solid #45e9ef;border-radius:50%;background:radial-gradient(circle at 35% 25%,#1c7fba,#061c34 70%);box-shadow:0 0 22px #00cfff88;color:#eaffff;cursor:pointer}
+    .protection-fab.is-visible{display:grid}
+    .protection-fab img{width:38px;height:38px;object-fit:contain}
+    .protection-fab:after{content:"";position:absolute;inset:-5px;border:1px solid #31d9ee88;border-radius:50%;animation:protectionPulse 2s ease-out infinite}
+    @keyframes protectionPulse{0%{transform:scale(.88);opacity:.8}100%{transform:scale(1.28);opacity:0}}
+    @media(max-width:700px){.protection-banner{margin:9px 12px 15px;padding:14px;border-radius:16px;gap:10px}.protection-robot{flex-basis:76px;width:76px;height:76px;border-radius:20px}.protection-robot img{width:57px;height:57px}.protection-shield{width:33px;height:37px;font-size:17px}.protection-copy p{font-size:11px}.protection-points{gap:5px}.protection-points span{font-size:9px;padding:4px 7px}.protection-fab{right:13px;bottom:92px;width:49px;height:49px}}
+    @media(prefers-reduced-motion:reduce){.protection-banner,.protection-fab:after{transition:none;animation:none}}
+
+    /* ATLAS-9 responsive repair: keep the workspace readable on phones */
+    .mobile-menu-toggle{display:none;border:1px solid #245477;border-radius:10px;background:#102b46;color:#eaf7ff;padding:8px 11px;font-weight:750}
+    .side{transition:transform .22s ease}
+    .connectivity-demo{max-width:900px;margin:14px auto 18px;padding:16px;border:1px solid #167d91;border-radius:16px;background:linear-gradient(145deg,#0d2944,#09182a);box-shadow:0 12px 32px #0003}
+    .connectivity-demo[hidden]{display:none}
+    .connectivity-demo h3{margin:0 0 5px;font-size:16px}
+    .connectivity-demo p{margin:0 0 12px;color:#a7bfd8;font-size:12px}
+    .connectivity-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .connectivity-channel{min-width:0;padding:10px;border:1px solid #245477;border-radius:11px;background:#0b1c30;color:#eaf7ff;text-align:left}
+    .connectivity-channel strong{display:block;font-size:12px}
+    .connectivity-channel small{display:block;margin-top:4px;color:#a8bfd8;font-size:10px}
+    .connectivity-channel[aria-pressed="false"]{opacity:.55;border-style:dashed}
+    .connectivity-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .connectivity-toolbar button{border:1px solid #2c7190;border-radius:9px;background:#123b59;color:#eaf7ff;padding:9px 12px;font-size:12px;font-weight:750}
+    .connectivity-status{color:#62e5cf;font-size:12px;font-weight:800}
+    .simulation-note{margin-top:10px!important;color:#f0cc83!important;font-size:10px!important}
+    .brand .logo,.mobile-brand .logo{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 0 9px #12bde877)}
+    .mobile-brand .logo{width:32px;height:32px}
+    @media(max-width:900px){
+      .app{display:block;max-width:100%;min-height:100dvh}
+      .side{position:fixed;z-index:40;inset:0 auto 0 0;width:min(82vw,290px);max-width:290px;overflow-y:auto;background:#071426;box-shadow:18px 0 45px #0008;transform:translateX(-110%);padding:22px 18px}
+      .side.is-open{transform:translateX(0)}
+      body.menu-open:before{content:"";position:fixed;inset:0;z-index:35;background:#020812b8}
+      .mobile-menu-toggle{display:inline-flex;align-items:center;gap:7px}
+      .top{gap:8px;padding:9px 12px}
+      .top>strong{display:none}
+      .mobile-brand{display:flex}
+      .top-actions{margin-left:auto;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+      .top-actions .pill{display:none}
+      .workspace{width:100%;padding-inline:12px}
+      .feed{padding:14px 13px 18px}
+      .connectivity-demo{margin-inline:12px}
+      .network-state{margin:6px 10px;font-size:11px}
+    }
+    @media(max-width:560px){
+      .top{min-height:58px}
+      .mobile-brand{font-size:14px}
+      .top-actions .settings-button,.top-actions .theme-toggle{font-size:10px;padding:7px 8px}
+      .connectivity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .connectivity-demo{padding:13px}
+    }
+    @media(prefers-reduced-motion:reduce){.side{transition:none}}
+
+
+    /* ATLAS-9 targeted screen refresh — dashboard and simulator */
+    .workspace{max-width:1080px;padding:0 4px}
+    .workspace-head{align-items:center;padding:14px 16px;border:1px solid #205477;border-radius:16px;background:linear-gradient(115deg,#102d4b,#0a1a2d);box-shadow:0 12px 28px #0002}
+    .workspace-head h2{font-size:clamp(17px,2.5vw,22px);letter-spacing:-.4px}
+    .workspace-head p{font-size:12px}
+    .workspace-tag{font-weight:800;letter-spacing:.5px}
+    .feature-grid{gap:10px}
+    .feature-card{display:flex;flex-direction:column;min-height:132px;padding:14px;background:linear-gradient(145deg,#122f4e,#0b1b2e);box-shadow:0 8px 22px #0002}
+    .feature-card:focus-within,.feature-card:hover{border-color:#36b9d4;transform:translateY(-1px)}
+    .feature-icon{display:grid;place-items:center;width:36px;height:36px;margin-bottom:9px;border:1px solid #28658a;border-radius:11px;background:#123b5c;color:#7be9f2}
+    .feature-card strong{font-size:13px}
+    .feature-card small{font-size:11px;line-height:1.5}
+    .feature-state{margin-top:auto;padding-top:10px}
+    .connectivity-demo{max-width:1080px}
+    .connectivity-channel{min-height:86px;cursor:pointer}
+    .connectivity-channel[aria-pressed="true"]{border-color:#29c5a4;background:linear-gradient(145deg,#123b46,#0b2634);opacity:1}
+    .connectivity-channel[aria-pressed="false"]{opacity:.62}
+    .connectivity-toolbar{padding:10px;border:1px solid #244e6b;border-radius:12px;background:#08192b}
+    .connectivity-toolbar button:focus-visible,.connectivity-channel:focus-visible{outline:2px solid #69e5d1;outline-offset:3px}
+    .simulation-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+    .simulation-metric{padding:10px;border:1px solid #245477;border-radius:10px;background:#0b1c30}
+    .simulation-metric small{display:block;color:#9bb4d1;font-size:10px}
+    .simulation-metric strong{display:block;margin-top:3px;color:#72e5d0;font-size:14px}
+    .simulation-note{padding:8px 10px;border:1px solid #735a2d;border-radius:9px;background:#2b2418}
+    html[data-theme="light"] .workspace-head{background:linear-gradient(115deg,#fff,#eaf3fc);border-color:#c8d9ec}
+    html[data-theme="light"] .feature-card{background:linear-gradient(145deg,#fff,#edf4fc);box-shadow:0 8px 20px #233c5b12}
+    html[data-theme="light"] .feature-icon{background:#e5f2fb;color:#075f8b;border-color:#b6d1e5}
+    html[data-theme="light"] .connectivity-channel[aria-pressed="true"]{background:linear-gradient(145deg,#e5f7f2,#f4fbff);color:#14243a}
+    html[data-theme="light"] .connectivity-toolbar,html[data-theme="light"] .simulation-metric{background:#f7faff;border-color:#cbd7e6}
+    @media(max-width:720px){.workspace{padding:0}.workspace-head{padding:12px}.feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature-card{min-height:126px;padding:11px}.simulation-metrics{grid-template-columns:1fr 1fr}.connectivity-channel{min-height:78px}}
+    @media(max-width:390px){.workspace-head{align-items:flex-start;flex-direction:column}.feature-grid{gap:7px}.feature-card{min-height:118px;padding:9px}.feature-card strong{font-size:12px}}
+
   </style>
 </head>
 
 <body>
   <div id="networkState" class="network-state" role="status" aria-live="polite">Memeriksa konektivitas…</div>
+  <nav class="quick-access" aria-label="Akses cepat CerdikGo">
+    <button class="quick-access-card protection" id="quickProtectionOpen" type="button" aria-label="Buka Protection Mode dan status autentikasi">
+      <span class="quick-access-icon" aria-hidden="true">⬡</span>
+      <span class="quick-access-copy"><strong>Protection Mode</strong><small>Perlindungan sesi &amp; akses terverifikasi</small><span class="quick-access-state">LOGIN-VERIFIED</span></span>
+      <span class="quick-access-action" aria-hidden="true">Buka ›</span>
+    </button>
+    <button class="quick-access-card" id="quickConnectivityOpen" type="button" aria-label="Buka Hybrid Connectivity Simulator">
+      <span class="quick-access-icon" aria-hidden="true">⌘</span>
+      <span class="quick-access-copy"><strong>Hybrid Connectivity</strong><small>Fiber · Cellular · Wi-Fi Mesh · LoRa</small><span class="quick-access-state">SIMULATOR ONLY</span></span>
+      <span class="quick-access-action" aria-hidden="true">Buka demo ›</span>
+    </button>
+  </nav>
   <div class="app">
-    <aside class="side">
+    <aside class="side" id="appSidebar" aria-label="Menu utama">
       <div class="brand">
         <img class="logo" src="/cerdikgo-mark.svg" alt="" aria-hidden="true">
         <span class="product-brand">Cerdik<em>Go</em></span>
@@ -768,14 +892,14 @@
     </aside>
 
     <main class="main">
-      <header class="top">
+      <header class="top">\n        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-controls="appSidebar" aria-expanded="false">☰ Menu</button>
         <div class="mobile-brand">
-          <img class="logo" src="/cerdikgo-mark.svg" alt="" aria-hidden="true">
+          <img class="logo" src="/cerdikgo-protection-robot.svg" alt="" aria-hidden="true">
           <span class="product-brand">Cerdik<em>Go</em></span>
         </div>
 
-        <strong>CerdikGo · Innovation Workspace</strong>
-        <div class="top-actions"><span class="pill">● AI · Beta</span><button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
+        <strong>CerdikGo · AI Innovation Workspace</strong>
+        <div class="top-actions"><span class="pill">● AI · CONTROLLED BETA</span><button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
       </header>
 
       <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
@@ -807,6 +931,18 @@
       </section>
       <section class="admin-placeholder" id="adminPlaceholder" hidden><h2>Administrator Control Center</h2><p>Autentikasi administrator terverifikasi. Modul pengelolaan belum diaktifkan; tidak ada kontrol administratif simulatif pada tahap ini.</p><button class="auth-logout" id="adminLogout" type="button">Keluar</button></section>
 
+      <section class="protection-banner" id="protectionBanner" aria-labelledby="protectionTitle" hidden>
+        <div class="protection-copy">
+          <div class="protection-kicker"><span aria-hidden="true">✦</span> CERDIKGO · PROTECTION MODE ON</div>
+          <h2 id="protectionTitle">Your workspace. Under protection.</h2>
+          <p>Ruang kerja AI terpadu dengan akses terkontrol, pengalaman yang berfokus pada privasi, dan beta pilot bertahap.</p>
+          <div class="protection-points"><span>✓ Access controlled</span><span>✓ Security-first</span><span>✓ Controlled beta</span></div>
+        </div>
+        <div class="protection-robot" aria-hidden="true"><img src="/cerdikgo-protection-robot.svg" alt=""><span class="protection-shield">✓</span></div>
+        <button class="protection-toggle" id="protectionCollapse" type="button" aria-label="Sembunyikan banner proteksi" aria-expanded="true">⌃</button>
+      </section>
+      <button class="protection-fab" id="protectionRestore" type="button" aria-label="Tampilkan banner Cerdik Protection Mode" title="Tampilkan Protection Mode"><img src="/cerdikgo-protection-robot.svg" alt=""></button>
+
       <section class="workspace" aria-label="CerdikGo feature workspace">
         <div class="workspace-head">
           <div><h2>Explore your AI workspace</h2><p>One intelligent workspace. Multiple ways to create, analyze, and discover.</p></div>
@@ -821,6 +957,7 @@
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">▥</div><strong>Data Analytics</strong><small>Explore metrics, patterns, and trends</small><span class="feature-state soon">Coming soon</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌘</div><strong>AI Tools & Agents</strong><small>Bounded tools and multi-step workflows</small><span class="feature-state soon">Coming soon</span></article>
           <article class="feature-card"><div class="feature-icon" aria-hidden="true">◷</div><strong>Conversation History</strong><small>Return to your previous work sessions</small><span class="feature-state soon">Coming soon</span></article>
+          <article class="feature-card"><div class="feature-icon" aria-hidden="true">⌁</div><strong>Hybrid Connectivity</strong><small>Internet + Wi-Fi mesh + radio failover demonstration</small><button class="settings-button" id="connectivityDemoOpen" type="button" style="margin-top:auto">Open demo</button><span class="feature-state soon">Simulation</span></article>
         </div>
         <div class="multimodal-panel">
           <div class="multi-top"><div><strong>Multimodal document workspace</strong><br><small>PDF · PNG · JPG · WEBP</small></div><span class="workspace-tag">VALIDATION GATE</span></div>
@@ -833,7 +970,21 @@
         </div>
       </section>
 
-      <section class="feed" id="feed" aria-live="polite"
+
+      <section class="connectivity-demo" id="connectivityDemo" aria-labelledby="connectivityTitle" hidden>
+        <h3 id="connectivityTitle">Hybrid Connectivity Control Demo</h3>
+        <p>Simulasikan perpindahan kanal internet dan kontinuitas jaringan lokal.</p>
+        <div class="connectivity-grid" id="connectivityChannels">
+          <button class="connectivity-channel" type="button" data-channel="Fiber" aria-pressed="true"><strong>Fiber Internet</strong><small>Primary WAN · Available</small></button>
+          <button class="connectivity-channel" type="button" data-channel="Cellular A" aria-pressed="true"><strong>Cellular A</strong><small>Backup WAN · Available</small></button>
+          <button class="connectivity-channel" type="button" data-channel="Cellular B" aria-pressed="true"><strong>Cellular B</strong><small>Backup WAN · Available</small></button>
+          <button class="connectivity-channel" type="button" data-channel="Wi-Fi Mesh" aria-pressed="true"><strong>Wi-Fi Mesh</strong><small>Local network · Available</small></button>
+          <button class="connectivity-channel" type="button" data-channel="LoRa Radio" aria-pressed="true"><strong>LoRa Radio</strong><small>Telemetry · Available</small></button>
+        </div>
+        <div class="simulation-metrics" aria-label="Metrik simulasi">\n          <div class="simulation-metric"><small>Rute aktif (simulasi)</small><strong id="simActiveRoute">Fiber Internet</strong></div>\n          <div class="simulation-metric"><small>Kanal tersedia</small><strong id="simAvailableCount">5 / 5</strong></div>\n          <div class="simulation-metric"><small>Mode operasi</small><strong id="simOperationMode">Primary</strong></div>\n        </div>\n        <div class="connectivity-toolbar"><span class="connectivity-status" id="connectivityStatus" role="status" aria-live="polite">Rute simulasi: Fiber Internet</span><div><button id="connectivityReset" type="button">Reset simulasi</button><button id="connectivityClose" type="button">Tutup</button></div></div>
+        <p class="simulation-note">SIMULATION ONLY — tidak mengukur jaringan nyata, tidak mengirim transmisi radio, dan tidak mengubah konfigurasi router.</p>
+      </section>
+\n      <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
         <div class="welcome" id="welcome">
           <div class="eyebrow">Pikirkan lebih jernih</div>
@@ -912,6 +1063,47 @@
     applyTheme(readThemePreference());
     themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true));
 
+
+    // Local-only connectivity scenario simulator. No device/network APIs are called.
+    const connectivityDemo = document.getElementById("connectivityDemo");
+    const connectivityOpen = document.getElementById("connectivityDemoOpen");
+    const connectivityClose = document.getElementById("connectivityClose");
+    const connectivityReset = document.getElementById("connectivityReset");
+    const connectivityStatus = document.getElementById("connectivityStatus");
+    const connectivityChannels = [...document.querySelectorAll(".connectivity-channel")];
+    const simActiveRoute = document.getElementById("simActiveRoute");
+    const simAvailableCount = document.getElementById("simAvailableCount");
+    const simOperationMode = document.getElementById("simOperationMode");
+    const defaultChannels = connectivityChannels.map((button, index) => ({name:button.dataset.channel,available:true,priority:index}));
+    let simulatedChannels = defaultChannels.map(channel => ({...channel}));
+    function renderConnectivitySimulation(message = "") {
+      const available = simulatedChannels.filter(channel => channel.available);
+      const selected = available.sort((a,b) => a.priority-b.priority)[0] || null;
+      connectivityChannels.forEach(button => {
+        const channel = simulatedChannels.find(item => item.name === button.dataset.channel);
+        button.setAttribute("aria-pressed", String(Boolean(channel?.available)));
+        const label = button.querySelector("small");
+        if (label) label.textContent = channel?.available ? "Tersedia · simulasi" : "Gangguan · simulasi";
+      });
+      simActiveRoute.textContent = selected ? selected.name : "Tidak tersedia";
+      simAvailableCount.textContent = available.length + " / " + simulatedChannels.length;
+      simOperationMode.textContent = !selected ? "Offline" : selected.priority === 0 ? "Primary" : "Failover";
+      connectivityStatus.textContent = message || (selected ? "Rute simulasi aktif: " + selected.name : "Semua kanal dinonaktifkan — simulasi offline");
+    }
+    connectivityOpen?.addEventListener("click", () => { connectivityDemo.hidden = false; connectivityDemo.scrollIntoView({behavior:"smooth",block:"nearest"}); });
+    connectivityClose?.addEventListener("click", () => { connectivityDemo.hidden = true; connectivityOpen?.focus(); });
+    connectivityChannels.forEach(button => button.addEventListener("click", () => {
+      const channel = simulatedChannels.find(item => item.name === button.dataset.channel);
+      if (!channel) return;
+      channel.available = !channel.available;
+      renderConnectivitySimulation(channel.available ? channel.name + " diaktifkan (simulasi)." : channel.name + " dinonaktifkan (simulasi).");
+    }));
+    connectivityReset?.addEventListener("click", () => {
+      simulatedChannels = defaultChannels.map(channel => ({...channel}));
+      renderConnectivitySimulation("Simulasi direset. Rute utama: Fiber Internet.");
+    });
+    renderConnectivitySimulation();
+
     const form = document.querySelector("#chatForm");
     const input = document.querySelector("#message");
     const feed = document.querySelector("#feed");
@@ -952,12 +1144,46 @@
     let csrfToken = "";
     let googleClientId = "";
 
+    const protectionBanner = document.querySelector("#protectionBanner");
+    const protectionCollapse = document.querySelector("#protectionCollapse");
+    const protectionRestore = document.querySelector("#protectionRestore");
+    let protectionCollapsed = false;
+    function setProtectionCollapsed(collapsed) {
+      protectionCollapsed = collapsed;
+      protectionBanner.classList.toggle("is-collapsed", collapsed);
+      protectionBanner.setAttribute("aria-hidden", String(collapsed));
+      protectionCollapse.setAttribute("aria-expanded", String(!collapsed));
+      protectionCollapse.setAttribute("aria-label", collapsed ? "Tampilkan banner proteksi" : "Sembunyikan banner proteksi");
+      protectionCollapse.textContent = collapsed ? "⌄" : "⌃";
+      protectionRestore.classList.toggle("is-visible", collapsed);
+    }
+    protectionCollapse.addEventListener("click", () => setProtectionCollapsed(true));
+    protectionRestore.addEventListener("click", () => setProtectionCollapsed(false));
+    document.getElementById("quickProtectionOpen").addEventListener("click", () => {
+      if (isAuthenticated) {
+        setProtectionCollapsed(false);
+        protectionBanner.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (!settingsDialog.open) {
+        settingsDialog.showModal();
+      }
+    });
+    document.getElementById("quickConnectivityOpen").addEventListener("click", () => {
+      document.getElementById("connectivityDemoOpen").click();
+    });
+    function updateProtectionVisibility() {
+      const visible = isAuthenticated;
+      protectionBanner.hidden = !visible;
+      protectionRestore.classList.toggle("is-visible", visible && protectionCollapsed);
+      if (!visible) setProtectionCollapsed(false);
+    }
+
     function updateAuthUI(user = null) {
       authPanel.hidden = !authRequired && !authConfigured;
       authGate.hidden = !(authRequired && !isAuthenticated);
       portalGate.hidden = !(authRequired && authConfigured && !isAuthenticated);
       adminPlaceholder.hidden = !(isAuthenticated && currentRole === "admin");
       if (workspace) workspace.hidden = authRequired && (!isAuthenticated || currentRole === "admin");
+      updateProtectionVisibility();
       authTitle.textContent = isAuthenticated ? "Anda telah masuk" : "Akses CerdikGo";
       authMessage.textContent = isAuthenticated
         ? "Sesi aman Anda aktif."
@@ -1606,7 +1832,8 @@
       });
     });
 
-    input.addEventListener("input", updateCount);
+    input.addEventListener("input", () => { updateCount(); if (input.value.length && !protectionCollapsed) setProtectionCollapsed(true); });
+    input.addEventListener("focus", () => { if (!protectionCollapsed) setProtectionCollapsed(true); });
 
     input.addEventListener("keydown", event => {
       if (event.key === "Enter" && !event.shiftKey) {
@@ -1770,6 +1997,25 @@
         .catch(() => { networkState.textContent += " • Penyimpanan offline belum aktif pada browser ini."; });
     }
     loadAuth();
+
+    // Accessible mobile navigation drawer.
+    const sidebar = document.getElementById("appSidebar");
+    const menuToggle = document.getElementById("mobileMenuToggle");
+    function setMenuOpen(open) {
+      sidebar.classList.toggle("is-open", open);
+      document.body.classList.toggle("menu-open", open);
+      menuToggle.setAttribute("aria-expanded", String(open));
+    }
+    menuToggle.addEventListener("click", () => setMenuOpen(!sidebar.classList.contains("is-open")));
+    document.addEventListener("click", event => {
+      if (document.body.classList.contains("menu-open") &&
+          !sidebar.contains(event.target) && !menuToggle.contains(event.target)) setMenuOpen(false);
+    });
+    document.addEventListener("keydown", event => { if (event.key === "Escape") setMenuOpen(false); });
+    sidebar.querySelectorAll("button").forEach(button => button.addEventListener("click", () => setMenuOpen(false)));
+
+
+
   </script>
 </body>
 </html>

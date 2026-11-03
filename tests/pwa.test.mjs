@@ -62,8 +62,8 @@ test("offline UI distinguishes network reachability from AI service health", () 
 });
 
 test("service worker caches only the static app shell", () => {
-  assert.ok(serviceWorker.includes('APP_SHELL = ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg"]'));
-  assert.match(serviceWorker, /cerdikgo-shell-v1/);
+  assert.ok(serviceWorker.includes('APP_SHELL = ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg", "/cerdikgo-protection-robot.svg"]'));
+  assert.match(serviceWorker, /cerdikgo-shell-v2/);
   assert.match(serviceWorker, /key\.startsWith\("cerdikgo-shell-"\)/);
 });
 
@@ -130,7 +130,7 @@ test("service worker install pre-caches the app shell before activation", async 
   let pending;
   harness.listeners.get("install")({ waitUntil(promise) { pending = promise; } });
   await pending;
-  assert.deepEqual(harness.cacheData.get("shell"), ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg"]);
+  assert.deepEqual(harness.cacheData.get("shell"), ["/", "/manifest.webmanifest", "/offline.html", "/cerdikgo-mark.svg", "/cerdikgo-protection-robot.svg"]);
 });
 
 test("activation removes only obsolete CerdikGo shell caches", async () => {
@@ -138,7 +138,7 @@ test("activation removes only obsolete CerdikGo shell caches", async () => {
   let pending;
   harness.listeners.get("activate")({ waitUntil(promise) { pending = promise; } });
   await pending;
-  assert.deepEqual(harness.deletedCaches, ["cerdikgo-shell-old"]);
+  assert.deepEqual(harness.deletedCaches, ["cerdikgo-shell-old", "cerdikgo-shell-v1"]);
 });
 
 test("fetch handler leaves API, cross-origin, non-GET and authorized requests untouched", () => {
