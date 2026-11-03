@@ -26,6 +26,8 @@
 "use strict";
 
 import { authConfig, googleLogin, currentSession, logout, requireSession } from "./auth/google-auth.js";
+import { handleFileAnalysis } from "./multimodal/file-analysis.js";
+import { handleVoiceTranscription } from "./multimodal/voice-assistance.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1473,6 +1475,18 @@ export default {
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
     if (url.pathname === "/api/auth/logout") return logout(request, env);
+
+    if (url.pathname === "/api/analyze" || url.pathname === "/api/voice/transcribe") {
+      const methods = "POST, OPTIONS";
+      if (request.method === "OPTIONS") {
+        if (!isSameOriginOrNoOrigin(request)) {
+          return errorResponse("ORIGIN_NOT_ALLOWED", "Origin permintaan tidak diizinkan.", 403, corsHeaders);
+        }
+        return new Response(null, { status: 204, headers: { ...corsHeaders, "access-control-allow-methods": methods, "access-control-allow-headers": "Content-Type, X-CSRF-Token" } });
+      }
+      if (url.pathname === "/api/analyze") return handleFileAnalysis(request, env, corsHeaders);
+      return handleVoiceTranscription(request, env, corsHeaders);
+    }
 
     if (url.pathname === CONFIG.API_PATH) {
       if (request.method === "OPTIONS") {
