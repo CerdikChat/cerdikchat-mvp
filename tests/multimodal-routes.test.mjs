@@ -8,7 +8,7 @@ const csrf = "C".repeat(43);
 function baseHeaders(extra = {}) {
   return {
     origin: ORIGIN,
-    cookie: `__Host-cerdikchat_csrf=${csrf}`,
+    cookie: `__Host-cerdikchat_session=test-session; __Host-cerdikchat_csrf=${csrf}`,
     "x-csrf-token": csrf,
     ...extra,
   };
