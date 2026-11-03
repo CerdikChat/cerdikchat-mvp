@@ -762,3 +762,14 @@ test("feature request form submits to authenticated, CSRF-protected D1 endpoint"
   assert.match(migration, /CREATE TABLE IF NOT EXISTS feature_requests/);
   assert.match(migration, /CHECK \(status IN/);
 });
+
+
+test("login and logout report failures inside the open account dialog and verify session state", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /authMessage\.textContent = `Login gagal:/);
+  assert.match(html, /authMessage\.textContent = `Logout gagal:/);
+  assert.match(html, /sessionResponse = await fetch\("\/api\/auth\/me"/);
+  assert.match(html, /sessionCheck\.status !== 401/);
+  assert.match(html, /id="adminConsoleLink" href="\/admin" hidden/);
+  assert.match(html, /payload\.role\)\s*\)/);
+});
