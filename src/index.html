@@ -1257,7 +1257,7 @@
           <textarea id="requestFeatureProblem" maxlength="800" rows="3" required placeholder="Apa kendala pengguna saat ini?"></textarea>
           <label for="requestFeatureBenefit">Manfaat yang diharapkan</label>
           <textarea id="requestFeatureBenefit" maxlength="800" rows="2" required placeholder="Apa hasil atau dampak yang diharapkan?"></textarea>
-          <p class="tool-feedback">Usulan dikirim ke server dan disimpan setelah sesi Anda diverifikasi. Jangan sertakan data rahasia atau pribadi.</p>
+          <p id="requestFeatureFeedback" class="tool-feedback" role="status" aria-live="polite">Usulan dikirim ke server dan disimpan setelah sesi Anda diverifikasi. Jangan sertakan data rahasia atau pribadi.</p>
           <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Kirim usulan</button></div>
         </form>
       </dialog>
@@ -2536,6 +2536,7 @@
     const requestFeatureDetails = document.querySelector("#requestFeatureDetails");
     const requestFeatureProblem = document.querySelector("#requestFeatureProblem");
     const requestFeatureBenefit = document.querySelector("#requestFeatureBenefit");
+    const requestFeatureFeedback = document.querySelector("#requestFeatureFeedback");
 
 
     const chooseAnalysisFile = document.querySelector("#chooseAnalysisFile");
@@ -2592,6 +2593,7 @@
         return;
       }
       try {
+        if (requestFeatureFeedback) requestFeatureFeedback.textContent = "";
         if (typeof requestFeatureDialog.showModal === "function") {
           if (!requestFeatureDialog.open) requestFeatureDialog.showModal();
         } else {
@@ -2613,11 +2615,12 @@
         benefit: requestFeatureBenefit.value.trim()
       };
       if (Object.values(payload).some(value => !value)) {
-        statusEl.textContent = "Lengkapi semua kolom usulan fitur sebelum mengirim.";
+        requestFeatureFeedback.textContent = "Lengkapi semua kolom usulan fitur sebelum mengirim.";
+        (requestFeatureCategory.value ? (!requestFeatureName.value.trim() ? requestFeatureName : !requestFeatureDetails.value.trim() ? requestFeatureDetails : !requestFeatureProblem.value.trim() ? requestFeatureProblem : requestFeatureBenefit) : requestFeatureCategory).focus();
         return;
       }
       if (!csrfToken) {
-        statusEl.textContent = "Sesi keamanan belum siap. Muat ulang halaman lalu coba kembali.";
+        requestFeatureFeedback.textContent = "Sesi keamanan belum siap. Muat ulang halaman lalu coba kembali.";
         return;
       }
       requestFeatureSubmit.disabled = true;
@@ -2644,7 +2647,7 @@
         requestFeatureCategory.value = ""; requestFeatureName.value = ""; requestFeatureDetails.value = "";
         requestFeatureProblem.value = ""; requestFeatureBenefit.value = "";
       } catch (error) {
-        statusEl.textContent = error.message || "Usulan belum berhasil dikirim. Periksa koneksi dan coba kembali.";
+        requestFeatureFeedback.textContent = error.message || "Usulan belum berhasil dikirim. Periksa koneksi dan coba kembali.";
       } finally {
         requestFeatureSubmit.disabled = false;
         requestFeatureSubmit.textContent = "Kirim usulan";
