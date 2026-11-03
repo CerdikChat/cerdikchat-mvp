@@ -746,8 +746,8 @@ test("feature request form captures category, description, problem and expected 
   const toolsDrawerEnd = html.indexOf("</details>", html.indexOf('id="workspaceTools"'));
   const featureDialogStart = html.indexOf('<dialog id="requestFeatureDialog"');
   assert.ok(toolsDrawerEnd > 0 && featureDialogStart > toolsDrawerEnd, "feature request dialog must be outside the collapsed workspace tools drawer");
-  assert.match(html, /<button value="cancel" class="tool-button">Batal<\\/button>/);
-  assert.match(html, /<button id="requestFeatureSubmit" type="button" class="tool-button">Kirim usulan<\\/button>/);
+  assert.ok(html.includes('<button value="cancel" class="tool-button">Batal</button>'));
+  assert.ok(html.includes('<button id="requestFeatureSubmit" type="button" class="tool-button">Kirim usulan</button>'));
 });
 
 
