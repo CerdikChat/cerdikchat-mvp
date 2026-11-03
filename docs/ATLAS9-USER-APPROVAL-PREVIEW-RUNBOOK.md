@@ -43,7 +43,7 @@ WHERE email = '<APPROVED_SUPER_ADMIN_EMAIL>';
 Do not run this against Production. This is a controlled Preview bootstrap step, not an application self-service feature.
 
 ## Preview-only migration
-Migration `0005_user_approval_index.sql` creates the isolated access-request queue and lookup indexes. Review the active D1 binding before applying; do not run against Production. No migration is automatically applied by this PR.
+Migration order on the PR #30 target branch is `0003_roles_admin_bootstrap.sql` (role, audit-log and administrator allowlist schema), `0004_admin_bootstrap_allowlist.sql` (idempotent allowlist reconciliation), then `0005_user_approval_index.sql` (access-request queue and lookup indexes). Do not apply the separate PR #21 migration `0003_user_roles_and_admin_audit.sql` to this same database as well: it defines overlapping `users.role` and `admin_audit_log` objects under a different migration filename. Before applying anything, inspect the actual D1 migration ledger and confirm which migration identity has already been applied. If either RBAC migration identity is already recorded, stop and reconcile the ledger/schema rather than applying the other one. Review the active D1 binding before applying; do not run against Production. No migration is automatically applied by this PR.
 
 ## Human test checklist
 1. Use a dedicated Google account that is not in the administrator allowlist.
