@@ -149,6 +149,11 @@ function validCsrf(request) {
   return constantTimeEqual(cookieToken, headerToken);
 }
 
+// Shared double-submit CSRF guard for authenticated multipart endpoints.
+export function validateCsrfRequest(request) {
+  return sameOrigin(request) && validCsrf(request);
+}
+
 function cookieHeader(value, maxAge) {
   return `${SESSION_COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 }
@@ -207,8 +212,14 @@ export function authConfig(request, env) {
 
 export async function googleLogin(request, env, options = {}) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
-  if (!sameOrigin(request)) return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
-  if (!validCsrf(request)) return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
+  if (!sameOrigin(request)) {
+    console.warn("AUTH_REJECTED", { endpoint: "google", reason: "ORIGIN_NOT_ALLOWED" });
+    return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
+  }
+  if (!validCsrf(request)) {
+    console.warn("AUTH_REJECTED", { endpoint: "google", reason: "CSRF_VALIDATION_FAILED" });
+    return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
+  }
   if (!/^application\/json(?:;|$)/i.test(request.headers.get("Content-Type") || "")) {
     return authJson({ error: "UNSUPPORTED_MEDIA_TYPE" }, 415);
   }
@@ -247,6 +258,7 @@ export async function googleLogin(request, env, options = {}) {
   } catch (error) {
     const code = typeof error?.message === "string" ? error.message : "GOOGLE_TOKEN_INVALID";
     const status = code === "GOOGLE_JWKS_UNAVAILABLE" || code === "GOOGLE_CLIENT_ID_MISSING" ? 503 : 401;
+    console.warn("AUTH_REJECTED", { endpoint: "google", reason: code, status });
     return authJson({ error: status === 503 ? "GOOGLE_VERIFICATION_UNAVAILABLE" : "GOOGLE_TOKEN_INVALID" }, status);
   }
 
@@ -259,6 +271,7 @@ export async function googleLogin(request, env, options = {}) {
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
   }
   if (!user || user.status !== "active") {
+    console.warn("AUTH_REJECTED", { endpoint: "google", reason: "USER_NOT_ALLOWLISTED" });
     // Do not disclose Google's stable subject identifier to end users.
     // Identity details remain available only to authorized server-side administration.
     return authJson({
@@ -278,6 +291,7 @@ export async function googleLogin(request, env, options = {}) {
       "INSERT INTO sessions (session_hash, google_sub, created_at, expires_at, revoked_at) VALUES (?, ?, ?, ?, NULL)"
     ).bind(sessionHash, identity.sub, now, expiresAt).run();
   } catch {
+    console.error("AUTH_SESSION_CREATE_FAILED");
     return authJson({ error: "SESSION_CREATE_FAILED" }, 503);
   }
 
@@ -326,8 +340,14 @@ export async function requireSession(request, env) {
 
 export async function logout(request, env) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
-  if (!sameOrigin(request)) return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
-  if (!validCsrf(request)) return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
+  if (!sameOrigin(request)) {
+    console.warn("AUTH_REJECTED", { endpoint: "logout", reason: "ORIGIN_NOT_ALLOWED" });
+    return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
+  }
+  if (!validCsrf(request)) {
+    console.warn("AUTH_REJECTED", { endpoint: "logout", reason: "CSRF_VALIDATION_FAILED" });
+    return authJson({ error: "CSRF_VALIDATION_FAILED" }, 403);
+  }
   const sessionId = getCookie(request, SESSION_COOKIE);
   if (sessionId && env.DB) {
     try {

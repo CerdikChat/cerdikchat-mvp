@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import worker from "../worker.js";
 import { verifyGoogleIdToken, googleLogin } from "../auth/google-auth.js";
+import { submitFeatureRequest } from "../feature-requests.js";
 
 function makeEnv(overrides = {}) {
   return {
@@ -171,7 +172,7 @@ test("static assets receive browser security headers", async () => {
   assert.match(response.headers.get("content-security-policy"), /accounts\.google\.com\/gsi\/client/);
   assert.match(response.headers.get("content-security-policy"), /frame-src https:\/\/accounts\.google\.com\/gsi\//);
   assert.match(response.headers.get("content-security-policy"), /frame-ancestors 'none'/);
-  assert.equal(response.headers.get("permissions-policy"), "camera=(), microphone=(), geolocation=()");
+  assert.equal(response.headers.get("permissions-policy"), "camera=(), microphone=(self), geolocation=()");
   assert.equal(response.headers.get("strict-transport-security"), "max-age=31536000; includeSubDomains");
 });
 
@@ -539,13 +540,312 @@ test("CerdikGo workspace uses a conversation-first innovation dashboard", async 
   const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
   assert.match(html, /<title>CerdikGo — AI Innovation Workspace<\/title>/);
   assert.match(html, /class="workspace-intro"/);
-  assert.match(html, /class="workspace-launcher"/);
+  assert.match(html, /class="side-workflows"/);
   assert.match(html, /Analisis Strategis/);
   assert.match(html, /Dokumen & Ringkasan/);
   assert.match(html, /Riset & Eksplorasi/);
   assert.match(html, /Rencana & Eksekusi/);
+  assert.match(html, /Usulan Fitur/);
+  assert.doesNotMatch(html, /class="workspace-launcher"/);
   assert.doesNotMatch(html, /Ide besar dimulai dari/);
   assert.match(html, /conversation-first, responsive/);
   assert.match(html, /@media\(max-width:720px\)/);
   assert.match(html, /prefers-reduced-motion:reduce/);
+});
+
+
+test("CerdikGo exposes honest network, Protection Mode and Hybrid Connectivity status panels", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="networkStatus"/);
+  assert.match(html, /navigator\.onLine/);
+  assert.match(html, /Layanan AI diverifikasi saat permintaan dijalankan/);
+  assert.match(html, /id="protectionStatusCard"/);
+  assert.match(html, /Protection Mode/);
+  assert.match(html, /Perlindungan sesi & akses/);
+  assert.match(html, /Hybrid Connectivity/);
+  assert.match(html, /SIMULATOR/);
+  assert.match(html, /Fiber · Cellular · Wi-Fi Mesh · LoRa/);
+  assert.match(html, /Belum ada koneksi radio mesh atau LoRa fisik/);
+});
+
+test("CerdikGo workbench sidebar exposes planned modules without claiming activation", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /class="side-tools"/);
+  assert.match(html, /Voice Studio/);
+  assert.match(html, /Usulkan fitur \/ IoT/);
+  assert.match(html, /SOP & Knowledge Base/);
+  assert.match(html, /Business & Strategy/);
+  assert.match(html, /PLANNED · NOT CONNECTED/);
+  assert.match(html, /SIMULATOR ONLY/);
+});
+
+test("CerdikGo header uses the approved blue-green wordmark rather than a placeholder C", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes("Cerdik<span>Go</span>"));
+  assert.match(html, /INNOVATION WORKSPACE/);
+  assert.doesNotMatch(html, /<div class="logo" aria-hidden="true">C<\/div>/);
+});
+
+
+test("CerdikGo branding and composer controls are accessible on mobile", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /cerdikgo-mark/);
+  assert.match(html, /CerdikGo · Innovation Workspace/);
+  assert.match(html, /INNOVATION WORKSPACE/);
+  assert.match(html, /id="expandComposer"/);
+  assert.match(html, /aria-expanded="false" aria-controls="message"/);
+  assert.match(html, /id="chooseAnalysisFile"/);
+  assert.match(html, /id="selectedFileName"/);
+  assert.match(html, /class="tool-button analyze-file"/);
+  assert.match(html, /analysisFile\?\.addEventListener\("change"/);
+});
+
+
+test("CerdikGo supports persistent dark, light and light-blue themes with readable controls", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /const themeModes = \["dark", "light", "light-blue"\]/);
+  assert.match(html, /localStorage\.getItem\("cerdikgo-theme"\)/);
+  assert.match(html, /localStorage\.setItem\("cerdikgo-theme", next\)/);
+  for (const theme of ["light", "light-blue"]) {
+    assert.match(html, new RegExp('html\\[data-theme="' + theme + '"\\]\\s*\\{\\s*color-scheme:\\s*light'));
+    assert.match(html, new RegExp('html\\[data-theme="' + theme + '"\\] \\.composer textarea[\\s\\S]*?color:'));
+    assert.match(html, new RegExp('html\\[data-theme="' + theme + '"\\] \\.composer-wrap'));
+    assert.match(html, new RegExp('html\\[data-theme="' + theme + '"\\] button:focus-visible'));
+  }
+  assert.match(html, /caret-color:#075fc8!important/);
+  assert.match(html, /caret-color:#087bd1!important/);
+});
+
+
+test("SOP, Business and Hybrid modules are contained in the navigation, not the chat workspace", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  const navStart = html.indexOf('<aside class="side" id="sideNavigation"');
+  const mainStart = html.indexOf('<main class="main">');
+  assert.ok(navStart >= 0 && mainStart > navStart);
+  const nav = html.slice(navStart, mainStart);
+  const main = html.slice(mainStart);
+  assert.match(nav, /<details class="menu-module" id="sopModule"/);
+  assert.match(nav, /<details class="menu-module" id="businessModule"/);
+  assert.match(nav, /<details class="menu-module" id="hybridModule"/);
+  assert.doesNotMatch(main, /id="sopModule"|id="businessModule"|id="hybridModule"/);
+});
+
+
+test("CerdikGo mobile navigation supports left-edge swipe open and drawer swipe close", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /Mobile edge-swipe navigation/);
+  assert.match(html, /touchstart/);
+  assert.match(html, /touchend/);
+  assert.match(html, /touchcancel/);
+  assert.match(html, /navSwipeThreshold = 68/);
+  assert.match(html, /!navTouchStart\.drawerOpen && dx > 0\) setNavigationOpen\(true/);
+  assert.match(html, /navTouchStart\.drawerOpen && dx < 0\) setNavigationOpen\(false/);
+  assert.match(html, /navBackdrop\.addEventListener\("click", \(\) => setNavigationOpen\(false\)\)/);
+});
+
+
+test("workspace tools stay collapsed until the user opens the compact tools drawer", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  const start = html.indexOf('<details class="workspace-tools-drawer main-workspace-tools" id="workspaceTools">');
+  const end = html.indexOf("</details>", start);
+  assert.ok(start >= 0 && end > start);
+  const drawer = html.slice(start, end);
+  assert.match(drawer, /<summary class="workspace-tools-trigger"/);
+  assert.doesNotMatch(drawer.slice(0, 100), /\sopen(?:\s|>)/);
+  assert.match(drawer, /id="themeToggle"/);
+  assert.match(drawer, /id="voiceRecord"/);
+  assert.match(drawer, /id="analysisFile"/);
+  assert.match(drawer, /id="analyzeUpload"/);
+  assert.match(html, /\.workspace-tools-drawer\[open\]/);
+});
+
+
+test("workspace tools are available from the main page in a collapsed expandable panel", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  const navStart = html.indexOf('<aside class="side" id="sideNavigation"');
+  const mainStart = html.indexOf('<main class="main">');
+  const statusStart = html.indexOf('<section class="status-deck"');
+  const drawerStart = html.indexOf('<details class="workspace-tools-drawer main-workspace-tools" id="workspaceTools">');
+  assert.ok(navStart >= 0 && mainStart > navStart && statusStart > mainStart && drawerStart > statusStart);
+  assert.doesNotMatch(html.slice(navStart, mainStart), /id="workspaceTools"/);
+  const drawerEnd = html.indexOf("</details>", drawerStart);
+  const drawer = html.slice(drawerStart, drawerEnd);
+  assert.match(drawer, /<summary class="workspace-tools-trigger"/);
+  assert.doesNotMatch(drawer.slice(0, 120), /\sopen(?:\s|>)/);
+  assert.match(drawer, /id="themeToggle"/);
+  assert.match(drawer, /id="voiceRecord"/);
+  assert.match(drawer, /id="analysisFile"/);
+  assert.match(drawer, /id="analyzeUpload"/);
+  assert.match(html, /\.main-workspace-tools\[open\]/);
+});
+
+
+test("Android keyboard viewport uses native browser focus scrolling without competing sticky behavior", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /window\.visualViewport/);
+  assert.match(html, /visualViewport\?\.addEventListener\("resize"/);
+  assert.match(html, /Let Android Chrome own focus scrolling/);
+  assert.doesNotMatch(html, /keyboard-open|scrollIntoView/);
+  assert.match(html, /html,body\{max-width:100%;overflow-x:hidden\}/);
+  assert.match(html, /\.content pre\{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere/);
+  assert.match(html, /\.content table\{display:block;width:100%;overflow-x:auto\}/);
+});
+
+
+test("CerdikGo offers opt-in voice conversation with speech input and spoken AI replies", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="voiceConversation"/);
+  assert.match(html, /aria-pressed="false"/);
+  assert.match(html, /window\.SpeechRecognition \|\| window\.webkitSpeechRecognition/);
+  assert.match(html, /voiceRecognition\.lang = "id-ID"/);
+  assert.match(html, /voiceRecognition\.continuous = false/);
+  assert.match(html, /voiceRecognition\.start\(\)/);
+  assert.match(html, /voiceRecognition\.stop\(\)/);
+  assert.match(html, /speakVoiceReply\(answer\)/);
+  assert.match(html, /window\.speechSynthesis\.speak\(utterance\)/);
+  assert.match(html, /stopVoiceConversation\(/);
+  assert.match(html, /Periksa izin mikrofon/);
+});
+
+
+test("chat messages expose Copy actions and user messages expose Edit actions", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /message-tools-toggle/);
+  assert.match(html, /textContent = "Salin"/);
+  assert.match(html, /navigator\.clipboard\?\.writeText/);
+  assert.match(html, /document\.execCommand\("copy"\)/);
+  assert.match(html, /if \(role === "user"\)/);
+  assert.match(html, /textContent = "Edit"/);
+  assert.match(html, /Pesan dimuat ke kolom tulis/);
+  assert.match(html, /aria-expanded/);
+});
+
+
+test("mobile typing avoids undersized focused controls and resizes for Android keyboard", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /interactive-widget=resizes-content/);
+  assert.match(html, /\.composer textarea,[\s\S]*?font-size: 16px !important/);
+  assert.match(html, /\.composer textarea:focus,[\s\S]*?font-size: 16px !important/);
+  assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/i);
+});
+
+
+test("feature request form captures category, description, problem and expected benefit", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="requestFeatureCategory" required/);
+  assert.match(html, /id="requestFeatureName" maxlength="100" required/);
+  assert.match(html, /id="requestFeatureDetails" maxlength="1200" rows="3" required/);
+  assert.match(html, /id="requestFeatureProblem" maxlength="800" rows="3" required/);
+  assert.match(html, /id="requestFeatureBenefit" maxlength="800" rows="2" required/);
+  assert.match(html, /Usulan dikirim ke server dan disimpan setelah sesi Anda diverifikasi/);
+  assert.doesNotMatch(html, /menyalinnya ke clipboard agar Anda kirim sendiri/);
+  const toolsDrawerEnd = html.indexOf("</details>", html.indexOf('id="workspaceTools"'));
+  const featureDialogStart = html.indexOf('<dialog id="requestFeatureDialog"');
+  assert.ok(toolsDrawerEnd > 0 && featureDialogStart > toolsDrawerEnd, "feature request dialog must be outside the collapsed workspace tools drawer");
+  assert.ok(html.includes('<button value="cancel" class="tool-button">Batal</button>'));
+  assert.ok(html.includes('<button id="requestFeatureSubmit" type="button" class="tool-button">Kirim usulan</button>'));
+  assert.match(html, /id="requestFeatureFeedback" class="tool-feedback" role="status" aria-live="polite"/);
+  assert.match(html, /requestFeatureFeedback\.textContent = "Lengkapi semua kolom usulan fitur sebelum mengirim\."/);
+  assert.match(html, /requestFeatureFeedback\.textContent = error\.message/);
+});
+
+
+test("feature request form submits to authenticated, CSRF-protected D1 endpoint", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  const worker = await readFile(new URL("../worker.js", import.meta.url), "utf8");
+  const endpoint = await readFile(new URL("../feature-requests.js", import.meta.url), "utf8");
+  const migration = await readFile(new URL("../migrations/0004_feature_requests.sql", import.meta.url), "utf8");
+  assert.match(html, /fetch\("\/api\/feature-requests"/);
+  assert.match(html, /"X-CSRF-Token": csrfToken/);
+  assert.match(html, /Kirim usulan/);
+  assert.match(worker, /submitFeatureRequest/);
+  assert.match(endpoint, /validateCsrfRequest\(request\)/);
+  assert.match(endpoint, /requireSession\(request, env\)/);
+  assert.match(endpoint, /FEATURE_REQUESTS_UNAVAILABLE/);
+  assert.match(endpoint, /RATE_LIMIT_EXCEEDED/);
+  assert.match(endpoint, /INSERT INTO feature_requests/);
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS feature_requests/);
+  assert.match(migration, /CHECK \(status IN/);
+});
+
+
+test("login and logout report failures inside the open account dialog and verify session state", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /authMessage\.textContent = `Login gagal:/);
+  assert.match(html, /authMessage\.textContent = `Logout gagal:/);
+  assert.match(html, /sessionResponse = await fetch\("\/api\/auth\/me"/);
+  assert.match(html, /sessionCheck\.status !== 401/);
+  assert.match(html, /id="adminConsoleLink" href="\/admin" hidden/);
+  assert.match(html, /payload\.role\)\s*\)/);
+});
+
+
+test("feature request modal remains scrollable within the live Android keyboard viewport", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /#requestFeatureDialog\.settings-dialog[\s\S]*?max-height:calc\(var\(--app-viewport-height,100vh\)/);
+  assert.match(html, /#requestFeatureDialog\.settings-dialog[\s\S]*?overflow-y:auto/);
+  assert.match(html, /overscroll-behavior:contain/);
+  assert.match(html, /visualViewport\?\.addEventListener\("resize", syncAppViewportHeight/);
+  assert.match(html, /requestFeatureDialog\.showModal\(\)/);
+});
+
+test("feature request endpoint stores a validated request and returns its server request ID", async () => {
+  const csrf = "F".repeat(43);
+  const sessionId = "test-session-id";
+  let inserted = null;
+  const env = makeEnv({
+    DB: {
+      prepare(sql) {
+        return {
+          bind(...values) {
+            if (sql.includes("SELECT s.google_sub, u.email FROM sessions")) {
+              return { first: async () => ({ google_sub: "pilot-google-sub", email: "pilot@example.test" }) };
+            }
+            if (sql.includes("INSERT INTO feature_requests")) {
+              inserted = { sql, values };
+              return { run: async () => ({ success: true, meta: { changes: 1 } }) };
+            }
+            throw new Error("Unexpected SQL in feature request test");
+          }
+        };
+      }
+    }
+  });
+  const request = new Request("https://cerdikchat.test/api/feature-requests", {
+    method: "POST",
+    headers: {
+      origin: "https://cerdikchat.test",
+      "sec-fetch-site": "same-origin",
+      "content-type": "application/json",
+      "cf-connecting-ip": "203.0.113.42",
+      cookie: "__Host-cerdikchat_session=" + sessionId + "; __Host-cerdikchat_csrf=" + csrf,
+      "x-csrf-token": csrf
+    },
+    body: JSON.stringify({
+      category: "AI & Analisis",
+      name: "Ringkasan riset",
+      description: "Menyusun ringkasan sumber dengan sitasi.",
+      problem: "Pengguna perlu merangkum banyak dokumen.",
+      benefit: "Menghemat waktu dan menjaga keterlacakan."
+    })
+  });
+  const response = await submitFeatureRequest(request, env);
+  const payload = await response.json();
+  assert.equal(response.status, 201);
+  assert.equal(payload.accepted, true);
+  assert.equal(payload.status, "submitted");
+  assert.match(payload.requestId, /^[0-9a-f-]{36}$/i);
+  assert.ok(inserted, "D1 INSERT must execute before success is returned");
+  assert.match(inserted.sql, /INSERT INTO feature_requests/);
+  assert.equal(inserted.values[0], payload.requestId);
+  assert.equal(inserted.values[1], "pilot-google-sub");
+});
+
+test("mobile feature request trigger opens the dialog through delegated click handling", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /document\.addEventListener\("click", \(event\) => \{/);
+  assert.match(html, /event\.target\.closest\("#featureRequestOpen"\)/);
+  assert.match(html, /requestFeatureDialog\.showModal\(\)/);
+  assert.match(html, /requestFeatureDialog\.setAttribute\("open", ""\)/);
+  assert.match(html, /requestFeatureCategory\?\.focus\(\)/);
 });

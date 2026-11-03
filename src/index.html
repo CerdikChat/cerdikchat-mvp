@@ -3,7 +3,7 @@
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#0b1220">
   <meta name="description" content="CerdikGo — ruang kerja AI terpadu untuk riset, analisis, penulisan, dan inovasi.">
   <meta name="mobile-web-app-capable" content="yes">
@@ -265,6 +265,14 @@
 
     .msg.user .avatar { background: #284e83; }
 
+    .bubble{position:relative}
+    .message-tools{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:7px}
+    .message-tools-toggle{border:1px solid var(--border);border-radius:9px;background:var(--panel2);color:var(--text);padding:5px 10px;font:inherit;font-size:12px;cursor:pointer}
+    .message-tools-menu{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:6px}
+    .message-tools-menu[hidden]{display:none}
+    .message-tools-menu button{border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);padding:7px 12px;font:inherit;font-size:12px;cursor:pointer}
+    .message-tools button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    @media(hover:hover) and (pointer:fine){.message-tools{opacity:.55}.msg:hover .message-tools{opacity:1}}
     .bubble {
       flex: 1;
       min-width: 0;
@@ -520,7 +528,7 @@
     .top { min-height:68px; border-bottom-color:#15385b; background:#071426cc; }
     .feed { min-height:0; padding:18px 24px 22px; background:radial-gradient(ellipse at 50% 18%,#0d2b4b55 0,transparent 55%); }
     .welcome { max-width:900px; margin:22px auto 24px; text-align:center; }
-    .welcome::before { content:"C"; display:grid; place-items:center; width:64px; height:64px; margin:0 auto 12px; border:1px solid #1d8bdf; border-radius:22px; background:linear-gradient(145deg,#102c50,#07172c); box-shadow:0 0 34px #168bff55,inset 0 0 18px #18b6ff22; color:#39d5ff; font-size:40px; font-weight:900; line-height:1; }
+    .welcome::before { content:none; }
     .eyebrow { color:#36d9e9; letter-spacing:2.2px; }
     .welcome h1 { margin:8px 0 9px; font-size:clamp(29px,4vw,44px); letter-spacing:-1.5px; }
     .welcome h1 span { color:#24c6e8; background:linear-gradient(90deg,#55aaff,#27e0d0); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
@@ -550,7 +558,7 @@
       .mobile-brand { font-size:16px; }
       .feed { padding:12px 13px 16px; min-height:0; }
       .welcome { margin:15px auto 16px; }
-      .welcome::before { width:48px; height:48px; margin-bottom:9px; border-radius:16px; font-size:30px; }
+      .welcome::before { content:none; }
       .welcome h1 { margin:7px 0; font-size:clamp(26px,7vw,34px); }
       .welcome p { font-size:13px; line-height:1.55; }
       .suggestions { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:15px; }
@@ -616,7 +624,50 @@
     @media(prefers-reduced-motion:reduce){.app>.side,.app>.nav-backdrop{transition:none}}
 
 
+
+
+    /* Android Chrome: prevent focus-triggered page magnification and keep keyboard layout stable. */
+    @media (max-width: 900px) {
+      .composer textarea,
+      .workspace-tools textarea,
+      input[type="text"],
+      input[type="email"],
+      input[type="search"],
+      input[type="url"],
+      input[type="password"],
+      .settings-content input,
+      .settings-content textarea {
+        font-size: 16px !important;
+      }
+      .composer textarea:focus,
+      .workspace-tools textarea:focus,
+      input:focus,
+      .settings-content textarea:focus {
+        font-size: 16px !important;
+        scroll-margin-block: 12px;
+      }
+    }
+
+    /* Android keyboard and narrow-screen resilience */
+    html,body{max-width:100%;overflow-x:hidden}
+    .app,.main,.feed,.bubble,.content,.composer-wrap,.composer{min-width:0;max-width:100%}
+    .feed{overflow-x:clip;overflow-wrap:anywhere}
+    .content,.content p,.content li,.content blockquote,.content table{max-width:100%;overflow-wrap:anywhere;word-break:normal}
+    .content pre{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+    .content img,.content video,.content svg{max-width:100%;height:auto}
+    .content table{display:block;width:100%;overflow-x:auto}
+    .composer textarea,.workspace-tools textarea{min-width:0;max-width:100%;overflow-wrap:anywhere}
+    .composer-wrap{z-index:20;isolation:isolate}
+    @media(max-width:720px){
+      .content pre{font-size:12px}
+      .composer textarea{max-height:min(24vh,112px)}
+    }
+
     /* CerdikGo Innovation Workspace redesign — conversation-first, responsive. */
+    .welcome-mascot{width:min(100%,390px);height:auto;margin:0 auto 8px;display:flex;justify-content:center;align-items:center;filter:drop-shadow(0 12px 18px rgba(13,150,220,.16))}
+    .welcome-mascot svg{display:block;width:100%;height:auto;max-height:310px;overflow:visible}
+    @media(max-width:720px){.welcome-mascot{width:min(88vw,330px);margin:0 auto 5px}.welcome-mascot svg{max-height:250px}}
+    html[data-theme="light"] .welcome-mascot{filter:drop-shadow(0 12px 18px rgba(13,150,220,.12))}
     .workspace-intro{max-width:760px;margin:4px auto 20px;text-align:left}
     .workspace-intro .eyebrow{font-size:10px;letter-spacing:2px;color:#42d9df}
     .workspace-intro h1{margin:9px 0 7px;font-size:clamp(27px,3.8vw,40px);line-height:1.12;letter-spacing:-1.25px}
@@ -643,16 +694,453 @@
       .workspace-intro{margin:5px 2px 15px}
       .workspace-intro h1{font-size:clamp(25px,7vw,32px)}
       .workspace-intro p{font-size:12px}
-      .workspace-launcher{padding:13px;border-radius:16px}
-      .launcher-heading{align-items:flex-start}
-      .launcher-heading strong{font-size:13px}
-      .suggestions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-      .suggest{min-height:126px;padding:11px;border-radius:12px}
-      .suggest b{font-size:12px}
-      .suggest small{font-size:10px}
     }
-    @media(max-width:360px){.workspace-launcher{padding:10px}.suggest{min-height:132px;padding:9px}}
     @media(prefers-reduced-motion:reduce){.suggest{transition:none!important;transform:none!important}}
+
+  
+
+    .workspace-tools-drawer{width:100%;margin:10px 0;position:relative;z-index:3}
+    .workspace-tools-trigger{display:flex;align-items:center;gap:9px;width:fit-content;max-width:100%;padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);box-shadow:0 2px 10px rgba(20,45,70,.08);font-size:12px;cursor:pointer;list-style:none}
+    .workspace-tools-trigger::-webkit-details-marker{display:none}
+    .workspace-tools-trigger>span{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--accent,#1599c8);color:white;font-size:15px}
+    .workspace-tools-trigger small{color:var(--muted);font-size:10px}
+    .workspace-tools-drawer[open] .workspace-tools-trigger>span{transform:rotate(45deg)}
+    .workspace-tools-drawer .workspace-tools{width:100%;max-width:none;margin:8px 0 0;padding:10px}
+    @media(max-width:700px){.workspace-tools-drawer{width:100%;margin:8px 0}.workspace-tools-trigger{width:100%;padding:10px 12px;justify-content:flex-start}}
+    .workspace-tools{max-width:900px;margin:14px auto 0;padding:14px;border:1px solid #1b527c;border-radius:16px;background:var(--panel,#0d2138)}
+    .tool-heading,.tool-actions{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
+    .tool-heading span,.tool-upload small,.tool-feedback{color:#9bb0c8;font-size:12px}
+    .tool-actions{justify-content:flex-start;margin:10px 0}
+    .tool-button{border:1px solid #28618a;border-radius:10px;padding:9px 12px;background:#102944;color:#eaf4ff;font:inherit;cursor:pointer;min-height:42px}
+    .tool-button:disabled{opacity:.5;cursor:not-allowed}
+    .tool-upload{display:grid;gap:8px;margin-top:10px;padding-top:12px;border-top:1px solid #28506d}
+    .tool-upload input,.settings-content input,.settings-content textarea{max-width:100%;padding:9px;border:1px solid #376184;border-radius:9px;background:#09182a;color:#eef6ff}
+    .settings-content{display:grid;gap:10px;padding:20px;color:inherit}
+    .settings-content h2{margin:0}
+    html[data-theme="light"] body{background:#eef4fa!important;color:#17283d!important}
+    html[data-theme="light"] .app,html[data-theme="light"] .main,html[data-theme="light"] .feed{background:#eef4fa!important;color:#17283d!important}
+    html[data-theme="light"] .workspace-launcher,html[data-theme="light"] .workspace-tools,html[data-theme="light"] .composer{background:#fff!important;color:#17283d!important;border-color:#c5d5e5!important}
+    html[data-theme="light"] .tool-button{background:#e7f0f8;color:#17283d;border-color:#9eb8d0}
+
+  
+    .workspace-tools button:focus-visible,.workspace-tools input:focus-visible{outline:3px solid #47d9df;outline-offset:2px}
+    .workspace-tools dialog[open]{color:var(--text,#eaf4ff)}
+    .workspace-tools dialog::backdrop{background:#020813b8;backdrop-filter:blur(3px)}
+
+
+    /* CerdikGo identity + operational status strip */
+    .brand-wordmark { display:flex; flex-direction:column; line-height:1.05; gap:4px; }
+    .brand-wordmark strong { font-size:21px; letter-spacing:-.7px; color:#f2f7ff; }
+    .brand-wordmark strong span { color:#43df86; }
+    .brand-wordmark small { color:var(--muted); font-size:9px; font-weight:700; letter-spacing:.8px; }
+    .mobile-brand .brand-wordmark strong { font-size:17px; }
+    .status-deck { padding:14px 20px 16px; display:grid; gap:10px; border-bottom:1px solid var(--line); }
+    .network-status { display:flex; align-items:center; gap:9px; min-height:42px; padding:9px 14px; border:1px solid #16795e; border-radius:13px; background:linear-gradient(90deg,#063c34,#075647); color:#d8fff0; font-size:13px; font-weight:650; }
+    .network-status[data-state="offline"] { border-color:#9a493e; background:#3b211f; color:#ffe1dc; }
+    .network-dot { width:9px; height:9px; flex:0 0 auto; border-radius:50%; background:#3de49a; box-shadow:0 0 0 4px #3de49a22; }
+    .network-status[data-state="offline"] .network-dot { background:#ff8d79; box-shadow:0 0 0 4px #ff8d7922; }
+    .status-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .status-card { display:flex; align-items:center; gap:13px; min-width:0; padding:14px 16px; border:1.5px solid #279b69; border-radius:18px; background:linear-gradient(115deg,#0b302b,#0d1e2d 70%); color:var(--text); text-decoration:none; box-shadow:inset 0 0 18px #22c4770b; }
+    .status-card.hybrid { border-color:#168fc5; background:linear-gradient(115deg,#0b2940,#101d32 70%); }
+    .status-card .status-icon { width:38px; height:38px; flex:0 0 auto; display:grid; place-items:center; font-size:27px; color:#43e68d; }
+    .status-card.hybrid .status-icon { color:#32c9f4; }
+    .status-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
+    .status-title { font-weight:850; font-size:15px; }
+    .status-sub { color:#b4c8d9; font-size:11px; }
+    .status-pill { display:inline-flex; align-self:flex-start; margin-top:2px; padding:3px 8px; border-radius:20px; background:#087d4a; color:white; font-size:10px; font-weight:800; letter-spacing:.3px; }
+    .hybrid .status-pill { background:#087bb3; }
+    .status-chevron { margin-left:auto; color:#d7eaff; font-size:22px; }
+
+
+    .logo .cerdikgo-mark{width:100%;height:100%;display:block}
+    .brand .logo{overflow:hidden;padding:2px;background:transparent}
+    .mobile-brand .logo{overflow:hidden;padding:1px;background:transparent}
+    .brand-wordmark small{letter-spacing:1px}
+    .composer-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 5px;color:var(--muted);font-size:11px}
+    .composer-expand{border:1px solid #28618a;border-radius:8px;padding:6px 9px;background:#102944;color:#dceeff;font:inherit;font-size:11px;cursor:pointer}
+    .composer.is-expanded textarea{min-height:220px;max-height:min(52vh,520px)}
+    .composer.is-expanded{box-shadow:0 14px 44px #0005}
+    .file-action-row{display:flex;align-items:center;gap:8px;min-width:0}
+    .file-pick{flex:0 0 auto}
+    .selected-file-name{min-width:0;flex:1;color:#a9bfd5;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .analyze-file{flex:0 0 auto}
+    @media(max-width:480px){.file-action-row{gap:6px}.selected-file-name{font-size:10px}.analyze-file,.file-pick{padding:8px 9px}}
+    html[data-theme="light"] .composer-expand{background:#e7f0f8;color:#17283d}
+
+    .menu-module-list{display:grid;gap:6px;margin:8px 0 4px}
+    .menu-module{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+    .menu-module summary{display:grid;grid-template-columns:20px 1fr;gap:4px 7px;align-items:center;padding:10px;color:var(--text);font-size:12px;font-weight:750;cursor:pointer;list-style:none}
+    .menu-module summary::-webkit-details-marker{display:none}
+    .menu-module summary:after{content:"＋";grid-column:1;grid-row:1;color:var(--accent,#28b9d2)}
+    .menu-module[open] summary:after{content:"−"}
+    .menu-module summary span{grid-column:2;grid-row:1}
+    .menu-module summary small{grid-column:2;color:var(--muted);font-size:9px;font-weight:800}
+    .menu-module p{margin:0;padding:0 10px 11px 37px;color:var(--muted);font-size:11px;line-height:1.5}
+    .side-workflows{margin:18px 0 10px;padding:14px 0 8px;border-top:1px solid var(--line)}
+    .side-workflows h2{margin:0 0 8px;color:#8fa9c6;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}
+    .menu-workflow{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;margin:4px 0;padding:8px 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--text);text-align:left;font:inherit;cursor:pointer}
+    .menu-workflow:hover,.menu-workflow:focus-visible{border-color:#28618a;background:var(--panel2);outline:none}
+    .menu-workflow>span:first-child{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:8px;background:#12375a;color:#58d5df;font-size:17px}
+    .menu-workflow strong,.menu-workflow small{display:block}
+    .menu-workflow strong{font-size:12px;font-weight:750}
+    .menu-workflow small{margin-top:2px;color:var(--muted);font-size:10px}
+    .side-tools{margin-top:12px}
+    .side-tools { margin-top:22px; padding-top:14px; border-top:1px solid var(--line); }
+    .side-tools-status{margin:0 0 8px;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.7px}
+    .side-tools-links{display:grid;gap:5px;margin:7px 0 10px}
+    .side-tool-item{display:block;padding:8px 10px;border:1px solid var(--line);border-radius:9px;color:var(--muted);font-size:11px}
+    .side-tools a { display:flex; align-items:center; gap:9px; width:100%; margin:3px 0; padding:10px 11px; border:1px solid transparent; border-radius:11px; color:#d7e4f8; text-decoration:none; font-size:13px; }
+    .side-tools a:hover { border-color:var(--line); background:var(--panel2); }
+    .module-preview { margin:12px 0 4px; padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+    .module-preview h2 { margin:0 0 5px; font-size:15px; }
+    .module-preview p { margin:0; color:var(--muted); font-size:12px; }
+    .module-state { display:inline-block; margin-top:8px; padding:3px 8px; border-radius:20px; background:#28374b; color:#c2d4e8; font-size:10px; font-weight:750; }
+    @media (max-width:700px) {
+      .status-deck { padding:10px 12px 12px; }
+      .status-cards { grid-template-columns:1fr; gap:8px; }
+      .status-card { padding:11px 13px; border-radius:15px; }
+      .status-card .status-icon { width:32px; height:32px; font-size:23px; }
+      .status-title { font-size:14px; }
+      .status-sub { font-size:10px; }
+      .network-status { font-size:11px; }
+    }
+    @media (max-width:380px) {
+      .top { gap:6px; padding-inline:9px; }
+      .top > strong { display:none; }
+      .top-actions { gap:5px; }
+      .top-actions .pill { display:none; }
+      .status-sub { max-width:230px; }
+    }
+
+  
+    /* Accessible light palette: warm white surfaces, dark ink, clear form controls. */
+    html[data-theme="light"] {
+      color-scheme: light;
+      --bg:#edf3f9;
+      --panel:#ffffff;
+      --panel2:#e5edf6;
+      --line:#c7d5e4;
+      --text:#172b43;
+      --muted:#52677f;
+      --blue:#155fc4;
+      --mint:#087f69;
+      --danger:#b42336;
+    }
+    html[data-theme="light"] body,
+    html[data-theme="light"] .app,
+    html[data-theme="light"] .main {background:#edf3f9!important;color:#172b43!important}
+    html[data-theme="light"] .side,
+    html[data-theme="light"] .top,
+    html[data-theme="light"] .status-deck {background:#f7faff!important;color:#172b43!important;border-color:#d4dfeb}
+    html[data-theme="light"] .side {border-right-color:#d4dfeb}
+    html[data-theme="light"] .brand-wordmark strong,
+    html[data-theme="light"] .mobile-brand .brand-wordmark strong,
+    html[data-theme="light"] .top > strong {color:#142b49!important}
+    html[data-theme="light"] .brand-wordmark small {color:#52677f!important}
+    html[data-theme="light"] .feed {background:#edf3f9!important;color:#172b43!important}
+    html[data-theme="light"] .welcome h1,
+    html[data-theme="light"] .content,
+    html[data-theme="light"] .module-preview h2 {color:#172b43!important}
+    html[data-theme="light"] .welcome p,
+    html[data-theme="light"] .module-preview p,
+    html[data-theme="light"] .who,
+    html[data-theme="light"] .hint,
+    html[data-theme="light"] .composer-heading,
+    html[data-theme="light"] .tool-heading span,
+    html[data-theme="light"] .tool-upload small,
+    html[data-theme="light"] .tool-feedback {color:#52677f!important}
+    html[data-theme="light"] .suggest,
+    html[data-theme="light"] .module-preview,
+    html[data-theme="light"] .workspace-launcher,
+    html[data-theme="light"] .workspace-tools,
+    html[data-theme="light"] .composer {
+      background:#fff!important;color:#172b43!important;border-color:#c7d5e4!important;
+      box-shadow:0 5px 18px rgba(24,55,90,.07)
+    }
+    html[data-theme="light"] .composer-wrap {background:#e8eff7!important;border-top-color:#d0dce9}
+    html[data-theme="light"] .composer textarea,
+    html[data-theme="light"] .settings-content input,
+    html[data-theme="light"] .settings-content textarea,
+    html[data-theme="light"] .tool-upload input:not([hidden]) {
+      color:#172b43!important;background:#fff!important;caret-color:#075fc8!important;
+      -webkit-text-fill-color:#172b43!important;border-color:#b8cadd!important
+    }
+    html[data-theme="light"] .composer textarea::placeholder {color:#71839a!important;opacity:1}
+    html[data-theme="light"] .composer textarea:disabled {opacity:1;-webkit-text-fill-color:#71839a!important}
+
+    /* Light Blue theme: cool, calm surfaces with stronger CerdikGo blue identity. */
+    html[data-theme="light-blue"] {
+      color-scheme:light;
+      --bg:#e8f4ff;--panel:#f8fcff;--panel2:#d9ecfb;--line:#b8d5eb;
+      --text:#123653;--muted:#4c6e8b;--blue:#087bd1;--mint:#078b91;--danger:#b42336;
+    }
+    html[data-theme="light-blue"] body,
+    html[data-theme="light-blue"] .app,
+    html[data-theme="light-blue"] .main,
+    html[data-theme="light-blue"] .feed {background:#e8f4ff!important;color:#123653!important}
+    html[data-theme="light-blue"] .side,
+    html[data-theme="light-blue"] .top,
+    html[data-theme="light-blue"] .status-deck {background:#f4faff!important;color:#123653!important;border-color:#c4dced}
+    html[data-theme="light-blue"] .brand-wordmark strong,
+    html[data-theme="light-blue"] .mobile-brand .brand-wordmark strong,
+    html[data-theme="light-blue"] .top > strong,
+    html[data-theme="light-blue"] .welcome h1,
+    html[data-theme="light-blue"] .content,
+    html[data-theme="light-blue"] .module-preview h2 {color:#123653!important}
+    html[data-theme="light-blue"] .brand-wordmark small,
+    html[data-theme="light-blue"] .welcome p,
+    html[data-theme="light-blue"] .module-preview p,
+    html[data-theme="light-blue"] .who,
+    html[data-theme="light-blue"] .hint,
+    html[data-theme="light-blue"] .composer-heading,
+    html[data-theme="light-blue"] .tool-heading span,
+    html[data-theme="light-blue"] .tool-upload small,
+    html[data-theme="light-blue"] .tool-feedback {color:#4c6e8b!important}
+    html[data-theme="light-blue"] .suggest,
+    html[data-theme="light-blue"] .module-preview,
+    html[data-theme="light-blue"] .workspace-launcher,
+    html[data-theme="light-blue"] .workspace-tools,
+    html[data-theme="light-blue"] .composer {background:#f8fcff!important;color:#123653!important;border-color:#b8d5eb!important;box-shadow:0 5px 18px rgba(24,91,145,.08)}
+    html[data-theme="light-blue"] .composer-wrap {background:#deeffc!important;border-top-color:#c2dced}
+    html[data-theme="light-blue"] .composer textarea,
+    html[data-theme="light-blue"] .settings-content input,
+    html[data-theme="light-blue"] .settings-content textarea,
+    html[data-theme="light-blue"] .tool-upload input:not([hidden]) {color:#123653!important;background:#fff!important;caret-color:#087bd1!important;-webkit-text-fill-color:#123653!important;border-color:#b8d5eb!important}
+    html[data-theme="light-blue"] .composer textarea::placeholder {color:#64819b!important;opacity:1}
+    html[data-theme="light-blue"] .composer-expand,
+    html[data-theme="light-blue"] .tool-button,
+    html[data-theme="light-blue"] .menu-workflow,
+    html[data-theme="light-blue"] .prompt {background:#e2f1fc!important;color:#17496e!important;border-color:#b4d4eb!important}
+
+    html[data-theme="light"] .composer-expand,
+    html[data-theme="light"] .tool-button,
+    html[data-theme="light"] .menu-workflow,
+    html[data-theme="light"] .prompt {background:#eaf2fb!important;color:#173a60!important;border-color:#b7cce1!important}
+    html[data-theme="light"] .send {background:linear-gradient(120deg,#1b69cb,#19a98b)!important;color:#fff!important}
+    html[data-theme="light"] .side-tools a {color:#25435f!important}
+    html[data-theme="light"] .side-tools a:hover {background:#eaf2fb!important}
+    html[data-theme="light"] .module-state {background:#e2edf8!important;color:#36516e!important}
+    html[data-theme="light"] .footer {color:#536981!important}
+    html[data-theme="light"] .content blockquote,
+    html[data-theme="light"] .content .math,
+    html[data-theme="light"] .content .math-block,
+    html[data-theme="light"] .content th {background:#edf3f9!important;color:#243e59!important}
+    html[data-theme="light"] .content pre {background:#172b43!important;color:#f1f6fc!important}
+    html[data-theme="light"] .pill {background:#e2f4ee!important;color:#087456!important;border-color:#a9d9c8}
+    html[data-theme="light"] .network-status {background:#e3f5ee!important;color:#075c45!important;border-color:#9bcfbb}
+    html[data-theme="light"] .network-status[data-state="offline"] {background:#fff0ee!important;color:#922d25!important;border-color:#e6b4ae}
+    html[data-theme="light"] .status-card {background:#fff!important;color:#17324f!important;border-color:#c7d5e4!important}
+    html[data-theme="light"] .status-title,
+    html[data-theme="light"] .status-sub {color:#24435f!important}
+    html[data-theme="light"] .status-pill {background:#e2f4ee!important;color:#087456!important}
+    html[data-theme="light"] .selected-file-name {color:#52677f!important}
+    html[data-theme="light"] .settings-content {color:#172b43!important}
+    html[data-theme="light"] .settings-content label {color:#294761!important}
+    html[data-theme="light"] .settings-dialog {background:#fff!important;color:#172b43!important;border-color:#c7d5e4!important}
+    html[data-theme="light"] button:focus-visible,
+    html[data-theme="light"] textarea:focus-visible,
+    html[data-theme="light"] input:focus-visible {outline:3px solid #0877dc!important;outline-offset:2px}
+
+    /* Light Blue parity layer: apply all accessible light-mode component rules. */
+    html[data-theme="light-blue"] {
+      color-scheme: light;
+      --bg:#edf3f9;
+      --panel:#ffffff;
+      --panel2:#e5edf6;
+      --line:#c7d5e4;
+      --text:#172b43;
+      --muted:#52677f;
+      --blue:#155fc4;
+      --mint:#087f69;
+      --danger:#b42336;
+    }
+    html[data-theme="light-blue"] body,
+    html[data-theme="light-blue"] .app,
+    html[data-theme="light-blue"] .main {background:#edf3f9!important;color:#172b43!important}
+    html[data-theme="light-blue"] .side,
+    html[data-theme="light-blue"] .top,
+    html[data-theme="light-blue"] .status-deck {background:#f7faff!important;color:#172b43!important;border-color:#d4dfeb}
+    html[data-theme="light-blue"] .side {border-right-color:#d4dfeb}
+    html[data-theme="light-blue"] .brand-wordmark strong,
+    html[data-theme="light-blue"] .mobile-brand .brand-wordmark strong,
+    html[data-theme="light-blue"] .top > strong {color:#142b49!important}
+    html[data-theme="light-blue"] .brand-wordmark small {color:#52677f!important}
+    html[data-theme="light-blue"] .feed {background:#edf3f9!important;color:#172b43!important}
+    html[data-theme="light-blue"] .welcome h1,
+    html[data-theme="light-blue"] .content,
+    html[data-theme="light-blue"] .module-preview h2 {color:#172b43!important}
+    html[data-theme="light-blue"] .welcome p,
+    html[data-theme="light-blue"] .module-preview p,
+    html[data-theme="light-blue"] .who,
+    html[data-theme="light-blue"] .hint,
+    html[data-theme="light-blue"] .composer-heading,
+    html[data-theme="light-blue"] .tool-heading span,
+    html[data-theme="light-blue"] .tool-upload small,
+    html[data-theme="light-blue"] .tool-feedback {color:#52677f!important}
+    html[data-theme="light-blue"] .suggest,
+    html[data-theme="light-blue"] .module-preview,
+    html[data-theme="light-blue"] .workspace-launcher,
+    html[data-theme="light-blue"] .workspace-tools,
+    html[data-theme="light-blue"] .composer {
+      background:#fff!important;color:#172b43!important;border-color:#c7d5e4!important;
+      box-shadow:0 5px 18px rgba(24,55,90,.07)
+    }
+    html[data-theme="light-blue"] .composer-wrap {background:#e8eff7!important;border-top-color:#d0dce9}
+    html[data-theme="light-blue"] .composer textarea,
+    html[data-theme="light-blue"] .settings-content input,
+    html[data-theme="light-blue"] .settings-content textarea,
+    html[data-theme="light-blue"] .tool-upload input:not([hidden]) {
+      color:#172b43!important;background:#fff!important;caret-color:#075fc8!important;
+      -webkit-text-fill-color:#172b43!important;border-color:#b8cadd!important
+    }
+    html[data-theme="light-blue"] .composer textarea::placeholder {color:#71839a!important;opacity:1}
+    html[data-theme="light-blue"] .composer textarea:disabled {opacity:1;-webkit-text-fill-color:#71839a!important}
+
+    /* Light Blue theme: cool, calm surfaces with stronger CerdikGo blue identity. */
+    html[data-theme="light-blue"] {
+      color-scheme:light;
+      --bg:#e8f4ff;--panel:#f8fcff;--panel2:#d9ecfb;--line:#b8d5eb;
+      --text:#123653;--muted:#4c6e8b;--blue:#087bd1;--mint:#078b91;--danger:#b42336;
+    }
+    html[data-theme="light-blue"] body,
+    html[data-theme="light-blue"] .app,
+    html[data-theme="light-blue"] .main,
+    html[data-theme="light-blue"] .feed {background:#e8f4ff!important;color:#123653!important}
+    html[data-theme="light-blue"] .side,
+    html[data-theme="light-blue"] .top,
+    html[data-theme="light-blue"] .status-deck {background:#f4faff!important;color:#123653!important;border-color:#c4dced}
+    html[data-theme="light-blue"] .brand-wordmark strong,
+    html[data-theme="light-blue"] .mobile-brand .brand-wordmark strong,
+    html[data-theme="light-blue"] .top > strong,
+    html[data-theme="light-blue"] .welcome h1,
+    html[data-theme="light-blue"] .content,
+    html[data-theme="light-blue"] .module-preview h2 {color:#123653!important}
+    html[data-theme="light-blue"] .brand-wordmark small,
+    html[data-theme="light-blue"] .welcome p,
+    html[data-theme="light-blue"] .module-preview p,
+    html[data-theme="light-blue"] .who,
+    html[data-theme="light-blue"] .hint,
+    html[data-theme="light-blue"] .composer-heading,
+    html[data-theme="light-blue"] .tool-heading span,
+    html[data-theme="light-blue"] .tool-upload small,
+    html[data-theme="light-blue"] .tool-feedback {color:#4c6e8b!important}
+    html[data-theme="light-blue"] .suggest,
+    html[data-theme="light-blue"] .module-preview,
+    html[data-theme="light-blue"] .workspace-launcher,
+    html[data-theme="light-blue"] .workspace-tools,
+    html[data-theme="light-blue"] .composer {background:#f8fcff!important;color:#123653!important;border-color:#b8d5eb!important;box-shadow:0 5px 18px rgba(24,91,145,.08)}
+    html[data-theme="light-blue"] .composer-wrap {background:#deeffc!important;border-top-color:#c2dced}
+    html[data-theme="light-blue"] .composer textarea,
+    html[data-theme="light-blue"] .settings-content input,
+    html[data-theme="light-blue"] .settings-content textarea,
+    html[data-theme="light-blue"] .tool-upload input:not([hidden]) {color:#123653!important;background:#fff!important;caret-color:#087bd1!important;-webkit-text-fill-color:#123653!important;border-color:#b8d5eb!important}
+    html[data-theme="light-blue"] .composer textarea::placeholder {color:#64819b!important;opacity:1}
+    html[data-theme="light-blue"] .composer-expand,
+    html[data-theme="light-blue"] .tool-button,
+    html[data-theme="light-blue"] .menu-workflow,
+    html[data-theme="light-blue"] .prompt {background:#e2f1fc!important;color:#17496e!important;border-color:#b4d4eb!important}
+
+    html[data-theme="light-blue"] .composer-expand,
+    html[data-theme="light-blue"] .tool-button,
+    html[data-theme="light-blue"] .menu-workflow,
+    html[data-theme="light-blue"] .prompt {background:#eaf2fb!important;color:#173a60!important;border-color:#b7cce1!important}
+    html[data-theme="light-blue"] .send {background:linear-gradient(120deg,#1b69cb,#19a98b)!important;color:#fff!important}
+    html[data-theme="light-blue"] .side-tools a {color:#25435f!important}
+    html[data-theme="light-blue"] .side-tools a:hover {background:#eaf2fb!important}
+    html[data-theme="light-blue"] .module-state {background:#e2edf8!important;color:#36516e!important}
+    html[data-theme="light-blue"] .footer {color:#536981!important}
+    html[data-theme="light-blue"] .content blockquote,
+    html[data-theme="light-blue"] .content .math,
+    html[data-theme="light-blue"] .content .math-block,
+    html[data-theme="light-blue"] .content th {background:#edf3f9!important;color:#243e59!important}
+    html[data-theme="light-blue"] .content pre {background:#172b43!important;color:#f1f6fc!important}
+    html[data-theme="light-blue"] .pill {background:#e2f4ee!important;color:#087456!important;border-color:#a9d9c8}
+    html[data-theme="light-blue"] .network-status {background:#e3f5ee!important;color:#075c45!important;border-color:#9bcfbb}
+    html[data-theme="light-blue"] .network-status[data-state="offline"] {background:#fff0ee!important;color:#922d25!important;border-color:#e6b4ae}
+    html[data-theme="light-blue"] .status-card {background:#fff!important;color:#17324f!important;border-color:#c7d5e4!important}
+    html[data-theme="light-blue"] .status-title,
+    html[data-theme="light-blue"] .status-sub {color:#24435f!important}
+    html[data-theme="light-blue"] .status-pill {background:#e2f4ee!important;color:#087456!important}
+    html[data-theme="light-blue"] .selected-file-name {color:#52677f!important}
+    html[data-theme="light-blue"] .settings-content {color:#172b43!important}
+    html[data-theme="light-blue"] .settings-content label {color:#294761!important}
+    html[data-theme="light-blue"] .settings-dialog {background:#fff!important;color:#172b43!important;border-color:#c7d5e4!important}
+    html[data-theme="light-blue"] button:focus-visible,
+    html[data-theme="light-blue"] textarea:focus-visible,
+    html[data-theme="light-blue"] input:focus-visible {outline:3px solid #0877dc!important;outline-offset:2px}
+
+    /* Light Blue brand refinements over the complete accessible light palette. */
+    html[data-theme="light-blue"] {--bg:#e8f4ff;--panel:#f8fcff;--panel2:#d9ecfb;--line:#b8d5eb;--text:#123653;--muted:#4c6e8b;--blue:#087bd1;--mint:#078b91;--danger:#b42336}
+    html[data-theme="light-blue"] body,
+    html[data-theme="light-blue"] .app,
+    html[data-theme="light-blue"] .main,
+    html[data-theme="light-blue"] .feed {background:#e8f4ff!important;color:#123653!important}
+    html[data-theme="light-blue"] .side,
+    html[data-theme="light-blue"] .top,
+    html[data-theme="light-blue"] .status-deck {background:#f4faff!important;color:#123653!important;border-color:#c4dced!important}
+    html[data-theme="light-blue"] .suggest,
+    html[data-theme="light-blue"] .module-preview,
+    html[data-theme="light-blue"] .workspace-launcher,
+    html[data-theme="light-blue"] .workspace-tools,
+    html[data-theme="light-blue"] .composer,
+    html[data-theme="light-blue"] .settings-dialog {background:#f8fcff!important;color:#123653!important;border-color:#b8d5eb!important}
+    html[data-theme="light-blue"] .composer-wrap {background:#deeffc!important;border-top-color:#c2dced!important}
+    html[data-theme="light-blue"] .composer textarea,
+    html[data-theme="light-blue"] .settings-content input,
+    html[data-theme="light-blue"] .settings-content textarea,
+    html[data-theme="light-blue"] .tool-upload input:not([hidden]) {background:#fff!important;color:#123653!important;-webkit-text-fill-color:#123653!important;caret-color:#087bd1!important;border-color:#b8d5eb!important}
+    html[data-theme="light-blue"] .composer textarea::placeholder {color:#64819b!important;opacity:1}
+    html[data-theme="light-blue"] .composer-expand,
+    html[data-theme="light-blue"] .tool-button,
+    html[data-theme="light-blue"] .menu-workflow,
+    html[data-theme="light-blue"] .prompt {background:#e2f1fc!important;color:#17496e!important;border-color:#b4d4eb!important}
+    html[data-theme="light-blue"] .footer,
+    html[data-theme="light-blue"] .selected-file-name {color:#4c6e8b!important}
+    html[data-theme="light-blue"] button:focus-visible,
+    html[data-theme="light-blue"] textarea:focus-visible,
+    html[data-theme="light-blue"] input:focus-visible {outline:3px solid #087bd1!important;outline-offset:2px}
+
+
+  
+    /* Main-page expandable workspace tools: keep the sidebar focused on navigation. */
+    .main-workspace-tools{width:min(100%,1120px);margin:18px auto 22px;padding:0 18px}
+    .main-workspace-tools>.workspace-tools-trigger{width:100%;min-height:58px;padding:13px 16px;border-radius:15px;border:1px solid #2675a8;background:linear-gradient(115deg,#092b50,#104a75 58%,#082743);color:#f2f8ff;box-shadow:0 8px 24px #071c3530}
+    .main-workspace-tools>.workspace-tools-trigger strong{font-size:15px;letter-spacing:.02em}
+    .main-workspace-tools>.workspace-tools-trigger small{margin-left:auto;color:#b8d4eb;font-size:11px}
+    .main-workspace-tools>.workspace-tools-trigger>span{width:27px;height:27px;background:linear-gradient(135deg,#09c8e8,#0871d9);font-weight:800}
+    .main-workspace-tools[open]>.workspace-tools-trigger{border-color:#18c7e7;box-shadow:0 0 0 2px #16b9df22,0 8px 24px #071c3530}
+    .main-workspace-tools .workspace-tools{margin-top:10px;border:1px solid #2675a8;border-radius:18px;background:linear-gradient(145deg,#0b2039,#102f50 55%,#0a1b31);box-shadow:0 12px 30px #06182b30}
+    @media(max-width:700px){.main-workspace-tools{padding:0 12px;margin:12px auto 16px}.main-workspace-tools>.workspace-tools-trigger{min-height:54px;padding:11px 13px}.main-workspace-tools>.workspace-tools-trigger small{font-size:10px}}
+
+  
+/* Feature-request modal: keep the form reachable while Android's IME is open. */
+#requestFeatureDialog.settings-dialog {
+  width:min(560px,calc(100vw - 24px)); max-width:560px;
+  max-height:calc(var(--app-viewport-height,100vh) - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  margin:auto; padding:0; overflow-x:hidden; overflow-y:auto;
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+  scrollbar-gutter:stable; scroll-padding-block:16px;
+}
+#requestFeatureDialog .settings-content { min-width:0; width:100%; padding:clamp(14px,3.5vw,20px); }
+#requestFeatureDialog .settings-content input,
+#requestFeatureDialog .settings-content select,
+#requestFeatureDialog .settings-content textarea {
+  width:100%; min-width:0; font-size:16px; scroll-margin-block:16px;
+}
+#requestFeatureDialog .tool-actions {
+  position:sticky; bottom:-1px; z-index:1; padding:10px 0 2px;
+  background:var(--panel,#0d1b30);
+}
+#requestFeatureDialog .tool-actions .tool-button { flex:1 1 120px; }
+@media (max-width:720px), (max-height:620px) {
+  #requestFeatureDialog.settings-dialog {
+    width:calc(100vw - 16px);
+    max-height:calc(var(--app-viewport-height,100vh) - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    border-radius:14px;
+  }
+  #requestFeatureDialog .settings-content { gap:8px; }
+  #requestFeatureDialog .settings-content textarea { min-height:72px; }
+}
 
   </style>
 </head>
@@ -660,12 +1148,12 @@
 <body>
   <div class="app">
     <aside class="side" id="sideNavigation" aria-label="Navigasi utama">
-      <div class="brand">
-        <div class="logo" aria-hidden="true">C</div>
-        CerdikGo
+      <div class="brand" aria-label="CerdikGo — AI Workspace for Real Action">
+        <div class="logo" aria-hidden="true"><svg class="cerdikgo-mark" viewBox="0 0 64 64" role="img" aria-label="CerdikGo robot mark"><defs><linearGradient id="cgBlue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#05d7ed"/><stop offset=".52" stop-color="#075be8"/><stop offset="1" stop-color="#04c879"/></linearGradient><linearGradient id="cgFace" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#8fcaff"/></linearGradient></defs><path d="M49 10C39 2 22 4 14 14 5 24 8 42 19 49c10 7 25 5 33-4l-7-6c-5 6-15 8-22 3-7-5-8-16-2-22 6-7 16-8 23-3z" fill="none" stroke="url(#cgBlue)" stroke-width="7" stroke-linecap="round"/><path d="M42 42l14 1-2 10" fill="none" stroke="#16d34a" stroke-width="5" stroke-linecap="round"/><rect x="18" y="18" width="31" height="29" rx="12" fill="url(#cgFace)" stroke="#eaf7ff" stroke-width="2"/><rect x="23" y="24" width="21" height="17" rx="7" fill="#082b62"/><path d="M28 31q3-5 6 0m4 0q3-5 5 0" fill="none" stroke="#10e6f2" stroke-width="2.5" stroke-linecap="round"/><path d="M32 36q3 3 6 0" fill="none" stroke="#10e6f2" stroke-width="2.5" stroke-linecap="round"/><path d="M36 17l2-6" stroke="#087be8" stroke-width="2.5" stroke-linecap="round"/><circle cx="39" cy="9" r="3" fill="#08d9f0"/></svg></div>
+        <div class="brand-wordmark"><strong>Cerdik<span>Go</span></strong><small>INNOVATION WORKSPACE</small></div>
       </div>
 
-      <div class="tag">CLOSED BETA · v0.1</div>
+      <div class="tag">CLOSED BETA · V3</div>
 
       <h2>Mulai dari sini</h2>
 
@@ -689,6 +1177,39 @@
         ◎ Belajar topik baru
       </button>
 
+      <div class="side-workflows" aria-label="Alur kerja utama">
+        <h2>Alur kerja</h2>
+        <button class="menu-workflow" type="button" data-prompt="Buat kerangka analisis strategis untuk ide atau masalah berikut. Sertakan tujuan, asumsi, opsi, risiko, dan rekomendasi:"><span aria-hidden="true">⌘</span><span><strong>Analisis Strategis</strong><small>Keputusan, opsi, dan risiko</small></span></button>
+        <button class="menu-workflow" type="button" data-prompt="Analisis dokumen atau informasi berikut. Buat ringkasan eksekutif, temuan utama, risiko, dan tindak lanjut:"><span aria-hidden="true">▤</span><span><strong>Dokumen & Ringkasan</strong><small>Temuan dan insight utama</small></span></button>
+        <button class="menu-workflow" type="button" data-prompt="Rancang riset untuk topik berikut. Sertakan pertanyaan penelitian, metodologi, sumber data, dan keterbatasan:"><span aria-hidden="true">⌕</span><span><strong>Riset & Eksplorasi</strong><small>Pertanyaan, metode, sumber</small></span></button>
+        <button class="menu-workflow" type="button" data-prompt="Bantu saya menyusun rencana kerja yang terukur. Sertakan prioritas, tahapan, PIC, tenggat, dan indikator keberhasilan:"><span aria-hidden="true">✓</span><span><strong>Rencana & Eksekusi</strong><small>Prioritas dan langkah nyata</small></span></button>
+        <button type="button" id="featureRequestOpen" class="menu-workflow"><span aria-hidden="true">＋</span><span><strong>Usulan Fitur</strong><small>Ajukan ide dan kebutuhan baru</small></span></button>
+      </div>
+
+
+
+
+      <div class="side-tools" aria-label="Modul tambahan CerdikGo">
+        <h2>Modul tambahan</h2>
+        <p class="side-tools-status">PLANNED · NOT CONNECTED</p>
+        <div class="side-tools-links">
+          <span class="side-tool-item">Voice Studio</span>
+          <span class="side-tool-item">Usulkan fitur / IoT</span>
+        </div>
+        <details class="menu-module" id="sopModule">
+          <summary><span aria-hidden="true">▤</span><span><strong>SOP & Knowledge Base</strong><small>PLANNED · NOT CONNECTED</small></span></summary>
+          <p>Modul SOP dan knowledge base direncanakan. Belum ada koneksi repositori dokumen atau pencarian lintas dokumen.</p>
+        </details>
+        <details class="menu-module" id="businessModule">
+          <summary><span aria-hidden="true">⌘</span><span><strong>Business & Strategy</strong><small>PLANNED · NOT CONNECTED</small></span></summary>
+          <p>Ruang kerja analisis bisnis lanjutan masih dalam perencanaan dan belum terhubung ke sistem eksternal.</p>
+        </details>
+        <details class="menu-module" id="hybridModule">
+          <summary><span aria-hidden="true">⌁</span><span><strong>Hybrid Connectivity</strong><small>SIMULATOR ONLY</small></span></summary>
+          <p>Fiber · Cellular · Wi-Fi Mesh · LoRa. Belum ada koneksi radio mesh atau LoRa fisik; panel ini hanya simulasi konseptual.</p>
+        </details>
+      </div>
+
       <h2>Tentang beta</h2>
       <div class="side-note">
         CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting
@@ -700,17 +1221,101 @@
     <main class="main">
       <header class="top">
         <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="sideNavigation" aria-label="Buka navigasi">☰ <span>Menu</span></button>
-        <div class="mobile-brand">
-          <div class="logo" aria-hidden="true">C</div>
-          CerdikGo
+        <div class="mobile-brand" aria-label="CerdikGo">
+          <div class="logo" aria-hidden="true"><svg class="cerdikgo-mark" viewBox="0 0 64 64" role="img" aria-label="CerdikGo robot mark"><defs><linearGradient id="cgBlue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#05d7ed"/><stop offset=".52" stop-color="#075be8"/><stop offset="1" stop-color="#04c879"/></linearGradient><linearGradient id="cgFace" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#8fcaff"/></linearGradient></defs><path d="M49 10C39 2 22 4 14 14 5 24 8 42 19 49c10 7 25 5 33-4l-7-6c-5 6-15 8-22 3-7-5-8-16-2-22 6-7 16-8 23-3z" fill="none" stroke="url(#cgBlue)" stroke-width="7" stroke-linecap="round"/><path d="M42 42l14 1-2 10" fill="none" stroke="#16d34a" stroke-width="5" stroke-linecap="round"/><rect x="18" y="18" width="31" height="29" rx="12" fill="url(#cgFace)" stroke="#eaf7ff" stroke-width="2"/><rect x="23" y="24" width="21" height="17" rx="7" fill="#082b62"/><path d="M28 31q3-5 6 0m4 0q3-5 5 0" fill="none" stroke="#10e6f2" stroke-width="2.5" stroke-linecap="round"/><path d="M32 36q3 3 6 0" fill="none" stroke="#10e6f2" stroke-width="2.5" stroke-linecap="round"/><path d="M36 17l2-6" stroke="#087be8" stroke-width="2.5" stroke-linecap="round"/><circle cx="39" cy="9" r="3" fill="#08d9f0"/></svg></div>
+          <div class="brand-wordmark"><strong>Cerdik<span>Go</span></strong><small>INNOVATION WORKSPACE</small></div>
         </div>
-        <strong>Ruang Kerja AI</strong>
+        <strong>CerdikGo · Innovation Workspace</strong>
         <div class="top-actions">
           <span class="pill">● AI · Beta</span>
           <button id="loginOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
           <button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button>
         </div>
       </header>
+
+      <section class="status-deck" aria-label="Status sistem">
+        <div class="network-status" id="networkStatus" data-state="online" role="status" aria-live="polite">
+          <span class="network-dot" aria-hidden="true"></span>
+          <span id="networkStatusText">Memeriksa konektivitas jaringan…</span>
+        </div>
+        <div class="status-cards">
+          <a class="status-card" href="#settingsDialog" id="protectionStatusCard" aria-label="Protection Mode — perlindungan sesi dan akses">
+            <span class="status-icon" aria-hidden="true">⬡</span>
+            <span class="status-copy"><span class="status-title">Protection Mode</span><span class="status-pill">ACTIVE · SERVER CHECK</span><span class="status-sub">Perlindungan sesi & akses</span></span>
+            <span class="status-chevron" aria-hidden="true">›</span>
+          </a>
+          <a class="status-card hybrid" href="#hybridModule" aria-label="Hybrid Connectivity — simulator">
+            <span class="status-icon" aria-hidden="true">⌘</span>
+            <span class="status-copy"><span class="status-title">Hybrid Connectivity</span><span class="status-pill">SIMULATOR</span><span class="status-sub">Fiber · Cellular · Wi-Fi Mesh · LoRa</span></span>
+            <span class="status-chevron" aria-hidden="true">›</span>
+          </a>
+        </div>
+      </section>
+
+      <details class="workspace-tools-drawer main-workspace-tools" id="workspaceTools">
+        <summary class="workspace-tools-trigger"><span aria-hidden="true">＋</span><strong>Alat kerja</strong><small>Ketuk untuk membuka fitur</small></summary>
+        <section class="workspace-tools" aria-label="Alat workspace">
+        <div class="tool-heading"><strong>Alat kerja</strong><span>Fitur tambahan CerdikGo</span></div>
+        <div class="tool-actions">
+          <button type="button" id="themeToggle" class="tool-button" aria-pressed="false">☼ Tema terang</button>
+          <button type="button" id="voiceRecord" class="tool-button">🎙 Mulai rekam</button>
+          <button type="button" id="voiceConversation" class="tool-button" aria-pressed="false">🎧 Mode percakapan suara</button>
+        </div>
+        <p id="voiceState" class="tool-feedback" role="status">Mikrofon hanya aktif setelah Anda menekan tombol rekam.</p>
+        <p id="voiceConversationState" class="tool-feedback" role="status" aria-live="polite">Mode suara nonaktif. Aktifkan secara manual untuk berbicara dan mendengar jawaban AI.</p>
+        <section id="voiceReview" class="tool-upload" hidden aria-label="Tinjau transkripsi suara">
+          <label for="voiceTranscript">Tinjau dan edit transkripsi sebelum dikirim</label>
+          <textarea id="voiceTranscript" rows="4" maxlength="8000" spellcheck="true"></textarea>
+          <div class="tool-actions">
+            <button id="voiceSendToAI" class="tool-button" type="button">Kirim ke AI</button>
+            <button id="voiceUseTranscript" class="tool-button" type="button">Gunakan di pesan</button>
+            <button id="voiceDiscard" class="tool-button" type="button">Buang</button>
+          </div>
+        </section>
+        <div class="tool-upload">
+          <label>Analisis dokumen (PDF/JPG/PNG/WEBP/GIF)</label>
+          <div class="file-action-row">
+            <input id="analysisFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,application/pdf,image/jpeg,image/png,image/webp,image/gif" hidden>
+            <button type="button" id="chooseAnalysisFile" class="tool-button file-pick" aria-controls="analysisFile">▣ <span>File</span></button>
+            <span id="selectedFileName" class="selected-file-name" aria-live="polite">Belum ada file dipilih</span>
+            <button type="button" id="analyzeUpload" class="tool-button analyze-file">Analisis file</button>
+          </div>
+          <small id="uploadHelp">Pemrosesan hanya dilanjutkan jika pemindai malware privat ClamAV aktif. Tanpa scanner, server menolak upload (fail-closed).</small>
+        </div>
+
+        </section>
+      </details>
+
+      <!-- Keep this modal outside the collapsed workspace-tools <details> container. -->
+      <dialog id="requestFeatureDialog" class="settings-dialog" aria-labelledby="requestFeatureTitle">
+        <form method="dialog" id="requestFeatureForm" class="settings-content">
+          <h2 id="requestFeatureTitle">Usulkan fitur</h2>
+          <label for="requestFeatureCategory">Jenis fitur yang diinginkan</label>
+          <select id="requestFeatureCategory" required>
+            <option value="">Pilih jenis fitur</option>
+            <option value="AI & Analisis">AI & Analisis</option>
+            <option value="Dokumen & Produktivitas">Dokumen & Produktivitas</option>
+            <option value="Riset & Knowledge Base">Riset & Knowledge Base</option>
+            <option value="Voice & Multimodal">Voice & Multimodal</option>
+            <option value="Business & Strategi">Business & Strategi</option>
+            <option value="IoT & Konektivitas">IoT & Konektivitas</option>
+            <option value="Keamanan & Admin">Keamanan & Admin</option>
+            <option value="UI/UX & Aksesibilitas">UI/UX & Aksesibilitas</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+          <label for="requestFeatureName">Nama fitur yang diusulkan</label>
+          <input id="requestFeatureName" maxlength="100" required placeholder="Contoh: Ringkasan dokumen otomatis">
+          <label for="requestFeatureDetails">Deskripsi fitur</label>
+          <textarea id="requestFeatureDetails" maxlength="1200" rows="3" required placeholder="Jelaskan cara kerja fitur yang diharapkan."></textarea>
+          <label for="requestFeatureProblem">Masalah atau kebutuhan yang ingin diselesaikan</label>
+          <textarea id="requestFeatureProblem" maxlength="800" rows="3" required placeholder="Apa kendala pengguna saat ini?"></textarea>
+          <label for="requestFeatureBenefit">Manfaat yang diharapkan</label>
+          <textarea id="requestFeatureBenefit" maxlength="800" rows="2" required placeholder="Apa hasil atau dampak yang diharapkan?"></textarea>
+          <p id="requestFeatureFeedback" class="tool-feedback" role="status" aria-live="polite">Usulan dikirim ke server dan disimpan setelah sesi Anda diverifikasi. Jangan sertakan data rahasia atau pribadi.</p>
+          <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Kirim usulan</button></div>
+        </form>
+      </dialog>
+
 
       <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
         <div class="settings-head">
@@ -723,7 +1328,7 @@
             <p>Masuk menggunakan akun Google yang telah diizinkan. Hak akses tetap diverifikasi oleh server.</p>
             <section class="auth-panel" id="authPanel" hidden aria-live="polite">
               <div><strong id="authTitle">Akses CerdikChat</strong><br><small id="authMessage">Masuk dengan akun Google yang telah diizinkan.</small></div>
-              <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
+              <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><a class="auth-logout" id="adminConsoleLink" href="/admin" hidden>Admin Console</a><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
             </section>
             <p id="authUnavailable" class="auth-unavailable" role="status" aria-live="polite" hidden></p>
           </section>
@@ -734,38 +1339,59 @@
       <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
         <div class="welcome" id="welcome">
+          <div class="welcome-mascot" aria-hidden="true">
+            <svg viewBox="0 0 520 390" role="img" aria-label="Maskot robot CerdikGo" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="mascotArmor" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8fdff"/><stop offset=".48" stop-color="#9edcff"/><stop offset="1" stop-color="#1769c9"/></linearGradient>
+                <linearGradient id="mascotBlue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#13e4f4"/><stop offset=".48" stop-color="#087de8"/><stop offset="1" stop-color="#073a91"/></linearGradient>
+                <linearGradient id="mascotCape" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#18dcf5"/><stop offset="1" stop-color="#0753bd"/></linearGradient>
+                <radialGradient id="mascotGlow"><stop stop-color="#66f4ff" stop-opacity=".48"/><stop offset="1" stop-color="#35caff" stop-opacity="0"/></radialGradient>
+                <filter id="mascotShadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur stdDeviation="7"/></filter>
+              </defs>
+              <ellipse cx="260" cy="345" rx="180" ry="28" fill="url(#mascotGlow)"/>
+              <ellipse cx="260" cy="340" rx="160" ry="24" fill="none" stroke="#65eaff" stroke-width="3" opacity=".8"/>
+              <ellipse cx="260" cy="340" rx="130" ry="15" fill="none" stroke="#24bce9" stroke-width="2" opacity=".65"/>
+              <path d="M328 208 Q414 194 465 286 Q426 314 360 302 L315 264Z" fill="url(#mascotCape)" stroke="#39cfff" stroke-width="5"/>
+              <path d="M177 226 Q117 205 83 254 L103 292 Q143 285 195 269Z" fill="#e9fbff" stroke="#64c9f4" stroke-width="5"/>
+              <g transform="translate(50 90)"><path d="M43 0 82 16 77 63 43 88 9 63 4 16Z" fill="url(#mascotArmor)" stroke="#078de0" stroke-width="6"/><circle cx="43" cy="34" r="12" fill="#0b7ddd"/><path d="M43 45v22m-9-10h18" stroke="#eaffff" stroke-width="6" stroke-linecap="round"/></g>
+              <g>
+                <path d="M194 252 Q164 268 150 304 Q145 317 158 321 L178 319 Q195 292 218 285Z" fill="url(#mascotArmor)" stroke="#328fd7" stroke-width="5"/>
+                <circle cx="158" cy="318" r="15" fill="url(#mascotBlue)" stroke="#b9efff" stroke-width="4"/>
+                <path d="M318 246 Q352 258 358 294 L344 315 326 306 311 275Z" fill="url(#mascotArmor)" stroke="#328fd7" stroke-width="5"/>
+                <circle cx="350" cy="308" r="14" fill="url(#mascotBlue)" stroke="#b9efff" stroke-width="4"/>
+                <path d="M220 276 211 327 Q210 341 226 344 L247 344 259 286Z" fill="url(#mascotArmor)" stroke="#328fd7" stroke-width="5"/>
+                <path d="M278 282 286 330 Q289 344 305 344 L326 340 309 270Z" fill="url(#mascotArmor)" stroke="#328fd7" stroke-width="5"/>
+                <path d="M215 337h39v13h-48q-8-7 9-13Zm76 0h37q15 9 5 15h-43Z" fill="#073f91" stroke="#8ce7ff" stroke-width="4"/>
+                <path d="M202 194 Q260 173 318 194 L332 268 Q316 298 260 300 Q207 295 188 268Z" fill="url(#mascotArmor)" stroke="#58b8ee" stroke-width="6"/>
+                <path d="M228 218 260 205 292 218 286 257 260 278 234 257Z" fill="#0875d5" stroke="#c9f7ff" stroke-width="5"/>
+                <circle cx="260" cy="231" r="9" fill="#bffaff"/><path d="M260 240v22m-9-12h18" stroke="#bffaff" stroke-width="5" stroke-linecap="round"/>
+                <path d="M177 91 Q260 43 343 91 L354 181 Q345 224 260 229 Q174 223 166 181Z" fill="url(#mascotArmor)" stroke="#69cfff" stroke-width="7"/>
+                <path d="M190 111 Q260 72 329 111 L333 171 Q329 205 260 210 Q191 205 187 171Z" fill="#052c68" stroke="#b9f5ff" stroke-width="5"/>
+                <ellipse cx="226" cy="153" rx="11" ry="17" fill="#3cf4ff"/><ellipse cx="294" cy="153" rx="11" ry="17" fill="#3cf4ff"/>
+                <path d="M245 179 Q260 193 275 179" fill="none" stroke="#50f5ff" stroke-width="6" stroke-linecap="round"/>
+                <path d="M180 127 Q145 126 149 166 Q151 190 178 188" fill="url(#mascotBlue)" stroke="#a8efff" stroke-width="6"/>
+                <path d="M340 127 Q375 126 371 166 Q369 190 342 188" fill="url(#mascotBlue)" stroke="#a8efff" stroke-width="6"/>
+                <path d="M244 88 Q260 55 277 88" fill="none" stroke="#0a83e9" stroke-width="9" stroke-linecap="round"/>
+                <circle cx="260" cy="75" r="9" fill="#13e3f4" stroke="#0879d9" stroke-width="4"/>
+                <path d="M203 88 Q260 60 317 88" fill="none" stroke="#fff" stroke-width="5" opacity=".8"/>
+              </g>
+              <g opacity=".55" fill="none" stroke="#69eaff" stroke-width="3"><path d="M370 95h55v38h-55zM381 108h30m-30 10h20"/><path d="M82 195h57v42H82zM94 209h31m-31 10h22"/></g>
+            </svg>
+          </div>
           <div class="workspace-intro">
             <div class="eyebrow">CERDIKGO · AI INNOVATION WORKSPACE</div>
             <h1>Selamat datang di <span>Ruang Kerja AI</span></h1>
             <p>Satu ruang untuk berpikir lebih jernih, mengolah informasi, dan mengubah ide menjadi langkah nyata.</p>
           </div>
 
-          <div class="workspace-launcher" aria-label="Mulai pekerjaan">
-            <div class="launcher-heading">
-              <div><strong>Mulai dari tujuan Anda</strong><small>Pilih alur kerja atau langsung tulis pertanyaan.</small></div>
-              <span class="workspace-status"><i aria-hidden="true"></i> AI BETA</span>
-            </div>
-            <div class="suggestions">
-              <button class="suggest" type="button" data-prompt="Buat kerangka analisis strategis untuk ide atau masalah berikut. Sertakan tujuan, asumsi, opsi, risiko, dan rekomendasi:">
-                <span class="suggest-icon" aria-hidden="true">⌘</span><b>Analisis Strategis</b><small>Uraikan masalah kompleks menjadi keputusan yang jelas.</small>
-              </button>
-              <button class="suggest" type="button" data-prompt="Analisis dokumen atau informasi berikut. Buat ringkasan eksekutif, temuan utama, risiko, dan tindak lanjut:">
-                <span class="suggest-icon" aria-hidden="true">▤</span><b>Dokumen & Ringkasan</b><small>Susun poin penting dan insight yang dapat ditindaklanjuti.</small>
-              </button>
-              <button class="suggest" type="button" data-prompt="Rancang riset untuk topik berikut. Sertakan pertanyaan penelitian, metodologi, sumber data, dan keterbatasan:">
-                <span class="suggest-icon" aria-hidden="true">⌕</span><b>Riset & Eksplorasi</b><small>Mulai dari pertanyaan yang tepat dan metode yang terukur.</small>
-              </button>
-              <button class="suggest" type="button" data-prompt="Bantu saya menyusun rencana kerja yang terukur. Sertakan prioritas, tahapan, PIC, tenggat, dan indikator keberhasilan:">
-                <span class="suggest-icon" aria-hidden="true">✓</span><b>Rencana & Eksekusi</b><small>Ubah gagasan menjadi prioritas dan langkah nyata.</small>
-              </button>
-            </div>
-            <div class="workspace-footnote"><span aria-hidden="true">✦</span> Percakapan menjadi pusat workspace setelah Anda memulai. Fitur yang belum aktif tidak ditampilkan sebagai fungsi siap pakai.</div>
-          </div>
         </div>
       </section>
 
+
+      
       <div class="composer-wrap">
         <form id="chatForm" class="composer">
+          <div class="composer-heading"><span>Pesan Anda</span><button type="button" id="expandComposer" class="composer-expand" aria-expanded="false" aria-controls="message">⤢ Perbesar kolom</button></div>
           <textarea
             id="message"
             disabled
@@ -812,6 +1438,7 @@
     const googleSignIn = document.querySelector("#googleSignIn");
     const authUser = document.querySelector("#authUser");
     const authLogout = document.querySelector("#authLogout");
+    const adminConsoleLink = document.querySelector("#adminConsoleLink");
     const authUnavailable = document.querySelector("#authUnavailable");
     const settingsDialog = document.querySelector("#settingsDialog");
     const settingsOpen = document.querySelector("#settingsOpen");
@@ -847,6 +1474,33 @@
       setNavigationOpen(navToggle.getAttribute("aria-expanded") !== "true");
     });
     navBackdrop.addEventListener("click", () => setNavigationOpen(false));
+
+    // Mobile edge-swipe navigation: reveal from the left edge, dismiss by swiping left.
+    let navTouchStart = null;
+    const navSwipeThreshold = 68;
+    document.addEventListener("touchstart", event => {
+      if (event.touches.length !== 1) { navTouchStart = null; return; }
+      const touch = event.touches[0];
+      const drawerOpen = appShell.classList.contains("nav-open");
+      if ((!drawerOpen && touch.clientX <= 26) || (drawerOpen && sideNavigation.contains(event.target))) {
+        navTouchStart = { x: touch.clientX, y: touch.clientY, drawerOpen };
+      } else {
+        navTouchStart = null;
+      }
+    }, { passive: true });
+    document.addEventListener("touchend", event => {
+      if (!navTouchStart || event.changedTouches.length !== 1) return;
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - navTouchStart.x;
+      const dy = Math.abs(touch.clientY - navTouchStart.y);
+      if (dy < 76 && Math.abs(dx) >= navSwipeThreshold) {
+        if (!navTouchStart.drawerOpen && dx > 0) setNavigationOpen(true, false);
+        else if (navTouchStart.drawerOpen && dx < 0) setNavigationOpen(false, false);
+      }
+      navTouchStart = null;
+    }, { passive: true });
+    document.addEventListener("touchcancel", () => { navTouchStart = null; }, { passive: true });
+
     sideNavigation.addEventListener("click", event => {
       if (event.target.closest("[data-prompt]") && appShell.classList.contains("nav-open")) {
         setNavigationOpen(false, false);
@@ -858,20 +1512,47 @@
       }
     });
 
+    // Let Android Chrome own focus scrolling and keyboard viewport resizing.
+    // JavaScript only publishes the visible viewport height; it never scrolls
+    // the composer or switches it into a second sticky positioning mode.
     function syncAppViewportHeight() {
-      const height = window.visualViewport?.height || window.innerHeight;
+      const viewport = window.visualViewport;
+      const height = viewport?.height || window.innerHeight;
       document.documentElement.style.setProperty("--app-viewport-height", Math.round(height) + "px");
     }
     syncAppViewportHeight();
     window.addEventListener("resize", syncAppViewportHeight, { passive: true });
     window.visualViewport?.addEventListener("resize", syncAppViewportHeight, { passive: true });
-    window.visualViewport?.addEventListener("scroll", syncAppViewportHeight, { passive: true });
 
     let authRequired = false;
     let authConfigured = false;
     let isAuthenticated = false;
     let csrfToken = "";
     let googleClientId = "";
+
+    async function refreshAdminConsoleLink() {
+      if (!adminConsoleLink) return;
+      if (!isAuthenticated) {
+        adminConsoleLink.hidden = true;
+        return;
+      }
+      try {
+        const response = await fetch("/api/admin/session", {
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Accept": "application/json" }
+        });
+        const payload = await response.json().catch(() => ({}));
+        adminConsoleLink.hidden = !(
+          response.ok &&
+          payload.authenticated === true &&
+          ["admin", "super_admin"].includes(payload.role)
+        );
+      } catch {
+        adminConsoleLink.hidden = true;
+      }
+      if (!isAuthenticated) adminConsoleLink.hidden = true;
+    }
 
     function updateAuthUI(user = null) {
       authPanel.hidden = !authRequired && !authConfigured;
@@ -885,6 +1566,8 @@
       authUser.hidden = !isAuthenticated;
       googleSignIn.hidden = isAuthenticated || !authConfigured;
       authLogout.hidden = !isAuthenticated;
+      if (!isAuthenticated) adminConsoleLink.hidden = true;
+      else void refreshAdminConsoleLink();
       input.disabled = authRequired && !isAuthenticated;
       send.disabled = authRequired && !isAuthenticated;
     }
@@ -934,9 +1617,12 @@
 
     async function handleGoogleCredential(response, nonce) {
       if (!response || typeof response.credential !== "string" || !csrfToken) {
-        setStatus("Respons Google atau token keamanan tidak tersedia.", true);
+        const message = "Respons Google atau token keamanan tidak tersedia. Muat ulang halaman dan coba lagi.";
+        authMessage.textContent = message;
+        setStatus(message, true);
         return;
       }
+      authMessage.textContent = "Memverifikasi akun Google dan membuat sesi aman…";
       try {
         const result = await fetch("/api/auth/google", {
           method: "POST",
@@ -948,26 +1634,41 @@
           },
           body: JSON.stringify({ credential: response.credential, nonce })
         });
-        const payload = await result.json();
+        const payload = await result.json().catch(() => ({}));
         if (!result.ok) {
           if (payload.error === "USER_NOT_ALLOWLISTED") {
-            authMessage.textContent = `Akun ${payload.email || "Google"} belum diizinkan. Hubungi administrator untuk meminta akses.`;
-            throw new Error("Akun Google belum diizinkan. Hubungi administrator untuk meminta akses.");
+            throw new Error(`Akun ${payload.email || "Google"} belum diizinkan. Hubungi administrator.`);
           }
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
-            throw new Error("Token keamanan diperbarui. Silakan tekan tombol Google sekali lagi.");
+            throw new Error("Token keamanan diperbarui. Tekan tombol Google sekali lagi.");
           }
           throw new Error(payload.message || payload.error || "Google Sign-In gagal.");
         }
+
+        // Do not show a signed-in state until the browser confirms the HttpOnly session cookie.
+        const sessionResponse = await fetch("/api/auth/me", {
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Accept": "application/json" }
+        });
+        const session = await sessionResponse.json().catch(() => ({}));
+        if (!sessionResponse.ok || session.authenticated !== true) {
+          throw new Error("Google menerima akun, tetapi sesi CerdikGo belum terverifikasi. Periksa cookie browser atau status layanan autentikasi.");
+        }
+
         isAuthenticated = true;
-        updateAuthUI(payload.user || null);
-        setStatus("Berhasil masuk ke CerdikChat.");
+        updateAuthUI(session.user || payload.user || null);
+        authMessage.textContent = "Login berhasil. Sesi aman Anda telah diverifikasi oleh server.";
+        setStatus("Berhasil masuk ke CerdikGo.");
       } catch (error) {
         isAuthenticated = false;
         updateAuthUI();
-        setStatus(error instanceof Error ? error.message : "Google Sign-In gagal.", true);
-        renderGoogleButton();
+        const message = error instanceof Error ? error.message : "Google Sign-In gagal.";
+        // Keep the reason inside the open account dialog; the page status is behind the modal.
+        authMessage.textContent = `Login gagal: ${message}`;
+        setStatus(message, true);
+        await renderGoogleButton();
       }
     }
 
@@ -993,7 +1694,9 @@
           width: 280
         });
       } catch {
-        setStatus("Google Identity Services tidak dapat dimuat. Periksa koneksi atau CSP.", true);
+        const message = "Google Identity Services tidak dapat dimuat. Periksa koneksi atau kebijakan keamanan browser (CSP).";
+        authMessage.textContent = message;
+        setStatus(message, true);
       }
     }
 
@@ -1058,10 +1761,13 @@
 
     async function logoutFromCerdikChat() {
       if (!csrfToken) {
-        setStatus("Token keamanan tidak tersedia. Muat ulang halaman.", true);
+        const message = "Token keamanan tidak tersedia. Muat ulang halaman sebelum logout.";
+        authMessage.textContent = message;
+        setStatus(message, true);
         return;
       }
       authLogout.disabled = true;
+      authMessage.textContent = "Mengakhiri sesi dan memverifikasi pencabutan akses…";
       try {
         const response = await fetch("/api/auth/logout", {
           method: "POST",
@@ -1071,7 +1777,7 @@
             "X-CSRF-Token": csrfToken
           }
         });
-        const payload = await response.json();
+        const payload = await response.json().catch(() => ({}));
         if (!response.ok) {
           if (payload.error === "CSRF_VALIDATION_FAILED") {
             await refreshCsrfToken();
@@ -1079,13 +1785,26 @@
           }
           throw new Error(payload.error || "Logout gagal.");
         }
+
+        const sessionCheck = await fetch("/api/auth/me", {
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Accept": "application/json" }
+        });
+        if (sessionCheck.status !== 401) {
+          throw new Error("Server belum mengonfirmasi pencabutan sesi. Jangan tutup dialog; coba lagi.");
+        }
+
         isAuthenticated = false;
         if (window.google?.accounts?.id) window.google.accounts.id.disableAutoSelect();
         updateAuthUI();
-        setStatus("Anda telah keluar.");
+        authMessage.textContent = "Anda telah keluar. Pilih akun Google jika ingin masuk kembali.";
+        setStatus("Logout berhasil; sesi server telah dicabut.");
         await renderGoogleButton();
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : "Logout gagal.", true);
+        const message = error instanceof Error ? error.message : "Logout gagal.";
+        authMessage.textContent = `Logout gagal: ${message}`;
+        setStatus(message, true);
       } finally {
         authLogout.disabled = false;
       }
@@ -1098,10 +1817,58 @@
 
     let history = [];
     let isSending = false;
+    let voiceReplyEnabled = false;
+    let voiceRecognition = null;
+    let voiceRecognitionActive = false;
+    let voiceTranscriptBuffer = "";
+    function speakVoiceReply(text) {
+      if (!voiceReplyEnabled || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "id-ID";
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      utterance.onstart = () => { if (voiceConversationState) voiceConversationState.textContent = "Jawaban AI sedang dibacakan…"; };
+      utterance.onend = () => { if (voiceReplyEnabled && voiceConversationState) voiceConversationState.textContent = "Jawaban selesai. Aktifkan mode suara lagi untuk pertanyaan berikutnya."; };
+      utterance.onerror = () => { if (voiceReplyEnabled && voiceConversationState) voiceConversationState.textContent = "Suara tidak dapat diputar di browser ini. Anda tetap dapat membaca jawaban AI."; };
+      window.speechSynthesis.speak(utterance);
+    }
+
 
     function updateCount() {
       count.textContent = String(input.value.length);
     }
+
+    // Device-native speech playback: no external TTS API, credentials, or paid service.
+    function addSpeechPlaybackControl(answerElement, answerText) {
+      if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
+      const actions = answerElement.parentElement?.querySelector(".answer-actions");
+      if (!actions) return;
+      const speak = document.createElement("button");
+      speak.type = "button";
+      speak.className = "answer-action";
+      speak.textContent = "🔊 Bacakan jawaban";
+      speak.setAttribute("aria-label", "Bacakan jawaban AI dalam bahasa Indonesia");
+      speak.addEventListener("click", () => {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(answerText);
+        utterance.lang = "id-ID";
+        utterance.rate = 1;
+        utterance.onstart = () => { speak.textContent = "⏹ Hentikan suara"; };
+        utterance.onend = utterance.onerror = () => { speak.dataset.playing = "false"; speak.textContent = "🔊 Bacakan jawaban"; };
+        if (speak.dataset.playing === "true") {
+          window.speechSynthesis.cancel();
+          speak.dataset.playing = "false";
+          speak.textContent = "🔊 Bacakan jawaban";
+          return;
+        }
+        speak.dataset.playing = "true";
+        window.speechSynthesis.speak(utterance);
+      });
+      actions.appendChild(speak);
+    }
+
+
 
     function setStatus(message = "", isError = false) {
       statusEl.textContent = message;
@@ -1488,6 +2255,70 @@
       body.textContent = text;
 
       wrap.append(who, body);
+
+      const tools = document.createElement("div");
+      tools.className = "message-tools";
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "message-tools-toggle";
+      toggle.textContent = "⋯";
+      toggle.setAttribute("aria-label", "Aksi pesan");
+      toggle.setAttribute("aria-expanded", "false");
+      const menu = document.createElement("div");
+      menu.className = "message-tools-menu";
+      menu.hidden = true;
+
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.textContent = "Salin";
+      copyButton.addEventListener("click", async () => {
+        const textToCopy = body.innerText || body.textContent || "";
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(textToCopy);
+          } else {
+            const helper = document.createElement("textarea");
+            helper.value = textToCopy;
+            helper.setAttribute("readonly", "");
+            helper.style.position = "fixed";
+            helper.style.opacity = "0";
+            document.body.append(helper);
+            helper.select();
+            const copied = document.execCommand("copy");
+            helper.remove();
+            if (!copied) throw new Error("copy unavailable");
+          }
+          setStatus("Teks pesan berhasil disalin.");
+        } catch {
+          setStatus("Tidak dapat menyalin otomatis. Pilih dan salin teks secara manual.", true);
+        }
+        menu.hidden = true;
+        toggle.setAttribute("aria-expanded", "false");
+      });
+      menu.append(copyButton);
+
+      if (role === "user") {
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.textContent = "Edit";
+        editButton.addEventListener("click", () => {
+          if (isSending || (authRequired && !isAuthenticated)) return;
+          input.value = body.innerText || body.textContent || "";
+          updateCount();
+          input.focus();
+          menu.hidden = true;
+          toggle.setAttribute("aria-expanded", "false");
+          setStatus("Pesan dimuat ke kolom tulis. Periksa dan kirim ulang setelah diedit.");
+        });
+        menu.append(editButton);
+      }
+
+      toggle.addEventListener("click", () => {
+        menu.hidden = !menu.hidden;
+        toggle.setAttribute("aria-expanded", String(!menu.hidden));
+      });
+      tools.append(toggle);
+      wrap.append(tools, menu);
       row.append(avatar, wrap);
       feed.append(row);
 
@@ -1620,6 +2451,8 @@
         }
 
         renderBasicMarkdown(answerElement, answer);
+        addSpeechPlaybackControl(answerElement, answer);
+        speakVoiceReply(answer);
 
         history.push(
           { role: "user", content: message },
@@ -1657,6 +2490,374 @@
     form.addEventListener("submit", sendMessage);
     updateCount();
     loadAuth();
+
+    // CerdikGo feature-preserving controls. All privileged operations remain server-authorized.
+    const themeToggle = document.querySelector("#themeToggle");
+    const voiceRecord = document.querySelector("#voiceRecord");
+    const voiceConversation = document.querySelector("#voiceConversation");
+    const voiceConversationState = document.querySelector("#voiceConversationState");
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    function stopVoiceConversation(message = "Mode percakapan suara dihentikan.") {
+      voiceReplyEnabled = false;
+      if (voiceRecognition && voiceRecognitionActive) {
+        try { voiceRecognition.stop(); } catch {}
+      }
+      voiceRecognitionActive = false;
+      voiceRecognition = null;
+      voiceConversation?.setAttribute("aria-pressed", "false");
+      if (voiceConversation) voiceConversation.textContent = "🎧 Mode percakapan suara";
+      if (voiceConversationState) voiceConversationState.textContent = message;
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    }
+    voiceConversation?.addEventListener("click", () => {
+      if (voiceReplyEnabled) {
+        stopVoiceConversation();
+        return;
+      }
+      if (!SpeechRecognitionAPI) {
+        voiceConversationState.textContent = "Browser belum mendukung pengenalan suara. Gunakan tombol Mulai rekam sebagai alternatif.";
+        return;
+      }
+      if (authRequired && !isAuthenticated) {
+        voiceConversationState.textContent = "Silakan masuk menggunakan akun yang diizinkan sebelum menggunakan mode suara.";
+        return;
+      }
+      try {
+        voiceRecognition = new SpeechRecognitionAPI();
+        voiceRecognition.lang = "id-ID";
+        voiceRecognition.continuous = false;
+        voiceRecognition.interimResults = true;
+        voiceRecognition.maxAlternatives = 1;
+        voiceTranscriptBuffer = "";
+        voiceReplyEnabled = true;
+        voiceConversation.setAttribute("aria-pressed", "true");
+        voiceConversation.textContent = "⏹ Hentikan mode suara";
+        voiceConversationState.textContent = "Mendengarkan… Silakan berbicara.";
+        voiceRecognition.onresult = event => {
+          let finalText = "";
+          let interimText = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0]?.transcript || "";
+            if (event.results[i].isFinal) finalText += transcript;
+            else interimText += transcript;
+          }
+          if (finalText.trim()) voiceTranscriptBuffer += (voiceTranscriptBuffer ? " " : "") + finalText.trim();
+          voiceConversationState.textContent = interimText
+            ? "Mendengar: " + interimText
+            : (voiceTranscriptBuffer ? "Transkripsi: " + voiceTranscriptBuffer : "Mendengarkan…");
+        };
+        voiceRecognition.onerror = event => {
+          stopVoiceConversation("Pengenalan suara gagal (" + event.error + "). Periksa izin mikrofon dan coba lagi.");
+        };
+        voiceRecognition.onend = () => {
+          voiceRecognitionActive = false;
+          const spoken = voiceTranscriptBuffer.trim();
+          if (!voiceReplyEnabled) return;
+          if (!spoken) {
+            stopVoiceConversation("Tidak ada ucapan yang terdeteksi. Tekan mode suara untuk mencoba lagi.");
+            return;
+          }
+          if (spoken.length > MAX_MESSAGE_LENGTH) {
+            stopVoiceConversation("Ucapan terlalu panjang. Batas pesan 8.000 karakter.");
+            return;
+          }
+          voiceConversationState.textContent = "Mengirim ucapan ke AI…";
+          input.value = spoken;
+          updateCount();
+          if (typeof form.requestSubmit === "function") form.requestSubmit();
+          else send.click();
+        };
+        voiceRecognitionActive = true;
+        voiceRecognition.start();
+      } catch (error) {
+        stopVoiceConversation("Mode suara tidak dapat dimulai. Periksa izin mikrofon browser.");
+      }
+    });
+
+    const voiceState = document.querySelector("#voiceState");
+    const voiceReview = document.querySelector("#voiceReview");
+    const voiceTranscript = document.querySelector("#voiceTranscript");
+    const voiceSendToAI = document.querySelector("#voiceSendToAI");
+    const voiceUseTranscript = document.querySelector("#voiceUseTranscript");
+    const voiceDiscard = document.querySelector("#voiceDiscard");
+    const analysisFile = document.querySelector("#analysisFile");
+    const analyzeUpload = document.querySelector("#analyzeUpload");
+    const requestFeatureDialog = document.querySelector("#requestFeatureDialog");
+    const requestFeatureOpen = document.querySelector("#featureRequestOpen");
+    const requestFeatureSubmit = document.querySelector("#requestFeatureSubmit");
+    const requestFeatureName = document.querySelector("#requestFeatureName");
+    const requestFeatureCategory = document.querySelector("#requestFeatureCategory");
+    const requestFeatureDetails = document.querySelector("#requestFeatureDetails");
+    const requestFeatureProblem = document.querySelector("#requestFeatureProblem");
+    const requestFeatureBenefit = document.querySelector("#requestFeatureBenefit");
+    const requestFeatureFeedback = document.querySelector("#requestFeatureFeedback");
+
+
+    const chooseAnalysisFile = document.querySelector("#chooseAnalysisFile");
+    const selectedFileName = document.querySelector("#selectedFileName");
+    const expandComposer = document.querySelector("#expandComposer");
+    chooseAnalysisFile?.addEventListener("click", () => analysisFile?.click());
+    analysisFile?.addEventListener("change", () => {
+      if (selectedFileName) selectedFileName.textContent = analysisFile.files?.[0]?.name || "Belum ada file dipilih";
+    });
+    expandComposer?.addEventListener("click", () => {
+      const expanded = form.classList.toggle("is-expanded");
+      expandComposer.setAttribute("aria-expanded", String(expanded));
+      expandComposer.textContent = expanded ? "⤡ Perkecil kolom" : "⤢ Perbesar kolom";
+      if (expanded) input.focus();
+    });
+
+    const themeModes = ["dark", "light", "light-blue"];
+    const themeLabels = {
+      dark: "☾ Tema Gelap",
+      light: "☼ Tema Terang",
+      "light-blue": "◉ Tema Light Blue"
+    };
+    const savedTheme = localStorage.getItem("cerdikgo-theme");
+    if (themeModes.includes(savedTheme)) document.documentElement.dataset.theme = savedTheme;
+    else document.documentElement.dataset.theme = "dark";
+    function syncThemeButton() {
+      const current = document.documentElement.dataset.theme || "dark";
+      const index = themeModes.indexOf(current);
+      const next = themeModes[(index + 1) % themeModes.length];
+      themeToggle.textContent = themeLabels[current] + " · Ganti";
+      themeToggle.setAttribute("aria-label", "Tema saat ini " + themeLabels[current] + ". Ketuk untuk beralih ke " + themeLabels[next]);
+      themeToggle.setAttribute("aria-pressed", String(current !== "dark"));
+    }
+    syncThemeButton();
+    themeToggle.addEventListener("click", () => {
+      const current = document.documentElement.dataset.theme || "dark";
+      const next = themeModes[(themeModes.indexOf(current) + 1) % themeModes.length];
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem("cerdikgo-theme", next);
+      syncThemeButton();
+    });
+
+    // Delegate the feature-request trigger so it also works when the mobile navigation
+    // drawer is re-rendered or the trigger is reached through the responsive workflow list.
+    document.addEventListener("click", (event) => {
+      const trigger = event.target instanceof Element
+        ? event.target.closest("#featureRequestOpen")
+        : null;
+      if (!trigger) return;
+      event.preventDefault();
+      if (!requestFeatureDialog) {
+        statusEl.textContent = "Formulir usulan fitur tidak tersedia. Muat ulang halaman.";
+        statusEl.classList.add("error");
+        return;
+      }
+      try {
+        if (requestFeatureFeedback) requestFeatureFeedback.textContent = "";
+        if (typeof requestFeatureDialog.showModal === "function") {
+          if (!requestFeatureDialog.open) requestFeatureDialog.showModal();
+        } else {
+          requestFeatureDialog.setAttribute("open", "");
+        }
+        requestFeatureCategory?.focus();
+      } catch (error) {
+        statusEl.textContent = "Formulir belum dapat dibuka. Muat ulang halaman lalu coba kembali.";
+        statusEl.classList.add("error");
+        console.error("Feature request dialog could not open:", error);
+      }
+    });
+    requestFeatureSubmit.addEventListener("click", async () => {
+      const payload = {
+        category: requestFeatureCategory.value,
+        name: requestFeatureName.value.trim(),
+        description: requestFeatureDetails.value.trim(),
+        problem: requestFeatureProblem.value.trim(),
+        benefit: requestFeatureBenefit.value.trim()
+      };
+      if (Object.values(payload).some(value => !value)) {
+        requestFeatureFeedback.textContent = "Lengkapi semua kolom usulan fitur sebelum mengirim.";
+        (requestFeatureCategory.value ? (!requestFeatureName.value.trim() ? requestFeatureName : !requestFeatureDetails.value.trim() ? requestFeatureDetails : !requestFeatureProblem.value.trim() ? requestFeatureProblem : requestFeatureBenefit) : requestFeatureCategory).focus();
+        return;
+      }
+      if (!csrfToken) {
+        requestFeatureFeedback.textContent = "Sesi keamanan belum siap. Muat ulang halaman lalu coba kembali.";
+        return;
+      }
+      requestFeatureSubmit.disabled = true;
+      requestFeatureSubmit.textContent = "Mengirim…";
+      try {
+        const response = await fetch("/api/feature-requests", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const messages = {
+            AUTH_REQUIRED: "Silakan masuk terlebih dahulu untuk mengirim usulan.",
+            CSRF_VALIDATION_FAILED: "Validasi keamanan gagal. Muat ulang halaman.",
+            FEATURE_REQUESTS_UNAVAILABLE: "Layanan usulan belum siap. Silakan coba kembali nanti.",
+            RATE_LIMIT_EXCEEDED: "Terlalu banyak pengiriman. Tunggu sebentar lalu coba lagi."
+          };
+          throw new Error(messages[result.error] || result.message || "Usulan belum berhasil dikirim.");
+        }
+        if (result.accepted !== true || typeof result.requestId !== "string" || !/^[0-9a-f-]{36}$/i.test(result.requestId)) {
+          throw new Error("Server belum mengonfirmasi nomor permintaan yang valid. Jangan kirim ulang sebelum memeriksa status usulan.");
+        }
+        requestFeatureFeedback.textContent = "Usulan diterima. Nomor permintaan: " + result.requestId;
+        statusEl.textContent = "Usulan berhasil diterima dengan nomor " + result.requestId + ".";
+        requestFeatureDialog.close();
+        requestFeatureCategory.value = ""; requestFeatureName.value = ""; requestFeatureDetails.value = "";
+        requestFeatureProblem.value = ""; requestFeatureBenefit.value = "";
+      } catch (error) {
+        requestFeatureFeedback.textContent = error.message || "Usulan belum berhasil dikirim. Periksa koneksi dan coba kembali.";
+      } finally {
+        requestFeatureSubmit.disabled = false;
+        requestFeatureSubmit.textContent = "Kirim usulan";
+      }
+    });
+
+
+    analyzeUpload.addEventListener("click", async () => {
+      const selected = analysisFile.files?.[0];
+      if (!selected) { statusEl.textContent = "Pilih satu file terlebih dahulu."; return; }
+      if (!csrfToken) { statusEl.textContent = "Sesi keamanan belum siap. Muat ulang halaman."; return; }
+      if (selected.size > 10 * 1024 * 1024) { statusEl.textContent = "Ukuran file maksimal 10 MB."; return; }
+      analyzeUpload.disabled = true;
+      analyzeUpload.textContent = "Memeriksa file…";
+      try {
+        const data = new FormData();
+        data.append("file", selected, selected.name);
+        data.append("prompt", "Analisis dokumen ini secara terstruktur. Pisahkan fakta, temuan, risiko, dan ketidakpastian.");
+        const response = await fetch("/api/analyze", { method: "POST", headers: { "X-CSRF-Token": csrfToken }, body: data, credentials: "same-origin" });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "ANALYSIS_FAILED");
+        input.value = "Analisis file " + selected.name + ":\n\n" + result.reply;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        statusEl.textContent = "Analisis selesai. Tinjau hasil sebelum dikirim.";
+      } catch (error) {
+        const code = String(error.message || "ANALYSIS_FAILED");
+        statusEl.textContent = code === "FILE_SCAN_UNAVAILABLE"
+          ? "Upload ditolak dengan aman: layanan pemindai malware privat belum tersedia."
+          : "Analisis file gagal: " + code.slice(0,120);
+      } finally {
+        analyzeUpload.disabled = false;
+        analyzeUpload.textContent = "Analisis file";
+      }
+    });
+
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordingStartedAt = 0;
+    let recordingStream = null;
+    voiceRecord.addEventListener("click", async () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        voiceRecord.disabled = true;
+        voiceState.textContent = "Memproses rekaman…";
+        return;
+      }
+      if (!csrfToken) { voiceState.textContent = "Sesi keamanan belum siap. Muat ulang halaman."; return; }
+      if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+        voiceState.textContent = "Browser ini tidak mendukung perekaman audio.";
+        return;
+      }
+      try {
+        recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mimeType = ["audio/webm;codecs=opus","audio/ogg;codecs=opus","audio/webm"].find(type => MediaRecorder.isTypeSupported(type)) || "";
+        mediaRecorder = new MediaRecorder(recordingStream, mimeType ? { mimeType } : undefined);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = event => { if (event.data?.size) audioChunks.push(event.data); };
+        mediaRecorder.onerror = () => { stopMicTracks(); voiceRecord.disabled = false; voiceRecord.textContent = "🎙 Coba rekam lagi"; voiceState.textContent = "Perekaman gagal."; };
+        mediaRecorder.onstop = async () => {
+          const durationMs = Date.now() - recordingStartedAt;
+          stopMicTracks();
+          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+          audioChunks = [];
+          voiceRecord.disabled = false;
+          voiceRecord.textContent = "🎙 Mulai rekam";
+          if (durationMs > 60000 || blob.size > 3 * 1024 * 1024 || !blob.size) {
+            voiceState.textContent = "Rekaman harus berdurasi maksimal 60 detik dan berukuran maksimal 3 MB.";
+            return;
+          }
+          try {
+            const data = new FormData();
+            const ext = blob.type.includes("ogg") ? "ogg" : blob.type.includes("wav") ? "wav" : "webm";
+            data.append("audio", blob, "recording." + ext);
+            data.append("durationMs", String(durationMs));
+            const response = await fetch("/api/voice/transcribe", { method: "POST", headers: { "X-CSRF-Token": csrfToken }, body: data, credentials: "same-origin" });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "TRANSCRIPTION_FAILED");
+            voiceTranscript.value = String(result.text || "").slice(0, 8000);
+            voiceReview.hidden = false;
+            voiceState.textContent = "Transkripsi siap. Edit bila perlu, lalu pilih tindakan berikutnya.";
+            voiceTranscript.focus();
+          } catch (error) {
+            voiceState.textContent = "Transkripsi gagal: " + String(error.message || "Kesalahan layanan").slice(0,120);
+          }
+        };
+        recordingStartedAt = Date.now();
+        mediaRecorder.start();
+        voiceRecord.textContent = "■ Selesai rekam";
+        voiceState.textContent = "Merekam… tekan tombol lagi untuk berhenti.";
+      } catch {
+        stopMicTracks();
+        voiceState.textContent = "Izin mikrofon ditolak atau perangkat tidak tersedia.";
+      }
+    });
+    function stopMicTracks() {
+      if (recordingStream) recordingStream.getTracks().forEach(track => track.stop());
+      recordingStream = null;
+    }
+    voiceUseTranscript.addEventListener("click", () => {
+      const transcript = voiceTranscript.value.trim();
+      if (!transcript) { voiceState.textContent = "Transkripsi masih kosong."; return; }
+      input.value = transcript;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      voiceReview.hidden = true;
+      voiceState.textContent = "Transkripsi dimasukkan ke pesan. Tinjau kembali sebelum mengirim.";
+      input.focus();
+    });
+    voiceSendToAI.addEventListener("click", () => {
+      const transcript = voiceTranscript.value.trim();
+      if (!transcript) { voiceState.textContent = "Transkripsi masih kosong."; return; }
+      if (transcript.length > 8000) { voiceState.textContent = "Transkripsi melebihi batas pesan."; return; }
+      input.value = transcript;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      voiceReview.hidden = true;
+      voiceState.textContent = "Mengirim transkripsi ke AI…";
+      form.requestSubmit();
+    });
+    voiceDiscard.addEventListener("click", () => {
+      voiceTranscript.value = "";
+      voiceReview.hidden = true;
+      voiceState.textContent = "Transkripsi dibuang. Rekaman tidak disimpan.";
+    });
+    window.addEventListener("pagehide", stopMicTracks);
+
+    
+
+    const protectionCard = document.getElementById("protectionStatusCard");
+    const accountDialog = document.getElementById("settingsDialog");
+    if (protectionCard && accountDialog) {
+      protectionCard.addEventListener("click", event => {
+        event.preventDefault();
+        if (!accountDialog.open) accountDialog.showModal();
+      });
+    }
+
+    // Browser connectivity indicator only; AI availability is verified per request.
+    (() => {
+      const bar = document.getElementById("networkStatus");
+      const label = document.getElementById("networkStatusText");
+      if (!bar || !label) return;
+      const refresh = () => {
+        const online = navigator.onLine;
+        bar.dataset.state = online ? "online" : "offline";
+        label.textContent = online
+          ? "ONLINE · Koneksi jaringan tersedia. Layanan AI diverifikasi saat permintaan dijalankan."
+          : "OFFLINE · Koneksi jaringan tidak tersedia. Permintaan AI memerlukan koneksi.";
+      };
+      window.addEventListener("online", refresh);
+      window.addEventListener("offline", refresh);
+      refresh();
+    })();
+
   </script>
 </body>
 </html>

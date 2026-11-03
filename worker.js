@@ -26,6 +26,10 @@
 "use strict";
 
 import { authConfig, googleLogin, currentSession, logout, requireSession } from "./auth/google-auth.js";
+import { handleFileAnalysis } from "./multimodal/file-analysis.js";
+import { handleVoiceTranscription } from "./multimodal/voice-assistance.js";
+import { submitFeatureRequest } from "./feature-requests.js";
+import { adminSession, pendingAdminUsers } from "./admin-portal.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1469,10 +1473,39 @@ export default {
     const url = new URL(request.url);
     const corsHeaders = getCorsHeaders(request);
 
+    if (url.pathname === "/api/feature-requests") return submitFeatureRequest(request, env, corsHeaders);
+    if (url.pathname === "/api/admin/session") return adminSession(request, env);
+    if (url.pathname === "/api/admin/users/pending") return pendingAdminUsers(request, env);
+
+    // The Admin Console is a distinct document and is served only after a server-side role check.
+    if (url.pathname === "/admin") {
+      if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405, headers: { allow: "GET", "cache-control": "no-store" } });
+      if (!env.ASSETS || typeof env.ASSETS.fetch !== "function") return new Response("Admin Console asset unavailable.", { status: 503, headers: { "cache-control": "no-store" } });
+      const gate = await adminSession(new Request(new URL("/api/admin/session", url), { headers: request.headers }), env);
+      if (gate.status !== 200) {
+        const payload = await gate.clone().json().catch(() => ({}));
+        const message = payload.error === "ADMIN_REQUIRED" ? "403 — Admin access required." : "Admin Console is not available until governance access is verified.";
+        return new Response(message, { status: gate.status, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+      }
+      const asset = await env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));
+      return new Response(asset.body, { status: asset.status, headers: { ...Object.fromEntries(asset.headers), "cache-control": "no-store" } });
+    }
     if (url.pathname === "/api/auth/config" && request.method === "GET") return authConfig(request, env);
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
     if (url.pathname === "/api/auth/logout") return logout(request, env);
+
+    if (url.pathname === "/api/analyze" || url.pathname === "/api/voice/transcribe") {
+      const methods = "POST, OPTIONS";
+      if (request.method === "OPTIONS") {
+        if (!isSameOriginOrNoOrigin(request)) {
+          return errorResponse("ORIGIN_NOT_ALLOWED", "Origin permintaan tidak diizinkan.", 403, corsHeaders);
+        }
+        return new Response(null, { status: 204, headers: { ...corsHeaders, "access-control-allow-methods": methods, "access-control-allow-headers": "Content-Type, X-CSRF-Token" } });
+      }
+      if (url.pathname === "/api/analyze") return handleFileAnalysis(request, env, corsHeaders);
+      return handleVoiceTranscription(request, env, corsHeaders);
+    }
 
     if (url.pathname === CONFIG.API_PATH) {
       if (request.method === "OPTIONS") {
@@ -1505,7 +1538,7 @@ export default {
       headers.set("referrer-policy", "no-referrer");
       headers.set("x-frame-options", "DENY");
       headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
-      headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
+      headers.set("permissions-policy", "camera=(), microphone=(self), geolocation=()");
       headers.set("cross-origin-opener-policy", "same-origin-allow-popups");
       headers.set("cross-origin-resource-policy", "same-origin");
       headers.set(

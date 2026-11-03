@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
   status TEXT NOT NULL DEFAULT 'active'
     CHECK (status IN ('active', 'disabled')),
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+  updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  role TEXT NOT NULL DEFAULT 'user'
+    CHECK (role IN ('user', 'admin', 'super_admin'))
 );
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
