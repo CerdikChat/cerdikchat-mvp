@@ -84,3 +84,12 @@ test("Theme toggle retains accessible labels and persisted preference", () => {
   assert.match(html, /Aktifkan mode siang/);
   assert.match(html, /Aktifkan mode malam/);
 });
+
+test("Hybrid connectivity has one authoritative state model and one set of event handlers", () => {
+  assert.equal((html.match(/connectivityDemoOpen\?\.addEventListener\("click"/g) || []).length, 1);
+  assert.equal((html.match(/connectivityClose\?\.addEventListener\("click"/g) || []).length, 1);
+  assert.equal((html.match(/connectivityReset\?\.addEventListener\("click"/g) || []).length, 1);
+  assert.doesNotMatch(html, /Buyer-facing simulator only|const wanOrder =|const channelState =/);
+  assert.match(html, /data-channel="Fiber"/);
+  assert.match(html, /simActiveRoute\.textContent = selected \? selected\.name/);
+});
