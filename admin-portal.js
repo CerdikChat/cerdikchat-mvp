@@ -16,7 +16,19 @@ function json(data, status = 200) {
 }
 
 function sameOrigin(request) {
-  return request.headers.get("Origin") === new URL(request.url).origin;
+  const requestOrigin = request.headers.get("Origin");
+  const expectedOrigin = new URL(request.url).origin;
+  if (requestOrigin) return requestOrigin === expectedOrigin;
+
+  // Browsers commonly omit Origin on safe GET navigations and same-origin fetches.
+  // Accept only Fetch Metadata that proves same-origin or an address-bar navigation.
+  if (request.method !== "GET") return false;
+  const fetchSite = request.headers.get("Sec-Fetch-Site");
+  if (fetchSite === "same-origin" || fetchSite === "none") return true;
+
+  const referer = request.headers.get("Referer");
+  try { return Boolean(referer) && new URL(referer).origin === expectedOrigin; }
+  catch { return false; }
 }
 
 async function requireAdmin(request, env) {
