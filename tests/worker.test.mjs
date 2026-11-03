@@ -613,7 +613,7 @@ test("CerdikGo light theme keeps composer text and workspace cards readable", as
 
 test("SOP, Business and Hybrid modules are contained in the navigation, not the chat workspace", async () => {
   const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
-  const navStart = html.indexOf('<aside id="sideNavigation"');
+  const navStart = html.indexOf('<aside class="side" id="sideNavigation"');
   const mainStart = html.indexOf('<main class="main">');
   assert.ok(navStart >= 0 && mainStart > navStart);
   const nav = html.slice(navStart, mainStart);
