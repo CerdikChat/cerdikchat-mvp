@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import worker from "../worker.js";
 import { verifyGoogleIdToken, googleLogin } from "../auth/google-auth.js";
 
@@ -507,4 +508,24 @@ test("logout rejects cross-origin requests", async () => {
   );
   assert.equal(response.status, 403);
   assert.equal((await json(response)).error, "ORIGIN_NOT_ALLOWED");
+});
+
+
+test("Android workspace exposes account access without leaking Google subject identifiers", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="settingsOpen"[^>]*aria-haspopup="dialog"/);
+  assert.match(html, /<dialog[^>]*id="settingsDialog"/);
+  assert.match(html, /id="authPanel"/);
+  assert.match(html, /id="authUnavailable"/);
+  assert.doesNotMatch(html, /googleSub|Google sub/i);
+});
+
+test("Android workspace provides an accessible mobile navigation and keyboard-aware viewport", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="navToggle"[^>]*aria-expanded="false"[^>]*aria-controls="sideNavigation"/);
+  assert.match(html, /id="sideNavigation"[^>]*aria-label="Navigasi utama"/);
+  assert.match(html, /id="navBackdrop"[^>]*aria-label="Tutup navigasi"/);
+  assert.match(html, /max-device-width:\\s*720px/);
+  assert.match(html, /visualViewport/);
+  assert.match(html, /prefers-reduced-motion:reduce/);
 });
