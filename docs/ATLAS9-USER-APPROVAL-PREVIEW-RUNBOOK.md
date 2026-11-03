@@ -23,24 +23,40 @@
 
 The role schema supports `user`, `admin`, and `super_admin`. The existing bootstrap allowlist creates ordinary `admin` accounts; it does not automatically designate a Super Administrator.
 
-After a specifically authorized operator has identified the intended, verified administrator account, promote exactly that account in the isolated Preview D1 database. Do not place the email or Google subject in source code, PR text, screenshots, or public logs. Confirm the target is already an active `admin` and that exactly one row is affected. The product owner must explicitly identify which allowlisted identity receives this authority before this step.
+Read-only staging verification on 3 November 2026 found two active ordinary administrator accounts, two active standard users, and **zero** `super_admin` accounts. The product owner must explicitly identify which of the two already-verified, allowlisted administrator identities receives this authority. No identity is selected by default.
+
+After the owner has selected the exact identity and separately authorized the Preview-only D1 role update, promote exactly one active `admin` account in the isolated `cerdikchat-staging` database. Do not place the email or Google subject in source code, PR text, screenshots, or public logs. Confirm the update affects exactly one row.
 
 ```sql
 UPDATE users
 SET role = 'super_admin', updated_at = unixepoch()
-WHERE email = '<APPROVED_SUPER_ADMIN_EMAIL>'
+WHERE email = '<OWNER_APPROVED_SUPER_ADMIN_EMAIL>'
   AND status = 'active'
   AND role = 'admin';
+
+INSERT INTO admin_audit_log
+  (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at)
+SELECT google_sub, google_sub, 'SUPER_ADMIN_BOOTSTRAPPED', 'admin', 'super_admin',
+       json_object('source', 'owner-approved-preview-bootstrap'), unixepoch()
+FROM users
+WHERE email = '<OWNER_APPROVED_SUPER_ADMIN_EMAIL>'
+  AND status = 'active'
+  AND role = 'super_admin'
+  AND NOT EXISTS (
+    SELECT 1 FROM admin_audit_log
+    WHERE action = 'SUPER_ADMIN_BOOTSTRAPPED'
+      AND target_google_sub = users.google_sub
+  );
 ```
 
-Verify the result privately:
+Verify privately:
 
 ```sql
 SELECT role, status FROM users
-WHERE email = '<APPROVED_SUPER_ADMIN_EMAIL>';
+WHERE email = '<OWNER_APPROVED_SUPER_ADMIN_EMAIL>';
 ```
 
-Do not run this against Production. This is a controlled Preview bootstrap step, not an application self-service feature.
+The bootstrap audit event attributes the controlled self-bootstrap to the newly designated account (actor and target are the same verified Google subject). Do not run this against Production. This is a controlled Preview bootstrap step, not an application self-service feature.
 
 ## Preview-only migration
 The canonical migration sequence is `0003_user_roles_and_admin_audit.sql` (role and audit-log schema), `0004_admin_bootstrap_allowlist.sql` (administrator allowlist), then `0005_user_approval_index.sql` (access-request queue and lookup indexes). The PR #30 feature branch is aligned to these exact migration filenames because the `cerdikchat-staging` D1 ledger records all three as applied. The staging database was inspected read-only on 3 November 2026: migrations `0001` through `0005` are recorded as applied, `users.role` exists, and `sessions.revoked_at` exists. No migration needs to be rerun on this staging database. Never apply the alternate `0003_roles_admin_bootstrap.sql` migration identity to this database; it attempts to add the same role/audit schema under a different filename and could fail with a duplicate-column error. For any new isolated database, apply only the canonical sequence after reviewing its own ledger. Never run against Production.
