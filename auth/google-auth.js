@@ -149,6 +149,11 @@ function validCsrf(request) {
   return constantTimeEqual(cookieToken, headerToken);
 }
 
+// Shared double-submit CSRF guard for authenticated multipart endpoints.
+export function validateCsrfRequest(request) {
+  return sameOrigin(request) && validCsrf(request);
+}
+
 function cookieHeader(value, maxAge) {
   return `${SESSION_COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 }
