@@ -691,6 +691,21 @@
     .hybrid .status-pill { background:#087bb3; }
     .status-chevron { margin-left:auto; color:#d7eaff; font-size:22px; }
 
+
+    .logo .cerdikgo-mark{width:100%;height:100%;display:block}
+    .brand .logo{overflow:hidden;padding:2px;background:transparent}
+    .mobile-brand .logo{overflow:hidden;padding:1px;background:transparent}
+    .brand-wordmark small{letter-spacing:1px}
+    .composer-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 5px;color:var(--muted);font-size:11px}
+    .composer-expand{border:1px solid #28618a;border-radius:8px;padding:6px 9px;background:#102944;color:#dceeff;font:inherit;font-size:11px;cursor:pointer}
+    .composer.is-expanded textarea{min-height:220px;max-height:min(52vh,520px)}
+    .composer.is-expanded{box-shadow:0 14px 44px #0005}
+    .file-action-row{display:flex;align-items:center;gap:8px;min-width:0}
+    .file-pick{flex:0 0 auto}
+    .selected-file-name{min-width:0;flex:1;color:#a9bfd5;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .analyze-file{flex:0 0 auto}
+    @media(max-width:480px){.file-action-row{gap:6px}.selected-file-name{font-size:10px}.analyze-file,.file-pick{padding:8px 9px}}
+    html[data-theme="light"] .composer-expand{background:#e7f0f8;color:#17283d}
     .side-workflows{margin:18px 0 10px;padding:14px 0 8px;border-top:1px solid var(--line)}
     .side-workflows h2{margin:0 0 8px;color:#8fa9c6;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}
     .menu-workflow{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;margin:4px 0;padding:8px 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--text);text-align:left;font:inherit;cursor:pointer}
@@ -731,8 +746,8 @@
   <div class="app">
     <aside class="side" id="sideNavigation" aria-label="Navigasi utama">
       <div class="brand" aria-label="CerdikGo — AI Workspace for Real Action">
-        <div class="logo" aria-hidden="true">CG</div>
-        <div class="brand-wordmark"><strong>Cerdik<span>Go</span></strong><small>AI WORKSPACE FOR REAL ACTION</small></div>
+        <div class="logo" aria-hidden="true"><svg class="cerdikgo-mark" viewBox="0 0 64 64" role="img" aria-label="CerdikGo robot mark"><defs><linearGradient id="cgBlue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#05d7ed"/><stop offset=".52" stop-color="#075be8"/><stop offset="1" stop-color="#04c879"/></linearGradient><linearGradient id="cgFace" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#8fcaff"/></linearGradient></defs><path d="M49 10C39 2 22 4 14 14 5 24 8 42 19 49c10 7 25 5 33-4l-7-6c-5 6-15 8-22 3-7-5-8-16-2-22 6-7 16-8 23-3z" fill="none" stroke="url(#cgBlue)" stroke-width="7" stroke-linecap="round"/><path d="M42 42l14 1-2 10" fill="none" stroke="#16d34a" stroke-width="5" stroke-linecap="round"/><rect x="18" y="18" width="31" height="29" rx="12" fill="url(#cgFace)" stroke="#eaf7ff" stroke-width="2"/><rect x="23" y="24" width="21" height="17" rx="7" fill="#082b62"/><path d="M28 31q3-5 6 0m4 0q3-5 5 0" fill="none" stroke="#10e6f2" stroke-width="2.5" stroke-linecap="round"/><path d="M32 36q3 3 6 0" fill="none" stroke="#10e6f2" stroke-width="2.5" stroke-linecap="round"/><path d="M36 17l2-6" stroke="#087be8" stroke-width="2.5" stroke-linecap="round"/><circle cx="39" cy="9" r="3" fill="#08d9f0"/></svg></div>
+        <div class="brand-wordmark"><strong>Cerdik<span>Go</span></strong><small>INNOVATION WORKSPACE</small></div>
       </div>
 
       <div class="tag">CLOSED BETA · v0.1</div>
@@ -790,9 +805,9 @@
         <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="sideNavigation" aria-label="Buka navigasi">☰ <span>Menu</span></button>
         <div class="mobile-brand" aria-label="CerdikGo">
           <div class="logo" aria-hidden="true">CG</div>
-          <div class="brand-wordmark"><strong>Cerdik<span>Go</span></strong><small>AI WORKSPACE</small></div>
+          <div class="brand-wordmark"><strong>Cerdik<span>Go</span></strong><small>INNOVATION WORKSPACE</small></div>
         </div>
-        <strong>Ruang Kerja AI</strong>
+        <strong>CerdikGo · Innovation Workspace</strong>
         <div class="top-actions">
           <span class="pill">● AI · Beta</span>
           <button id="loginOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
@@ -868,9 +883,13 @@
           </div>
         </section>
         <div class="tool-upload">
-          <label for="analysisFile">Analisis dokumen (PDF/JPG/PNG/WEBP/GIF)</label>
-          <input id="analysisFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,application/pdf,image/jpeg,image/png,image/webp,image/gif">
-          <button type="button" id="analyzeUpload" class="tool-button">Analisis file</button>
+          <label>Analisis dokumen (PDF/JPG/PNG/WEBP/GIF)</label>
+          <div class="file-action-row">
+            <input id="analysisFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,application/pdf,image/jpeg,image/png,image/webp,image/gif" hidden>
+            <button type="button" id="chooseAnalysisFile" class="tool-button file-pick" aria-controls="analysisFile">▣ <span>File</span></button>
+            <span id="selectedFileName" class="selected-file-name" aria-live="polite">Belum ada file dipilih</span>
+            <button type="button" id="analyzeUpload" class="tool-button analyze-file">Analisis file</button>
+          </div>
           <small id="uploadHelp">Pemrosesan hanya dilanjutkan jika pemindai malware privat ClamAV aktif. Tanpa scanner, server menolak upload (fail-closed).</small>
         </div>
         <dialog id="requestFeatureDialog" class="settings-dialog" aria-labelledby="requestFeatureTitle">
@@ -898,6 +917,7 @@
 
       <div class="composer-wrap">
         <form id="chatForm" class="composer">
+          <div class="composer-heading"><span>Pesan Anda</span><button type="button" id="expandComposer" class="composer-expand" aria-expanded="false" aria-controls="message">⤢ Perbesar kolom</button></div>
           <textarea
             id="message"
             disabled
@@ -1838,6 +1858,21 @@
     const requestFeatureSubmit = document.querySelector("#requestFeatureSubmit");
     const requestFeatureName = document.querySelector("#requestFeatureName");
     const requestFeatureDetails = document.querySelector("#requestFeatureDetails");
+
+
+    const chooseAnalysisFile = document.querySelector("#chooseAnalysisFile");
+    const selectedFileName = document.querySelector("#selectedFileName");
+    const expandComposer = document.querySelector("#expandComposer");
+    chooseAnalysisFile?.addEventListener("click", () => analysisFile?.click());
+    analysisFile?.addEventListener("change", () => {
+      if (selectedFileName) selectedFileName.textContent = analysisFile.files?.[0]?.name || "Belum ada file dipilih";
+    });
+    expandComposer?.addEventListener("click", () => {
+      const expanded = form.classList.toggle("is-expanded");
+      expandComposer.setAttribute("aria-expanded", String(expanded));
+      expandComposer.textContent = expanded ? "⤡ Perkecil kolom" : "⤢ Perbesar kolom";
+      if (expanded) input.focus();
+    });
 
     const savedTheme = localStorage.getItem("cerdikgo-theme");
     if (savedTheme === "light") document.documentElement.dataset.theme = "light";
