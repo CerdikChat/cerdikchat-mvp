@@ -738,3 +738,22 @@ test("feature request form captures category, description, problem and expected 
   assert.match(html, /\\\\nManfaat: /);
   assert.match(html, /Belum ada tiket yang dikirim atau disimpan di server/);
 });
+
+
+test("feature request form submits to authenticated, CSRF-protected D1 endpoint", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  const worker = await readFile(new URL("../worker.js", import.meta.url), "utf8");
+  const endpoint = await readFile(new URL("../feature-requests.js", import.meta.url), "utf8");
+  const migration = await readFile(new URL("../migrations/0004_feature_requests.sql", import.meta.url), "utf8");
+  assert.match(html, /fetch\("\/api\/feature-requests"/);
+  assert.match(html, /"X-CSRF-Token": csrfToken/);
+  assert.match(html, /Kirim usulan/);
+  assert.match(worker, /submitFeatureRequest/);
+  assert.match(endpoint, /validateCsrfRequest\(request\)/);
+  assert.match(endpoint, /requireSession\(request, env\)/);
+  assert.match(endpoint, /FEATURE_REQUESTS_UNAVAILABLE/);
+  assert.match(endpoint, /RATE_LIMIT_EXCEEDED/);
+  assert.match(endpoint, /INSERT INTO feature_requests/);
+  assert.match(migration, /CREATE TABLE IF NOT EXISTS feature_requests/);
+  assert.match(migration, /CHECK \(status IN/);
+});
