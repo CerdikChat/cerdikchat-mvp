@@ -16,66 +16,98 @@
 - `POST /api/auth/request-access`: same-origin + CSRF protected; accepts a Google GIS credential and nonce; returns HTTP 202 with `status: pending`; no session cookie is issued.
 - `GET /api/admin/users/pending`: requires an active admin/super_admin session; returns at most 100 pending standard-user requests.
 - `POST /api/admin/users/decision`: requires an active `super_admin` session and CSRF; body `{"email":"user@example.com","decision":"approve"}`, `reject`, or `suspend`.
-- The approval INSERT enforces the 30-active-standard-user ceiling (`role='user'`) inside the write statement. Administrator and Super Administrator accounts do not consume pilot seats. A full pilot returns HTTP 409 `PILOT_CAP_REACHED`; a prior count/read is not used to allocate the final seat.
+- The approval INSERT enforces the 30-active-standard-user ceiling (`role='user'`) inside the write statement. Administrator and Super Administrator accounts do not consume pilot seats. A full pilot returns HTTP 409 `PILOT_CAP_REACHED`.
 - Approval/rejection updates the request queue and audit log in one D1 batch. Approval creates only a standard-user account.
 
-## Super Administrator bootstrap (Preview only)
+## Owner-approved Super Administrator designation (Preview only)
 
-The role schema supports `user`, `admin`, and `super_admin`. The existing bootstrap allowlist creates ordinary `admin` accounts; it does not automatically designate a Super Administrator.
+The project owner has explicitly designated **two** verified administrator identities as Super Administrators:
+- Primary Super Admin: owner-designated primary Google account.
+- Secondary Super Admin: owner-designated secondary Google account.
 
-Read-only staging verification on 3 November 2026 found two active ordinary administrator accounts, two active standard users, and **zero** `super_admin` accounts. The product owner must explicitly identify which of the two already-verified, allowlisted administrator identities receives this authority. No identity is selected by default.
+Do not copy personal email addresses or Google subject identifiers into source code, public PR descriptions, screenshots, or public logs. Resolve the exact two identities privately from the owner's approved designation and verify each against the authenticated Google identity and the existing bootstrap allowlist.
 
-After the owner has selected the exact identity and separately authorized the Preview-only D1 role update, promote exactly one active `admin` account in the isolated `cerdikchat-staging` database. Do not place the email or Google subject in source code, PR text, screenshots, or public logs. Confirm the update affects exactly one row.
+Important implementation detail: the bootstrap allowlist creates an ordinary `admin` row on first successful administrator sign-in. Allowlisting alone does not grant `super_admin`. Both accounts must first authenticate through the Administrator Portal so their active `users` rows are created with their immutable Google `sub`. Then, after separate explicit authorization for the Preview D1 write, promote exactly those two active `admin` rows to `super_admin`.
+
+### Read-only preflight (no writes)
+1. Confirm the target is the isolated `cerdikchat-staging` database and that its ID matches the Preview D1 binding in `wrangler.toml` and `wrangler.preview-migrations.toml`.
+2. Inspect `d1_migrations` and confirm the canonical migration identities and statuses.
+3. Confirm `users.role`, `sessions.revoked_at`, `admin_bootstrap_allowlist`, and `admin_audit_log` exist.
+4. Confirm both owner-designated identities appear in the allowlist and each maps to exactly one active `users` row by immutable Google `sub`.
+5. Confirm both target rows currently have `role='admin'` or are already `super_admin'`. Stop if either identity is missing, disabled, ambiguous, or linked to a different Google subject.
+6. Record only aggregate counts and migration names in the engineering report; keep emails and Google subjects out of public logs.
+
+### Prepared role-promotion SQL (DO NOT EXECUTE without separate approval)
+
+The following is a preparation template, not an instruction to run now. Replace the two private placeholders only in the authorized Preview D1 console/session. Require the preflight to show exactly two matching active administrator rows before proceeding.
 
 ```sql
+-- Preview staging only. Both identities must be owner-approved and verified.
 UPDATE users
 SET role = 'super_admin', updated_at = unixepoch()
-WHERE email = '<OWNER_APPROVED_SUPER_ADMIN_EMAIL>'
+WHERE email IN ('<PRIMARY_OWNER_APPROVED_EMAIL>', '<SECONDARY_OWNER_APPROVED_EMAIL>')
   AND status = 'active'
-  AND role = 'admin';
+  AND role = 'admin'
+  AND (
+    SELECT COUNT(*)
+    FROM users
+    WHERE email IN ('<PRIMARY_OWNER_APPROVED_EMAIL>', '<SECONDARY_OWNER_APPROVED_EMAIL>')
+      AND status = 'active'
+      AND role = 'admin'
+  ) = 2;
+
+-- Check the UPDATE result metadata: exactly 2 rows must have changed.
+-- If the result is not exactly 2, STOP; do not run the audit INSERT.
 
 INSERT INTO admin_audit_log
   (actor_google_sub, target_google_sub, action, previous_role, new_role, details_json, created_at)
 SELECT google_sub, google_sub, 'SUPER_ADMIN_BOOTSTRAPPED', 'admin', 'super_admin',
        json_object('source', 'owner-approved-preview-bootstrap'), unixepoch()
-FROM users
-WHERE email = '<OWNER_APPROVED_SUPER_ADMIN_EMAIL>'
+FROM users AS target
+WHERE email IN ('<PRIMARY_OWNER_APPROVED_EMAIL>', '<SECONDARY_OWNER_APPROVED_EMAIL>')
   AND status = 'active'
   AND role = 'super_admin'
   AND NOT EXISTS (
-    SELECT 1 FROM admin_audit_log
-    WHERE action = 'SUPER_ADMIN_BOOTSTRAPPED'
-      AND target_google_sub = users.google_sub
+    SELECT 1 FROM admin_audit_log AS audit
+    WHERE audit.action = 'SUPER_ADMIN_BOOTSTRAPPED'
+      AND audit.target_google_sub = target.google_sub
   );
 ```
 
-Verify privately:
+The audit event attributes each controlled self-bootstrap to the corresponding verified Google subject (actor and target are the same subject). Verify privately that exactly two active rows have `role='super_admin'` and that each has one corresponding audit event. Do not expose identities or subjects in public logs.
 
-```sql
-SELECT role, status FROM users
-WHERE email = '<OWNER_APPROVED_SUPER_ADMIN_EMAIL>';
-```
+## Canonical Preview migration sequence
 
-The bootstrap audit event attributes the controlled self-bootstrap to the newly designated account (actor and target are the same verified Google subject). Do not run this against Production. This is a controlled Preview bootstrap step, not an application self-service feature.
+The canonical migration files are:
+1. `0001_users.sql`
+2. `0002_sessions.sql`
+3. `0003_user_roles_and_admin_audit.sql`
+4. `0004_admin_bootstrap_allowlist.sql`
+5. `0005_user_approval_index.sql`
 
-## Preview-only migration
-The canonical migration sequence is `0003_user_roles_and_admin_audit.sql` (role and audit-log schema), `0004_admin_bootstrap_allowlist.sql` (administrator allowlist), then `0005_user_approval_index.sql` (access-request queue and lookup indexes). The PR #30 feature branch is aligned to these exact migration filenames because the `cerdikchat-staging` D1 ledger records all three as applied. The staging database was inspected read-only on 3 November 2026: migrations `0001` through `0005` are recorded as applied, `users.role` exists, and `sessions.revoked_at` exists. No migration needs to be rerun on this staging database. Never apply the alternate `0003_roles_admin_bootstrap.sql` migration identity to this database; it attempts to add the same role/audit schema under a different filename and could fail with a duplicate-column error. For any new isolated database, apply only the canonical sequence after reviewing its own ledger. Never run against Production.
+The latest repository runbook records migrations `0001` through `0005` as applied in `cerdikchat-staging`, with `users.role` and `sessions.revoked_at` present. This is prior documented evidence, not a substitute for a fresh read-only check of the current Preview database ledger.
 
-## Human test checklist
-1. Use a dedicated Google account that is not in the administrator allowlist.
-2. Choose User Portal and complete Google verification; expect HTTP 202 and a pending message.
-3. Confirm no session cookie is issued and the account cannot access the chat or Admin endpoints while pending.
-4. Sign in as an approved administrator; retrieve pending requests in Administrator Dashboard.
-5. Verify an ordinary `admin` receives HTTP 403 `SUPER_ADMIN_REQUIRED` when attempting approve, reject, or suspend.
-6. Verify a designated `super_admin` can approve the dedicated test account.
-7. Sign in through User Portal; verify `/api/auth/me` reports role `user`.
-8. Verify `/api/admin/session` returns HTTP 403 `ADMIN_REQUIRED` for that user.
-9. Verify Administrator Portal selection returns `ROLE_MISMATCH` and no session.
-10. Suspend the test user and verify all session rows are revoked and existing sessions stop working.
-11. Verify audit log entries for approval, rejection, and suspension; never expose Google subject/session identifiers in UI or logs.
+Do not apply the deleted/alternate migration identity `0003_roles_admin_bootstrap.sql`; it duplicates the role and audit schema and can fail with a duplicate-column error. If the live Preview ledger confirms all five canonical migrations are applied, **no migration is required** for Super Admin designation: only the separately authorized two-row role promotion is needed. If the ledger differs, stop and prepare a reconciliation plan; do not improvise or execute migrations.
+
+The migration-only configuration `wrangler.preview-migrations.toml` points to the staging D1 binding. It must never be used for Production. Confirm its database ID against the Preview binding before any authorized operation.
+
+## Human acceptance checklist
+1. Use a dedicated Google identity that is not in the administrator allowlist for standard-user testing.
+2. Submit a User Portal access request; expect HTTP 202 and a pending message.
+3. Confirm no session cookie is issued and the pending identity cannot access chat or Admin endpoints.
+4. Sign in with each of the two owner-designated accounts through the Administrator Portal.
+5. Verify each account is active and has the expected immutable Google subject.
+6. After separately authorized Preview provisioning, verify both accounts independently return `role='super_admin'` from `/api/auth/me`.
+7. Verify both can list pending requests and perform approve/reject/suspend actions.
+8. Verify an ordinary `admin` receives HTTP 403 `SUPER_ADMIN_REQUIRED` for decisions.
+9. Verify a standard user receives HTTP 403 `ADMIN_REQUIRED` from `/api/admin/session`.
+10. Approve a synthetic test user, verify role `user`, then suspend the user and confirm all sessions are revoked.
+11. Verify audit records for both Super Admin bootstraps and subsequent user decisions.
+12. Verify the 30-active-standard-user cap, including the final-seat/concurrent-approval case.
 
 ## Safety boundaries
-- This PR is code-only until separately approved for Preview migration and deployment.
-- No Production D1, Production deployment, OAuth configuration, secrets, billing, or merge changes.
-- Do not use the project owner's real identity as a standard-user test account.
+- Code and documentation changes on feature branches are allowed under Controlled Autopilot.
+- Preview D1 migration or role updates require separate, explicit action-specific authorization.
+- No Production D1 writes/migrations, Production deployment, OAuth configuration, secrets, billing, or merge changes are authorized by this runbook.
+- Do not use either owner's real identity as a standard-user test account.
 - The dashboard approval panel consumes real APIs; it must display API errors and must not show mock records or simulated success.
