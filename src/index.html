@@ -1227,6 +1227,7 @@
         </div>
         <strong>CerdikGo · Innovation Workspace</strong>
         <div class="top-actions">
+          <button id="languageOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="languageDialog" aria-label="Pilih bahasa">🌐 <span id="languageCurrent">ID</span></button>
           <span class="pill">● AI · Beta</span>
           <button id="loginOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
           <button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button>
@@ -1316,6 +1317,22 @@
         </form>
       </dialog>
 
+
+      <dialog class="settings-dialog" id="languageDialog" aria-labelledby="languageTitle">
+        <div class="settings-head">
+          <div><h2 id="languageTitle">Bahasa / Language</h2><small id="languageHelp">Pilih bahasa antarmuka CerdikGo</small></div>
+          <button class="settings-close" id="languageClose" type="button" aria-label="Tutup pilihan bahasa">×</button>
+        </div>
+        <div class="settings-body">
+          <label for="languageSelect" id="languageLabel">Bahasa antarmuka</label>
+          <select id="languageSelect" class="tool-button" style="width:100%;min-height:44px">
+            <option value="id">🇮🇩 Bahasa Indonesia</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="zh">🇨🇳 中文（简体）</option>
+          </select>
+          <p class="settings-note" id="languageNotice">Preferensi bahasa disimpan pada perangkat ini.</p>
+        </div>
+      </dialog>
 
       <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
         <div class="settings-head">
@@ -2856,6 +2873,69 @@
       window.addEventListener("online", refresh);
       window.addEventListener("offline", refresh);
       refresh();
+    })();
+
+
+    // CerdikGo interface language: Indonesian, English, Simplified Chinese.
+    (() => {
+      const dialog = document.querySelector("#languageDialog");
+      const open = document.querySelector("#languageOpen");
+      const close = document.querySelector("#languageClose");
+      const select = document.querySelector("#languageSelect");
+      const current = document.querySelector("#languageCurrent");
+      const packs = {
+        id: {
+          title:"CerdikGo · Innovation Workspace", menu:"☰ Menu", login:"Masuk / Akun", settings:"⚙ Pengaturan",
+          language:"Bahasa / Language", help:"Pilih bahasa antarmuka CerdikGo", label:"Bahasa antarmuka",
+          notice:"Preferensi bahasa disimpan pada perangkat ini.", send:"Kirim ↑", placeholder:"Tulis pesan Anda...",
+          welcome:"Selamat datang di CerdikGo", closeNav:"Tutup navigasi", openNav:"Buka navigasi"
+        },
+        en: {
+          title:"CerdikGo · Innovation Workspace", menu:"☰ Menu", login:"Sign in / Account", settings:"⚙ Settings",
+          language:"Language", help:"Choose your CerdikGo interface language", label:"Interface language",
+          notice:"Your language preference is saved on this device.", send:"Send ↑", placeholder:"Write your message...",
+          welcome:"Welcome to CerdikGo", closeNav:"Close navigation", openNav:"Open navigation"
+        },
+        zh: {
+          title:"CerdikGo · 智能工作空间", menu:"☰ 菜单", login:"登录 / 账户", settings:"⚙ 设置",
+          language:"语言", help:"选择 CerdikGo 界面语言", label:"界面语言",
+          notice:"语言偏好保存在此设备上。", send:"发送 ↑", placeholder:"输入您的消息...",
+          welcome:"欢迎使用 CerdikGo", closeNav:"关闭导航", openNav:"打开导航"
+        }
+      };
+      const setText = (selector, value) => {
+        const node = document.querySelector(selector);
+        if (node) node.textContent = value;
+      };
+      function applyLanguage(code) {
+        const lang = packs[code] ? code : "id";
+        const p = packs[lang];
+        document.documentElement.lang = lang === "zh" ? "zh-CN" : lang;
+        document.documentElement.dir = "ltr";
+        setText(".top > strong", p.title);
+        setText("#navToggle", p.menu);
+        setText("#loginOpen", p.login);
+        setText("#settingsOpen", p.settings);
+        setText("#languageTitle", p.language);
+        setText("#languageHelp", p.help);
+        setText("#languageLabel", p.label);
+        setText("#languageNotice", p.notice);
+        setText("#send", p.send);
+        const message = document.querySelector("#message");
+        if (message) message.placeholder = p.placeholder;
+        if (current) current.textContent = lang.toUpperCase();
+        if (select) select.value = lang;
+        try { localStorage.setItem("cerdikgo-ui-language", lang); } catch (_) {}
+      }
+      if (open && dialog) open.addEventListener("click", () => dialog.showModal());
+      if (close && dialog) close.addEventListener("click", () => dialog.close());
+      if (dialog) dialog.addEventListener("click", event => {
+        if (event.target === dialog) dialog.close();
+      });
+      if (select) select.addEventListener("change", () => applyLanguage(select.value));
+      let saved = "id";
+      try { saved = localStorage.getItem("cerdikgo-ui-language") || "id"; } catch (_) {}
+      applyLanguage(saved);
     })();
 
   </script>
