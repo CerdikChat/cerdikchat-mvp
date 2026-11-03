@@ -1109,6 +1109,36 @@
     .main-workspace-tools .workspace-tools{margin-top:10px;border:1px solid #2675a8;border-radius:18px;background:linear-gradient(145deg,#0b2039,#102f50 55%,#0a1b31);box-shadow:0 12px 30px #06182b30}
     @media(max-width:700px){.main-workspace-tools{padding:0 12px;margin:12px auto 16px}.main-workspace-tools>.workspace-tools-trigger{min-height:54px;padding:11px 13px}.main-workspace-tools>.workspace-tools-trigger small{font-size:10px}}
 
+  
+/* Feature-request modal: keep the form reachable while Android's IME is open. */
+#requestFeatureDialog.settings-dialog {
+  width:min(560px,calc(100vw - 24px)); max-width:560px;
+  max-height:calc(var(--app-viewport-height,100vh) - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  margin:auto; padding:0; overflow-x:hidden; overflow-y:auto;
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+  scrollbar-gutter:stable; scroll-padding-block:16px;
+}
+#requestFeatureDialog .settings-content { min-width:0; width:100%; padding:clamp(14px,3.5vw,20px); }
+#requestFeatureDialog .settings-content input,
+#requestFeatureDialog .settings-content select,
+#requestFeatureDialog .settings-content textarea {
+  width:100%; min-width:0; font-size:16px; scroll-margin-block:16px;
+}
+#requestFeatureDialog .tool-actions {
+  position:sticky; bottom:-1px; z-index:1; padding:10px 0 2px;
+  background:var(--panel,#0d1b30);
+}
+#requestFeatureDialog .tool-actions .tool-button { flex:1 1 120px; }
+@media (max-width:720px), (max-height:620px) {
+  #requestFeatureDialog.settings-dialog {
+    width:calc(100vw - 16px);
+    max-height:calc(var(--app-viewport-height,100vh) - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    border-radius:14px;
+  }
+  #requestFeatureDialog .settings-content { gap:8px; }
+  #requestFeatureDialog .settings-content textarea { min-height:72px; }
+}
+
   </style>
 </head>
 
@@ -2642,6 +2672,10 @@
           };
           throw new Error(messages[result.error] || result.message || "Usulan belum berhasil dikirim.");
         }
+        if (result.accepted !== true || typeof result.requestId !== "string" || !/^[0-9a-f-]{36}$/i.test(result.requestId)) {
+          throw new Error("Server belum mengonfirmasi nomor permintaan yang valid. Jangan kirim ulang sebelum memeriksa status usulan.");
+        }
+        requestFeatureFeedback.textContent = "Usulan diterima. Nomor permintaan: " + result.requestId;
         statusEl.textContent = "Usulan berhasil diterima dengan nomor " + result.requestId + ".";
         requestFeatureDialog.close();
         requestFeatureCategory.value = ""; requestFeatureName.value = ""; requestFeatureDetails.value = "";
