@@ -668,6 +668,7 @@
         <strong>AI Workspace</strong>
         <div class="top-actions">
           <span class="pill">● AI · Beta</span>
+          <button id="loginOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
           <button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button>
         </div>
       </header>
@@ -770,15 +771,18 @@
     const authUnavailable = document.querySelector("#authUnavailable");
     const settingsDialog = document.querySelector("#settingsDialog");
     const settingsOpen = document.querySelector("#settingsOpen");
+    const loginOpen = document.querySelector("#loginOpen");
     const settingsClose = document.querySelector("#settingsClose");
     const appShell = document.querySelector(".app");
     const navToggle = document.querySelector("#navToggle");
     const navBackdrop = document.querySelector("#navBackdrop");
     const sideNavigation = document.querySelector("#sideNavigation");
 
-    settingsOpen.addEventListener("click", () => {
+    function openAccountDialog() {
       if (!settingsDialog.open) settingsDialog.showModal();
-    });
+    }
+    settingsOpen.addEventListener("click", openAccountDialog);
+    loginOpen.addEventListener("click", openAccountDialog);
     settingsClose.addEventListener("click", () => settingsDialog.close());
     settingsDialog.addEventListener("click", event => {
       if (event.target === settingsDialog) settingsDialog.close();
