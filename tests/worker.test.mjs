@@ -636,3 +636,19 @@ test("CerdikGo mobile navigation supports left-edge swipe open and drawer swipe 
   assert.match(html, /navTouchStart\.drawerOpen && dx < 0\) setNavigationOpen\(false/);
   assert.match(html, /navBackdrop\.addEventListener\("click", \(\) => setNavigationOpen\(false\)\)/);
 });
+
+
+test("workspace tools stay collapsed until the user opens the compact tools drawer", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  const start = html.indexOf('<details class="workspace-tools-drawer" id="workspaceTools">');
+  const end = html.indexOf("</details>", start);
+  assert.ok(start >= 0 && end > start);
+  const drawer = html.slice(start, end);
+  assert.match(drawer, /<summary class="workspace-tools-trigger"/);
+  assert.doesNotMatch(drawer.slice(0, 100), /\sopen(?:\s|>)/);
+  assert.match(drawer, /id="themeToggle"/);
+  assert.match(drawer, /id="voiceRecord"/);
+  assert.match(drawer, /id="analysisFile"/);
+  assert.match(drawer, /id="analyzeUpload"/);
+  assert.match(html, /\.workspace-tools-drawer\[open\]/);
+});
