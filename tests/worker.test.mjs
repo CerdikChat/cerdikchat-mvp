@@ -671,12 +671,12 @@ test("workspace tools are available only from the navigation menu until clicked"
 });
 
 
-test("Android keyboard viewport and narrow-screen overflow protections are present", async () => {
+test("Android keyboard viewport uses native browser focus scrolling without competing sticky behavior", async () => {
   const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
   assert.match(html, /window\.visualViewport/);
-  assert.match(html, /keyboard-open/);
-  assert.match(html, /window\.innerHeight - viewport\.height > 140/);
-  assert.match(html, /scrollIntoView\(\{ block: "nearest", behavior: "smooth" \}\)/);
+  assert.match(html, /visualViewport\?\.addEventListener\("resize"/);
+  assert.match(html, /Let Android Chrome own focus scrolling/);
+  assert.doesNotMatch(html, /keyboard-open|scrollIntoView/);
   assert.match(html, /html,body\{max-width:100%;overflow-x:hidden\}/);
   assert.match(html, /\.content pre\{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere/);
   assert.match(html, /\.content table\{display:block;width:100%;overflow-x:auto\}/);
