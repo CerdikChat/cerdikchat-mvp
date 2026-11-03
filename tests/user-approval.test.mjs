@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { requestUserAccess, listPendingUserAccess, decideUserAccess } from "../auth/google-auth.js";
+import { requestUserAccess, listPendingUserAccess, decideUserAccess, requireSession } from "../auth/google-auth.js";
 
 const sessionId = "atlas9-test-session";
 const sessionHash = createHash("sha256").update(sessionId).digest("hex");
@@ -193,19 +193,21 @@ test("user approval requires CSRF and an administrator session", async () => {
 });
 
 test("ordinary administrator cannot approve, reject, or suspend users", async () => {
-  const db = adminDb({ role: "admin" });
-  const response = await decideUserAccess(
-    request("/api/admin/users/decision", {
-      method: "POST",
-      body: { email: "pilot@example.com", decision: "approve" },
-      withSession: true,
-      withCsrf: true,
-    }),
-    { DB: db }
-  );
-  assert.equal(response.status, 403);
-  assert.equal((await response.json()).error, "SUPER_ADMIN_REQUIRED");
-  assert.equal(db.calls.length, 0);
+  for (const decision of ["approve", "reject", "suspend"]) {
+    const db = adminDb({ role: "admin" });
+    const response = await decideUserAccess(
+      request("/api/admin/users/decision", {
+        method: "POST",
+        body: { email: "pilot@example.com", decision },
+        withSession: true,
+        withCsrf: true,
+      }),
+      { DB: db }
+    );
+    assert.equal(response.status, 403, decision);
+    assert.equal((await response.json()).error, "SUPER_ADMIN_REQUIRED", decision);
+    assert.equal(db.calls.length, 0, decision);
+  }
 });
 
 test("approval batches standard-user creation, queue update, and audit record", async () => {
@@ -292,4 +294,24 @@ test("approval refuses the 31st active standard user and does not allocate a sea
   assert.equal(response.status, 409);
   assert.equal((await response.json()).error, "PILOT_CAP_REACHED");
   assert.match(db.calls[0][0].sql, /status = 'active' AND role = 'user'.*< 30/s);
+});
+
+
+test("pending identity without an active users row cannot obtain an authenticated session", async () => {
+  const db = {
+    prepare(sql) {
+      return {
+        bind() {
+          return { first: async () => null };
+        },
+      };
+    },
+  };
+  const result = await requireSession(
+    request("/api/auth/me", { withSession: true }),
+    { DB: db }
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.response.status, 401);
+  assert.equal((await result.response.json()).error, "AUTH_REQUIRED");
 });
