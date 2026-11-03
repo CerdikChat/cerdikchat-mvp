@@ -44,7 +44,14 @@
     .upload-copy b { display:block; font-size:12px; }
     .upload-copy span { color:#9bb4d1; font-size:10px; }
     .upload-action { padding:8px 11px; border:1px solid #42647d; border-radius:9px; background:#172d43; color:#b9c9d9; font-size:10px; font-weight:750; }
-    .upload-action:disabled { opacity:.8; cursor:not-allowed; }
+
+    .upload-action:disabled { opacity:.45; cursor:not-allowed; }
+    #uploadFileName { display:block; overflow-wrap:anywhere; }
+    #uploadPanel { flex-wrap:wrap; }
+    #uploadPanel .upload-action { min-height:38px; cursor:pointer; }
+    #uploadPanel .upload-action:focus-visible { outline:2px solid var(--mint); outline-offset:3px; }
+    @media(max-width:720px) { #uploadPanel .upload-action { margin-left:0; flex:1 1 120px; } }
+
     .workspace-foot { margin-top:9px; color:#819bb8; font-size:10px; }
     @media(max-width:720px) {
       .workspace { margin-bottom:14px; }
@@ -750,12 +757,14 @@
         </div>
         <div class="multimodal-panel">
           <div class="multi-top"><div><strong>Multimodal document workspace</strong><br><small>PDF · PNG · JPG · WEBP</small></div><span class="workspace-tag">VALIDATION GATE</span></div>
-          <div class="upload-preview">
+          <div class="upload-preview" id="uploadPanel">
             <div class="upload-symbol" aria-hidden="true">＋</div>
-            <div class="upload-copy"><b>Attach a document or image</b><span>Secure upload interface is being prepared for the authenticated pilot.</span></div>
-            <button class="upload-action" type="button" disabled aria-disabled="true">Upload · Locked</button>
+            <div class="upload-copy"><b>Attach a PDF or image</b><span id="uploadFileName">PDF, PNG, JPG, WEBP or GIF · Maximum 10 MB · One file per analysis</span></div>
+            <input id="analysisFile" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,application/pdf,image/png,image/jpeg,image/webp,image/gif" hidden>
+            <button class="upload-action" id="chooseUpload" type="button">Choose file</button>
+            <button class="upload-action" id="analyzeUpload" type="button" disabled>Analyze file</button>
           </div>
-          <div class="workspace-foot">Upload controls will be enabled after live AI inference, session security, and Android pilot checks pass. CerdikChat powers the shared core.</div>
+          <div class="workspace-foot" id="uploadHelp">Secure, authenticated analysis. Files are processed for this request and are not stored by this feature. Do not upload confidential or sensitive personal data.</div>
         </div>
       </section>
 
@@ -899,6 +908,7 @@
       authLogout.hidden = !isAuthenticated;
       input.disabled = authRequired && !isAuthenticated;
       send.disabled = authRequired && !isAuthenticated;
+      if (typeof updateUploadControls === "function") updateUploadControls();
     }
 
     function createNonce() {
@@ -1545,6 +1555,125 @@
         }
       }
     });
+
+    const analysisFile = document.querySelector("#analysisFile");
+    const chooseUpload = document.querySelector("#chooseUpload");
+    const analyzeUpload = document.querySelector("#analyzeUpload");
+    const uploadFileName = document.querySelector("#uploadFileName");
+    const uploadHelp = document.querySelector("#uploadHelp");
+    const MAX_ANALYSIS_FILE_BYTES = 10 * 1024 * 1024;
+    const ALLOWED_ANALYSIS_TYPES = new Set([
+      "application/pdf", "image/png", "image/jpeg", "image/webp", "image/gif"
+    ]);
+    let selectedAnalysisFile = null;
+    let isAnalyzingFile = false;
+
+    function updateUploadControls() {
+      const canUseUpload = isAuthenticated && currentRole !== "admin";
+      chooseUpload.disabled = !canUseUpload || isAnalyzingFile;
+      analyzeUpload.disabled = !canUseUpload || !selectedAnalysisFile || isAnalyzingFile;
+      analysisFile.disabled = !canUseUpload || isAnalyzingFile;
+    }
+
+    chooseUpload.addEventListener("click", () => {
+      if (!isAuthenticated || currentRole === "admin" || isAnalyzingFile) {
+        setStatus("Masuk melalui User Portal untuk menggunakan analisis berkas.", true);
+        return;
+      }
+      analysisFile.click();
+    });
+
+    analysisFile.addEventListener("change", () => {
+      const file = analysisFile.files?.[0] || null;
+      selectedAnalysisFile = null;
+      if (!file) {
+        uploadFileName.textContent = "PDF, PNG, JPG, WEBP atau GIF · Maksimal 10 MB";
+        updateUploadControls();
+        return;
+      }
+      if (file.size <= 0 || file.size > MAX_ANALYSIS_FILE_BYTES) {
+        analysisFile.value = "";
+        uploadFileName.textContent = "Berkas kosong atau melebihi batas 10 MB.";
+        setStatus("Ukuran berkas harus lebih dari 0 dan maksimal 10 MB.", true);
+        updateUploadControls();
+        return;
+      }
+      if (!ALLOWED_ANALYSIS_TYPES.has(file.type.toLowerCase())) {
+        analysisFile.value = "";
+        uploadFileName.textContent = "Format tidak didukung. Pilih PDF atau gambar PNG/JPG/WEBP/GIF.";
+        setStatus("Format berkas tidak didukung.", true);
+        updateUploadControls();
+        return;
+      }
+      selectedAnalysisFile = file;
+      uploadFileName.textContent = file.name + " · " + (file.size / 1024 / 1024).toFixed(2) + " MB";
+      setStatus("Berkas dipilih. Siap dianalisis.");
+      updateUploadControls();
+    });
+
+    async function analyzeSelectedFile() {
+      if (isAnalyzingFile || !selectedAnalysisFile) return;
+      if (!isAuthenticated || currentRole === "admin") {
+        setStatus("Analisis berkas hanya tersedia untuk sesi User Portal yang terverifikasi.", true);
+        return;
+      }
+      isAnalyzingFile = true;
+      updateUploadControls();
+      analyzeUpload.textContent = "Analyzing…";
+      uploadHelp.textContent = "Mengirim berkas melalui koneksi aman untuk analisis. Jangan tutup halaman.";
+      setStatus("Memvalidasi sesi dan memproses berkas…");
+      try {
+        if (!csrfToken) await refreshCsrfToken();
+        const formData = new FormData();
+        formData.append("file", selectedAnalysisFile, selectedAnalysisFile.name);
+        formData.append("prompt", input.value.trim().slice(0, 1000));
+        const response = await fetch("/api/analyze", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Accept": "application/json", "X-CSRF-Token": csrfToken },
+          body: formData
+        });
+        let payload;
+        try { payload = await response.json(); }
+        catch { throw new Error("Server mengirim respons analisis yang tidak valid."); }
+        if (!response.ok) {
+          if (payload.error === "CSRF_VALIDATION_FAILED") {
+            await refreshCsrfToken();
+            throw new Error("Token keamanan diperbarui. Silakan ulangi analisis.");
+          }
+          const messages = {
+            AUTH_REQUIRED: "Sesi berakhir. Silakan masuk kembali.",
+            ENCRYPTED_PDF_UNSUPPORTED: "PDF terenkripsi atau dilindungi kata sandi belum didukung.",
+            FILE_TOO_LARGE: "Ukuran berkas melebihi batas 10 MB.",
+            UNSUPPORTED_FILE_TYPE: "Format berkas tidak didukung.",
+            FILE_SIGNATURE_MISMATCH: "Isi berkas tidak sesuai dengan ekstensi atau tipe yang dinyatakan.",
+            AI_QUOTA_EXCEEDED: "Kuota AI sementara tercapai. Coba lagi nanti."
+          };
+          throw new Error(messages[payload.error] || payload.error || "Analisis berkas gagal.");
+        }
+        if (typeof payload.reply !== "string" || !payload.reply.trim()) {
+          throw new Error("AI tidak mengembalikan hasil analisis.");
+        }
+        addMessage("user", "Analisis berkas: " + selectedAnalysisFile.name);
+        const answerElement = addMessage("assistant", "");
+        renderBasicMarkdown(answerElement, payload.reply);
+        setStatus("Analisis selesai. Berkas tidak disimpan oleh fitur ini.");
+        selectedAnalysisFile = null;
+        analysisFile.value = "";
+        uploadFileName.textContent = "PDF, PNG, JPG, WEBP atau GIF · Maksimal 10 MB";
+        input.value = "";
+        updateCount();
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : "Analisis berkas gagal.", true);
+      } finally {
+        isAnalyzingFile = false;
+        analyzeUpload.textContent = "Analyze file";
+        uploadHelp.textContent = "Secure, authenticated analysis. Files are processed for this request and are not stored by this feature. Do not upload confidential or sensitive personal data.";
+        updateUploadControls();
+      }
+    }
+
+    analyzeUpload.addEventListener("click", analyzeSelectedFile);
 
     async function sendMessage(event) {
       event.preventDefault();
