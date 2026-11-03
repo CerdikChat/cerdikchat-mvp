@@ -70,7 +70,7 @@ async function signedGoogleFixture() {
   };
 }
 
-function adminDb({ role = "admin", pending = [], target = null } = {}) {
+function adminDb({ role = "admin", pending = [], target = null, targetUser = null, activeCount = 0, batchResults = null } = {}) {
   const calls = [];
   const db = {
     prepare(sql) {
@@ -86,7 +86,8 @@ function adminDb({ role = "admin", pending = [], target = null } = {}) {
               }
               if (sql.includes("FROM user_access_requests WHERE status = 'pending'")) return target;
               if (sql.includes("FROM user_access_requests WHERE email")) return target;
-              if (sql.includes("FROM users WHERE email")) return null;
+              if (sql.includes("SELECT COUNT(*) AS active_count FROM users")) return { active_count: activeCount };
+              if (sql.includes("FROM users WHERE email")) return targetUser;
               return null;
             },
             all: async () => ({ results: pending }),
@@ -97,7 +98,7 @@ function adminDb({ role = "admin", pending = [], target = null } = {}) {
     },
     batch: async (statements) => {
       calls.push(statements);
-      return [{ meta: { changes: 1 } }, { meta: { changes: 1 } }, { meta: { changes: 1 } }];
+      return batchResults || [{ meta: { changes: 1 } }, { meta: { changes: 1 } }, { meta: { changes: 1 } }];
     },
     calls,
   };
@@ -231,4 +232,63 @@ test("approval batches standard-user creation, queue update, and audit record", 
   assert.match(db.calls[0][0].sql, /COUNT\(\*\).*status = 'active' AND role = 'user'.*< 30/s);
   assert.match(db.calls[0][0].sql, /INSERT INTO users.*SELECT/s);
   assert.match(db.calls[0][1].sql, /EXISTS \(SELECT 1 FROM users/s);
+});
+
+
+test("Super Admin can suspend a standard user and batch-revoke every active session", async () => {
+  const db = adminDb({
+    role: "super_admin",
+    targetUser: {
+      google_sub: "pilot-google-sub",
+      email: "pilot@example.com",
+      status: "active",
+      role: "user",
+    },
+  });
+  const response = await decideUserAccess(
+    request("/api/admin/users/decision", {
+      method: "POST",
+      body: { email: "pilot@example.com", decision: "suspend" },
+      withSession: true,
+      withCsrf: true,
+    }),
+    { DB: db }
+  );
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { updated: true, status: "disabled", role: "user" });
+  assert.equal(db.calls.length, 1);
+  assert.equal(db.calls[0].length, 3);
+  assert.match(db.calls[0][0].sql, /UPDATE users SET status = 'disabled'.*role = 'user'/s);
+  assert.match(db.calls[0][1].sql, /UPDATE sessions SET revoked_at = \? WHERE google_sub = \? AND revoked_at IS NULL/);
+  assert.match(db.calls[0][2].sql, /INSERT INTO admin_audit_log/);
+});
+
+test("approval refuses the 31st active standard user and does not allocate a seat", async () => {
+  const db = adminDb({
+    role: "super_admin",
+    activeCount: 30,
+    target: {
+      google_sub: "verified-google-sub-31",
+      email: "pilot31@example.com",
+      display_name: "Pilot 31",
+      status: "pending",
+    },
+    batchResults: [
+      { meta: { changes: 0 } },
+      { meta: { changes: 0 } },
+      { meta: { changes: 0 } },
+    ],
+  });
+  const response = await decideUserAccess(
+    request("/api/admin/users/decision", {
+      method: "POST",
+      body: { email: "pilot31@example.com", decision: "approve" },
+      withSession: true,
+      withCsrf: true,
+    }),
+    { DB: db }
+  );
+  assert.equal(response.status, 409);
+  assert.equal((await response.json()).error, "PILOT_CAP_REACHED");
+  assert.match(db.calls[0][0].sql, /status = 'active' AND role = 'user'.*< 30/s);
 });
