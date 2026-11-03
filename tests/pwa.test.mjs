@@ -200,3 +200,33 @@ test("Administrator and User portals have separate Google sign-in surfaces", () 
   assert.match(indexHtml, /id="adminPlaceholder"/);
   assert.match(indexHtml, /fetch\("\/api\/admin\/session"/);
 });
+
+
+test("failed chat sends restore the user's draft for retry", () => {
+  assert.match(indexHtml, /input\.value = message;\s*updateCount\(\);/);
+  assert.match(indexHtml, /Pesan Anda sudah dipulihkan ke kolom penulisan/);
+  assert.match(indexHtml, /send\.disabled = true;[\s\S]*?input\.disabled = true;/);
+});
+
+test("editing a sent message is transactional and preserves the old transcript on failure", () => {
+  assert.match(indexHtml, /const requestHistory = isEditing \? history\.slice\(0, editIndex\) : history\.slice\(\);/);
+  assert.match(indexHtml, /if \(isEditing\) \{\s*rowsToReplace\.forEach\(row => row\.remove\(\)\);\s*history = requestHistory\.slice\(\);/);
+  assert.match(indexHtml, /if \(isEditing\) \{\s*if \(userRow\) userRow\.remove\(\);/);
+  assert.match(indexHtml, /editingHistoryIndex = null;\s*editingMessageRow = null;/);
+});
+
+test("mobile navigation drawer has accessible controls and close behavior", () => {
+  assert.match(indexHtml, /id="navToggle"[^>]*aria-expanded="false"[^>]*aria-controls="sideNavigation"/);
+  assert.match(indexHtml, /id="sideNavigation"[^>]*aria-label="Navigasi utama"/);
+  assert.match(indexHtml, /id="navBackdrop"[^>]*aria-label="Tutup navigasi"/);
+  assert.match(indexHtml, /appShell\.classList\.toggle\("nav-open"\)/);
+  assert.match(indexHtml, /navBackdrop\.addEventListener\("click", closeNavigation\)/);
+  assert.match(indexHtml, /event\.key === "Escape"\) closeNavigation\(\)/);
+});
+
+test("mobile navigation respects safe areas, reduced motion, and desktop collapse", () => {
+  assert.match(indexHtml, /env\(safe-area-inset-top\)/);
+  assert.match(indexHtml, /env\(safe-area-inset-bottom\)/);
+  assert.match(indexHtml, /prefers-reduced-motion:reduce/);
+  assert.match(indexHtml, /appShell\.classList\.toggle\("nav-collapsed"\)/);
+});
