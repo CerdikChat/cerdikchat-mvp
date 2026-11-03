@@ -616,6 +616,26 @@
     @media(prefers-reduced-motion:reduce){.app>.side,.app>.nav-backdrop{transition:none}}
 
 
+
+    /* Android keyboard and narrow-screen resilience */
+    html,body{max-width:100%;overflow-x:hidden}
+    .app,.main,.feed,.bubble,.content,.composer-wrap,.composer{min-width:0;max-width:100%}
+    .feed{overflow-x:clip;overflow-wrap:anywhere}
+    .content,.content p,.content li,.content blockquote,.content table{max-width:100%;overflow-wrap:anywhere;word-break:normal}
+    .content pre{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+    .content img,.content video,.content svg{max-width:100%;height:auto}
+    .content table{display:block;width:100%;overflow-x:auto}
+    .composer textarea,.workspace-tools textarea{min-width:0;max-width:100%;overflow-wrap:anywhere}
+    .composer-wrap{z-index:20;isolation:isolate}
+    body.keyboard-open .composer-wrap{position:sticky;bottom:0;padding-bottom:max(6px,env(safe-area-inset-bottom));background:var(--bg,#eef4fa);box-shadow:0 -8px 22px #10243b18}
+    body.keyboard-open .composer{box-shadow:0 4px 20px #10243b20}
+    body.keyboard-open .feed{scroll-margin-bottom:16px}
+    @media(max-width:720px){
+      .content pre{font-size:12px}
+      .composer textarea{max-height:min(24vh,112px)}
+      body.keyboard-open .composer-wrap{padding-left:8px;padding-right:8px}
+    }
+
     /* CerdikGo Innovation Workspace redesign — conversation-first, responsive. */
     .workspace-intro{max-width:760px;margin:4px auto 20px;text-align:left}
     .workspace-intro .eyebrow{font-size:10px;letter-spacing:2px;color:#42d9df}
@@ -1142,13 +1162,26 @@
     });
 
     function syncAppViewportHeight() {
-      const height = window.visualViewport?.height || window.innerHeight;
+      const viewport = window.visualViewport;
+      const height = viewport?.height || window.innerHeight;
       document.documentElement.style.setProperty("--app-viewport-height", Math.round(height) + "px");
+      const keyboardVisible = Boolean(viewport && window.innerHeight - viewport.height > 140);
+      document.body.classList.toggle("keyboard-open", keyboardVisible);
     }
     syncAppViewportHeight();
     window.addEventListener("resize", syncAppViewportHeight, { passive: true });
     window.visualViewport?.addEventListener("resize", syncAppViewportHeight, { passive: true });
     window.visualViewport?.addEventListener("scroll", syncAppViewportHeight, { passive: true });
+    const messageComposer = document.getElementById("message");
+    messageComposer?.addEventListener("focus", () => {
+      window.setTimeout(() => {
+        syncAppViewportHeight();
+        messageComposer.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }, 180);
+    });
+    messageComposer?.addEventListener("blur", () => {
+      window.setTimeout(syncAppViewportHeight, 120);
+    });
 
     let authRequired = false;
     let authConfigured = false;
