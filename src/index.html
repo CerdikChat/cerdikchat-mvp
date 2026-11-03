@@ -1022,11 +1022,28 @@
         <dialog id="requestFeatureDialog" class="settings-dialog" aria-labelledby="requestFeatureTitle">
           <form method="dialog" id="requestFeatureForm" class="settings-content">
             <h2 id="requestFeatureTitle">Usulkan fitur</h2>
-            <label for="requestFeatureName">Nama fitur</label>
-            <input id="requestFeatureName" maxlength="100" required>
-            <label for="requestFeatureDetails">Manfaat dan kebutuhan</label>
-            <textarea id="requestFeatureDetails" maxlength="1000" rows="4" required></textarea>
-            <p class="tool-feedback">Usulan akan disalin ke clipboard untuk Anda kirim sendiri. Form ini belum mengirim tiket ke server.</p>
+            <label for="requestFeatureCategory">Jenis fitur yang diinginkan</label>
+            <select id="requestFeatureCategory" required>
+              <option value="">Pilih jenis fitur</option>
+              <option value="AI & Analisis">AI & Analisis</option>
+              <option value="Dokumen & Produktivitas">Dokumen & Produktivitas</option>
+              <option value="Riset & Knowledge Base">Riset & Knowledge Base</option>
+              <option value="Voice & Multimodal">Voice & Multimodal</option>
+              <option value="Business & Strategi">Business & Strategi</option>
+              <option value="IoT & Konektivitas">IoT & Konektivitas</option>
+              <option value="Keamanan & Admin">Keamanan & Admin</option>
+              <option value="UI/UX & Aksesibilitas">UI/UX & Aksesibilitas</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+            <label for="requestFeatureName">Nama fitur yang diusulkan</label>
+            <input id="requestFeatureName" maxlength="100" required placeholder="Contoh: Ringkasan dokumen otomatis">
+            <label for="requestFeatureDetails">Deskripsi fitur</label>
+            <textarea id="requestFeatureDetails" maxlength="1200" rows="3" required placeholder="Jelaskan cara kerja fitur yang diharapkan."></textarea>
+            <label for="requestFeatureProblem">Masalah atau kebutuhan yang ingin diselesaikan</label>
+            <textarea id="requestFeatureProblem" maxlength="800" rows="3" required placeholder="Apa kendala pengguna saat ini?"></textarea>
+            <label for="requestFeatureBenefit">Manfaat yang diharapkan</label>
+            <textarea id="requestFeatureBenefit" maxlength="800" rows="2" required placeholder="Apa hasil atau dampak yang diharapkan?"></textarea>
+            <p class="tool-feedback">Formulir ini menyiapkan ringkasan usulan dan menyalinnya ke clipboard agar Anda kirim sendiri. Belum ada tiket yang dikirim atau disimpan di server.</p>
             <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Salin usulan</button></div>
           </form>
         </dialog>
@@ -2200,7 +2217,10 @@
     const requestFeatureOpen = document.querySelector("#featureRequestOpen");
     const requestFeatureSubmit = document.querySelector("#requestFeatureSubmit");
     const requestFeatureName = document.querySelector("#requestFeatureName");
+    const requestFeatureCategory = document.querySelector("#requestFeatureCategory");
     const requestFeatureDetails = document.querySelector("#requestFeatureDetails");
+    const requestFeatureProblem = document.querySelector("#requestFeatureProblem");
+    const requestFeatureBenefit = document.querySelector("#requestFeatureBenefit");
 
 
     const chooseAnalysisFile = document.querySelector("#chooseAnalysisFile");
@@ -2234,17 +2254,25 @@
 
     requestFeatureOpen.addEventListener("click", () => requestFeatureDialog.showModal());
     requestFeatureSubmit.addEventListener("click", async () => {
+      const category = requestFeatureCategory.value;
       const name = requestFeatureName.value.trim();
       const details = requestFeatureDetails.value.trim();
-      if (!name || !details) { statusEl.textContent = "Lengkapi nama fitur dan manfaatnya."; return; }
-      const summary = "Usulan fitur CerdikGo\nNama: " + name + "\nKebutuhan: " + details;
+      const problem = requestFeatureProblem.value.trim();
+      const benefit = requestFeatureBenefit.value.trim();
+      if (!category || !name || !details || !problem || !benefit) {
+        statusEl.textContent = "Lengkapi semua kolom usulan fitur sebelum menyalin.";
+        return;
+      }
+      const summary = "USULAN FITUR CERDIKGO\\nJenis: " + category + "\\nNama fitur: " + name +
+        "\\nDeskripsi: " + details + "\\nMasalah/kebutuhan: " + problem + "\\nManfaat: " + benefit;
       try {
         await navigator.clipboard.writeText(summary);
-        statusEl.textContent = "Usulan disalin. Kirimkan secara manual kepada tim pengembang.";
+        statusEl.textContent = "Ringkasan usulan disalin. Kirimkan secara manual kepada tim pengembang.";
         requestFeatureDialog.close();
-        requestFeatureName.value = ""; requestFeatureDetails.value = "";
+        requestFeatureCategory.value = ""; requestFeatureName.value = ""; requestFeatureDetails.value = "";
+        requestFeatureProblem.value = ""; requestFeatureBenefit.value = "";
       } catch {
-        statusEl.textContent = "Clipboard tidak tersedia. Salin teks usulan secara manual.";
+        statusEl.textContent = "Clipboard tidak tersedia. Usulan belum terkirim; coba salin secara manual.";
       }
     });
 
