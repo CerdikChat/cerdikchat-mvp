@@ -1479,11 +1479,13 @@ export default {
 
     // The Admin Console is a distinct document and is served only after a server-side role check.
     if (url.pathname === "/admin") {
+      if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405, headers: { allow: "GET", "cache-control": "no-store" } });
+      if (!env.ASSETS || typeof env.ASSETS.fetch !== "function") return new Response("Admin Console asset unavailable.", { status: 503, headers: { "cache-control": "no-store" } });
       const gate = await adminSession(new Request(new URL("/api/admin/session", url), { headers: request.headers }), env);
-      if (!gate.ok) {
-        if (!gate.headers.get("content-type")?.includes("application/json")) return gate;
+      if (gate.status !== 200) {
         const payload = await gate.clone().json().catch(() => ({}));
-        if (gate.status !== 200) return new Response(payload.error === "ADMIN_REQUIRED" ? "403 — Admin access required." : "Admin Console is not available until governance access is verified.", { status: gate.status, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+        const message = payload.error === "ADMIN_REQUIRED" ? "403 — Admin access required." : "Admin Console is not available until governance access is verified.";
+        return new Response(message, { status: gate.status, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
       }
       const asset = await env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));
       return new Response(asset.body, { status: asset.status, headers: { ...Object.fromEntries(asset.headers), "cache-control": "no-store" } });
