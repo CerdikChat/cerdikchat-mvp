@@ -710,3 +710,12 @@ test("chat messages expose Copy actions and user messages expose Edit actions", 
   assert.match(html, /Pesan dimuat ke kolom tulis/);
   assert.match(html, /aria-expanded/);
 });
+
+
+test("mobile typing avoids undersized focused controls and resizes for Android keyboard", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /interactive-widget=resizes-content/);
+  assert.match(html, /\.composer textarea,[\s\S]*?font-size: 16px !important/);
+  assert.match(html, /\.composer textarea:focus,[\s\S]*?font-size: 16px !important/);
+  assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/i);
+});
