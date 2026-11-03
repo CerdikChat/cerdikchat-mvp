@@ -327,11 +327,13 @@ test("concurrent approvals with one seat remaining allocate exactly one pilot se
   const db = {
     prepare(sql) {
       return {
+        sql,
         first: async () => sql.includes("SELECT COUNT(*) AS active_count FROM users")
           ? { active_count: activeCount }
           : null,
         bind(...values) {
           return {
+            sql,
             first: async () => {
               if (sql.includes("FROM sessions s JOIN users u")) {
                 return { google_sub: "super-admin-sub", email: "super-admin@example.com", role: "super_admin" };
