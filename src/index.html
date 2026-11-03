@@ -2000,6 +2000,16 @@
     window.addEventListener("pagehide", stopMicTracks);
 
     
+
+    const protectionCard = document.getElementById("protectionStatusCard");
+    const accountDialog = document.getElementById("settingsDialog");
+    if (protectionCard && accountDialog) {
+      protectionCard.addEventListener("click", event => {
+        event.preventDefault();
+        if (!accountDialog.open) accountDialog.showModal();
+      });
+    }
+
     // Browser connectivity indicator only; AI availability is verified per request.
     (() => {
       const bar = document.getElementById("networkStatus");
