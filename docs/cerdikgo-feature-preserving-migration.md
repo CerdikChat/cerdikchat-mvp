@@ -170,3 +170,29 @@ Implementation has started on `atlas9/cerdikgo-feature-preserving-migration`:
 - PWA/service-worker runtime behavior remains a separate acceptance gate.
 - CI has not yet been observed for the latest migration commits; do not treat tests as passed until GitHub Actions reports success.
 - No D1 migration was applied; no Preview or Production deployment was performed.
+
+
+## Access governance implementation — Preview-only foundation
+
+### Human-approved role policy
+- Designated Super Admin identity: `dr.ngyoonseong@gmail.com`.
+- Keep the Admin role separate; it is not an alias for the Super Admin account.
+- The Super Admin identity must be bound to a verified Google identity and a controlled bootstrap procedure. Never grant elevated privileges from a browser-supplied email, UI selection, or request payload.
+- No Admin account email has been designated in this change. Admin provisioning remains a separate authorized action.
+- Autobots/automation do not sign in as either human administrator and do not impersonate administrator sessions.
+
+### Schema foundation
+- `migrations/0003_access_governance.sql` adds role, approval timestamps/expiry, access request records, and an append-oriented administrator audit log.
+- The migration is a schema artifact only. It has **not** been applied to Preview or Production D1.
+- Newly approved access is intended to expire 76 hours after approval. This is distinct from the existing 8-hour session lifetime.
+- Existing active accounts are not silently expired or rewritten by this migration; a reviewed reconciliation policy is required before rollout.
+- Approval/rejection endpoints, role-enforcement integration, expiry enforcement, email notification delivery, and their regression tests remain incomplete until implemented and tested together.
+
+### Email notification dependency
+- The repository scan did not identify an application email provider binding or provider SDK/configuration in this migration branch.
+- The Google Drive backup workflow credentials are unrelated and must never be reused for email delivery.
+- Admin notification recipient confirmed: `dr.ngyoonseong@gmail.com`.
+- Notification delivery remains fail-closed/disabled until the existing provider is identified and its Worker binding/configuration is verified. Do not add a new provider, secret, or paid service without separate authorization.
+
+### Change boundary
+All work remains on `atlas9/cerdikgo-feature-preserving-migration`. No Production Worker, Production D1, OAuth client, secret, billing, or database write has been performed.
