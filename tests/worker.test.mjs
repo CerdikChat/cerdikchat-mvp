@@ -600,14 +600,19 @@ test("CerdikGo branding and composer controls are accessible on mobile", async (
 });
 
 
-test("CerdikGo light theme keeps composer text and workspace cards readable", async () => {
+test("CerdikGo supports persistent dark, light and light-blue themes with readable controls", async () => {
   const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
-  assert.match(html, /html\[data-theme="light"\]\s*\{\s*color-scheme:\s*light/);
-  assert.match(html, /html\[data-theme="light"\] \.composer textarea[\s\S]*?color:#172b43!important/);
-  assert.match(html, /html\[data-theme="light"\] \.composer textarea::placeholder \{color:#71839a!important;opacity:1\}/);
-  assert.match(html, /\.menu-module\{[^}]*background:var\(--panel\)/);
-  assert.match(html, /html\[data-theme="light"\] \.composer-wrap/);
+  assert.match(html, /const themeModes = \["dark", "light", "light-blue"\]/);
+  assert.match(html, /localStorage\.getItem\("cerdikgo-theme"\)/);
+  assert.match(html, /localStorage\.setItem\("cerdikgo-theme", next\)/);
+  for (const theme of ["light", "light-blue"]) {
+    assert.match(html, new RegExp('html\\[data-theme="' + theme + '"\\]\\s*\\{\\s*color-scheme:\\s*light'));
+    assert.match(html, new RegExp('html\\[data-theme="' + theme + '"\\] \\.composer textarea[\\s\\S]*?color:'));
+    assert.match(html, new RegExp('html\\[data-theme="' + theme + '"\\] \\.composer-wrap'));
+    assert.match(html, new RegExp('html\\[data-theme="' + theme + '"\\] button:focus-visible'));
+  }
   assert.match(html, /caret-color:#075fc8!important/);
+  assert.match(html, /caret-color:#087bd1!important/);
 });
 
 
