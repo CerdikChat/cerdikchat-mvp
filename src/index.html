@@ -1427,6 +1427,9 @@
       utterance.lang = "id-ID";
       utterance.rate = 1;
       utterance.pitch = 1;
+      utterance.onstart = () => { if (voiceConversationState) voiceConversationState.textContent = "Jawaban AI sedang dibacakan…"; };
+      utterance.onend = () => { if (voiceReplyEnabled && voiceConversationState) voiceConversationState.textContent = "Jawaban selesai. Aktifkan mode suara lagi untuk pertanyaan berikutnya."; };
+      utterance.onerror = () => { if (voiceReplyEnabled && voiceConversationState) voiceConversationState.textContent = "Suara tidak dapat diputar di browser ini. Anda tetap dapat membaca jawaban AI."; };
       window.speechSynthesis.speak(utterance);
     }
 
@@ -2062,7 +2065,6 @@
         voiceRecognition.maxAlternatives = 1;
         voiceTranscriptBuffer = "";
         voiceReplyEnabled = true;
-        voiceConversationActive = true;
         voiceConversation.setAttribute("aria-pressed", "true");
         voiceConversation.textContent = "⏹ Hentikan mode suara";
         voiceConversationState.textContent = "Mendengarkan… Silakan berbicara.";
