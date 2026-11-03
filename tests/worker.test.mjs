@@ -527,6 +527,6 @@ test("Android workspace provides an accessible mobile navigation and keyboard-aw
   assert.match(html, /id="navBackdrop"[^>]*aria-label="Tutup navigasi"/);
   assert.match(html, /max-device-width:\s*720px/);
   assert.match(html, /visualViewport/);
-  assert.match(html, /body,\\.app,\\.main\\{min-height:var\\(--app-viewport-height/);
+  assert.match(html, /body,\.app,\.main\{min-height:var\(--app-viewport-height/);
   assert.match(html, /prefers-reduced-motion:reduce/);
 });
