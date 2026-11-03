@@ -63,7 +63,7 @@ test("Protection Mode and Hybrid Connectivity have visible quick access below ne
   assert.match(html, /SIMULATOR ONLY/);
   assert.match(html, /LOGIN-VERIFIED/);
   assert.match(html, /quickProtectionOpen.*settingsDialog\.showModal/s);
-  assert.match(html, /quickConnectivityOpen.*connectivityDemoOpen/s);
+  assert.match(html, /quickConnectivityOpen.*connectivityOpen/s);
 });
 
 test("Hybrid connectivity simulator is interactive, local-only, and clearly labelled", () => {
