@@ -28,6 +28,7 @@
 import { authConfig, googleLogin, currentSession, logout, requireSession } from "./auth/google-auth.js";
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
 import { handleVoiceTranscription } from "./multimodal/voice-assistance.js";
+import { submitFeatureRequest } from "./feature-requests.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1471,6 +1472,7 @@ export default {
     const url = new URL(request.url);
     const corsHeaders = getCorsHeaders(request);
 
+    if (url.pathname === "/api/feature-requests") return submitFeatureRequest(request, env, corsHeaders);
     if (url.pathname === "/api/auth/config" && request.method === "GET") return authConfig(request, env);
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
