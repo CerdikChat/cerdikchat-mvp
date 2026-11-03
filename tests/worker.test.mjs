@@ -549,3 +549,36 @@ test("CerdikGo workspace uses a conversation-first innovation dashboard", async 
   assert.match(html, /@media\(max-width:720px\)/);
   assert.match(html, /prefers-reduced-motion:reduce/);
 });
+
+
+test("CerdikGo exposes honest network, Protection Mode and Hybrid Connectivity status panels", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="networkStatus"/);
+  assert.match(html, /navigator\.onLine/);
+  assert.match(html, /Layanan AI diverifikasi saat permintaan dijalankan/);
+  assert.match(html, /id="protectionStatusCard"/);
+  assert.match(html, /Protection Mode/);
+  assert.match(html, /Perlindungan sesi & akses/);
+  assert.match(html, /Hybrid Connectivity/);
+  assert.match(html, /SIMULATOR/);
+  assert.match(html, /Fiber · Cellular · Wi-Fi Mesh · LoRa/);
+  assert.match(html, /Belum ada koneksi radio mesh atau LoRa fisik/);
+});
+
+test("CerdikGo workbench sidebar exposes planned modules without claiming activation", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /class="side-tools"/);
+  assert.match(html, /Voice Studio/);
+  assert.match(html, /Usulkan fitur \/ IoT/);
+  assert.match(html, /SOP & Knowledge Base/);
+  assert.match(html, /Business & Strategy/);
+  assert.match(html, /PLANNED · NOT CONNECTED/);
+  assert.match(html, /SIMULATOR ONLY/);
+});
+
+test("CerdikGo header uses the approved blue-green wordmark rather than a placeholder C", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /Cerdik<span>CerdikGo/); // guarded below by explicit brand markup
+  assert.match(html, /AI WORKSPACE FOR REAL ACTION/);
+  assert.doesNotMatch(html, /<div class="logo" aria-hidden="true">C<\/div>/);
+});
