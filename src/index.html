@@ -648,14 +648,14 @@
 
   
 
-    .workspace-tools-drawer{width:min(100%,760px);margin:0 auto 10px;position:relative;z-index:3}
+    .workspace-tools-drawer{width:100%;margin:10px 0;position:relative;z-index:3}
     .workspace-tools-trigger{display:flex;align-items:center;gap:9px;width:fit-content;max-width:100%;padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);box-shadow:0 2px 10px rgba(20,45,70,.08);font-size:12px;cursor:pointer;list-style:none}
     .workspace-tools-trigger::-webkit-details-marker{display:none}
     .workspace-tools-trigger>span{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--accent,#1599c8);color:white;font-size:15px}
     .workspace-tools-trigger small{color:var(--muted);font-size:10px}
     .workspace-tools-drawer[open] .workspace-tools-trigger>span{transform:rotate(45deg)}
-    .workspace-tools-drawer .workspace-tools{margin:8px auto 0}
-    @media(max-width:700px){.workspace-tools-drawer{width:100%;margin-bottom:8px}.workspace-tools-trigger{padding:8px 12px}}
+    .workspace-tools-drawer .workspace-tools{width:100%;max-width:none;margin:8px 0 0;padding:10px}
+    @media(max-width:700px){.workspace-tools-drawer{width:100%;margin:8px 0}.workspace-tools-trigger{width:100%;padding:10px 12px;justify-content:flex-start}}
     .workspace-tools{max-width:900px;margin:14px auto 0;padding:14px;border:1px solid #1b527c;border-radius:16px;background:var(--panel,#0d2138)}
     .tool-heading,.tool-actions{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
     .tool-heading span,.tool-upload small,.tool-feedback{color:#9bb0c8;font-size:12px}
@@ -901,6 +901,49 @@
         </div>
       </div>
 
+<details class="workspace-tools-drawer" id="workspaceTools">
+        <summary class="workspace-tools-trigger"><span aria-hidden="true">＋</span><strong>Alat kerja</strong><small>Ketuk untuk membuka fitur</small></summary>
+        <section class="workspace-tools" aria-label="Alat workspace">
+        <div class="tool-heading"><strong>Alat kerja</strong><span>Fitur tambahan CerdikGo</span></div>
+        <div class="tool-actions">
+          <button type="button" id="themeToggle" class="tool-button" aria-pressed="false">☼ Tema terang</button>
+          <button type="button" id="voiceRecord" class="tool-button">🎙 Mulai rekam</button>
+        </div>
+        <p id="voiceState" class="tool-feedback" role="status">Mikrofon hanya aktif setelah Anda menekan tombol rekam.</p>
+        <section id="voiceReview" class="tool-upload" hidden aria-label="Tinjau transkripsi suara">
+          <label for="voiceTranscript">Tinjau dan edit transkripsi sebelum dikirim</label>
+          <textarea id="voiceTranscript" rows="4" maxlength="8000" spellcheck="true"></textarea>
+          <div class="tool-actions">
+            <button id="voiceSendToAI" class="tool-button" type="button">Kirim ke AI</button>
+            <button id="voiceUseTranscript" class="tool-button" type="button">Gunakan di pesan</button>
+            <button id="voiceDiscard" class="tool-button" type="button">Buang</button>
+          </div>
+        </section>
+        <div class="tool-upload">
+          <label>Analisis dokumen (PDF/JPG/PNG/WEBP/GIF)</label>
+          <div class="file-action-row">
+            <input id="analysisFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,application/pdf,image/jpeg,image/png,image/webp,image/gif" hidden>
+            <button type="button" id="chooseAnalysisFile" class="tool-button file-pick" aria-controls="analysisFile">▣ <span>File</span></button>
+            <span id="selectedFileName" class="selected-file-name" aria-live="polite">Belum ada file dipilih</span>
+            <button type="button" id="analyzeUpload" class="tool-button analyze-file">Analisis file</button>
+          </div>
+          <small id="uploadHelp">Pemrosesan hanya dilanjutkan jika pemindai malware privat ClamAV aktif. Tanpa scanner, server menolak upload (fail-closed).</small>
+        </div>
+        <dialog id="requestFeatureDialog" class="settings-dialog" aria-labelledby="requestFeatureTitle">
+          <form method="dialog" id="requestFeatureForm" class="settings-content">
+            <h2 id="requestFeatureTitle">Usulkan fitur</h2>
+            <label for="requestFeatureName">Nama fitur</label>
+            <input id="requestFeatureName" maxlength="100" required>
+            <label for="requestFeatureDetails">Manfaat dan kebutuhan</label>
+            <textarea id="requestFeatureDetails" maxlength="1000" rows="4" required></textarea>
+            <p class="tool-feedback">Usulan akan disalin ke clipboard untuk Anda kirim sendiri. Form ini belum mengirim tiket ke server.</p>
+            <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Salin usulan</button></div>
+          </form>
+        </dialog>
+        </section>
+      </details>
+
+
       <h2>Tentang beta</h2>
       <div class="side-note">
         CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting
@@ -975,48 +1018,7 @@
       </section>
 
 
-      <details class="workspace-tools-drawer" id="workspaceTools">
-        <summary class="workspace-tools-trigger"><span aria-hidden="true">＋</span><strong>Alat kerja</strong><small>Voice · Tema · File</small></summary>
-        <section class="workspace-tools" aria-label="Alat workspace">
-        <div class="tool-heading"><strong>Alat kerja</strong><span>Fitur tambahan CerdikGo</span></div>
-        <div class="tool-actions">
-          <button type="button" id="themeToggle" class="tool-button" aria-pressed="false">☼ Tema terang</button>
-          <button type="button" id="voiceRecord" class="tool-button">🎙 Mulai rekam</button>
-        </div>
-        <p id="voiceState" class="tool-feedback" role="status">Mikrofon hanya aktif setelah Anda menekan tombol rekam.</p>
-        <section id="voiceReview" class="tool-upload" hidden aria-label="Tinjau transkripsi suara">
-          <label for="voiceTranscript">Tinjau dan edit transkripsi sebelum dikirim</label>
-          <textarea id="voiceTranscript" rows="4" maxlength="8000" spellcheck="true"></textarea>
-          <div class="tool-actions">
-            <button id="voiceSendToAI" class="tool-button" type="button">Kirim ke AI</button>
-            <button id="voiceUseTranscript" class="tool-button" type="button">Gunakan di pesan</button>
-            <button id="voiceDiscard" class="tool-button" type="button">Buang</button>
-          </div>
-        </section>
-        <div class="tool-upload">
-          <label>Analisis dokumen (PDF/JPG/PNG/WEBP/GIF)</label>
-          <div class="file-action-row">
-            <input id="analysisFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,application/pdf,image/jpeg,image/png,image/webp,image/gif" hidden>
-            <button type="button" id="chooseAnalysisFile" class="tool-button file-pick" aria-controls="analysisFile">▣ <span>File</span></button>
-            <span id="selectedFileName" class="selected-file-name" aria-live="polite">Belum ada file dipilih</span>
-            <button type="button" id="analyzeUpload" class="tool-button analyze-file">Analisis file</button>
-          </div>
-          <small id="uploadHelp">Pemrosesan hanya dilanjutkan jika pemindai malware privat ClamAV aktif. Tanpa scanner, server menolak upload (fail-closed).</small>
-        </div>
-        <dialog id="requestFeatureDialog" class="settings-dialog" aria-labelledby="requestFeatureTitle">
-          <form method="dialog" id="requestFeatureForm" class="settings-content">
-            <h2 id="requestFeatureTitle">Usulkan fitur</h2>
-            <label for="requestFeatureName">Nama fitur</label>
-            <input id="requestFeatureName" maxlength="100" required>
-            <label for="requestFeatureDetails">Manfaat dan kebutuhan</label>
-            <textarea id="requestFeatureDetails" maxlength="1000" rows="4" required></textarea>
-            <p class="tool-feedback">Usulan akan disalin ke clipboard untuk Anda kirim sendiri. Form ini belum mengirim tiket ke server.</p>
-            <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Salin usulan</button></div>
-          </form>
-        </dialog>
-        </section>
-      </details>
-
+      
       <div class="composer-wrap">
         <form id="chatForm" class="composer">
           <div class="composer-heading"><span>Pesan Anda</span><button type="button" id="expandComposer" class="composer-expand" aria-expanded="false" aria-controls="message">⤢ Perbesar kolom</button></div>
