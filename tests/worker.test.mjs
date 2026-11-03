@@ -584,3 +584,17 @@ test("CerdikGo header uses the approved blue-green wordmark rather than a placeh
   assert.match(html, /AI WORKSPACE FOR REAL ACTION/);
   assert.doesNotMatch(html, /<div class="logo" aria-hidden="true">C<\/div>/);
 });
+
+
+test("CerdikGo branding and composer controls are accessible on mobile", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /cerdikgo-mark/);
+  assert.match(html, /CerdikGo · Innovation Workspace/);
+  assert.match(html, /INNOVATION WORKSPACE/);
+  assert.match(html, /id="expandComposer"/);
+  assert.match(html, /aria-expanded="false" aria-controls="message"/);
+  assert.match(html, /id="chooseAnalysisFile"/);
+  assert.match(html, /id="selectedFileName"/);
+  assert.match(html, /class="tool-button analyze-file"/);
+  assert.match(html, /analysisFile\?\.addEventListener\("change"/);
+});
