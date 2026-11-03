@@ -265,6 +265,14 @@
 
     .msg.user .avatar { background: #284e83; }
 
+    .bubble{position:relative}
+    .message-tools{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:7px}
+    .message-tools-toggle{border:1px solid var(--border);border-radius:9px;background:var(--panel2);color:var(--text);padding:5px 10px;font:inherit;font-size:12px;cursor:pointer}
+    .message-tools-menu{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:6px}
+    .message-tools-menu[hidden]{display:none}
+    .message-tools-menu button{border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);padding:7px 12px;font:inherit;font-size:12px;cursor:pointer}
+    .message-tools button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    @media(hover:hover) and (pointer:fine){.message-tools{opacity:.55}.msg:hover .message-tools{opacity:1}}
     .bubble {
       flex: 1;
       min-width: 0;
@@ -1854,6 +1862,70 @@
       body.textContent = text;
 
       wrap.append(who, body);
+
+      const tools = document.createElement("div");
+      tools.className = "message-tools";
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "message-tools-toggle";
+      toggle.textContent = "⋯";
+      toggle.setAttribute("aria-label", "Aksi pesan");
+      toggle.setAttribute("aria-expanded", "false");
+      const menu = document.createElement("div");
+      menu.className = "message-tools-menu";
+      menu.hidden = true;
+
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.textContent = "Salin";
+      copyButton.addEventListener("click", async () => {
+        const textToCopy = body.innerText || body.textContent || "";
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(textToCopy);
+          } else {
+            const helper = document.createElement("textarea");
+            helper.value = textToCopy;
+            helper.setAttribute("readonly", "");
+            helper.style.position = "fixed";
+            helper.style.opacity = "0";
+            document.body.append(helper);
+            helper.select();
+            const copied = document.execCommand("copy");
+            helper.remove();
+            if (!copied) throw new Error("copy unavailable");
+          }
+          setStatus("Teks pesan berhasil disalin.");
+        } catch {
+          setStatus("Tidak dapat menyalin otomatis. Pilih dan salin teks secara manual.", true);
+        }
+        menu.hidden = true;
+        toggle.setAttribute("aria-expanded", "false");
+      });
+      menu.append(copyButton);
+
+      if (role === "user") {
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.textContent = "Edit";
+        editButton.addEventListener("click", () => {
+          if (isSending || (authRequired && !isAuthenticated)) return;
+          input.value = body.innerText || body.textContent || "";
+          updateCount();
+          input.focus();
+          menu.hidden = true;
+          toggle.setAttribute("aria-expanded", "false");
+          setStatus("Pesan dimuat ke kolom tulis. Periksa dan kirim ulang setelah diedit.");
+        });
+        menu.append(editButton);
+      }
+
+      toggle.addEventListener("click", () => {
+        menu.hidden = !menu.hidden;
+        toggle.setAttribute("aria-expanded", String(!menu.hidden));
+      });
+      tools.append(toggle);
+      wrap.append(tools, menu);
       row.append(avatar, wrap);
       feed.append(row);
 
