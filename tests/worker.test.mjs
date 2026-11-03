@@ -741,7 +741,13 @@ test("feature request form captures category, description, problem and expected 
   assert.match(html, /\\\\nDeskripsi: /);
   assert.match(html, /\\\\nMasalah\/kebutuhan: /);
   assert.match(html, /\\\\nManfaat: /);
-  assert.match(html, /Belum ada tiket yang dikirim atau disimpan di server/);
+  assert.match(html, /Usulan dikirim ke server dan disimpan setelah sesi Anda diverifikasi/);
+  assert.doesNotMatch(html, /menyalinnya ke clipboard agar Anda kirim sendiri/);
+  const toolsDrawerEnd = html.indexOf("</details>", html.indexOf('id="workspaceTools"'));
+  const featureDialogStart = html.indexOf('<dialog id="requestFeatureDialog"');
+  assert.ok(toolsDrawerEnd > 0 && featureDialogStart > toolsDrawerEnd, "feature request dialog must be outside the collapsed workspace tools drawer");
+  assert.match(html, /<button value="cancel" class="tool-button">Batal<\\/button>/);
+  assert.match(html, /<button id="requestFeatureSubmit" type="button" class="tool-button">Kirim usulan<\\/button>/);
 });
 
 
