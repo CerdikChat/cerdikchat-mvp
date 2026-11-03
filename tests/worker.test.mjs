@@ -623,3 +623,16 @@ test("SOP, Business and Hybrid modules are contained in the navigation, not the 
   assert.match(nav, /<details class="menu-module" id="hybridModule"/);
   assert.doesNotMatch(main, /id="sopModule"|id="businessModule"|id="hybridModule"/);
 });
+
+
+test("CerdikGo mobile navigation supports left-edge swipe open and drawer swipe close", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /Mobile edge-swipe navigation/);
+  assert.match(html, /touchstart/);
+  assert.match(html, /touchend/);
+  assert.match(html, /touchcancel/);
+  assert.match(html, /navSwipeThreshold = 68/);
+  assert.match(html, /!navTouchStart\.drawerOpen && dx > 0\) setNavigationOpen\(true/);
+  assert.match(html, /navTouchStart\.drawerOpen && dx < 0\) setNavigationOpen\(false/);
+  assert.match(html, /navBackdrop\.addEventListener\("click", \(\) => setNavigationOpen\(false\)\)/);
+});
