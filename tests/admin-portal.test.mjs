@@ -130,3 +130,15 @@ test("Admin Console document rejects non-GET methods", async () => {
   );
   assert.equal(response.status, 405);
 });
+
+
+test("governance compatibility migration adds only missing columns and preserves existing role schema", async () => {
+  const usersMigration = await readFile(new URL("../migrations/0001_users.sql", import.meta.url), "utf8");
+  const governanceMigration = await readFile(new URL("../migrations/0006_access_governance_compat.sql", import.meta.url), "utf8");
+  assert.match(usersMigration, /role TEXT NOT NULL DEFAULT 'user'/);
+  assert.match(governanceMigration, /ADD COLUMN approved_at/);
+  assert.match(governanceMigration, /ADD COLUMN access_expires_at/);
+  assert.match(governanceMigration, /CREATE TABLE IF NOT EXISTS access_requests/);
+  assert.doesNotMatch(governanceMigration, /ADD COLUMN role/);
+  assert.doesNotMatch(governanceMigration, /CREATE TABLE IF NOT EXISTS admin_audit_log/);
+});
