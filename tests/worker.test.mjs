@@ -681,3 +681,19 @@ test("Android keyboard viewport and narrow-screen overflow protections are prese
   assert.match(html, /\.content pre\{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere/);
   assert.match(html, /\.content table\{display:block;width:100%;overflow-x:auto\}/);
 });
+
+
+test("CerdikGo offers opt-in voice conversation with speech input and spoken AI replies", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="voiceConversation"/);
+  assert.match(html, /aria-pressed="false"/);
+  assert.match(html, /window\.SpeechRecognition \|\| window\.webkitSpeechRecognition/);
+  assert.match(html, /voiceRecognition\.lang = "id-ID"/);
+  assert.match(html, /voiceRecognition\.continuous = false/);
+  assert.match(html, /voiceRecognition\.start\(\)/);
+  assert.match(html, /voiceRecognition\.stop\(\)/);
+  assert.match(html, /speakVoiceReply\(answer\)/);
+  assert.match(html, /window\.speechSynthesis\.speak\(utterance\)/);
+  assert.match(html, /stopVoiceConversation\(/);
+  assert.match(html, /Periksa izin mikrofon/);
+});
