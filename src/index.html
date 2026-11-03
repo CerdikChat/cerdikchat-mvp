@@ -792,8 +792,8 @@
         <div class="tool-upload">
           <label for="analysisFile">Analisis dokumen (PDF/JPG/PNG/WEBP/GIF)</label>
           <input id="analysisFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,application/pdf,image/jpeg,image/png,image/webp,image/gif">
-          <button type="button" id="analyzeUpload" class="tool-button" disabled>Analisis file</button>
-          <small id="uploadHelp">Upload dikunci sampai layanan pemindai malware privat ClamAV tersedia dan tervalidasi. API menerapkan fail-closed.</small>
+          <button type="button" id="analyzeUpload" class="tool-button">Analisis file</button>
+          <small id="uploadHelp">Pemrosesan hanya dilanjutkan jika pemindai malware privat ClamAV aktif. Tanpa scanner, server menolak upload (fail-closed).</small>
         </div>
         <dialog id="requestFeatureDialog" class="settings-dialog" aria-labelledby="requestFeatureTitle">
           <form method="dialog" id="requestFeatureForm" class="settings-content">
@@ -1742,6 +1742,35 @@
         requestFeatureName.value = ""; requestFeatureDetails.value = "";
       } catch {
         statusEl.textContent = "Clipboard tidak tersedia. Salin teks usulan secara manual.";
+      }
+    });
+
+
+    analyzeUpload.addEventListener("click", async () => {
+      const selected = analysisFile.files?.[0];
+      if (!selected) { statusEl.textContent = "Pilih satu file terlebih dahulu."; return; }
+      if (!csrfToken) { statusEl.textContent = "Sesi keamanan belum siap. Muat ulang halaman."; return; }
+      if (selected.size > 10 * 1024 * 1024) { statusEl.textContent = "Ukuran file maksimal 10 MB."; return; }
+      analyzeUpload.disabled = true;
+      analyzeUpload.textContent = "Memeriksa file…";
+      try {
+        const data = new FormData();
+        data.append("file", selected, selected.name);
+        data.append("prompt", "Analisis dokumen ini secara terstruktur. Pisahkan fakta, temuan, risiko, dan ketidakpastian.");
+        const response = await fetch("/api/analyze", { method: "POST", headers: { "X-CSRF-Token": csrfToken }, body: data, credentials: "same-origin" });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "ANALYSIS_FAILED");
+        input.value = "Analisis file " + selected.name + ":\n\n" + result.reply;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        statusEl.textContent = "Analisis selesai. Tinjau hasil sebelum dikirim.";
+      } catch (error) {
+        const code = String(error.message || "ANALYSIS_FAILED");
+        statusEl.textContent = code === "FILE_SCAN_UNAVAILABLE"
+          ? "Upload ditolak dengan aman: layanan pemindai malware privat belum tersedia."
+          : "Analisis file gagal: " + code.slice(0,120);
+      } finally {
+        analyzeUpload.disabled = false;
+        analyzeUpload.textContent = "Analisis file";
       }
     });
 
