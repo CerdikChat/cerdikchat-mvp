@@ -722,3 +722,19 @@ test("mobile typing avoids undersized focused controls and resizes for Android k
   assert.match(html, /\.composer textarea:focus,[\s\S]*?font-size: 16px !important/);
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/i);
 });
+
+
+test("feature request form captures category, description, problem and expected benefit", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="requestFeatureCategory" required/);
+  assert.match(html, /id="requestFeatureName" maxlength="100" required/);
+  assert.match(html, /id="requestFeatureDetails" maxlength="1200" rows="3" required/);
+  assert.match(html, /id="requestFeatureProblem" maxlength="800" rows="3" required/);
+  assert.match(html, /id="requestFeatureBenefit" maxlength="800" rows="2" required/);
+  assert.match(html, /USULAN FITUR CERDIKGO/);
+  assert.match(html, /\\\\nJenis: /);
+  assert.match(html, /\\\\nDeskripsi: /);
+  assert.match(html, /\\\\nMasalah\/kebutuhan: /);
+  assert.match(html, /\\\\nManfaat: /);
+  assert.match(html, /Belum ada tiket yang dikirim atau disimpan di server/);
+});
