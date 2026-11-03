@@ -10,6 +10,7 @@ function authenticatedAdminEnv(role = "super_admin", accessExpiresAt = null) {
     DB: {
       prepare(sql) {
         return {
+          all: async () => ({ results: [] }),
           bind() {
             return {
               first: async () => {
