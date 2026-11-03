@@ -928,8 +928,10 @@
         <div class="tool-actions">
           <button type="button" id="themeToggle" class="tool-button" aria-pressed="false">☼ Tema terang</button>
           <button type="button" id="voiceRecord" class="tool-button">🎙 Mulai rekam</button>
+          <button type="button" id="voiceConversation" class="tool-button" aria-pressed="false">🎧 Mode percakapan suara</button>
         </div>
         <p id="voiceState" class="tool-feedback" role="status">Mikrofon hanya aktif setelah Anda menekan tombol rekam.</p>
+        <p id="voiceConversationState" class="tool-feedback" role="status" aria-live="polite">Mode suara nonaktif. Aktifkan secara manual untuk berbicara dan mendengar jawaban AI.</p>
         <section id="voiceReview" class="tool-upload" hidden aria-label="Tinjau transkripsi suara">
           <label for="voiceTranscript">Tinjau dan edit transkripsi sebelum dikirim</label>
           <textarea id="voiceTranscript" rows="4" maxlength="8000" spellcheck="true"></textarea>
@@ -1414,6 +1416,20 @@
 
     let history = [];
     let isSending = false;
+    let voiceReplyEnabled = false;
+    let voiceRecognition = null;
+    let voiceRecognitionActive = false;
+    let voiceTranscriptBuffer = "";
+    function speakVoiceReply(text) {
+      if (!voiceReplyEnabled || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "id-ID";
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+
 
     function updateCount() {
       count.textContent = String(input.value.length);
@@ -1968,6 +1984,7 @@
 
         renderBasicMarkdown(answerElement, answer);
         addSpeechPlaybackControl(answerElement, answer);
+        speakVoiceReply(answer);
 
         history.push(
           { role: "user", content: message },
@@ -2009,6 +2026,87 @@
     // CerdikGo feature-preserving controls. All privileged operations remain server-authorized.
     const themeToggle = document.querySelector("#themeToggle");
     const voiceRecord = document.querySelector("#voiceRecord");
+    const voiceConversation = document.querySelector("#voiceConversation");
+    const voiceConversationState = document.querySelector("#voiceConversationState");
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    function stopVoiceConversation(message = "Mode percakapan suara dihentikan.") {
+      voiceReplyEnabled = false;
+      if (voiceRecognition && voiceRecognitionActive) {
+        try { voiceRecognition.stop(); } catch {}
+      }
+      voiceRecognitionActive = false;
+      voiceRecognition = null;
+      voiceConversation?.setAttribute("aria-pressed", "false");
+      if (voiceConversation) voiceConversation.textContent = "🎧 Mode percakapan suara";
+      if (voiceConversationState) voiceConversationState.textContent = message;
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    }
+    voiceConversation?.addEventListener("click", () => {
+      if (voiceReplyEnabled) {
+        stopVoiceConversation();
+        return;
+      }
+      if (!SpeechRecognitionAPI) {
+        voiceConversationState.textContent = "Browser belum mendukung pengenalan suara. Gunakan tombol Mulai rekam sebagai alternatif.";
+        return;
+      }
+      if (authRequired && !isAuthenticated) {
+        voiceConversationState.textContent = "Silakan masuk menggunakan akun yang diizinkan sebelum menggunakan mode suara.";
+        return;
+      }
+      try {
+        voiceRecognition = new SpeechRecognitionAPI();
+        voiceRecognition.lang = "id-ID";
+        voiceRecognition.continuous = false;
+        voiceRecognition.interimResults = true;
+        voiceRecognition.maxAlternatives = 1;
+        voiceTranscriptBuffer = "";
+        voiceReplyEnabled = true;
+        voiceConversationActive = true;
+        voiceConversation.setAttribute("aria-pressed", "true");
+        voiceConversation.textContent = "⏹ Hentikan mode suara";
+        voiceConversationState.textContent = "Mendengarkan… Silakan berbicara.";
+        voiceRecognition.onresult = event => {
+          let finalText = "";
+          let interimText = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0]?.transcript || "";
+            if (event.results[i].isFinal) finalText += transcript;
+            else interimText += transcript;
+          }
+          if (finalText.trim()) voiceTranscriptBuffer += (voiceTranscriptBuffer ? " " : "") + finalText.trim();
+          voiceConversationState.textContent = interimText
+            ? "Mendengar: " + interimText
+            : (voiceTranscriptBuffer ? "Transkripsi: " + voiceTranscriptBuffer : "Mendengarkan…");
+        };
+        voiceRecognition.onerror = event => {
+          stopVoiceConversation("Pengenalan suara gagal (" + event.error + "). Periksa izin mikrofon dan coba lagi.");
+        };
+        voiceRecognition.onend = () => {
+          voiceRecognitionActive = false;
+          const spoken = voiceTranscriptBuffer.trim();
+          if (!voiceReplyEnabled) return;
+          if (!spoken) {
+            stopVoiceConversation("Tidak ada ucapan yang terdeteksi. Tekan mode suara untuk mencoba lagi.");
+            return;
+          }
+          if (spoken.length > MAX_MESSAGE_LENGTH) {
+            stopVoiceConversation("Ucapan terlalu panjang. Batas pesan 8.000 karakter.");
+            return;
+          }
+          voiceConversationState.textContent = "Mengirim ucapan ke AI…";
+          input.value = spoken;
+          updateCount();
+          if (typeof form.requestSubmit === "function") form.requestSubmit();
+          else send.click();
+        };
+        voiceRecognitionActive = true;
+        voiceRecognition.start();
+      } catch (error) {
+        stopVoiceConversation("Mode suara tidak dapat dimulai. Periksa izin mikrofon browser.");
+      }
+    });
+
     const voiceState = document.querySelector("#voiceState");
     const voiceReview = document.querySelector("#voiceReview");
     const voiceTranscript = document.querySelector("#voiceTranscript");
