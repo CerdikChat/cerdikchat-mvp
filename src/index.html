@@ -706,6 +706,16 @@
     .analyze-file{flex:0 0 auto}
     @media(max-width:480px){.file-action-row{gap:6px}.selected-file-name{font-size:10px}.analyze-file,.file-pick{padding:8px 9px}}
     html[data-theme="light"] .composer-expand{background:#e7f0f8;color:#17283d}
+
+    .menu-module-list{display:grid;gap:6px;margin:8px 0 4px}
+    .menu-module{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+    .menu-module summary{display:grid;grid-template-columns:20px 1fr;gap:4px 7px;align-items:center;padding:10px;color:var(--text);font-size:12px;font-weight:750;cursor:pointer;list-style:none}
+    .menu-module summary::-webkit-details-marker{display:none}
+    .menu-module summary:after{content:"＋";grid-column:1;grid-row:1;color:var(--accent,#28b9d2)}
+    .menu-module[open] summary:after{content:"−"}
+    .menu-module summary span{grid-column:2;grid-row:1}
+    .menu-module summary small{grid-column:2;color:var(--muted);font-size:9px;font-weight:800}
+    .menu-module p{margin:0;padding:0 10px 11px 37px;color:var(--muted);font-size:11px;line-height:1.5}
     .side-workflows{margin:18px 0 10px;padding:14px 0 8px;border-top:1px solid var(--line)}
     .side-workflows h2{margin:0 0 8px;color:#8fa9c6;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}
     .menu-workflow{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;margin:4px 0;padding:8px 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--text);text-align:left;font:inherit;cursor:pointer}
@@ -873,7 +883,13 @@
         <a href="#workspaceTools">🎙 <span>Voice Studio</span></a>
         <a href="#featureRequestOpen">＋ <span>Usulkan fitur / IoT</span></a>
         <a href="#sopModule">▤ <span>SOP & Knowledge Base</span></a>
-        <a href="#businessModule">◈ <span>Business & Strategy</span></a>
+        <a href="#featureRequestOpen">＋ <span>Usulkan fitur / IoT</span></a>
+        <a href="#workspaceTools">⚙ <span>SOP, Business & Connectivity</span></a>
+                <div class="menu-module-list" aria-label="Modul workspace">
+          <details class="menu-module" id="sopModule"><summary>▤ <span>SOP & Knowledge Base</span><small>PLANNED · NOT CONNECTED</small></summary><p>Ruang dokumentasi dan prosedur operasional. Belum terhubung ke repositori SOP.</p></details>
+          <details class="menu-module" id="businessModule"><summary>◈ <span>Business & Strategy</span><small>PLANNED · NOT CONNECTED</small></summary><p>Ruang kerja analisis bisnis dan strategi. Modul khusus belum diaktifkan.</p></details>
+          <details class="menu-module" id="hybridModule"><summary>⌘ <span>Hybrid Connectivity</span><small>SIMULATOR ONLY</small></summary><p>Mode saat ini hanya simulator. Belum ada koneksi radio mesh atau LoRa fisik yang dinyatakan aktif.</p></details>
+        </div>
       </div>
 
       <h2>Tentang beta</h2>
@@ -987,16 +1003,6 @@
             <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Salin usulan</button></div>
           </form>
         </dialog>
-      </section>
-
-      <section class="module-preview" id="sopModule" aria-label="SOP and Knowledge Base">
-        <h2>SOP & Knowledge Base</h2><p>Ruang modul untuk dokumentasi dan prosedur operasional. Belum terhubung ke repositori SOP.</p><span class="module-state">PLANNED · NOT CONNECTED</span>
-      </section>
-      <section class="module-preview" id="businessModule" aria-label="Business and Strategy">
-        <h2>Business & Strategy</h2><p>Ruang kerja analisis bisnis dan strategi. Modul khusus belum diaktifkan.</p><span class="module-state">PLANNED · NOT CONNECTED</span>
-      </section>
-      <section class="module-preview" id="hybridModule" aria-label="Hybrid Connectivity simulator">
-        <h2>Hybrid Connectivity</h2><p>Mode saat ini hanya simulator. Belum ada koneksi radio mesh atau LoRa fisik yang dinyatakan aktif.</p><span class="module-state">SIMULATOR ONLY</span>
       </section>
 
       <div class="composer-wrap">
