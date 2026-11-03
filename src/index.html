@@ -794,6 +794,15 @@
           <button type="button" id="featureRequestOpen" class="tool-button">＋ Usulkan fitur</button>
         </div>
         <p id="voiceState" class="tool-feedback" role="status">Mikrofon hanya aktif setelah Anda menekan tombol rekam.</p>
+        <section id="voiceReview" class="tool-upload" hidden aria-label="Tinjau transkripsi suara">
+          <label for="voiceTranscript">Tinjau dan edit transkripsi sebelum dikirim</label>
+          <textarea id="voiceTranscript" rows="4" maxlength="8000" spellcheck="true"></textarea>
+          <div class="tool-actions">
+            <button id="voiceSendToAI" class="tool-button" type="button">Kirim ke AI</button>
+            <button id="voiceUseTranscript" class="tool-button" type="button">Gunakan di pesan</button>
+            <button id="voiceDiscard" class="tool-button" type="button">Buang</button>
+          </div>
+        </section>
         <div class="tool-upload">
           <label for="analysisFile">Analisis dokumen (PDF/JPG/PNG/WEBP/GIF)</label>
           <input id="analysisFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,application/pdf,image/jpeg,image/png,image/webp,image/gif">
@@ -1743,6 +1752,11 @@
     const themeToggle = document.querySelector("#themeToggle");
     const voiceRecord = document.querySelector("#voiceRecord");
     const voiceState = document.querySelector("#voiceState");
+    const voiceReview = document.querySelector("#voiceReview");
+    const voiceTranscript = document.querySelector("#voiceTranscript");
+    const voiceSendToAI = document.querySelector("#voiceSendToAI");
+    const voiceUseTranscript = document.querySelector("#voiceUseTranscript");
+    const voiceDiscard = document.querySelector("#voiceDiscard");
     const analysisFile = document.querySelector("#analysisFile");
     const analyzeUpload = document.querySelector("#analyzeUpload");
     const requestFeatureDialog = document.querySelector("#requestFeatureDialog");
@@ -1853,9 +1867,10 @@
             const response = await fetch("/api/voice/transcribe", { method: "POST", headers: { "X-CSRF-Token": csrfToken }, body: data, credentials: "same-origin" });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || "TRANSCRIPTION_FAILED");
-            input.value = result.text;
-            input.dispatchEvent(new Event("input", { bubbles: true }));
-            voiceState.textContent = "Transkripsi siap ditinjau. Periksa teks sebelum mengirim ke AI.";
+            voiceTranscript.value = String(result.text || "").slice(0, 8000);
+            voiceReview.hidden = false;
+            voiceState.textContent = "Transkripsi siap. Edit bila perlu, lalu pilih tindakan berikutnya.";
+            voiceTranscript.focus();
           } catch (error) {
             voiceState.textContent = "Transkripsi gagal: " + String(error.message || "Kesalahan layanan").slice(0,120);
           }
@@ -1873,6 +1888,30 @@
       if (recordingStream) recordingStream.getTracks().forEach(track => track.stop());
       recordingStream = null;
     }
+    voiceUseTranscript.addEventListener("click", () => {
+      const transcript = voiceTranscript.value.trim();
+      if (!transcript) { voiceState.textContent = "Transkripsi masih kosong."; return; }
+      input.value = transcript;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      voiceReview.hidden = true;
+      voiceState.textContent = "Transkripsi dimasukkan ke pesan. Tinjau kembali sebelum mengirim.";
+      input.focus();
+    });
+    voiceSendToAI.addEventListener("click", () => {
+      const transcript = voiceTranscript.value.trim();
+      if (!transcript) { voiceState.textContent = "Transkripsi masih kosong."; return; }
+      if (transcript.length > 8000) { voiceState.textContent = "Transkripsi melebihi batas pesan."; return; }
+      input.value = transcript;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      voiceReview.hidden = true;
+      voiceState.textContent = "Mengirim transkripsi ke AI…";
+      form.requestSubmit();
+    });
+    voiceDiscard.addEventListener("click", () => {
+      voiceTranscript.value = "";
+      voiceReview.hidden = true;
+      voiceState.textContent = "Transkripsi dibuang. Rekaman tidak disimpan.";
+    });
     window.addEventListener("pagehide", stopMicTracks);
 
   </script>
