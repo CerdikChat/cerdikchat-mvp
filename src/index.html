@@ -864,6 +864,51 @@
     }
     html[data-theme="light"] .composer textarea::placeholder {color:#71839a!important;opacity:1}
     html[data-theme="light"] .composer textarea:disabled {opacity:1;-webkit-text-fill-color:#71839a!important}
+
+    /* Light Blue theme: cool, calm surfaces with stronger CerdikGo blue identity. */
+    html[data-theme="light-blue"] {
+      color-scheme:light;
+      --bg:#e8f4ff;--panel:#f8fcff;--panel2:#d9ecfb;--line:#b8d5eb;
+      --text:#123653;--muted:#4c6e8b;--blue:#087bd1;--mint:#078b91;--danger:#b42336;
+    }
+    html[data-theme="light-blue"] body,
+    html[data-theme="light-blue"] .app,
+    html[data-theme="light-blue"] .main,
+    html[data-theme="light-blue"] .feed {background:#e8f4ff!important;color:#123653!important}
+    html[data-theme="light-blue"] .side,
+    html[data-theme="light-blue"] .top,
+    html[data-theme="light-blue"] .status-deck {background:#f4faff!important;color:#123653!important;border-color:#c4dced}
+    html[data-theme="light-blue"] .brand-wordmark strong,
+    html[data-theme="light-blue"] .mobile-brand .brand-wordmark strong,
+    html[data-theme="light-blue"] .top > strong,
+    html[data-theme="light-blue"] .welcome h1,
+    html[data-theme="light-blue"] .content,
+    html[data-theme="light-blue"] .module-preview h2 {color:#123653!important}
+    html[data-theme="light-blue"] .brand-wordmark small,
+    html[data-theme="light-blue"] .welcome p,
+    html[data-theme="light-blue"] .module-preview p,
+    html[data-theme="light-blue"] .who,
+    html[data-theme="light-blue"] .hint,
+    html[data-theme="light-blue"] .composer-heading,
+    html[data-theme="light-blue"] .tool-heading span,
+    html[data-theme="light-blue"] .tool-upload small,
+    html[data-theme="light-blue"] .tool-feedback {color:#4c6e8b!important}
+    html[data-theme="light-blue"] .suggest,
+    html[data-theme="light-blue"] .module-preview,
+    html[data-theme="light-blue"] .workspace-launcher,
+    html[data-theme="light-blue"] .workspace-tools,
+    html[data-theme="light-blue"] .composer {background:#f8fcff!important;color:#123653!important;border-color:#b8d5eb!important;box-shadow:0 5px 18px rgba(24,91,145,.08)}
+    html[data-theme="light-blue"] .composer-wrap {background:#deeffc!important;border-top-color:#c2dced}
+    html[data-theme="light-blue"] .composer textarea,
+    html[data-theme="light-blue"] .settings-content input,
+    html[data-theme="light-blue"] .settings-content textarea,
+    html[data-theme="light-blue"] .tool-upload input:not([hidden]) {color:#123653!important;background:#fff!important;caret-color:#087bd1!important;-webkit-text-fill-color:#123653!important;border-color:#b8d5eb!important}
+    html[data-theme="light-blue"] .composer textarea::placeholder {color:#64819b!important;opacity:1}
+    html[data-theme="light-blue"] .composer-expand,
+    html[data-theme="light-blue"] .tool-button,
+    html[data-theme="light-blue"] .menu-workflow,
+    html[data-theme="light-blue"] .prompt {background:#e2f1fc!important;color:#17496e!important;border-color:#b4d4eb!important}
+
     html[data-theme="light"] .composer-expand,
     html[data-theme="light"] .tool-button,
     html[data-theme="light"] .menu-workflow,
@@ -2280,18 +2325,29 @@
       if (expanded) input.focus();
     });
 
+    const themeModes = ["dark", "light", "light-blue"];
+    const themeLabels = {
+      dark: "☾ Tema Gelap",
+      light: "☼ Tema Terang",
+      "light-blue": "◉ Tema Light Blue"
+    };
     const savedTheme = localStorage.getItem("cerdikgo-theme");
-    if (savedTheme === "light") document.documentElement.dataset.theme = "light";
+    if (themeModes.includes(savedTheme)) document.documentElement.dataset.theme = savedTheme;
+    else document.documentElement.dataset.theme = "dark";
     function syncThemeButton() {
-      const light = document.documentElement.dataset.theme === "light";
-      themeToggle.textContent = light ? "☾ Tema gelap" : "☼ Tema terang";
-      themeToggle.setAttribute("aria-pressed", String(light));
+      const current = document.documentElement.dataset.theme || "dark";
+      const index = themeModes.indexOf(current);
+      const next = themeModes[(index + 1) % themeModes.length];
+      themeToggle.textContent = themeLabels[current] + " · Ganti";
+      themeToggle.setAttribute("aria-label", "Tema saat ini " + themeLabels[current] + ". Ketuk untuk beralih ke " + themeLabels[next]);
+      themeToggle.setAttribute("aria-pressed", String(current !== "dark"));
     }
     syncThemeButton();
     themeToggle.addEventListener("click", () => {
-      const light = document.documentElement.dataset.theme !== "light";
-      document.documentElement.dataset.theme = light ? "light" : "dark";
-      localStorage.setItem("cerdikgo-theme", light ? "light" : "dark");
+      const current = document.documentElement.dataset.theme || "dark";
+      const next = themeModes[(themeModes.indexOf(current) + 1) % themeModes.length];
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem("cerdikgo-theme", next);
       syncThemeButton();
     });
 
