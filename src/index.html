@@ -643,15 +643,7 @@
       .workspace-intro{margin:5px 2px 15px}
       .workspace-intro h1{font-size:clamp(25px,7vw,32px)}
       .workspace-intro p{font-size:12px}
-      .workspace-launcher{padding:13px;border-radius:16px}
-      .launcher-heading{align-items:flex-start}
-      .launcher-heading strong{font-size:13px}
-      .suggestions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-      .suggest{min-height:126px;padding:11px;border-radius:12px}
-      .suggest b{font-size:12px}
-      .suggest small{font-size:10px}
     }
-    @media(max-width:360px){.workspace-launcher{padding:10px}.suggest{min-height:132px;padding:9px}}
     @media(prefers-reduced-motion:reduce){.suggest{transition:none!important;transform:none!important}}
 
   
@@ -698,6 +690,16 @@
     .status-pill { display:inline-flex; align-self:flex-start; margin-top:2px; padding:3px 8px; border-radius:20px; background:#087d4a; color:white; font-size:10px; font-weight:800; letter-spacing:.3px; }
     .hybrid .status-pill { background:#087bb3; }
     .status-chevron { margin-left:auto; color:#d7eaff; font-size:22px; }
+
+    .side-workflows{margin:18px 0 10px;padding:14px 0 8px;border-top:1px solid var(--line)}
+    .side-workflows h2{margin:0 0 8px;color:#8fa9c6;font-size:10px;letter-spacing:1.2px;text-transform:uppercase}
+    .menu-workflow{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;margin:4px 0;padding:8px 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--text);text-align:left;font:inherit;cursor:pointer}
+    .menu-workflow:hover,.menu-workflow:focus-visible{border-color:#28618a;background:var(--panel2);outline:none}
+    .menu-workflow>span:first-child{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:8px;background:#12375a;color:#58d5df;font-size:17px}
+    .menu-workflow strong,.menu-workflow small{display:block}
+    .menu-workflow strong{font-size:12px;font-weight:750}
+    .menu-workflow small{margin-top:2px;color:var(--muted);font-size:10px}
+    .side-tools{margin-top:12px}
     .side-tools { margin-top:22px; padding-top:14px; border-top:1px solid var(--line); }
     .side-tools a { display:flex; align-items:center; gap:9px; width:100%; margin:3px 0; padding:10px 11px; border:1px solid transparent; border-radius:11px; color:#d7e4f8; text-decoration:none; font-size:13px; }
     .side-tools a:hover { border-color:var(--line); background:var(--panel2); }
@@ -756,6 +758,15 @@
         data-prompt="Jelaskan topik ini dari dasar, beri contoh praktis, lalu tutup dengan ringkasan: ">
         ◎ Belajar topik baru
       </button>
+
+      <div class="side-workflows" aria-label="Alur kerja utama">
+        <h2>Alur kerja</h2>
+        <button class="menu-workflow" type="button" data-prompt="Buat kerangka analisis strategis untuk ide atau masalah berikut. Sertakan tujuan, asumsi, opsi, risiko, dan rekomendasi:"><span aria-hidden="true">⌘</span><span><strong>Analisis Strategis</strong><small>Keputusan, opsi, dan risiko</small></span></button>
+        <button class="menu-workflow" type="button" data-prompt="Analisis dokumen atau informasi berikut. Buat ringkasan eksekutif, temuan utama, risiko, dan tindak lanjut:"><span aria-hidden="true">▤</span><span><strong>Dokumen & Ringkasan</strong><small>Temuan dan insight utama</small></span></button>
+        <button class="menu-workflow" type="button" data-prompt="Rancang riset untuk topik berikut. Sertakan pertanyaan penelitian, metodologi, sumber data, dan keterbatasan:"><span aria-hidden="true">⌕</span><span><strong>Riset & Eksplorasi</strong><small>Pertanyaan, metode, sumber</small></span></button>
+        <button class="menu-workflow" type="button" data-prompt="Bantu saya menyusun rencana kerja yang terukur. Sertakan prioritas, tahapan, PIC, tenggat, dan indikator keberhasilan:"><span aria-hidden="true">✓</span><span><strong>Rencana & Eksekusi</strong><small>Prioritas dan langkah nyata</small></span></button>
+        <button type="button" id="featureRequestOpen" class="menu-workflow"><span aria-hidden="true">＋</span><span><strong>Usulan Fitur</strong><small>Ajukan ide dan kebutuhan baru</small></span></button>
+      </div>
 
       <div class="side-tools" aria-label="Alat kerja">
         <h2>Alat kerja</h2>
@@ -836,27 +847,6 @@
             <p>Satu ruang untuk berpikir lebih jernih, mengolah informasi, dan mengubah ide menjadi langkah nyata.</p>
           </div>
 
-          <div class="workspace-launcher" aria-label="Mulai pekerjaan">
-            <div class="launcher-heading">
-              <div><strong>Mulai dari tujuan Anda</strong><small>Pilih alur kerja atau langsung tulis pertanyaan.</small></div>
-              <span class="workspace-status"><i aria-hidden="true"></i> AI BETA</span>
-            </div>
-            <div class="suggestions">
-              <button class="suggest" type="button" data-prompt="Buat kerangka analisis strategis untuk ide atau masalah berikut. Sertakan tujuan, asumsi, opsi, risiko, dan rekomendasi:">
-                <span class="suggest-icon" aria-hidden="true">⌘</span><b>Analisis Strategis</b><small>Uraikan masalah kompleks menjadi keputusan yang jelas.</small>
-              </button>
-              <button class="suggest" type="button" data-prompt="Analisis dokumen atau informasi berikut. Buat ringkasan eksekutif, temuan utama, risiko, dan tindak lanjut:">
-                <span class="suggest-icon" aria-hidden="true">▤</span><b>Dokumen & Ringkasan</b><small>Susun poin penting dan insight yang dapat ditindaklanjuti.</small>
-              </button>
-              <button class="suggest" type="button" data-prompt="Rancang riset untuk topik berikut. Sertakan pertanyaan penelitian, metodologi, sumber data, dan keterbatasan:">
-                <span class="suggest-icon" aria-hidden="true">⌕</span><b>Riset & Eksplorasi</b><small>Mulai dari pertanyaan yang tepat dan metode yang terukur.</small>
-              </button>
-              <button class="suggest" type="button" data-prompt="Bantu saya menyusun rencana kerja yang terukur. Sertakan prioritas, tahapan, PIC, tenggat, dan indikator keberhasilan:">
-                <span class="suggest-icon" aria-hidden="true">✓</span><b>Rencana & Eksekusi</b><small>Ubah gagasan menjadi prioritas dan langkah nyata.</small>
-              </button>
-            </div>
-            <div class="workspace-footnote"><span aria-hidden="true">✦</span> Percakapan menjadi pusat workspace setelah Anda memulai. Fitur yang belum aktif tidak ditampilkan sebagai fungsi siap pakai.</div>
-          </div>
         </div>
       </section>
 
@@ -866,7 +856,6 @@
         <div class="tool-actions">
           <button type="button" id="themeToggle" class="tool-button" aria-pressed="false">☼ Tema terang</button>
           <button type="button" id="voiceRecord" class="tool-button">🎙 Mulai rekam</button>
-          <button type="button" id="featureRequestOpen" class="tool-button">＋ Usulkan fitur</button>
         </div>
         <p id="voiceState" class="tool-feedback" role="status">Mikrofon hanya aktif setelah Anda menekan tombol rekam.</p>
         <section id="voiceReview" class="tool-upload" hidden aria-label="Tinjau transkripsi suara">
