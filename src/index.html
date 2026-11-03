@@ -1505,7 +1505,7 @@
     </main>
   </div>
 
-  <script src="/prompt-intelligence.js" defer></script>
+  <script src="/prompt-intelligence.js"></script>
   <script>
     "use strict";
 
@@ -2992,6 +2992,7 @@
         if (message) message.placeholder = p.placeholder;
         if (current) current.textContent = lang.toUpperCase();
         if (select) select.value = lang;
+        window.CerdikGoPromptI18n?.(lang);
         try { localStorage.setItem("cerdikgo-ui-language", lang); } catch (_) {}
       }
       if (open && dialog) open.addEventListener("click", () => dialog.showModal());
