@@ -17,6 +17,19 @@
   <style>
     .network-state{max-width:900px;margin:8px auto 0;padding:8px 12px;border:1px solid #246b5c;border-radius:10px;background:#0b302f;color:#8ff0d4;font-size:12px}
     .network-state.offline{border-color:#765a28;background:#302617;color:#f2d59a}
+    .quick-access{max-width:1440px;margin:8px auto 10px;padding:0 18px;display:grid;grid-template-columns:1fr 1.15fr;gap:10px}
+    .quick-access-card{display:flex;align-items:center;gap:12px;min-width:0;padding:11px 14px;border:1px solid #1d5278;border-radius:15px;background:linear-gradient(120deg,#102b49,#0a1a2d);color:#eef7ff;text-align:left;cursor:pointer}
+    .quick-access-card.protection{border-color:#238b67;background:linear-gradient(120deg,#0d302e,#0b1c2c)}
+    .quick-access-icon{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:10px;background:#123e5b;color:#43d9e8;font-size:19px}
+    .protection .quick-access-icon{background:#124536;color:#55e6a5}
+    .quick-access-copy{min-width:0;flex:1}
+    .quick-access-copy strong{display:block;font-size:13px}
+    .quick-access-copy small{display:block;margin-top:2px;color:#a6bdd7;font-size:10px;line-height:1.35}
+    .quick-access-state{display:inline-block;margin-top:3px;color:#57e5d1;font-size:9px;font-weight:800;letter-spacing:.45px}
+    .quick-access-action{flex:0 0 auto;padding:7px 9px;border:1px solid #285778;border-radius:9px;background:#122c47;color:#d9f5ff;font-size:10px;font-weight:750}
+    .quick-access-card:focus-visible{outline:2px solid #20e2d0;outline-offset:3px}
+    @media(max-width:720px){.quick-access{padding:0 10px;gap:7px}.quick-access-card{gap:8px;padding:9px;border-radius:12px}.quick-access-icon{flex-basis:28px;width:28px;height:28px;font-size:16px}.quick-access-copy strong{font-size:11px}.quick-access-copy small{font-size:9px}.quick-access-action{padding:6px;font-size:9px}}
+    @media(max-width:390px){.quick-access{grid-template-columns:1fr}.quick-access-card{min-height:58px}}
 
 
     /* CerdikGo Innovation Workspace — visual feature layer */
@@ -828,6 +841,18 @@
 
 <body>
   <div id="networkState" class="network-state" role="status" aria-live="polite">Memeriksa konektivitas…</div>
+  <nav class="quick-access" aria-label="Akses cepat CerdikGo">
+    <button class="quick-access-card protection" id="quickProtectionOpen" type="button" aria-label="Buka Protection Mode dan status autentikasi">
+      <span class="quick-access-icon" aria-hidden="true">⬡</span>
+      <span class="quick-access-copy"><strong>Protection Mode</strong><small>Perlindungan sesi &amp; akses terverifikasi</small><span class="quick-access-state">LOGIN-VERIFIED</span></span>
+      <span class="quick-access-action" aria-hidden="true">Buka ›</span>
+    </button>
+    <button class="quick-access-card" id="quickConnectivityOpen" type="button" aria-label="Buka Hybrid Connectivity Simulator">
+      <span class="quick-access-icon" aria-hidden="true">⌘</span>
+      <span class="quick-access-copy"><strong>Hybrid Connectivity</strong><small>Fiber · Cellular · Wi-Fi Mesh · LoRa</small><span class="quick-access-state">SIMULATOR ONLY</span></span>
+      <span class="quick-access-action" aria-hidden="true">Buka demo ›</span>
+    </button>
+  </nav>
   <div class="app">
     <aside class="side" id="appSidebar" aria-label="Menu utama">
       <div class="brand">
@@ -1134,6 +1159,17 @@
     }
     protectionCollapse.addEventListener("click", () => setProtectionCollapsed(true));
     protectionRestore.addEventListener("click", () => setProtectionCollapsed(false));
+    document.getElementById("quickProtectionOpen").addEventListener("click", () => {
+      if (isAuthenticated) {
+        setProtectionCollapsed(false);
+        protectionBanner.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (!settingsDialog.open) {
+        settingsDialog.showModal();
+      }
+    });
+    document.getElementById("quickConnectivityOpen").addEventListener("click", () => {
+      document.getElementById("connectivityDemoOpen").click();
+    });
     function updateProtectionVisibility() {
       const visible = isAuthenticated;
       protectionBanner.hidden = !visible;
