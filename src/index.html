@@ -647,6 +647,15 @@
     @media(prefers-reduced-motion:reduce){.suggest{transition:none!important;transform:none!important}}
 
   
+
+    .workspace-tools-drawer{width:min(100%,760px);margin:0 auto 10px;position:relative;z-index:3}
+    .workspace-tools-trigger{display:flex;align-items:center;gap:9px;width:fit-content;max-width:100%;padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);box-shadow:0 2px 10px rgba(20,45,70,.08);font-size:12px;cursor:pointer;list-style:none}
+    .workspace-tools-trigger::-webkit-details-marker{display:none}
+    .workspace-tools-trigger>span{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--accent,#1599c8);color:white;font-size:15px}
+    .workspace-tools-trigger small{color:var(--muted);font-size:10px}
+    .workspace-tools-drawer[open] .workspace-tools-trigger>span{transform:rotate(45deg)}
+    .workspace-tools-drawer .workspace-tools{margin:8px auto 0}
+    @media(max-width:700px){.workspace-tools-drawer{width:100%;margin-bottom:8px}.workspace-tools-trigger{padding:8px 12px}}
     .workspace-tools{max-width:900px;margin:14px auto 0;padding:14px;border:1px solid #1b527c;border-radius:16px;background:var(--panel,#0d2138)}
     .tool-heading,.tool-actions{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
     .tool-heading span,.tool-upload small,.tool-feedback{color:#9bb0c8;font-size:12px}
@@ -966,7 +975,9 @@
       </section>
 
 
-      <section class="workspace-tools" id="workspaceTools" aria-label="Alat workspace">
+      <details class="workspace-tools-drawer" id="workspaceTools">
+        <summary class="workspace-tools-trigger"><span aria-hidden="true">＋</span><strong>Alat kerja</strong><small>Voice · Tema · File</small></summary>
+        <section class="workspace-tools" aria-label="Alat workspace">
         <div class="tool-heading"><strong>Alat kerja</strong><span>Fitur tambahan CerdikGo</span></div>
         <div class="tool-actions">
           <button type="button" id="themeToggle" class="tool-button" aria-pressed="false">☼ Tema terang</button>
@@ -1003,7 +1014,8 @@
             <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Salin usulan</button></div>
           </form>
         </dialog>
-      </section>
+        </section>
+      </details>
 
       <div class="composer-wrap">
         <form id="chatForm" class="composer">
