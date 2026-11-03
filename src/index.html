@@ -3,7 +3,7 @@
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#0b1220">
   <meta name="description" content="CerdikGo — ruang kerja AI terpadu untuk riset, analisis, penulisan, dan inovasi.">
   <meta name="mobile-web-app-capable" content="yes">
@@ -624,6 +624,29 @@
     @media(prefers-reduced-motion:reduce){.app>.side,.app>.nav-backdrop{transition:none}}
 
 
+
+
+    /* Android Chrome: prevent focus-triggered page magnification and keep keyboard layout stable. */
+    @media (max-width: 900px) {
+      .composer textarea,
+      .workspace-tools textarea,
+      input[type="text"],
+      input[type="email"],
+      input[type="search"],
+      input[type="url"],
+      input[type="password"],
+      .settings-content input,
+      .settings-content textarea {
+        font-size: 16px !important;
+      }
+      .composer textarea:focus,
+      .workspace-tools textarea:focus,
+      input:focus,
+      .settings-content textarea:focus {
+        font-size: 16px !important;
+        scroll-margin-block: 12px;
+      }
+    }
 
     /* Android keyboard and narrow-screen resilience */
     html,body{max-width:100%;overflow-x:hidden}
