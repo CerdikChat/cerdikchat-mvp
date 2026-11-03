@@ -790,6 +790,39 @@
     }
     @media(prefers-reduced-motion:reduce){.side{transition:none}}
 
+
+    /* ATLAS-9 targeted screen refresh — dashboard and simulator */
+    .workspace{max-width:1080px;padding:0 4px}
+    .workspace-head{align-items:center;padding:14px 16px;border:1px solid #205477;border-radius:16px;background:linear-gradient(115deg,#102d4b,#0a1a2d);box-shadow:0 12px 28px #0002}
+    .workspace-head h2{font-size:clamp(17px,2.5vw,22px);letter-spacing:-.4px}
+    .workspace-head p{font-size:12px}
+    .workspace-tag{font-weight:800;letter-spacing:.5px}
+    .feature-grid{gap:10px}
+    .feature-card{display:flex;flex-direction:column;min-height:132px;padding:14px;background:linear-gradient(145deg,#122f4e,#0b1b2e);box-shadow:0 8px 22px #0002}
+    .feature-card:focus-within,.feature-card:hover{border-color:#36b9d4;transform:translateY(-1px)}
+    .feature-icon{display:grid;place-items:center;width:36px;height:36px;margin-bottom:9px;border:1px solid #28658a;border-radius:11px;background:#123b5c;color:#7be9f2}
+    .feature-card strong{font-size:13px}
+    .feature-card small{font-size:11px;line-height:1.5}
+    .feature-state{margin-top:auto;padding-top:10px}
+    .connectivity-demo{max-width:1080px}
+    .connectivity-channel{min-height:86px;cursor:pointer}
+    .connectivity-channel[aria-pressed="true"]{border-color:#29c5a4;background:linear-gradient(145deg,#123b46,#0b2634);opacity:1}
+    .connectivity-channel[aria-pressed="false"]{opacity:.62}
+    .connectivity-toolbar{padding:10px;border:1px solid #244e6b;border-radius:12px;background:#08192b}
+    .connectivity-toolbar button:focus-visible,.connectivity-channel:focus-visible{outline:2px solid #69e5d1;outline-offset:3px}
+    .simulation-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+    .simulation-metric{padding:10px;border:1px solid #245477;border-radius:10px;background:#0b1c30}
+    .simulation-metric small{display:block;color:#9bb4d1;font-size:10px}
+    .simulation-metric strong{display:block;margin-top:3px;color:#72e5d0;font-size:14px}
+    .simulation-note{padding:8px 10px;border:1px solid #735a2d;border-radius:9px;background:#2b2418}
+    html[data-theme="light"] .workspace-head{background:linear-gradient(115deg,#fff,#eaf3fc);border-color:#c8d9ec}
+    html[data-theme="light"] .feature-card{background:linear-gradient(145deg,#fff,#edf4fc);box-shadow:0 8px 20px #233c5b12}
+    html[data-theme="light"] .feature-icon{background:#e5f2fb;color:#075f8b;border-color:#b6d1e5}
+    html[data-theme="light"] .connectivity-channel[aria-pressed="true"]{background:linear-gradient(145deg,#e5f7f2,#f4fbff);color:#14243a}
+    html[data-theme="light"] .connectivity-toolbar,html[data-theme="light"] .simulation-metric{background:#f7faff;border-color:#cbd7e6}
+    @media(max-width:720px){.workspace{padding:0}.workspace-head{padding:12px}.feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature-card{min-height:126px;padding:11px}.simulation-metrics{grid-template-columns:1fr 1fr}.connectivity-channel{min-height:78px}}
+    @media(max-width:390px){.workspace-head{align-items:flex-start;flex-direction:column}.feature-grid{gap:7px}.feature-card{min-height:118px;padding:9px}.feature-card strong{font-size:12px}}
+
   </style>
 </head>
 
@@ -923,7 +956,7 @@
           <button class="connectivity-channel" type="button" data-channel="Wi-Fi Mesh" aria-pressed="true"><strong>Wi-Fi Mesh</strong><small>Local network · Available</small></button>
           <button class="connectivity-channel" type="button" data-channel="LoRa Radio" aria-pressed="true"><strong>LoRa Radio</strong><small>Telemetry · Available</small></button>
         </div>
-        <div class="connectivity-toolbar"><span class="connectivity-status" id="connectivityStatus" role="status" aria-live="polite">Primary route: Fiber Internet</span><button id="connectivityReset" type="button">Reset simulation</button><button id="connectivityClose" type="button">Close</button></div>
+        <div class="simulation-metrics" aria-label="Metrik simulasi">\n          <div class="simulation-metric"><small>Rute aktif (simulasi)</small><strong id="simActiveRoute">Fiber Internet</strong></div>\n          <div class="simulation-metric"><small>Kanal tersedia</small><strong id="simAvailableCount">5 / 5</strong></div>\n          <div class="simulation-metric"><small>Mode operasi</small><strong id="simOperationMode">Primary</strong></div>\n        </div>\n        <div class="connectivity-toolbar"><span class="connectivity-status" id="connectivityStatus" role="status" aria-live="polite">Rute simulasi: Fiber Internet</span><div><button id="connectivityReset" type="button">Reset simulasi</button><button id="connectivityClose" type="button">Tutup</button></div></div>
         <p class="simulation-note">SIMULATION ONLY — tidak mengukur jaringan nyata, tidak mengirim transmisi radio, dan tidak mengubah konfigurasi router.</p>
       </section>
 \n      <section class="feed" id="feed" aria-live="polite"
@@ -1004,6 +1037,47 @@
     }
     applyTheme(readThemePreference());
     themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true));
+
+
+    // Local-only connectivity scenario simulator. No device/network APIs are called.
+    const connectivityDemo = document.getElementById("connectivityDemo");
+    const connectivityOpen = document.getElementById("connectivityDemoOpen");
+    const connectivityClose = document.getElementById("connectivityClose");
+    const connectivityReset = document.getElementById("connectivityReset");
+    const connectivityStatus = document.getElementById("connectivityStatus");
+    const connectivityChannels = [...document.querySelectorAll(".connectivity-channel")];
+    const simActiveRoute = document.getElementById("simActiveRoute");
+    const simAvailableCount = document.getElementById("simAvailableCount");
+    const simOperationMode = document.getElementById("simOperationMode");
+    const defaultChannels = connectivityChannels.map((button, index) => ({name:button.dataset.channel,available:true,priority:index}));
+    let simulatedChannels = defaultChannels.map(channel => ({...channel}));
+    function renderConnectivitySimulation(message = "") {
+      const available = simulatedChannels.filter(channel => channel.available);
+      const selected = available.sort((a,b) => a.priority-b.priority)[0] || null;
+      connectivityChannels.forEach(button => {
+        const channel = simulatedChannels.find(item => item.name === button.dataset.channel);
+        button.setAttribute("aria-pressed", String(Boolean(channel?.available)));
+        const label = button.querySelector("small");
+        if (label) label.textContent = channel?.available ? "Tersedia · simulasi" : "Gangguan · simulasi";
+      });
+      simActiveRoute.textContent = selected ? selected.name : "Tidak tersedia";
+      simAvailableCount.textContent = available.length + " / " + simulatedChannels.length;
+      simOperationMode.textContent = !selected ? "Offline" : selected.priority === 0 ? "Primary" : "Failover";
+      connectivityStatus.textContent = message || (selected ? "Rute simulasi aktif: " + selected.name : "Semua kanal dinonaktifkan — simulasi offline");
+    }
+    connectivityOpen?.addEventListener("click", () => { connectivityDemo.hidden = false; connectivityDemo.scrollIntoView({behavior:"smooth",block:"nearest"}); });
+    connectivityClose?.addEventListener("click", () => { connectivityDemo.hidden = true; connectivityOpen?.focus(); });
+    connectivityChannels.forEach(button => button.addEventListener("click", () => {
+      const channel = simulatedChannels.find(item => item.name === button.dataset.channel);
+      if (!channel) return;
+      channel.available = !channel.available;
+      renderConnectivitySimulation(channel.available ? channel.name + " diaktifkan (simulasi)." : channel.name + " dinonaktifkan (simulasi).");
+    }));
+    connectivityReset?.addEventListener("click", () => {
+      simulatedChannels = defaultChannels.map(channel => ({...channel}));
+      renderConnectivitySimulation("Simulasi direset. Rute utama: Fiber Internet.");
+    });
+    renderConnectivitySimulation();
 
     const form = document.querySelector("#chatForm");
     const input = document.querySelector("#message");
