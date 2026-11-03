@@ -16,7 +16,7 @@
 - `POST /api/auth/request-access`: same-origin + CSRF protected; accepts a Google GIS credential and nonce; returns HTTP 202 with `status: pending`; no session cookie is issued.
 - `GET /api/admin/users/pending`: requires an active admin/super_admin session; returns at most 100 pending standard-user requests.
 - `POST /api/admin/users/decision`: requires an active `super_admin` session and CSRF; body `{"email":"user@example.com","decision":"approve"}`, `reject`, or `suspend`.
-- The approval INSERT enforces the 30-active-account ceiling inside the write statement. A full pilot returns HTTP 409 `PILOT_CAP_REACHED`; a prior count/read is not used to allocate the final seat.
+- The approval INSERT enforces the 30-active-standard-user ceiling (`role='user'`) inside the write statement. Administrator and Super Administrator accounts do not consume pilot seats. A full pilot returns HTTP 409 `PILOT_CAP_REACHED`; a prior count/read is not used to allocate the final seat.
 - Approval/rejection updates the request queue and audit log in one D1 batch. Approval creates only a standard-user account.
 
 ## Super Administrator bootstrap (Preview only)
