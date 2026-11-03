@@ -620,7 +620,7 @@
 
 <body>
   <div class="app">
-    <aside class="side">
+    <aside class="side" id="sideNavigation" aria-label="Navigasi utama">
       <div class="brand">
         <div class="logo" aria-hidden="true">C</div>
         CerdikChat
@@ -656,6 +656,7 @@
         secara mandiri. Hindari memasukkan data pribadi atau rahasia.
       </div>
     </aside>
+    <button id="navBackdrop" class="nav-backdrop" type="button" aria-label="Tutup navigasi"></button>
 
     <main class="main">
       <header class="top">
@@ -689,7 +690,6 @@
           <p class="settings-note">Jangan bagikan kata sandi, token, atau informasi rahasia. Keluar akan mencabut sesi aktif pada server.</p>
         </div>
       </dialog>
-      <button id="navBackdrop" class="nav-backdrop" type="button" aria-label="Tutup navigasi"></button>
 
       <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
