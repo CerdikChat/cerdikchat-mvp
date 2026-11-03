@@ -315,3 +315,67 @@ test("pending identity without an active users row cannot obtain an authenticate
   assert.equal(result.response.status, 401);
   assert.equal((await result.response.json()).error, "AUTH_REQUIRED");
 });
+
+
+test("concurrent approvals with one seat remaining allocate exactly one pilot seat", async () => {
+  let activeCount = 29;
+  let batchTail = Promise.resolve();
+  const pending = new Map([
+    ["pilot-a@example.com", { google_sub: "pilot-sub-a", email: "pilot-a@example.com", display_name: "Pilot A", status: "pending" }],
+    ["pilot-b@example.com", { google_sub: "pilot-sub-b", email: "pilot-b@example.com", display_name: "Pilot B", status: "pending" }],
+  ]);
+  const db = {
+    prepare(sql) {
+      return {
+        first: async () => sql.includes("SELECT COUNT(*) AS active_count FROM users")
+          ? { active_count: activeCount }
+          : null,
+        bind(...values) {
+          return {
+            first: async () => {
+              if (sql.includes("FROM sessions s JOIN users u")) {
+                return { google_sub: "super-admin-sub", email: "super-admin@example.com", role: "super_admin" };
+              }
+              if (sql.includes("FROM user_access_requests WHERE email")) return pending.get(values[0]) || null;
+              if (sql.includes("FROM users WHERE email")) return null;
+              return null;
+            },
+          };
+        },
+      };
+    },
+    batch: async (statements) => {
+      const current = batchTail.then(async () => {
+        assert.match(statements[0].sql, /status = 'active' AND role = 'user'.*< 30/s);
+        if (activeCount < 30) {
+          activeCount += 1;
+          return [{ meta: { changes: 1 } }, { meta: { changes: 1 } }, { meta: { changes: 1 } }];
+        }
+        return [{ meta: { changes: 0 } }, { meta: { changes: 0 } }, { meta: { changes: 0 } }];
+      });
+      batchTail = current.then(() => undefined);
+      return current;
+    },
+  };
+
+  const makeApproval = (email) => decideUserAccess(
+    request("/api/admin/users/decision", {
+      method: "POST",
+      body: { email, decision: "approve" },
+      withSession: true,
+      withCsrf: true,
+    }),
+    { DB: db }
+  );
+  const responses = await Promise.all([
+    makeApproval("pilot-a@example.com"),
+    makeApproval("pilot-b@example.com"),
+  ]);
+  const outcomes = await Promise.all(responses.map(async response => ({
+    status: response.status,
+    error: (await response.json()).error,
+  })));
+  assert.deepEqual(outcomes.map(x => x.status).sort(), [200, 409]);
+  assert.equal(outcomes.filter(x => x.error === "PILOT_CAP_REACHED").length, 1);
+  assert.equal(activeCount, 30);
+});
