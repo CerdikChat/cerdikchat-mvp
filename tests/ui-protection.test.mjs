@@ -86,7 +86,7 @@ test("Theme toggle retains accessible labels and persisted preference", () => {
 });
 
 test("Hybrid connectivity has one authoritative state model and one set of event handlers", () => {
-  assert.equal((html.match(/connectivityDemoOpen\?\.addEventListener\("click"/g) || []).length, 1);
+  assert.equal((html.match(/connectivityOpen\?\.addEventListener\("click"/g) || []).length, 1);
   assert.equal((html.match(/connectivityClose\?\.addEventListener\("click"/g) || []).length, 1);
   assert.equal((html.match(/connectivityReset\?\.addEventListener\("click"/g) || []).length, 1);
   assert.doesNotMatch(html, /Buyer-facing simulator only|const wanOrder =|const channelState =/);
