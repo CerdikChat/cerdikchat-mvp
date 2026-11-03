@@ -44,7 +44,7 @@ export async function submitFeatureRequest(request, env, corsHeaders = {}) {
   } catch {
     return reply({ error: "FEATURE_REQUESTS_UNAVAILABLE" }, 503, corsHeaders);
   }
-  if (!/^application\\/json(?:\\s*;|$)/i.test(request.headers.get("Content-Type") || "")) {
+  if (!/^application\/json(?:\s*;|$)/i.test(request.headers.get("Content-Type") || "")) {
     return reply({ error: "UNSUPPORTED_MEDIA_TYPE" }, 415, corsHeaders);
   }
   let body;
