@@ -533,3 +533,19 @@ test("Android workspace provides an accessible mobile navigation and keyboard-aw
   assert.match(html, /body,\.app,\.main\{min-height:var\(--app-viewport-height/);
   assert.match(html, /prefers-reduced-motion:reduce/);
 });
+
+
+test("CerdikGo workspace uses a conversation-first innovation dashboard", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /<title>CerdikGo — AI Innovation Workspace<\/title>/);
+  assert.match(html, /class="workspace-intro"/);
+  assert.match(html, /class="workspace-launcher"/);
+  assert.match(html, /Analisis Strategis/);
+  assert.match(html, /Dokumen & Ringkasan/);
+  assert.match(html, /Riset & Eksplorasi/);
+  assert.match(html, /Rencana & Eksekusi/);
+  assert.doesNotMatch(html, /Ide besar dimulai dari/);
+  assert.match(html, /conversation-first, responsive/);
+  assert.match(html, /@media\(max-width:720px\)/);
+  assert.match(html, /prefers-reduced-motion:reduce/);
+});
