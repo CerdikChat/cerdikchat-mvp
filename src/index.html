@@ -654,6 +654,22 @@
     @media(max-width:360px){.workspace-launcher{padding:10px}.suggest{min-height:132px;padding:9px}}
     @media(prefers-reduced-motion:reduce){.suggest{transition:none!important;transform:none!important}}
 
+  
+    .workspace-tools{max-width:900px;margin:14px auto 0;padding:14px;border:1px solid #1b527c;border-radius:16px;background:var(--panel,#0d2138)}
+    .tool-heading,.tool-actions{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
+    .tool-heading span,.tool-upload small,.tool-feedback{color:#9bb0c8;font-size:12px}
+    .tool-actions{justify-content:flex-start;margin:10px 0}
+    .tool-button{border:1px solid #28618a;border-radius:10px;padding:9px 12px;background:#102944;color:#eaf4ff;font:inherit;cursor:pointer;min-height:42px}
+    .tool-button:disabled{opacity:.5;cursor:not-allowed}
+    .tool-upload{display:grid;gap:8px;margin-top:10px;padding-top:12px;border-top:1px solid #28506d}
+    .tool-upload input,.settings-content input,.settings-content textarea{max-width:100%;padding:9px;border:1px solid #376184;border-radius:9px;background:#09182a;color:#eef6ff}
+    .settings-content{display:grid;gap:10px;padding:20px;color:inherit}
+    .settings-content h2{margin:0}
+    html[data-theme="light"] body{background:#eef4fa!important;color:#17283d!important}
+    html[data-theme="light"] .app,html[data-theme="light"] .main,html[data-theme="light"] .feed{background:#eef4fa!important;color:#17283d!important}
+    html[data-theme="light"] .workspace-launcher,html[data-theme="light"] .workspace-tools,html[data-theme="light"] .composer{background:#fff!important;color:#17283d!important;border-color:#c5d5e5!important}
+    html[data-theme="light"] .tool-button{background:#e7f0f8;color:#17283d;border-color:#9eb8d0}
+
   </style>
 </head>
 
@@ -762,6 +778,34 @@
             <div class="workspace-footnote"><span aria-hidden="true">✦</span> Percakapan menjadi pusat workspace setelah Anda memulai. Fitur yang belum aktif tidak ditampilkan sebagai fungsi siap pakai.</div>
           </div>
         </div>
+      </section>
+
+
+      <section class="workspace-tools" aria-label="Alat workspace">
+        <div class="tool-heading"><strong>Alat kerja</strong><span>Fitur tambahan CerdikGo</span></div>
+        <div class="tool-actions">
+          <button type="button" id="themeToggle" class="tool-button" aria-pressed="false">☼ Tema terang</button>
+          <button type="button" id="voiceRecord" class="tool-button">🎙 Mulai rekam</button>
+          <button type="button" id="featureRequestOpen" class="tool-button">＋ Usulkan fitur</button>
+        </div>
+        <p id="voiceState" class="tool-feedback" role="status">Mikrofon hanya aktif setelah Anda menekan tombol rekam.</p>
+        <div class="tool-upload">
+          <label for="analysisFile">Analisis dokumen (PDF/JPG/PNG/WEBP/GIF)</label>
+          <input id="analysisFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,application/pdf,image/jpeg,image/png,image/webp,image/gif">
+          <button type="button" id="analyzeUpload" class="tool-button" disabled>Analisis file</button>
+          <small id="uploadHelp">Upload dikunci sampai layanan pemindai malware privat ClamAV tersedia dan tervalidasi. API menerapkan fail-closed.</small>
+        </div>
+        <dialog id="requestFeatureDialog" class="settings-dialog" aria-labelledby="requestFeatureTitle">
+          <form method="dialog" id="requestFeatureForm" class="settings-content">
+            <h2 id="requestFeatureTitle">Usulkan fitur</h2>
+            <label for="requestFeatureName">Nama fitur</label>
+            <input id="requestFeatureName" maxlength="100" required>
+            <label for="requestFeatureDetails">Manfaat dan kebutuhan</label>
+            <textarea id="requestFeatureDetails" maxlength="1000" rows="4" required></textarea>
+            <p class="tool-feedback">Usulan akan disalin ke clipboard untuk Anda kirim sendiri. Form ini belum mengirim tiket ke server.</p>
+            <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Salin usulan</button></div>
+          </form>
+        </dialog>
       </section>
 
       <div class="composer-wrap">
@@ -1657,6 +1701,114 @@
     form.addEventListener("submit", sendMessage);
     updateCount();
     loadAuth();
+
+    // CerdikGo feature-preserving controls. All privileged operations remain server-authorized.
+    const themeToggle = document.querySelector("#themeToggle");
+    const voiceRecord = document.querySelector("#voiceRecord");
+    const voiceState = document.querySelector("#voiceState");
+    const analysisFile = document.querySelector("#analysisFile");
+    const analyzeUpload = document.querySelector("#analyzeUpload");
+    const requestFeatureDialog = document.querySelector("#requestFeatureDialog");
+    const requestFeatureOpen = document.querySelector("#featureRequestOpen");
+    const requestFeatureSubmit = document.querySelector("#requestFeatureSubmit");
+    const requestFeatureName = document.querySelector("#requestFeatureName");
+    const requestFeatureDetails = document.querySelector("#requestFeatureDetails");
+
+    const savedTheme = localStorage.getItem("cerdikgo-theme");
+    if (savedTheme === "light") document.documentElement.dataset.theme = "light";
+    function syncThemeButton() {
+      const light = document.documentElement.dataset.theme === "light";
+      themeToggle.textContent = light ? "☾ Tema gelap" : "☼ Tema terang";
+      themeToggle.setAttribute("aria-pressed", String(light));
+    }
+    syncThemeButton();
+    themeToggle.addEventListener("click", () => {
+      const light = document.documentElement.dataset.theme !== "light";
+      document.documentElement.dataset.theme = light ? "light" : "dark";
+      localStorage.setItem("cerdikgo-theme", light ? "light" : "dark");
+      syncThemeButton();
+    });
+
+    requestFeatureOpen.addEventListener("click", () => requestFeatureDialog.showModal());
+    requestFeatureSubmit.addEventListener("click", async () => {
+      const name = requestFeatureName.value.trim();
+      const details = requestFeatureDetails.value.trim();
+      if (!name || !details) { statusEl.textContent = "Lengkapi nama fitur dan manfaatnya."; return; }
+      const summary = "Usulan fitur CerdikGo\nNama: " + name + "\nKebutuhan: " + details;
+      try {
+        await navigator.clipboard.writeText(summary);
+        statusEl.textContent = "Usulan disalin. Kirimkan secara manual kepada tim pengembang.";
+        requestFeatureDialog.close();
+        requestFeatureName.value = ""; requestFeatureDetails.value = "";
+      } catch {
+        statusEl.textContent = "Clipboard tidak tersedia. Salin teks usulan secara manual.";
+      }
+    });
+
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordingStartedAt = 0;
+    let recordingStream = null;
+    voiceRecord.addEventListener("click", async () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        voiceRecord.disabled = true;
+        voiceState.textContent = "Memproses rekaman…";
+        return;
+      }
+      if (!csrfToken) { voiceState.textContent = "Sesi keamanan belum siap. Muat ulang halaman."; return; }
+      if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+        voiceState.textContent = "Browser ini tidak mendukung perekaman audio.";
+        return;
+      }
+      try {
+        recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mimeType = ["audio/webm;codecs=opus","audio/ogg;codecs=opus","audio/webm"].find(type => MediaRecorder.isTypeSupported(type)) || "";
+        mediaRecorder = new MediaRecorder(recordingStream, mimeType ? { mimeType } : undefined);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = event => { if (event.data?.size) audioChunks.push(event.data); };
+        mediaRecorder.onerror = () => { stopMicTracks(); voiceRecord.disabled = false; voiceRecord.textContent = "🎙 Coba rekam lagi"; voiceState.textContent = "Perekaman gagal."; };
+        mediaRecorder.onstop = async () => {
+          const durationMs = Date.now() - recordingStartedAt;
+          stopMicTracks();
+          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+          audioChunks = [];
+          voiceRecord.disabled = false;
+          voiceRecord.textContent = "🎙 Mulai rekam";
+          if (durationMs > 60000 || blob.size > 3 * 1024 * 1024 || !blob.size) {
+            voiceState.textContent = "Rekaman harus berdurasi maksimal 60 detik dan berukuran maksimal 3 MB.";
+            return;
+          }
+          try {
+            const data = new FormData();
+            const ext = blob.type.includes("ogg") ? "ogg" : blob.type.includes("wav") ? "wav" : "webm";
+            data.append("audio", blob, "recording." + ext);
+            data.append("durationMs", String(durationMs));
+            const response = await fetch("/api/voice/transcribe", { method: "POST", headers: { "X-CSRF-Token": csrfToken }, body: data, credentials: "same-origin" });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "TRANSCRIPTION_FAILED");
+            input.value = result.text;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            voiceState.textContent = "Transkripsi siap ditinjau. Periksa teks sebelum mengirim ke AI.";
+          } catch (error) {
+            voiceState.textContent = "Transkripsi gagal: " + String(error.message || "Kesalahan layanan").slice(0,120);
+          }
+        };
+        recordingStartedAt = Date.now();
+        mediaRecorder.start();
+        voiceRecord.textContent = "■ Selesai rekam";
+        voiceState.textContent = "Merekam… tekan tombol lagi untuk berhenti.";
+      } catch {
+        stopMicTracks();
+        voiceState.textContent = "Izin mikrofon ditolak atau perangkat tidak tersedia.";
+      }
+    });
+    function stopMicTracks() {
+      if (recordingStream) recordingStream.getTracks().forEach(track => track.stop());
+      recordingStream = null;
+    }
+    window.addEventListener("pagehide", stopMicTracks);
+
   </script>
 </body>
 </html>
