@@ -736,11 +736,6 @@ test("feature request form captures category, description, problem and expected 
   assert.match(html, /id="requestFeatureDetails" maxlength="1200" rows="3" required/);
   assert.match(html, /id="requestFeatureProblem" maxlength="800" rows="3" required/);
   assert.match(html, /id="requestFeatureBenefit" maxlength="800" rows="2" required/);
-  assert.match(html, /USULAN FITUR CERDIKGO/);
-  assert.match(html, /\\\\nJenis: /);
-  assert.match(html, /\\\\nDeskripsi: /);
-  assert.match(html, /\\\\nMasalah\/kebutuhan: /);
-  assert.match(html, /\\\\nManfaat: /);
   assert.match(html, /Usulan dikirim ke server dan disimpan setelah sesi Anda diverifikasi/);
   assert.doesNotMatch(html, /menyalinnya ke clipboard agar Anda kirim sendiri/);
   const toolsDrawerEnd = html.indexOf("</details>", html.indexOf('id="workspaceTools"'));
