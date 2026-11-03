@@ -646,7 +646,7 @@ test("CerdikGo mobile navigation supports left-edge swipe open and drawer swipe 
 
 test("workspace tools stay collapsed until the user opens the compact tools drawer", async () => {
   const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
-  const start = html.indexOf('<details class="workspace-tools-drawer" id="workspaceTools">');
+  const start = html.indexOf('<details class="workspace-tools-drawer main-workspace-tools" id="workspaceTools">');
   const end = html.indexOf("</details>", start);
   assert.ok(start >= 0 && end > start);
   const drawer = html.slice(start, end);
