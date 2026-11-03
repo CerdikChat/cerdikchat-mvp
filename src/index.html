@@ -675,15 +675,62 @@
     .workspace-tools dialog[open]{color:var(--text,#eaf4ff)}
     .workspace-tools dialog::backdrop{background:#020813b8;backdrop-filter:blur(3px)}
 
+
+    /* CerdikGo identity + operational status strip */
+    .brand-wordmark { display:flex; flex-direction:column; line-height:1.05; gap:4px; }
+    .brand-wordmark strong { font-size:21px; letter-spacing:-.7px; color:#f2f7ff; }
+    .brand-wordmark strong span { color:#43df86; }
+    .brand-wordmark small { color:var(--muted); font-size:9px; font-weight:700; letter-spacing:.8px; }
+    .mobile-brand .brand-wordmark strong { font-size:17px; }
+    .status-deck { padding:14px 20px 16px; display:grid; gap:10px; border-bottom:1px solid var(--line); }
+    .network-status { display:flex; align-items:center; gap:9px; min-height:42px; padding:9px 14px; border:1px solid #16795e; border-radius:13px; background:linear-gradient(90deg,#063c34,#075647); color:#d8fff0; font-size:13px; font-weight:650; }
+    .network-status[data-state="offline"] { border-color:#9a493e; background:#3b211f; color:#ffe1dc; }
+    .network-dot { width:9px; height:9px; flex:0 0 auto; border-radius:50%; background:#3de49a; box-shadow:0 0 0 4px #3de49a22; }
+    .network-status[data-state="offline"] .network-dot { background:#ff8d79; box-shadow:0 0 0 4px #ff8d7922; }
+    .status-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .status-card { display:flex; align-items:center; gap:13px; min-width:0; padding:14px 16px; border:1.5px solid #279b69; border-radius:18px; background:linear-gradient(115deg,#0b302b,#0d1e2d 70%); color:var(--text); text-decoration:none; box-shadow:inset 0 0 18px #22c4770b; }
+    .status-card.hybrid { border-color:#168fc5; background:linear-gradient(115deg,#0b2940,#101d32 70%); }
+    .status-card .status-icon { width:38px; height:38px; flex:0 0 auto; display:grid; place-items:center; font-size:27px; color:#43e68d; }
+    .status-card.hybrid .status-icon { color:#32c9f4; }
+    .status-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
+    .status-title { font-weight:850; font-size:15px; }
+    .status-sub { color:#b4c8d9; font-size:11px; }
+    .status-pill { display:inline-flex; align-self:flex-start; margin-top:2px; padding:3px 8px; border-radius:20px; background:#087d4a; color:white; font-size:10px; font-weight:800; letter-spacing:.3px; }
+    .hybrid .status-pill { background:#087bb3; }
+    .status-chevron { margin-left:auto; color:#d7eaff; font-size:22px; }
+    .side-tools { margin-top:22px; padding-top:14px; border-top:1px solid var(--line); }
+    .side-tools a { display:flex; align-items:center; gap:9px; width:100%; margin:3px 0; padding:10px 11px; border:1px solid transparent; border-radius:11px; color:#d7e4f8; text-decoration:none; font-size:13px; }
+    .side-tools a:hover { border-color:var(--line); background:var(--panel2); }
+    .module-preview { margin:12px 0 4px; padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+    .module-preview h2 { margin:0 0 5px; font-size:15px; }
+    .module-preview p { margin:0; color:var(--muted); font-size:12px; }
+    .module-state { display:inline-block; margin-top:8px; padding:3px 8px; border-radius:20px; background:#28374b; color:#c2d4e8; font-size:10px; font-weight:750; }
+    @media (max-width:700px) {
+      .status-deck { padding:10px 12px 12px; }
+      .status-cards { grid-template-columns:1fr; gap:8px; }
+      .status-card { padding:11px 13px; border-radius:15px; }
+      .status-card .status-icon { width:32px; height:32px; font-size:23px; }
+      .status-title { font-size:14px; }
+      .status-sub { font-size:10px; }
+      .network-status { font-size:11px; }
+    }
+    @media (max-width:380px) {
+      .top { gap:6px; padding-inline:9px; }
+      .top > strong { display:none; }
+      .top-actions { gap:5px; }
+      .top-actions .pill { display:none; }
+      .status-sub { max-width:230px; }
+    }
+
   </style>
 </head>
 
 <body>
   <div class="app">
     <aside class="side" id="sideNavigation" aria-label="Navigasi utama">
-      <div class="brand">
-        <div class="logo" aria-hidden="true">C</div>
-        CerdikGo
+      <div class="brand" aria-label="CerdikGo — AI Workspace for Real Action">
+        <div class="logo" aria-hidden="true">CG</div>
+        <div class="brand-wordmark"><strong>Cerdik<span>Go</span></strong><small>AI WORKSPACE FOR REAL ACTION</small></div>
       </div>
 
       <div class="tag">CLOSED BETA · v0.1</div>
@@ -710,6 +757,15 @@
         ◎ Belajar topik baru
       </button>
 
+      <div class="side-tools" aria-label="Alat kerja">
+        <h2>Alat kerja</h2>
+        <a href="#workspaceTools">☼ <span>Tema & preferensi</span></a>
+        <a href="#workspaceTools">🎙 <span>Voice Studio</span></a>
+        <a href="#featureRequestOpen">＋ <span>Usulkan fitur / IoT</span></a>
+        <a href="#sopModule">▤ <span>SOP & Knowledge Base</span></a>
+        <a href="#businessModule">◈ <span>Business & Strategy</span></a>
+      </div>
+
       <h2>Tentang beta</h2>
       <div class="side-note">
         CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting
@@ -721,9 +777,9 @@
     <main class="main">
       <header class="top">
         <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="sideNavigation" aria-label="Buka navigasi">☰ <span>Menu</span></button>
-        <div class="mobile-brand">
-          <div class="logo" aria-hidden="true">C</div>
-          CerdikGo
+        <div class="mobile-brand" aria-label="CerdikGo">
+          <div class="logo" aria-hidden="true">CG</div>
+          <div class="brand-wordmark"><strong>Cerdik<span>Go</span></strong><small>AI WORKSPACE</small></div>
         </div>
         <strong>Ruang Kerja AI</strong>
         <div class="top-actions">
@@ -732,6 +788,25 @@
           <button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button>
         </div>
       </header>
+
+      <section class="status-deck" aria-label="Status sistem">
+        <div class="network-status" id="networkStatus" data-state="online" role="status" aria-live="polite">
+          <span class="network-dot" aria-hidden="true"></span>
+          <span id="networkStatusText">Memeriksa konektivitas jaringan…</span>
+        </div>
+        <div class="status-cards">
+          <a class="status-card" href="#settingsDialog" id="protectionStatusCard" aria-label="Protection Mode — perlindungan sesi dan akses">
+            <span class="status-icon" aria-hidden="true">⬡</span>
+            <span class="status-copy"><span class="status-title">Protection Mode</span><span class="status-pill">ACTIVE · SERVER CHECK</span><span class="status-sub">Perlindungan sesi & akses</span></span>
+            <span class="status-chevron" aria-hidden="true">›</span>
+          </a>
+          <a class="status-card hybrid" href="#hybridModule" aria-label="Hybrid Connectivity — simulator">
+            <span class="status-icon" aria-hidden="true">⌘</span>
+            <span class="status-copy"><span class="status-title">Hybrid Connectivity</span><span class="status-pill">SIMULATOR</span><span class="status-sub">Fiber · Cellular · Wi-Fi Mesh · LoRa</span></span>
+            <span class="status-chevron" aria-hidden="true">›</span>
+          </a>
+        </div>
+      </section>
 
       <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
         <div class="settings-head">
@@ -786,7 +861,7 @@
       </section>
 
 
-      <section class="workspace-tools" aria-label="Alat workspace">
+      <section class="workspace-tools" id="workspaceTools" aria-label="Alat workspace">
         <div class="tool-heading"><strong>Alat kerja</strong><span>Fitur tambahan CerdikGo</span></div>
         <div class="tool-actions">
           <button type="button" id="themeToggle" class="tool-button" aria-pressed="false">☼ Tema terang</button>
@@ -820,6 +895,16 @@
             <div class="tool-actions"><button value="cancel" class="tool-button">Batal</button><button id="requestFeatureSubmit" type="button" class="tool-button">Salin usulan</button></div>
           </form>
         </dialog>
+      </section>
+
+      <section class="module-preview" id="sopModule" aria-label="SOP and Knowledge Base">
+        <h2>SOP & Knowledge Base</h2><p>Ruang modul untuk dokumentasi dan prosedur operasional. Belum terhubung ke repositori SOP.</p><span class="module-state">PLANNED · NOT CONNECTED</span>
+      </section>
+      <section class="module-preview" id="businessModule" aria-label="Business and Strategy">
+        <h2>Business & Strategy</h2><p>Ruang kerja analisis bisnis dan strategi. Modul khusus belum diaktifkan.</p><span class="module-state">PLANNED · NOT CONNECTED</span>
+      </section>
+      <section class="module-preview" id="hybridModule" aria-label="Hybrid Connectivity simulator">
+        <h2>Hybrid Connectivity</h2><p>Mode saat ini hanya simulator. Belum ada koneksi radio mesh atau LoRa fisik yang dinyatakan aktif.</p><span class="module-state">SIMULATOR ONLY</span>
       </section>
 
       <div class="composer-wrap">
@@ -1913,6 +1998,24 @@
       voiceState.textContent = "Transkripsi dibuang. Rekaman tidak disimpan.";
     });
     window.addEventListener("pagehide", stopMicTracks);
+
+    
+    // Browser connectivity indicator only; AI availability is verified per request.
+    (() => {
+      const bar = document.getElementById("networkStatus");
+      const label = document.getElementById("networkStatusText");
+      if (!bar || !label) return;
+      const refresh = () => {
+        const online = navigator.onLine;
+        bar.dataset.state = online ? "online" : "offline";
+        label.textContent = online
+          ? "ONLINE · Koneksi jaringan tersedia. Layanan AI diverifikasi saat permintaan dijalankan."
+          : "OFFLINE · Koneksi jaringan tidak tersedia. Permintaan AI memerlukan koneksi.";
+      };
+      window.addEventListener("online", refresh);
+      window.addEventListener("offline", refresh);
+      refresh();
+    })();
 
   </script>
 </body>
