@@ -697,3 +697,16 @@ test("CerdikGo offers opt-in voice conversation with speech input and spoken AI 
   assert.match(html, /stopVoiceConversation\(/);
   assert.match(html, /Periksa izin mikrofon/);
 });
+
+
+test("chat messages expose Copy actions and user messages expose Edit actions", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /message-tools-toggle/);
+  assert.match(html, /textContent = "Salin"/);
+  assert.match(html, /navigator\.clipboard\?\.writeText/);
+  assert.match(html, /document\.execCommand\("copy"\)/);
+  assert.match(html, /if \(role === "user"\)/);
+  assert.match(html, /textContent = "Edit"/);
+  assert.match(html, /Pesan dimuat ke kolom tulis/);
+  assert.match(html, /aria-expanded/);
+});
