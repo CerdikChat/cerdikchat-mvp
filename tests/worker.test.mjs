@@ -743,6 +743,9 @@ test("feature request form captures category, description, problem and expected 
   assert.ok(toolsDrawerEnd > 0 && featureDialogStart > toolsDrawerEnd, "feature request dialog must be outside the collapsed workspace tools drawer");
   assert.ok(html.includes('<button value="cancel" class="tool-button">Batal</button>'));
   assert.ok(html.includes('<button id="requestFeatureSubmit" type="button" class="tool-button">Kirim usulan</button>'));
+  assert.match(html, /id="requestFeatureFeedback" class="tool-feedback" role="status" aria-live="polite"/);
+  assert.match(html, /requestFeatureFeedback\.textContent = "Lengkapi semua kolom usulan fitur sebelum mengirim\."/);
+  assert.match(html, /requestFeatureFeedback\.textContent = error\.message/);
 });
 
 
