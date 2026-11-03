@@ -29,6 +29,7 @@ import { authConfig, googleLogin, currentSession, logout, requireSession } from 
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
 import { handleVoiceTranscription } from "./multimodal/voice-assistance.js";
 import { submitFeatureRequest } from "./feature-requests.js";
+import { adminSession, pendingAdminUsers } from "./admin-portal.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1473,6 +1474,20 @@ export default {
     const corsHeaders = getCorsHeaders(request);
 
     if (url.pathname === "/api/feature-requests") return submitFeatureRequest(request, env, corsHeaders);
+    if (url.pathname === "/api/admin/session") return adminSession(request, env);
+    if (url.pathname === "/api/admin/users/pending") return pendingAdminUsers(request, env);
+
+    // The Admin Console is a distinct document and is served only after a server-side role check.
+    if (url.pathname === "/admin") {
+      const gate = await adminSession(new Request(new URL("/api/admin/session", url), { headers: request.headers }), env);
+      if (!gate.ok) {
+        if (!gate.headers.get("content-type")?.includes("application/json")) return gate;
+        const payload = await gate.clone().json().catch(() => ({}));
+        if (gate.status !== 200) return new Response(payload.error === "ADMIN_REQUIRED" ? "403 — Admin access required." : "Admin Console is not available until governance access is verified.", { status: gate.status, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+      }
+      const asset = await env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));
+      return new Response(asset.body, { status: asset.status, headers: { ...Object.fromEntries(asset.headers), "cache-control": "no-store" } });
+    }
     if (url.pathname === "/api/auth/config" && request.method === "GET") return authConfig(request, env);
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
