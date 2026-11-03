@@ -45,3 +45,29 @@ test("All inline JavaScript parses without syntax errors", () => {
   assert.ok(scripts.length > 0, "Expected at least one inline script");
   for (const source of scripts) new vm.Script(source, { filename: "src/index.html:inline-script" });
 });
+
+test("Targeted workspace refresh includes responsive dashboard and explicit controlled-beta status", () => {
+  assert.match(html, /CerdikGo · AI Innovation Workspace/);
+  assert.match(html, /CONTROLLED BETA/);
+  assert.match(html, /ATLAS-9 targeted screen refresh/);
+  assert.match(html, /@media\(max-width:720px\)/);
+});
+
+test("Hybrid connectivity simulator is interactive, local-only, and clearly labelled", () => {
+  assert.match(html, /Local-only connectivity scenario simulator/);
+  assert.match(html, /data-channel="Fiber"/);
+  assert.match(html, /data-channel="Cellular A"/);
+  assert.match(html, /data-channel="Cellular B"/);
+  assert.match(html, /data-channel="Wi-Fi Mesh"/);
+  assert.match(html, /data-channel="LoRa Radio"/);
+  assert.match(html, /SIMULATION ONLY/);
+  assert.match(html, /connectivityReset\?\.addEventListener/);
+  assert.match(html, /channel\.available = !channel\.available/);
+});
+
+test("Theme toggle retains accessible labels and persisted preference", () => {
+  assert.match(html, /localStorage\.getItem\(THEME_STORAGE_KEY\)/);
+  assert.match(html, /localStorage\.setItem\(THEME_STORAGE_KEY, selected\)/);
+  assert.match(html, /Aktifkan mode siang/);
+  assert.match(html, /Aktifkan mode malam/);
+});
