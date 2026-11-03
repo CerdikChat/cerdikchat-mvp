@@ -624,7 +624,7 @@ export async function decideUserAccess(request, env) {
       // D1 serializes the batch; concurrent approvals cannot both consume
       // the final seat because this conditional write re-checks active seats.
       statements.push(env.DB.prepare(
-        "INSERT INTO users (google_sub, email, display_name, status, role, created_at, updated_at) SELECT ?, ?, ?, 'active', 'user', ?, ? WHERE (SELECT COUNT(*) FROM users WHERE status = 'active') < 30 AND EXISTS (SELECT 1 FROM user_access_requests WHERE google_sub = ? AND status = 'pending')"
+        "INSERT INTO users (google_sub, email, display_name, status, role, created_at, updated_at) SELECT ?, ?, ?, 'active', 'user', ?, ? WHERE (SELECT COUNT(*) FROM users WHERE status = 'active' AND role = 'user') < 30 AND EXISTS (SELECT 1 FROM user_access_requests WHERE google_sub = ? AND status = 'pending')"
       ).bind(target.google_sub, target.email, target.display_name || "", now, now, target.google_sub));
       statements.push(env.DB.prepare(
         "UPDATE user_access_requests SET status = 'approved', reviewed_at = ?, reviewed_by = ? WHERE google_sub = ? AND status = 'pending' AND EXISTS (SELECT 1 FROM users WHERE google_sub = ? AND status = 'active')"
@@ -634,7 +634,7 @@ export async function decideUserAccess(request, env) {
       ).bind(admin.subject, target.google_sub, JSON.stringify({ email: target.email, requestStatus: "approved" }), now, target.google_sub));
       const results = await env.DB.batch(statements);
       if (results[0]?.meta?.changes !== 1 || results[1]?.meta?.changes !== 1) {
-        const count = await env.DB.prepare("SELECT COUNT(*) AS active_count FROM users WHERE status = 'active'").first();
+        const count = await env.DB.prepare("SELECT COUNT(*) AS active_count FROM users WHERE status = 'active' AND role = 'user'").first();
         if (Number(count?.active_count || 0) >= 30) return authJson({ error: "PILOT_CAP_REACHED" }, 409);
         return authJson({ error: "USER_STATE_CHANGED" }, 409);
       }
