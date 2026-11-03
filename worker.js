@@ -1519,7 +1519,7 @@ export default {
       headers.set("referrer-policy", "no-referrer");
       headers.set("x-frame-options", "DENY");
       headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
-      headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
+      headers.set("permissions-policy", "camera=(), microphone=(self), geolocation=()");
       headers.set("cross-origin-opener-policy", "same-origin-allow-popups");
       headers.set("cross-origin-resource-policy", "same-origin");
       headers.set(
