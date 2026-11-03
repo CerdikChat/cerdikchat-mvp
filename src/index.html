@@ -5,13 +5,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1220">
-  <meta name="description" content="CerdikChat — asisten AI untuk riset, analisis, penulisan, dan perencanaan.">
+  <meta name="description" content="CerdikGo — ruang kerja AI terpadu untuk riset, analisis, penulisan, dan inovasi.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="CerdikChat">
+  <meta name="apple-mobile-web-app-title" content="CerdikGo">
   <meta name="color-scheme" content="dark">
   <link rel="manifest" href="/manifest.webmanifest">
-  <title>CerdikChat — AI Workspace</title>
+  <title>CerdikGo — AI Innovation Workspace</title>
 
   <style>
     .auth-panel[hidden] { display: none !important; }
@@ -615,6 +615,45 @@
     }
     @media(prefers-reduced-motion:reduce){.app>.side,.app>.nav-backdrop{transition:none}}
 
+
+    /* CerdikGo Innovation Workspace redesign — conversation-first, responsive. */
+    .workspace-intro{max-width:760px;margin:4px auto 20px;text-align:left}
+    .workspace-intro .eyebrow{font-size:10px;letter-spacing:2px;color:#42d9df}
+    .workspace-intro h1{margin:9px 0 7px;font-size:clamp(27px,3.8vw,40px);line-height:1.12;letter-spacing:-1.25px}
+    .workspace-intro h1 span{background:linear-gradient(90deg,#54b8ff,#28e0ce);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .workspace-intro p{max-width:620px;margin:0;color:#a7bdd5;font-size:14px;line-height:1.6}
+    .workspace-launcher{max-width:900px;margin:0 auto;padding:17px;border:1px solid #1b527c;border-radius:19px;background:linear-gradient(145deg,#0d2138ed,#09182bed);box-shadow:0 14px 38px #0003,inset 0 1px #ffffff09}
+    .launcher-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+    .launcher-heading strong,.launcher-heading small{display:block}
+    .launcher-heading strong{font-size:14px;color:#f2f8ff}
+    .launcher-heading small{margin-top:3px;font-size:11px;color:#91abc7}
+    .workspace-status{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid #216b65;border-radius:20px;color:#72e7d2;font-size:9px;font-weight:800;letter-spacing:.8px;white-space:nowrap}
+    .workspace-status i{width:6px;height:6px;border-radius:50%;background:#38d6a5;box-shadow:0 0 9px #38d6a5}
+    .suggestions{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0}
+    .suggest{position:relative;display:flex;min-height:142px;flex-direction:column;align-items:flex-start;gap:7px;padding:14px;border:1px solid #1b456b;border-radius:14px;background:linear-gradient(155deg,#112b47,#0b1b30);text-align:left}
+    .suggest:hover{transform:translateY(-2px);border-color:#27bddd;box-shadow:0 8px 22px #087fc522}
+    .suggest-icon{display:grid;place-items:center;width:34px;height:34px;border:1px solid #17658a;border-radius:11px;background:#0c3850;color:#48d9e8;font-size:20px}
+    .suggest b{font-size:13px;line-height:1.35}
+    .suggest small{font-size:11px;line-height:1.5;color:#9cb4ce}
+    .workspace-footnote{margin-top:13px;padding-top:11px;border-top:1px solid #183b5a;color:#8ea8c3;font-size:10px;line-height:1.5}
+    .workspace-footnote span{color:#44d9df;margin-right:5px}
+    @media(max-width:900px){.suggestions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:720px){
+      .feed{padding:15px 12px 18px}
+      .workspace-intro{margin:5px 2px 15px}
+      .workspace-intro h1{font-size:clamp(25px,7vw,32px)}
+      .workspace-intro p{font-size:12px}
+      .workspace-launcher{padding:13px;border-radius:16px}
+      .launcher-heading{align-items:flex-start}
+      .launcher-heading strong{font-size:13px}
+      .suggestions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+      .suggest{min-height:126px;padding:11px;border-radius:12px}
+      .suggest b{font-size:12px}
+      .suggest small{font-size:10px}
+    }
+    @media(max-width:360px){.workspace-launcher{padding:10px}.suggest{min-height:132px;padding:9px}}
+    @media(prefers-reduced-motion:reduce){.suggest{transition:none!important;transform:none!important}}
+
   </style>
 </head>
 
@@ -623,7 +662,7 @@
     <aside class="side" id="sideNavigation" aria-label="Navigasi utama">
       <div class="brand">
         <div class="logo" aria-hidden="true">C</div>
-        CerdikChat
+        CerdikGo
       </div>
 
       <div class="tag">CLOSED BETA · v0.1</div>
@@ -663,9 +702,9 @@
         <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="sideNavigation" aria-label="Buka navigasi">☰ <span>Menu</span></button>
         <div class="mobile-brand">
           <div class="logo" aria-hidden="true">C</div>
-          CerdikChat
+          CerdikGo
         </div>
-        <strong>AI Workspace</strong>
+        <strong>Ruang Kerja AI</strong>
         <div class="top-actions">
           <span class="pill">● AI · Beta</span>
           <button id="loginOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
@@ -695,27 +734,32 @@
       <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
         <div class="welcome" id="welcome">
-          <div class="eyebrow">Pikirkan lebih jernih</div>
+          <div class="workspace-intro">
+            <div class="eyebrow">CERDIKGO · AI INNOVATION WORKSPACE</div>
+            <h1>Selamat datang di <span>Ruang Kerja AI</span></h1>
+            <p>Satu ruang untuk berpikir lebih jernih, mengolah informasi, dan mengubah ide menjadi langkah nyata.</p>
+          </div>
 
-          <h1>
-            Ide besar dimulai dari
-            <span>pertanyaan yang tepat.</span>
-          </h1>
-
-          <p>
-            Ruang kerja AI untuk membantu riset, analisis, penulisan, dan
-            perencanaan — satu percakapan pada satu waktu.
-          </p>
-
-          <div class="suggestions">
-            <button class="suggest" type="button" data-prompt="Buat kerangka analisis strategis untuk sebuah ide bisnis baru."><b>↗ Analisis strategis</b><small>Ubah masalah kompleks menjadi langkah yang jelas.</small></button>
-            <button class="suggest" type="button" data-prompt="Bantu saya menyusun ringkasan eksekutif yang singkat dan meyakinkan tentang: "><b>▤ Ringkasan eksekutif</b><small>Susun pesan utama secara terstruktur.</small></button>
-            <button class="suggest" type="button" data-prompt="Buat rencana riset dengan pertanyaan penelitian, metode, sumber data, dan keterbatasan untuk topik: "><b>⌕ Rencana riset</b><small>Mulai dengan pertanyaan dan metode yang tepat.</small></button>
-            <button class="suggest" type="button" data-prompt="Bantu saya memetakan risiko sebuah proyek beserta mitigasi dan indikator peringatannya: "><b>◇ Pemetaan risiko</b><small>Identifikasi risiko sebelum menjadi masalah.</small></button>
-            <button class="suggest" type="button" data-prompt="Bantu saya menyusun rencana kerja mingguan dengan prioritas, tenggat, dan hasil yang diharapkan."><b>◷ Perencanaan kerja</b><small>Susun prioritas dan langkah pelaksanaan.</small></button>
-            <button class="suggest" type="button" data-prompt="Tulis ulang teks berikut agar profesional, jelas, dan alami: "><b>✎ Penulisan profesional</b><small>Perjelas pesan tanpa mengubah makna.</small></button>
-            <button class="suggest" type="button" data-prompt="Jelaskan topik berikut dari dasar, berikan contoh praktis, dan akhiri dengan ringkasan: "><b>◎ Belajar & eksplorasi</b><small>Pahami konsep melalui contoh terarah.</small></button>
-            <button class="suggest" type="button" data-prompt="Analisis masalah berikut: akar masalah, dampak, opsi solusi, risiko, dan rekomendasi: "><b>⌘ Pemecahan masalah</b><small>Petakan masalah dan opsi tindak lanjut.</small></button>
+          <div class="workspace-launcher" aria-label="Mulai pekerjaan">
+            <div class="launcher-heading">
+              <div><strong>Mulai dari tujuan Anda</strong><small>Pilih alur kerja atau langsung tulis pertanyaan.</small></div>
+              <span class="workspace-status"><i aria-hidden="true"></i> AI BETA</span>
+            </div>
+            <div class="suggestions">
+              <button class="suggest" type="button" data-prompt="Buat kerangka analisis strategis untuk ide atau masalah berikut. Sertakan tujuan, asumsi, opsi, risiko, dan rekomendasi:">
+                <span class="suggest-icon" aria-hidden="true">⌘</span><b>Analisis Strategis</b><small>Uraikan masalah kompleks menjadi keputusan yang jelas.</small>
+              </button>
+              <button class="suggest" type="button" data-prompt="Analisis dokumen atau informasi berikut. Buat ringkasan eksekutif, temuan utama, risiko, dan tindak lanjut:">
+                <span class="suggest-icon" aria-hidden="true">▤</span><b>Dokumen & Ringkasan</b><small>Susun poin penting dan insight yang dapat ditindaklanjuti.</small>
+              </button>
+              <button class="suggest" type="button" data-prompt="Rancang riset untuk topik berikut. Sertakan pertanyaan penelitian, metodologi, sumber data, dan keterbatasan:">
+                <span class="suggest-icon" aria-hidden="true">⌕</span><b>Riset & Eksplorasi</b><small>Mulai dari pertanyaan yang tepat dan metode yang terukur.</small>
+              </button>
+              <button class="suggest" type="button" data-prompt="Bantu saya menyusun rencana kerja yang terukur. Sertakan prioritas, tahapan, PIC, tenggat, dan indikator keberhasilan:">
+                <span class="suggest-icon" aria-hidden="true">✓</span><b>Rencana & Eksekusi</b><small>Ubah gagasan menjadi prioritas dan langkah nyata.</small>
+              </button>
+            </div>
+            <div class="workspace-footnote"><span aria-hidden="true">✦</span> Percakapan menjadi pusat workspace setelah Anda memulai. Fitur yang belum aktif tidak ditampilkan sebagai fungsi siap pakai.</div>
           </div>
         </div>
       </section>
