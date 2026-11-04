@@ -16,6 +16,7 @@ on:
       - "wrangler.toml"
       - "docs/MCP-*.md"
       - "docs/CHATGPT-GO-CONTEXT-BRIDGE.md"
+      - "docs/AI-PROVIDER-ROUTING.md"
       - ".github/workflows/cerdikgo-hybrid-gateway.yml"
   pull_request:
     paths:
