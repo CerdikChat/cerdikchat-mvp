@@ -28,6 +28,7 @@
 import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession } from "./auth/google-auth.js";
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
 import { listAgentCapabilities, buildAgentPlan } from "./integrations/agent-gateway.js";
+import { cerdikgoMcpHandler } from "./mcp/cerdikgo-mcp-server.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1484,6 +1485,23 @@ async function handleChat(request, env, ctx) {
 }
 
 /* =========================================================
+   MCP BEARER TOKEN VERIFICATION
+========================================================= */
+
+async function verifyMcpBearerToken(supplied, configured) {
+  const encoder = new TextEncoder();
+  const [left, right] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(supplied)),
+    crypto.subtle.digest("SHA-256", encoder.encode(configured)),
+  ]);
+  const a = new Uint8Array(left);
+  const b = new Uint8Array(right);
+  let difference = 0;
+  for (let i = 0; i < a.length; i++) difference |= a[i] ^ b[i];
+  return difference === 0;
+}
+
+/* =========================================================
    19. CLOUDFLARE WORKER ENTRY POINT
 ========================================================= */
 
@@ -1505,6 +1523,29 @@ export default {
         "cache-control": "no-store",
         "x-content-type-options": "nosniff",
       });
+    }
+
+    // Remote MCP is disabled until a dedicated bearer secret and feature flag are configured.
+    if (url.pathname === "/mcp") {
+      if (env.CERDIKGO_MCP_ENABLED !== "true") {
+        return errorResponse("MCP_DISABLED", "MCP endpoint is not enabled in this environment.", 404);
+      }
+      const configuredToken = env.CERDIKGO_MCP_BEARER_TOKEN;
+      if (typeof configuredToken !== "string" || configuredToken.length < 32) {
+        return errorResponse("MCP_AUTH_NOT_CONFIGURED", "MCP authentication is not configured.", 503);
+      }
+      const authorization = request.headers.get("Authorization") || "";
+      const suppliedToken = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+      if (!suppliedToken || !(await verifyMcpBearerToken(suppliedToken, configuredToken))) {
+        return jsonResponse(
+          { error: "UNAUTHORIZED", message: "A valid bearer token is required." },
+          401,
+          { "www-authenticate": 'Bearer realm="CerdikGo MCP"' }
+        );
+      }
+      const mcpRateLimitError = await applyRateLimit(request, env, {}, null);
+      if (mcpRateLimitError) return mcpRateLimitError;
+      return cerdikgoMcpHandler(request, env, ctx);
     }
 
     // Hybrid agent gateway is opt-in and remains plan-only in this phase.
