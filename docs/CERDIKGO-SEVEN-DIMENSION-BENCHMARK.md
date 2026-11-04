@@ -61,9 +61,10 @@ Historical percentage ranges previously discussed (reasoning 15–25%, coding 20
 
 - PR #57 head `570471a9303cda3beb110d04c80445a4db104039`: regression/install run `41875508518`, Phase 3 run `41875508872`, and hybrid gateway run `41875508705` completed successfully.
 - PR #58 head `5b482b05e832ed342791763eba7a84d4c9951c34`: regression/install `41876151107`, Phase 3 `41876151036`, hybrid gateway `41876151233`, and TypeScript foundation `41876151056` completed successfully.
-- PR #59 head `e6e7b17eaac1e0a94724cf9ff56b6d2a04e80ba3`: Auto Pilot gate `41917081910` and regression/install `41917081974` completed successfully. The gate tested merge candidate `96ba7681c3a0167ac2551edfa4db59b196176d3f`; all 127 automated tests passed, and installation preflight, TypeScript, regression and workflow safety scan passed.
-- Earlier readiness runs `41877325709` and `41879349586` failed because the workflow safety grep matched its own literal pattern. The scan was corrected in PR #59 commit `e6e7b17eaac1e0a94724cf9ff56b6d2a04e80ba3`.
-- PR #60 prior regression `41879349569` passed; its earlier gate `41879349586` ran before the PR #59 fix. PR #60 must pass its own readiness workflow on its current merged candidate before Human Verification of PR #60.
+- PR #59 head `637ff536011ed25fc598888f62f520b4cfdccd3c`: Auto Pilot gate `41917635551` and regression/install `41917635482` completed successfully. The gate tested merge candidate `25f416f68c9db0d2ce5a9a22ad38a003e2e36939`; all 127 automated tests passed, and installation preflight, TypeScript, regression and workflow safety scan passed.
+- PR #60 head `6b24a410de3925f649189fba6450265be7318236`: Auto Pilot gate `41917922881`, regression/install `41917922855`, Phase 3 `41917922823`, and hybrid gateway `41917922865` completed successfully. The gate tested merge candidate `26cd4038e4d9ef79bbe1320dc1b8fb3b290687b0`; all 129 automated tests passed, including the manifest-structure test.
+- PR #61 head `17760f85b01e0db2e7a09679324d55adfe1fcf95`: security regression `41917776597` and regression `41917776653` passed; 99 tests passed and the auth-log redaction check passed.
+- Earlier readiness runs `41877325709`, `41879349586`, and `41917595755` failed because the workflow safety grep matched its own literal pattern or a stale inherited workflow. The corrected workflow and PR #60 branch synchronization resolved the issue; current PR #59 and PR #60 merge-candidate gates pass.
 
 ## 5. Release and verification gate
 
