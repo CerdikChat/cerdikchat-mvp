@@ -29,7 +29,7 @@ import { authConfig, googleLogin, currentSession, logout, requireSession } from 
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
 import { handleVoiceTranscription } from "./multimodal/voice-assistance.js";
 import { submitFeatureRequest } from "./feature-requests.js";
-import { adminSession, pendingAdminUsers } from "./admin-portal.js";
+import { adminSession, pendingAdminUsers, decideAccessRequest } from "./admin-portal.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1476,6 +1476,7 @@ export default {
     if (url.pathname === "/api/feature-requests") return submitFeatureRequest(request, env, corsHeaders);
     if (url.pathname === "/api/admin/session") return adminSession(request, env);
     if (url.pathname === "/api/admin/users/pending") return pendingAdminUsers(request, env);
+    if (url.pathname === "/api/admin/users/decide") return decideAccessRequest(request, env);
 
     // The Admin Console is a distinct document and is served only after a server-side role check.
     if (url.pathname === "/admin") {
