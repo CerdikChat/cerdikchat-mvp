@@ -7,19 +7,27 @@ on:
     paths:
       - "integrations/**"
       - "mcp/**"
+      - "mcp-preview/**"
+      - "mcp-preview-worker.js"
       - "tests/**"
       - "worker.js"
       - "package.json"
       - "wrangler.toml"
+      - "docs/MCP-*.md"
+      - "docs/CHATGPT-GO-CONTEXT-BRIDGE.md"
       - ".github/workflows/cerdikgo-hybrid-gateway.yml"
   pull_request:
     paths:
       - "integrations/**"
       - "mcp/**"
+      - "mcp-preview/**"
+      - "mcp-preview-worker.js"
       - "tests/**"
       - "worker.js"
       - "package.json"
       - "wrangler.toml"
+      - "docs/MCP-*.md"
+      - "docs/CHATGPT-GO-CONTEXT-BRIDGE.md"
       - ".github/workflows/cerdikgo-hybrid-gateway.yml"
 
 permissions:
