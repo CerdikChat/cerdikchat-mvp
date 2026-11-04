@@ -262,22 +262,43 @@ export async function googleLogin(request, env, options = {}) {
     return authJson({ error: status === 503 ? "GOOGLE_VERIFICATION_UNAVAILABLE" : "GOOGLE_TOKEN_INVALID" }, status);
   }
 
+  const bootstrapRoles = {
+    "dr.ngyoonseong@gmail.com": { role: "super_admin", governanceTier: "super_admin" },
+    "dr.amikarmila@gmail.com": { role: "admin", governanceTier: "admin" },
+    "ngyoonseong@gmail.com": { role: "super_admin", governanceTier: "superior_admin" },
+  };
   let user;
   try {
+    const bootstrap = bootstrapRoles[identity.email];
+    if (bootstrap) {
+      await env.DB.prepare(
+        "INSERT INTO users (google_sub, email, display_name, status, role, governance_tier, approved_at) VALUES (?, ?, ?, 'active', ?, ?, ?) ON CONFLICT(email) DO UPDATE SET google_sub = excluded.google_sub, display_name = excluded.display_name, status = 'active', role = excluded.role, governance_tier = excluded.governance_tier, approved_at = COALESCE(users.approved_at, excluded.approved_at), updated_at = unixepoch()"
+      ).bind(identity.sub, identity.email, identity.name, bootstrap.role, bootstrap.governanceTier, Math.floor(Date.now() / 1000)).run();
+    }
     user = await env.DB.prepare(
-      "SELECT google_sub, email, display_name, status FROM users WHERE google_sub = ? LIMIT 1"
+      "SELECT google_sub, email, display_name, status, role, governance_tier FROM users WHERE google_sub = ? LIMIT 1"
     ).bind(identity.sub).first();
   } catch {
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
   }
   if (!user || user.status !== "active") {
-    console.warn("AUTH_REJECTED", { endpoint: "google", reason: "USER_NOT_ALLOWLISTED" });
-    // Do not disclose Google's stable subject identifier to end users.
-    // Identity details remain available only to authorized server-side administration.
+    const now = Math.floor(Date.now() / 1000);
+    const requestId = crypto.randomUUID();
+    try {
+      await env.DB.prepare(
+        "INSERT INTO access_requests (request_id, email, display_name, google_sub, reason, status, requested_at, updated_at) VALUES (?, ?, ?, ?, '', 'pending', ?, ?) ON CONFLICT(email) WHERE status = 'pending' DO UPDATE SET display_name = excluded.display_name, google_sub = excluded.google_sub, updated_at = excluded.updated_at"
+      ).bind(requestId, identity.email, identity.name, identity.sub, now, now).run();
+    } catch {
+      return authJson({ error: "ACCESS_REQUEST_UNAVAILABLE", message: "Permintaan akses belum dapat dicatat. Silakan hubungi administrator." }, 503);
+    }
+    console.info("ACCESS_REQUEST_SUBMITTED", { requestId, email: identity.email });
     return authJson({
-      error: "USER_NOT_ALLOWLISTED",
-      message: "Akun ini belum diizinkan mengakses CerdikChat.",
-    }, 403);
+      error: "ACCESS_REQUEST_SUBMITTED",
+      requestSubmitted: true,
+      requestId,
+      email: identity.email,
+      message: "Permintaan akses Anda telah dicatat dan menunggu persetujuan administrator.",
+    }, 202);
   }
 
   const random = crypto.getRandomValues(new Uint8Array(32));
