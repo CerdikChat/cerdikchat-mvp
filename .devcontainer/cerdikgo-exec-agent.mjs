@@ -143,8 +143,8 @@ async function main() {
         console.log(`Running task=${task}, requested_by=${actor}`);
         const result = executeTask(task);
         const status = result.ok ? "PASS" : "FAIL";
-        post(`**CerdikGo task: ${task} — ${status}**\\n\\n`
-          + `Exit code: ${result.exitCode}\\n\\n`
+        post(`**CerdikGo task: ${task} — ${status}**\n\n`
+          + `Exit code: ${result.exitCode}\n\n`
           + `\`\`\`text\\n${result.body}\\n\`\`\`\\n\\n`
           + "Preview-only execution. No deployment, database migration, secrets, OAuth, billing, merge, or Production operations were performed.");
         console.log(`Completed task=${task}, status=${status}`);
