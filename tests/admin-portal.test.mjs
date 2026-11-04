@@ -268,4 +268,5 @@ test("access decisions persist an explicitly identifiable audit record and retur
 test("Admin Console exposes the server-issued audit reference after a decision", async () => {
   const html = await readFile(new URL("../src/admin.html", import.meta.url), "utf8");
   assert.match(html, /Audit ID: "\+d\.auditId/);
+  assert.match(html, /await load\(\);statusEl\.textContent="Permintaan "\+d\.status\+" berhasil dicatat\. Audit ID: "\+d\.auditId/);
 });
