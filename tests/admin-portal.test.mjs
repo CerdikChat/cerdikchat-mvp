@@ -17,7 +17,7 @@ function authenticatedAdminEnv(role = "super_admin", accessExpiresAt = null) {
                 if (sql.includes("FROM sessions s")) {
                   return { google_sub: "test-admin-sub", email: "admin@example.test" };
                 }
-                if (sql.includes("SELECT role, access_expires_at FROM users")) {
+                if (sql.includes("SELECT role, governance_tier, access_expires_at FROM users")) {
                   return { role, access_expires_at: accessExpiresAt };
                 }
                 return null;
@@ -142,4 +142,8 @@ test("governance compatibility migration adds only missing columns and preserves
   assert.match(governanceMigration, /CREATE TABLE IF NOT EXISTS access_requests/);
   assert.doesNotMatch(governanceMigration, /ADD COLUMN role/);
   assert.doesNotMatch(governanceMigration, /CREATE TABLE IF NOT EXISTS admin_audit_log/);
+  const controlMigration = await readFile(new URL("../migrations/0007_governance_control_center.sql", import.meta.url), "utf8");
+  assert.match(controlMigration, /governance_tier/);
+  assert.match(controlMigration, /superior_admin/);
+  assert.match(controlMigration, /admin_audit_events/);
 });
