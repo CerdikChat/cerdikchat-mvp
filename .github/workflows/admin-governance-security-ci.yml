@@ -1,0 +1,44 @@
+name: ATLAS-9 Admin Governance Security Regression
+
+on:
+  push:
+    branches:
+      - atlas9/cerdikgo-admin-governance-security-hardening
+    paths:
+      - "auth/**"
+      - "admin-portal.js"
+      - "tests/**"
+      - ".github/workflows/admin-governance-security-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-governance-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies without lifecycle scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Run authentication, governance and regression tests
+        run: npm test
+      - name: Confirm auth log redaction source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE 'ACCESS_REQUEST_SUBMITTED.*email|ACCESS_REQUEST_SUBMITTED.*identity\.email' auth/google-auth.js; then
+            echo "::error::Personal email appears in access-request auth logging."
+            exit 1
+          fi
+          echo "Access-request authentication log is redacted."
