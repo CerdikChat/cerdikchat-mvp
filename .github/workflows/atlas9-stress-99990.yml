@@ -35,7 +35,9 @@ jobs:
       - name: Run existing regression suite
         run: npm test
       - name: Execute 99,990 synthetic Worker requests
-        run: node scripts/atlas9-stress-99990.mjs | tee atlas9-stress-report.json
+        run: |
+          set -o pipefail
+          node scripts/atlas9-stress-99990.mjs | tee atlas9-stress-report.json
       - name: Upload machine-readable report
         if: always()
         uses: actions/upload-artifact@v4
