@@ -133,7 +133,7 @@ test("Admin Console document rejects non-GET methods", async () => {
 });
 
 
-test("admin approval cannot rebind an existing email to a different Google subject", async () => {
+test("access decision batches approval, pending-state transition and audit insert atomically", async () => {\n  const source = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");\n  assert.match(source, /typeof env\\.DB\\.batch!=="function"/);\n  assert.match(source, /const results=await env\\.DB\\.batch\\(statements\\)/);\n  assert.match(source, /WHERE changes\\(\\)=1/);\n  assert.match(source, /REQUEST_ALREADY_DECIDED_OR_IDENTITY_CONFLICT/);\n});\n\ntest("admin approval cannot rebind an existing email to a different Google subject", async () => {
   const source = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");
   assert.match(source, /ON CONFLICT\(email\) DO UPDATE[\s\S]*?WHERE users\.google_sub=excluded\.google_sub/);
   assert.match(source, /activated\.meta\?\.changes\?\?0\)!==1\)return json\(\{error:"ACCOUNT_IDENTITY_CONFLICT"\},409\)/);
