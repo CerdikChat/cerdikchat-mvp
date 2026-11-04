@@ -10,10 +10,10 @@ const env = {
 };
 const cases = [
   ["auth-config", "/api/auth/config", "GET", 200],
-  ["admin-session-fail-closed", "/api/admin/session", "GET", 401],
-  ["pending-queue-fail-closed", "/api/admin/users/pending", "GET", 401],
+  ["admin-session-fail-closed", "/api/admin/session", "GET", 503],
+  ["pending-queue-fail-closed", "/api/admin/users/pending", "GET", 503],
   ["decision-method-guard", "/api/admin/users/decide", "GET", 405],
-  ["decision-auth-fail-closed", "/api/admin/users/decide", "POST", 401],
+  ["decision-auth-fail-closed", "/api/admin/users/decide", "POST", 503],
   ["unknown-route", "/__atlas9_unknown__", "GET", 404]
 ];
 const samples = new Array(TOTAL);
