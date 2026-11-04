@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { executeTool, handleMcpRequest } from "../mcp-preview-worker.js";
+import canonicalWorker, { executeTool, handleMcpRequest } from "../mcp-preview-worker.js";
+import compatibilityWorker, { handleMcpRequest as compatibilityHandle } from "../mcp-preview/worker.js";
 
 const token = "test-only-preview-token-0123456789abcdef";
 
@@ -14,6 +15,12 @@ function request(body, headers = {}, method = "POST") {
 const env = { CERDIKGO_MCP_ENABLED: "true", CERDIKGO_MCP_BEARER_TOKEN: token };
 const auth = { authorization: `Bearer ${token}` };
 
+test("compatibility Worker entrypoint re-exports the canonical implementation", async () => {
+  assert.equal(typeof canonicalWorker.fetch, "function");
+  assert.equal(compatibilityWorker.fetch, canonicalWorker.fetch);
+  assert.equal(compatibilityHandle, handleMcpRequest);
+});
+
 test("disabled MCP endpoint is closed", async () => {
   const response = await handleMcpRequest(request({ jsonrpc: "2.0", id: 1, method: "ping" }), { ...env, CERDIKGO_MCP_ENABLED: "false" });
   assert.equal(response.status, 404);
@@ -24,23 +31,26 @@ test("rejects missing or invalid bearer token", async () => {
   assert.equal(response.status, 401);
 });
 
-test("initialize returns Streamable HTTP MCP metadata", async () => {
-  const response = await handleMcpRequest(request({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-03-26", capabilities: {}, clientInfo: { name: "test", version: "1" } } }, auth), env);
-  assert.equal(response.status, 200);
-  const body = await response.json();
-  assert.equal(body.result.serverInfo.name, "cerdikgo-atlas9");
-  assert.ok(body.result.capabilities.tools);
+test("initialize returns the server-supported Streamable HTTP protocol version", async () => {
+  for (const clientVersion of ["2025-03-26", "2099-01-01"]) {
+    const response = await handleMcpRequest(request({
+      jsonrpc: "2.0", id: 1, method: "initialize",
+      params: { protocolVersion: clientVersion, capabilities: {}, clientInfo: { name: "test", version: "1" } },
+    }, auth), env);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.result.serverInfo.name, "cerdikgo-atlas9");
+    assert.equal(body.result.protocolVersion, "2025-03-26");
+    assert.ok(body.result.capabilities.tools);
+  }
 });
 
-test("initialize falls back to the server-supported protocol version", async () => {
-  const response = await handleMcpRequest(request({
-    jsonrpc: "2.0", id: 11, method: "initialize",
-    params: { protocolVersion: "2099-01-01", capabilities: {}, clientInfo: { name: "future-client", version: "1" } },
-  }, auth), env);
-  assert.equal(response.status, 200);
-  const body = await response.json();
-  assert.equal(body.result.protocolVersion, "2025-03-26");
+test("initialized notification is accepted without a JSON-RPC response body", async () => {
+  const response = await handleMcpRequest(request({ jsonrpc: "2.0", method: "notifications/initialized" }, auth), env);
+  assert.equal(response.status, 202);
+  assert.equal(await response.text(), "");
 });
+
 test("tools/list exposes exactly three read-only planning tools", async () => {
   const response = await handleMcpRequest(request({ jsonrpc: "2.0", id: 2, method: "tools/list" }, auth), env);
   const body = await response.json();
