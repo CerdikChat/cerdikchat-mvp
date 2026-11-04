@@ -133,6 +133,12 @@ test("Admin Console document rejects non-GET methods", async () => {
 });
 
 
+test("admin approval cannot rebind an existing email to a different Google subject", async () => {
+  const source = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");
+  assert.match(source, /ON CONFLICT\(email\) DO UPDATE[\s\S]*?WHERE users\.google_sub=excluded\.google_sub/);
+  assert.match(source, /activated\.meta\?\.changes\?\?0\)!==1\)return json\(\{error:"ACCOUNT_IDENTITY_CONFLICT"\},409\)/);
+});
+
 test("governance compatibility migration adds only missing columns and preserves existing role schema", async () => {
   const usersMigration = await readFile(new URL("../migrations/0001_users.sql", import.meta.url), "utf8");
   const governanceMigration = await readFile(new URL("../migrations/0006_access_governance_compat.sql", import.meta.url), "utf8");
