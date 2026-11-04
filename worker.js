@@ -1529,7 +1529,7 @@ export default {
       if (request.method !== "POST") {
         return errorResponse("METHOD_NOT_ALLOWED", "Gunakan POST.", 405, corsHeaders, { allow: "POST, OPTIONS" });
       }
-      if (!/^application\\/json(?:\\s*;|$)/i.test(request.headers.get("Content-Type") || "")) {
+      if (!(request.headers.get("Content-Type") || "").toLowerCase().startsWith("application/json")) {
         return errorResponse("UNSUPPORTED_MEDIA_TYPE", "Content-Type harus application/json.", 415, corsHeaders);
       }
 
