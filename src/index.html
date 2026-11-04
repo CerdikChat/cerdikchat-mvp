@@ -1737,8 +1737,15 @@
         });
         const payload = await result.json().catch(() => ({}));
         if (result.status === 202 && payload.error === "ACCESS_REQUEST_SUBMITTED" && payload.requestSubmitted === true) {
-          authMessage.textContent = "Permintaan akses berhasil dikirim. Administrator akan meninjau permintaan Anda.";
-          setStatus("Permintaan akses tercatat. Silakan tunggu persetujuan administrator.");
+          authMessage.textContent = "Permintaan akses berhasil dicatat. Administrator akan meninjau permintaan Anda.";
+          const emailLink = document.createElement("a");
+          emailLink.href = "mailto:dr.ngyoonseong@gmail.com?subject=" + encodeURIComponent("Permintaan akses CerdikGo " + (payload.requestId || "")) + "&body=" + encodeURIComponent("Mohon tinjau permintaan akses CerdikGo berikut.\nRequest ID: " + (payload.requestId || "") + "\nAkun Google: " + (payload.email || "") + "\n\nSilakan lakukan persetujuan melalui Admin Control Center Preview.");
+          emailLink.textContent = "Hubungi administrator melalui email";
+          emailLink.style.display = "inline-block";
+          emailLink.style.marginTop = "8px";
+          emailLink.style.color = "var(--accent, #20e2d0)";
+          authMessage.append(document.createElement("br"), emailLink);
+          setStatus("Permintaan akses tercatat. Masa akses setelah disetujui adalah 76 jam; setelah kedaluwarsa, login atau ajukan akses kembali.");
           await renderGoogleButton();
           return;
         }
