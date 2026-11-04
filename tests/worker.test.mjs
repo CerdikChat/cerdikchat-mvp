@@ -98,7 +98,7 @@ test("unlisted Google account response does not disclose Google subject identifi
       prepare: (sql) => ({
         bind: () => ({
           first: async () => {
-            assert.match(sql, /SELECT google_sub, email, display_name, status, role, governance_tier FROM users/);
+            assert.match(sql, /SELECT google_sub, email, display_name, status, role, governance_tier, access_expires_at FROM users/);
             return null;
           },
           run: async () => ({ meta: { changes: 1 } })
