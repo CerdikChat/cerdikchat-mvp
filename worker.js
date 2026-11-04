@@ -29,6 +29,7 @@ import { authConfig, googleLogin, currentSession, logout, requireSession, requir
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
 import { listAgentCapabilities, buildAgentPlan } from "./integrations/agent-gateway.js";
 import { cerdikgoMcpHandler } from "./mcp/cerdikgo-mcp-server.js";
+import { resolveModelRoute } from "./integrations/model-router.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1013,7 +1014,8 @@ function buildCalculatorResponse(calculation, corsHeaders) {
         reply: `Hasil perhitungan: ${formatCalculatorResult(
           result.result
         )}`,
-        model: CONFIG.MODEL,
+        provider: modelRoute.provider,
+      model: modelRoute.model,
         tool: result,
       },
       200,
@@ -1267,7 +1269,9 @@ async function handleChat(request, env, ctx) {
      AI BINDING VALIDATION
   ----------------------------------------------- */
 
-  if (!env.AI || typeof env.AI.run !== "function") {
+  const modelRoute = resolveModelRoute(env);
+
+  if (modelRoute.provider !== "workers_ai" || !env.AI || typeof env.AI.run !== "function") {
     console.error("CERDIKCHAT_CONFIG_ERROR", {
       reason: "AI_BINDING_MISSING",
     });
@@ -1303,7 +1307,7 @@ async function handleChat(request, env, ctx) {
   ----------------------------------------------- */
 
   try {
-    const result = await env.AI.run(CONFIG.MODEL, {
+    const result = await env.AI.run(modelRoute.model, {
       messages,
       tools: CALCULATOR_TOOLS,
       max_tokens: CONFIG.MAX_OUTPUT_TOKENS,
