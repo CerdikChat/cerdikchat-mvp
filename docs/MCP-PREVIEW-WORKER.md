@@ -2,7 +2,7 @@
 
 ## Canonical source
 
-- Source: `mcp-preview/worker.js`
+- Source: `mcp-preview-worker.js`
 - Runtime: Cloudflare Workers Module Worker
 - Endpoint: `POST /mcp` (Streamable HTTP JSON-RPC subset)
 - Server identity: `cerdikgo-atlas9` version `0.1.1`
