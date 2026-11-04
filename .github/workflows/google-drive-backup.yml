@@ -1,0 +1,89 @@
+name: ATLAS-9 Google Drive Backup
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_google_drive:
+        description: "Upload to Google Drive (leave off for manual ZIP download)"
+        required: false
+        type: boolean
+        default: false
+  schedule:
+    # 02:00 WITA (Bali) every day
+    - cron: "0 2 * * *"
+      timezone: "Asia/Makassar"
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: google-drive-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout full repository history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch all remote branches and tags
+        run: |
+          git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*' '+refs/tags/*:refs/tags/*'
+
+      - name: Scan repository for exposed secrets
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+      - name: Build complete Git and source archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          git bundle create backup/cerdikchat-full-history.bundle --all
+          git bundle verify backup/cerdikchat-full-history.bundle
+          git archive --format=zip --output=backup/cerdikchat-source.zip HEAD
+          (
+            cd backup
+            sha256sum cerdikchat-full-history.bundle cerdikchat-source.zip > SHA256SUMS.txt
+          )
+          cat backup/SHA256SUMS.txt
+          du -h backup/*
+
+      - name: Publish backup package for manual download
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerdikchat-full-backup-${{ github.run_id }}
+          path: backup/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload verified backup files to Google Drive
+        if: github.event_name == 'workflow_dispatch' && inputs.upload_to_google_drive == true
+        env:
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: node scripts/backup-to-drive.mjs backup
+
+      - name: Publish backup summary
+        if: always()
+        run: |
+          {
+            echo "## ATLAS-9 Google Drive Backup"
+            echo "- Repository: ${GITHUB_REPOSITORY}"
+            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Trigger: ${GITHUB_EVENT_NAME}"
+            echo "- Artifacts: Git bundle, source ZIP, SHA-256 manifest"
+            echo "- Retention: no automatic deletion in this initial release"
+          } >> "$GITHUB_STEP_SUMMARY"
