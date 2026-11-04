@@ -649,6 +649,7 @@
     @media(max-width:620px){.portal-grid{grid-template-columns:1fr}.portal-card p{min-height:0}}
     
     html[data-theme="light"] .settings-dialog{background:#fff;color:#14243a}html[data-theme="light"] .settings-section{background:#f2f6fc}
+  .bridge-top-link{display:inline-flex;align-items:center;padding:7px 10px;border:1px solid #267b8a;border-radius:9px;background:#0d2836;color:#a8f4eb;text-decoration:none;font-size:11px;font-weight:750}.bridge-top-link:focus-visible{outline:2px solid var(--mint);outline-offset:3px}@media(max-width:720px){.bridge-top-link{padding:6px 8px;font-size:10px}}
   </style>
 </head>
 
@@ -702,7 +703,7 @@
         </div>
 
         <strong>CerdikGo · Innovation Workspace</strong>
-        <div class="top-actions"><span class="pill">● AI · Beta</span><button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
+        <div class="top-actions"><a class="bridge-top-link" href="/bridge.html">⇄ Context Bridge</a><span class="pill">● AI · Beta</span><button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button><button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Aktifkan mode siang">☀️ Mode siang</button></div>
       </header>
 
       <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
