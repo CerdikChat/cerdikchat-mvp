@@ -254,3 +254,96 @@ test("governance migration preflight is read-only and flags duplicate pending em
   const executableSql = sql.replace(/^\s*--.*$/gm, "");
   assert.doesNotMatch(executableSql, /\b(DELETE|UPDATE|INSERT|REPLACE)\b/i);
 });
+
+
+function decisionEnvironment(batchResults, requestStatus = "pending", role = "super_admin") {
+  const requestRow = {
+    request_id: "00000000-0000-4000-8000-000000000001",
+    email: "pilot@example.test",
+    display_name: "Pilot User",
+    google_sub: "pilot-google-sub",
+    status: requestStatus
+  };
+  const statements = [];
+  const DB = {
+    prepare(sql) {
+      statements.push(sql);
+      return {
+        bind(...args) {
+          return {
+            first: async () => {
+              if (sql.includes("FROM sessions s")) {
+                return { google_sub: "admin-google-sub", email: "admin@example.test" };
+              }
+              if (sql.includes("SELECT role, governance_tier, access_expires_at FROM users")) {
+                return { role, governance_tier: role, access_expires_at: null };
+              }
+              if (sql.includes("FROM access_requests WHERE request_id")) return requestRow;
+              return null;
+            },
+            all: async () => ({ results: [] }),
+            run: async () => ({ meta: { changes: 1 } })
+          };
+        }
+      };
+    },
+    batch: async batch => {
+      DB.lastBatchSql = batch.map(statement => statement.sql || "");
+      return batchResults;
+    }
+  };
+  return { DB, statements };
+}
+
+function decisionRequest(decision = "approve", role = "user") {
+  const session = "A".repeat(43);
+  const csrf = "C".repeat(43);
+  return new Request("https://cerdikchat.test/api/admin/users/decide", {
+    method: "POST",
+    headers: {
+      origin: "https://cerdikchat.test",
+      "sec-fetch-site": "same-origin",
+      "content-type": "application/json",
+      cookie: `__Host-cerdikchat_session=${session}; __Host-cerdikchat_csrf=${csrf}`,
+      "x-csrf-token": csrf
+    },
+    body: JSON.stringify({
+      requestId: "00000000-0000-4000-8000-000000000001",
+      decision,
+      role
+    })
+  });
+}
+
+test("Admin approval endpoint validates identity and records a traceable audit result", async () => {
+  const environment = decisionEnvironment([
+    { meta: { changes: 1 } },
+    { meta: { changes: 1 } },
+    { meta: { changes: 1 } }
+  ]);
+  const response = await worker.fetch(decisionRequest("approve", "user"), environment);
+  const payload = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(payload.success, true);
+  assert.equal(payload.status, "approved");
+  assert.match(payload.auditId, /^[0-9a-f-]{36}$/i);
+});
+
+test("Admin approval rejects an already-decided request without reporting success", async () => {
+  const environment = decisionEnvironment([
+    { meta: { changes: 0 } },
+    { meta: { changes: 0 } }
+  ], "approved");
+  const response = await worker.fetch(decisionRequest("reject"), environment);
+  const payload = await response.json();
+  assert.equal(response.status, 409);
+  assert.equal(payload.error, "REQUEST_NOT_PENDING");
+});
+
+test("Admin approval refuses role escalation beyond the administrator tier", async () => {
+  const environment = decisionEnvironment([], "pending", "admin");
+  const response = await worker.fetch(decisionRequest("approve", "super_admin"), environment);
+  const payload = await response.json();
+  assert.equal(response.status, 403);
+  assert.equal(payload.error, "ROLE_ESCALATION_FORBIDDEN");
+});
