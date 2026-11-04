@@ -1,0 +1,73 @@
+name: CerdikGo Auto Pilot Readiness Gate
+
+on:
+  pull_request:
+    branches: [main, "atlas9/**"]
+  push:
+    branches: ["atlas9/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerdikgo-autopilot-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  automated-validation:
+    name: Automated validation (no human test before green)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact candidate commit
+        uses: actions/checkout@v4
+      - name: Record exact tested checkout and PR refs
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Candidate identity"
+            echo "- Tested checkout SHA: $(git rev-parse HEAD)"
+            echo "- Workflow event SHA: ${GITHUB_SHA}"
+            echo "- PR head SHA: ${{ github.event.pull_request.head.sha || github.sha }}"
+            echo "- PR base SHA: ${{ github.event.pull_request.base.sha || 'not-applicable' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies without lifecycle scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Installation and configuration preflight
+        run: npm run doctor
+      - name: Strict TypeScript contracts
+        run: npm run typecheck
+      - name: Full automated regression suite
+        run: npm test
+      - name: Verify no accidental production deployment workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Split the command fragments so this safety check does not match its own source.
+          deploy_pattern='wrangler[[:space:]]+deploy([[:space:]]|$)'
+          remote_d1_pattern='wrangler[[:space:]]+d1 migrations apply.*--remote'
+          if grep -RniE "${deploy_pattern}|${remote_d1_pattern}" .github/workflows; then
+            echo "::error::Unapproved remote deployment or remote migration command found in workflow files."
+            exit 1
+          fi
+          echo "No direct remote deployment or remote D1 migration command found in workflow files."
+      - name: Publish machine gate result
+        if: success()
+        run: |
+          {
+            echo "## READY FOR HUMAN VERIFICATION"
+            echo
+            echo "- Installation preflight: PASS"
+            echo "- Strict TypeScript contracts: PASS"
+            echo "- Automated regression suite: PASS"
+            echo "- Workflow deployment safety scan: PASS"
+            echo
+            echo "This status is valid only for this exact tested checkout SHA, recorded above. It does not prove remote Preview health, Android usability, or Production readiness."
+            echo "No deployment, D1 write/migration, OAuth/secrets change, DNS change, or billing action is performed by this workflow."
+          } >> "$GITHUB_STEP_SUMMARY"
