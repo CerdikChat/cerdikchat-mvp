@@ -1,4 +1,4 @@
-name: CerdikChat regression tests
+name: CerdikGo regression and installation checks
 
 on:
   pull_request:
@@ -12,6 +12,7 @@ permissions:
 jobs:
   regression:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,5 +22,7 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check installation prerequisites
+        run: npm run doctor
       - name: Run regression tests
         run: npm test
