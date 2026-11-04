@@ -778,7 +778,9 @@ test("login and logout report failures inside the open account dialog and verify
   assert.match(html, /sessionResponse = await fetch\("\/api\/auth\/me"/);
   assert.match(html, /sessionCheck\.status !== 401/);
   assert.match(html, /id="adminConsoleLink" href="\/admin" hidden/);
-  assert.match(html, /payload\.role\)\s*\)/);
+  assert.match(html, /payload\.authenticated === true/);
+  assert.match(html, /\["admin", "superior_admin", "super_admin"\]\.includes\(payload\.role\)/);
+  assert.match(html, /adminSettingsSection\.hidden = !canAccessAdmin/);
 });
 
 
