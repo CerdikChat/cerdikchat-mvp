@@ -34,3 +34,9 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 - Initial scorecard charter: `ce08d5faa7591774f11c0b2266fcaa85ddaa6e38`.
 - Benchmark manifest: `5185b6263cea02efb7eec73fb9e8f29b9d4bab0e`.
 - Manifest test: `241b28d02bfe6bcff7add5782612d6b71c84f514`.
+
+## 2026-11-05 — Final PR #60 candidate re-verification
+- PR #60 head `a32a800f19ad57a40f2e48f7e71e622070a21c8b`; tested merge candidate `a6215155fe39d37f44ecf468bdee944ba4a852dc`.
+- Auto Pilot readiness `41918309854`, regression/install `41918309389`, Phase 3 `41918309358`, and hybrid gateway `41918309299`: all passed; 129/129 tests passed.
+- Branch-push readiness `41918299433` and regression/install `41918299401`: passed.
+- This run confirms CI and benchmark-manifest structure only; it does not measure model reasoning, research quality or Gemini parity.
