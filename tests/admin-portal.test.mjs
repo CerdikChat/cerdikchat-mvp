@@ -263,3 +263,9 @@ test("access decisions persist an explicitly identifiable audit record and retur
     "the API must not report success before confirming the audit insert"
   );
 });
+
+
+test("Admin Console exposes the server-issued audit reference after a decision", async () => {
+  const html = await readFile(new URL("../src/admin.html", import.meta.url), "utf8");
+  assert.match(html, /Audit ID: "\+d\.auditId/);
+});
