@@ -41,3 +41,10 @@ The first ledger/QA snapshot described PR #57–#59 workflows as queued or untes
 - No merge, Production deployment, remote D1 write/migration, OAuth/secrets change, DNS change, billing activation, or destructive privileged action without separate explicit approval.
 - Human Verification must follow Auto Pilot success for the exact candidate commit.
 - CI green does not establish Preview runtime, Android acceptance, or Production readiness.
+
+## Entry — 2026-11-05: Final PR #60 candidate re-verification
+- PR #60 latest head: `a32a800f19ad57a40f2e48f7e71e622070a21c8b`.
+- Tested merge candidate: `a6215155fe39d37f44ecf468bdee944ba4a852dc`, merging the PR #60 head into corrected PR #59 head `637ff536011ed25fc598888f62f520b4cfdccd3c`.
+- Auto Pilot readiness `41918309854`, regression/install `41918309389`, Phase 3 `41918309358`, and hybrid gateway `41918309299`: all VERIFIED / success.
+- 129/129 automated tests passed. This verifies code/CI readiness for the tested merge candidate, not model-performance parity or runtime/Android acceptance.
+- Branch-push readiness `41918299433` and regression/install `41918299401`: success.
