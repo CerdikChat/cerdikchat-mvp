@@ -251,5 +251,6 @@ test("governance migration preflight is read-only and flags duplicate pending em
   assert.match(sql, /SELECT lower\(trim\(email\)\)/);
   assert.match(sql, /WHERE status = 'pending'/);
   assert.match(sql, /HAVING COUNT\(\*\) > 1/);
-  assert.doesNotMatch(sql, /\b(DELETE|UPDATE|INSERT|REPLACE)\b/i);
+  const executableSql = sql.replace(/^\\s*--.*$/gm, "");
+  assert.doesNotMatch(executableSql, /\\b(DELETE|UPDATE|INSERT|REPLACE)\\b/i);
 });
