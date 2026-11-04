@@ -40,3 +40,9 @@
 
 ## Standing controls
 No merge, Production deployment, remote D1 write/migration, OAuth/secrets change, DNS change, billing activation, or privileged external operation without separate explicit authorization. Human Verification starts only after the Auto Pilot gate passes for the exact candidate being verified.
+
+## Additional technical findings — 2026-11-05
+10. **Document-research evidence integrity (REVIEW REQUIRED).** PR #35 `multimodal/file-analysis.js` validates that a non-null `reference` string occurs in extracted text, but does not independently validate the returned `evidence` text against that source. Add an explicit verbatim excerpt/quote field or a stronger claim-to-excerpt contract and negative tests before assigning full research-quality credit.
+11. **Central model routing (REVIEW REQUIRED).** PR #35 document analysis hardcodes the Gemma model and PR #41 voice assistance hardcodes Whisper. Confirm that these routes remain consistent with the central free-only model policy and add tests to prevent silent model-policy drift.
+12. **Hybrid connectivity scope (NOT TESTED beyond shell fallback).** PR #45 service worker caches only the static app shell and offline page; it bypasses `/api/` and authorization-bearing requests. This is a safe offline-shell fallback, not offline chat, peer-to-peer connectivity, radio mesh, or 3-mile offshore communications. No radio hardware/mesh transport or coverage test is evidenced.
+13. **Voice device acceptance (NOT TESTED).** PR #41 limits audio uploads to 3 MB and 60 seconds and a fixed MIME/signature allowlist, then uses Workers AI Whisper. Android recorder MIME compatibility, microphone permissions, playback, interruption, network-loss recovery and accessibility still require real-device tests.
