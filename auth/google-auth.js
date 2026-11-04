@@ -262,19 +262,8 @@ export async function googleLogin(request, env, options = {}) {
     return authJson({ error: status === 503 ? "GOOGLE_VERIFICATION_UNAVAILABLE" : "GOOGLE_TOKEN_INVALID" }, status);
   }
 
-  const bootstrapRoles = {
-    "dr.ngyoonseong@gmail.com": { role: "super_admin", governanceTier: "super_admin" },
-    "dr.amikarmila@gmail.com": { role: "admin", governanceTier: "admin" },
-    "ngyoonseong@gmail.com": { role: "super_admin", governanceTier: "superior_admin" },
-  };
   let user;
   try {
-    const bootstrap = bootstrapRoles[identity.email];
-    if (bootstrap) {
-      await env.DB.prepare(
-        "INSERT INTO users (google_sub, email, display_name, status, role, governance_tier, approved_at) VALUES (?, ?, ?, 'active', ?, ?, ?) ON CONFLICT(email) DO UPDATE SET google_sub = excluded.google_sub, display_name = excluded.display_name, status = 'active', role = excluded.role, governance_tier = excluded.governance_tier, approved_at = COALESCE(users.approved_at, excluded.approved_at), updated_at = unixepoch()"
-      ).bind(identity.sub, identity.email, identity.name, bootstrap.role, bootstrap.governanceTier, Math.floor(Date.now() / 1000)).run();
-    }
     user = await env.DB.prepare(
       "SELECT google_sub, email, display_name, status, role, governance_tier FROM users WHERE google_sub = ? LIMIT 1"
     ).bind(identity.sub).first();
