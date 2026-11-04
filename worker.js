@@ -27,6 +27,7 @@
 
 import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession } from "./auth/google-auth.js";
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
+import { listAgentCapabilities, buildAgentPlan } from "./integrations/agent-gateway.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1504,6 +1505,64 @@ export default {
         "cache-control": "no-store",
         "x-content-type-options": "nosniff",
       });
+    }
+
+    // Hybrid agent gateway is opt-in and remains plan-only in this phase.
+    if (url.pathname === "/api/agents/registry" || url.pathname === "/api/agents/plan") {
+      if (env.CERDIKGO_AGENT_GATEWAY_ENABLED !== "true") {
+        return errorResponse("FEATURE_DISABLED", "Agent gateway belum diaktifkan pada environment ini.", 404, corsHeaders);
+      }
+
+      const session = await requireSession(request, env);
+      if (!session.ok) return session.response;
+
+      if (url.pathname === "/api/agents/registry") {
+        if (request.method !== "GET") {
+          return errorResponse("METHOD_NOT_ALLOWED", "Gunakan GET.", 405, corsHeaders, { allow: "GET" });
+        }
+        return jsonResponse(listAgentCapabilities(), 200, corsHeaders);
+      }
+
+      if (request.method !== "OPTIONS" && !isSameOriginOrNoOrigin(request)) {
+        return errorResponse("ORIGIN_NOT_ALLOWED", "Origin permintaan tidak diizinkan.", 403, corsHeaders);
+      }
+      if (request.method !== "POST") {
+        return errorResponse("METHOD_NOT_ALLOWED", "Gunakan POST.", 405, corsHeaders, { allow: "POST, OPTIONS" });
+      }
+      if (!/^application\\/json(?:\\s*;|$)/i.test(request.headers.get("Content-Type") || "")) {
+        return errorResponse("UNSUPPORTED_MEDIA_TYPE", "Content-Type harus application/json.", 415, corsHeaders);
+      }
+
+      const rateLimitError = await applyRateLimit(request, env, corsHeaders, session.subject || session.email);
+      if (rateLimitError) return rateLimitError;
+
+      const bodyResult = await readBodyLimited(request, 8192);
+      if (!bodyResult.ok) {
+        return errorResponse(bodyResult.reason === "TOO_LARGE" ? "REQUEST_TOO_LARGE" : "INVALID_BODY", "Body permintaan tidak valid atau melebihi 8 KiB.", bodyResult.reason === "TOO_LARGE" ? 413 : 400, corsHeaders);
+      }
+
+      let body;
+      try {
+        body = JSON.parse(bodyResult.text);
+      } catch {
+        return errorResponse("INVALID_JSON", "Body harus berupa JSON yang valid.", 400, corsHeaders);
+      }
+
+      try {
+        const plan = buildAgentPlan(body, crypto.randomUUID());
+        console.log("CERDIKGO_AGENT_PLAN_CREATED", {
+          requestId: plan.request_id,
+          selectedAgents: plan.selected_agents,
+          actionClass: plan.action_class,
+          approvalRequired: plan.approval_required,
+          executionMode: plan.execution_mode,
+        });
+        return jsonResponse(plan, 200, corsHeaders);
+      } catch (error) {
+        const known = ["INVALID_PLAN_INPUT", "INVALID_INTENT", "INVALID_AGENT_SELECTION", "AGENT_NOT_ALLOWED", "ACTION_CLASS_NOT_ALLOWED"];
+        const code = known.includes(error?.message) ? error.message : "AGENT_PLAN_REJECTED";
+        return errorResponse(code, "Rencana agen tidak valid atau tidak diizinkan.", 400, corsHeaders);
+      }
     }
 
     if (url.pathname === "/api/analyze") {
