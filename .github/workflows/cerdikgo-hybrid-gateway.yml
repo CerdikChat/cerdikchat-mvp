@@ -5,6 +5,7 @@ on:
     branches:
       - atlas9/cerdikgo-multi-agent-evolution
     paths:
+      - ".devcontainer/**"
       - "integrations/**"
       - "mcp/**"
       - "mcp-preview/**"
@@ -18,6 +19,7 @@ on:
       - ".github/workflows/cerdikgo-hybrid-gateway.yml"
   pull_request:
     paths:
+      - ".devcontainer/**"
       - "integrations/**"
       - "mcp/**"
       - "mcp-preview/**"
