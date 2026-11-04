@@ -38,7 +38,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RniE 'wrangler deploy([[:space:]]|$)|wrangler d1 migrations apply.*--remote' .github/workflows; then
+          # Split the command fragments so this safety check does not match its own source.
+          deploy_pattern='wrangler[[:space:]]+deploy([[:space:]]|$)'
+          remote_d1_pattern='wrangler[[:space:]]+d1 migrations apply.*--remote'
+          if grep -RniE "${deploy_pattern}|${remote_d1_pattern}" .github/workflows; then
             echo "::error::Unapproved remote deployment or remote migration command found in workflow files."
             exit 1
           fi
