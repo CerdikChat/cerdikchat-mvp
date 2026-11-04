@@ -1,59 +1,45 @@
-# CerdikChat MVP v0.1 — Closed Beta
+# CerdikGo — AI Innovation Workspace
 
-Aplikasi web chat responsif dengan frontend statis, backend Cloudflare Workers, dan satu model Gemini. Riwayat percakapan hanya berada di memori browser selama halaman terbuka; tidak ada database atau login.
+**CerdikGo** is the product experience; **CerdikChat** remains the repository and shared application-core name. This repository currently builds a Cloudflare Workers application with a static, mobile-first workspace.
 
-## Prasyarat
-- Akun Cloudflare
-- Google AI Studio / Gemini API key
-- Node.js LTS dan npm (untuk menjalankan/deploy dengan Wrangler)
+## Current architecture
 
-## 1. Konfigurasi lokal
+- **Frontend:** static assets in `src/`, served by the Cloudflare Worker.
+- **Backend:** `worker.js`, with authenticated routes and request validation.
+- **AI inference:** Cloudflare Workers AI through the `AI` binding. The Worker configuration currently selects `@cf/google/gemma-4-26b-a4b-it`.
+- **Rate limiting:** `CHAT_RATE_LIMITER` binding; configured limits differ by environment.
+- **Database:** D1 binding `DB`. Production and Preview use separately named databases in Wrangler configuration; do not assume a migration has been applied merely because a migration file exists.
+- **Authentication:** Google Identity Services flow and server-side sessions in `auth/google-auth.js`. Preview configuration requires Google authentication; actual access still depends on the configured identity allowlist and required environment settings.
+- **PWA metadata:** `src/manifest.webmanifest` and the CerdikGo mark asset. Installability and service-worker/offline behavior require separate browser verification.
 
-```bash
-npm install -g wrangler
-wrangler login
-```
+## Local development
 
-Buat file `.dev.vars` di folder proyek (jangan commit file ini):
+1. Install a supported Node.js LTS release.
+2. Install dependencies with `npm install`.
+3. Authenticate Wrangler with `npx wrangler login`.
+4. Configure only the environment variables/secrets required by the selected local environment. Never commit credentials or paste them into source files.
+5. Run the project test suite using the repository's package scripts, then start a local Worker with `npx wrangler dev`.
 
-```dotenv
-GEMINI_API_KEY="TEMPELKAN_API_KEY_ANDA_DI_SINI"
-GEMINI_MODEL="gemini-2.5-flash"
-```
+Check `package.json`, `wrangler.toml`, and the relevant environment documentation before running commands. Do not copy old Gemini setup instructions: the current Worker uses Cloudflare Workers AI, not a Gemini API key.
 
-Jalankan:
+## Environment and release safety
 
-```bash
-wrangler dev
-```
+- Treat `atlas9/beta-pilot-multimodal-workspace` and its Preview configuration as the integration baseline unless a newer approved branch is explicitly selected.
+- Preview D1 is `cerdikchat-staging`; Production D1 is a different resource. Verify the binding and target before any database operation.
+- A migration file in Git is **not** proof that it has been applied.
+- Do not run remote D1 migrations, write data, change OAuth clients/secrets, enable paid services/billing, change DNS, or deploy Production without separate explicit authorization.
+- Keep changes on feature branches and validate the exact commit SHA in CI and Preview before requesting Android Human Verification.
+- A passing CI run is not equivalent to a successful Preview runtime test or Android acceptance test.
 
-Buka alamat lokal yang ditampilkan Wrangler. Uji kirim pesan. Jika model tidak tersedia di akun/region atau kuota berbeda, ubah `GEMINI_MODEL` ke model Gemini yang tersedia bagi akun Anda.
+## Product capability and limitations
 
-## 2. Deploy ke Cloudflare Workers
+The workspace UI may expose modules whose backend/provider dependencies are still gated or under validation. Do not describe a feature as operational solely because its UI is visible. In particular, live web research requires an approved search provider; document scanning requires a real private scanner service; hybrid radio/connectivity concepts are simulations unless connected to actual radio hardware and independently measured. See the relevant feature PR and runbook for each acceptance gate.
 
-```bash
-wrangler secret put GEMINI_API_KEY
-```
-Masukkan API key saat diminta. Jangan masukkan API key ke `src/index.html`, repositori GitHub, atau chat publik.
+## Brand and attribution
 
-Kemudian deploy:
+- Product: **CerdikGo**
+- Shared core / repository: **CerdikChat**
+- Strategic engineering program: **ATLAS-9**
+- Attribution: **Developed by ATLAS-9 (Dr. Steven)**
 
-```bash
-wrangler deploy
-```
-Wrangler mengunggah `worker.js` dan aset di `src/`. Buka URL deployment yang ditampilkan, lalu uji endpoint chat.
-
-## 3. Fitur yang sudah ada
-- UI responsif desktop/mobile
-- Prompt starter
-- Chat dengan konteks beberapa pesan terakhir
-- Validasi input dan batas karakter
-- Pesan error dasar untuk masalah API/kuota
-- API key disimpan sebagai secret backend
-- Tanpa database, login, atau penyimpanan permanen
-
-## 4. Batasan dan sebelum mengundang penguji
-
-Ini adalah starter MVP, bukan layanan produksi yang telah diaudit atau dideploy. Belum ada autentikasi, rate limit per pengguna/IP yang persisten, CAPTCHA, moderasi khusus, observability, penghapusan data terpusat, atau jaminan uptime. Jangan memublikasikan URL secara luas sebelum menambah pembatasan penyalahgunaan. Jika beta dibuka ke publik, pasang rate limiting di Cloudflare, pantau pemakaian/biaya, dan tetapkan kebijakan privasi.
-
-Untuk beta, gunakan data sintetis. Periksa ketentuan privasi dan penggunaan data Gemini API untuk tier yang dipakai. Kuota, harga, model, dan ketentuan layanan dapat berubah.
+Use CerdikGo in user-facing product identity. Retain CerdikChat only where it accurately refers to the shared core, repository, existing Worker/resource identifiers, or historical implementation names.
