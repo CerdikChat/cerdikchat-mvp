@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: CerdikGo Hybrid Agent Gateway
-  version: 0.1.0
-  description: Authenticated, plan-only agent registry and planning endpoints. No agent execution is exposed.
+  title: CerdikGo Agent and MCP Gateway
+  version: 0.2.0
+  description: Authenticated plan-only agent API and stateless Streamable HTTP MCP endpoint.
 servers:
   - url: https://{worker-host}
     variables:
@@ -66,9 +66,39 @@ paths:
           description: Request too large
         '429':
           description: Rate limit exceeded
+  /mcp:
+    post:
+      operationId: cerdikgoMcpStreamableHttp
+      summary: MCP Streamable HTTP endpoint
+      description: Stateless MCP endpoint. Requires the Preview feature flag and dedicated bearer secret. Initial tools are read-only and plan-only; no provider inference or data mutation is exposed.
+      security:
+        - mcpBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: MCP JSON-RPC request envelope; exact schema is defined by the MCP protocol.
+      responses:
+        '200':
+          description: MCP JSON-RPC response
+        '401':
+          description: Bearer token missing or invalid
+        '404':
+          description: MCP endpoint disabled
+        '405':
+          description: Unsupported HTTP method
+        '429':
+          description: Rate limit exceeded
+        '503':
+          description: MCP authentication secret not configured
 components:
   securitySchemes:
     cerdikGoSession:
       type: apiKey
       in: cookie
       name: __Host-cerdikchat_session
+    mcpBearer:
+      type: http
+      scheme: bearer
