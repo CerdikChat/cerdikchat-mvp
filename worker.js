@@ -1014,8 +1014,8 @@ function buildCalculatorResponse(calculation, corsHeaders) {
         reply: `Hasil perhitungan: ${formatCalculatorResult(
           result.result
         )}`,
-        provider: modelRoute.provider,
-      model: modelRoute.model,
+        provider: "workers_ai",
+        model: CONFIG.MODEL,
         tool: result,
       },
       200,
