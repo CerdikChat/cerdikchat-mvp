@@ -211,3 +211,39 @@ test("Admin feature-request queue rejects cross-site requests", async () => {
   assert.equal(response.status,403);
   assert.equal((await response.json()).error,"ORIGIN_NOT_ALLOWED");
 });
+
+test("Admin document is denied to regular users before the asset is served", async () => {
+  let assetRequested = false;
+  const environment = authenticatedAdminEnv("user");
+  environment.ASSETS.fetch = async () => {
+    assetRequested = true;
+    return new Response("SHOULD_NOT_BE_SERVED");
+  };
+  const response = await worker.fetch(
+    adminRequest("/admin", { fetchSite: "none" }),
+    environment
+  );
+  assert.equal(response.status, 403);
+  assert.match(await response.text(), /Admin access required/);
+  assert.equal(assetRequested, false);
+});
+
+test("Admin document is denied after administrator access expires", async () => {
+  let assetRequested = false;
+  const environment = authenticatedAdminEnv(
+    "super_admin",
+    Math.floor(Date.now() / 1000) - 1
+  );
+  environment.ASSETS.fetch = async () => {
+    assetRequested = true;
+    return new Response("SHOULD_NOT_BE_SERVED");
+  };
+  const response = await worker.fetch(
+    adminRequest("/admin", { fetchSite: "none" }),
+    environment
+  );
+  assert.equal(response.status, 403);
+  assert.match(await response.text(), /governance access is verified/);
+  assert.equal(assetRequested, false);
+});
+
