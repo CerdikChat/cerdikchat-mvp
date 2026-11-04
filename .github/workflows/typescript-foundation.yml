@@ -1,0 +1,46 @@
+name: CerdikGo TypeScript Foundation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "atlas9/**"
+    paths:
+      - "package.json"
+      - "tsconfig.json"
+      - "src/contracts/**"
+      - ".github/workflows/typescript-foundation.yml"
+  push:
+    branches:
+      - "atlas9/cerdikgo-typescript-foundation"
+    paths:
+      - "package.json"
+      - "tsconfig.json"
+      - "src/contracts/**"
+      - ".github/workflows/typescript-foundation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerdikgo-typescript-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    name: Strict TypeScript contract check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check TypeScript contracts
+        run: npm run typecheck
+      - name: Run existing regression suite
+        run: npm test
