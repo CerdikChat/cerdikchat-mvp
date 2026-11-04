@@ -35,6 +35,10 @@ Check `package.json`, `wrangler.toml`, and the relevant environment documentatio
 
 The workspace UI may expose modules whose backend/provider dependencies are still gated or under validation. Do not describe a feature as operational solely because its UI is visible. In particular, live web research requires an approved search provider; document scanning requires a real private scanner service; hybrid radio/connectivity concepts are simulations unless connected to actual radio hardware and independently measured. See the relevant feature PR and runbook for each acceptance gate.
 
+## System-wide acceptance register
+
+See [CerdikGo System Unification & Acceptance Register](docs/CERDIKGO-SYSTEM-UNIFICATION-AND-ACCEPTANCE.md) for the capability truth table, integration rules, Preview/Android acceptance gates, and protected-operation boundaries.
+
 ## Brand and attribution
 
 - Product: **CerdikGo**
