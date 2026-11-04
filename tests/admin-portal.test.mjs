@@ -187,31 +187,6 @@ test("Admin feature-request queue rejects cross-site requests", async () => {
   assert.equal((await response.json()).error,"ORIGIN_NOT_ALLOWED");
 });
 
-test("Admin feature-request queue returns stored proposals to verified administrators", async () => {
-  const rows=[{request_id:"00000000-0000-4000-8000-000000000001",user_email:"pilot@example.test",feature_name:"Preview proposal",status:"submitted"}];
-  let sql="";
-  const environment=authenticatedAdminEnv();
-  environment.DB.prepare=(query)=>{sql=query;return{bind(){return{first:async()=>query.includes("FROM sessions s")?{google_sub:"test-admin-sub",email:"admin@example.test"}:{role:"super_admin",governance_tier:"super_admin",access_expires_at:null},all:async()=>({results:rows})}}}};
-  const response=await worker.fetch(adminRequest("/api/admin/feature-requests"),environment);
-  assert.equal(response.status,200);
-  const payload=await response.json();
-  assert.equal(payload.requests.length,1);
-  assert.equal(payload.requests[0].feature_name,"Preview proposal");
-  assert.match(sql,/FROM feature_requests/);
-});
-
-test("Admin feature-request queue rejects regular users", async () => {
-  const response=await worker.fetch(adminRequest("/api/admin/feature-requests"),authenticatedAdminEnv("user"));
-  assert.equal(response.status,403);
-  assert.equal((await response.json()).error,"ADMIN_REQUIRED");
-});
-
-test("Admin feature-request queue rejects cross-site requests", async () => {
-  const response=await worker.fetch(adminRequest("/api/admin/feature-requests",{fetchSite:"cross-site",origin:"https://attacker.example"}),authenticatedAdminEnv());
-  assert.equal(response.status,403);
-  assert.equal((await response.json()).error,"ORIGIN_NOT_ALLOWED");
-});
-
 test("Admin document is denied to regular users before the asset is served", async () => {
   let assetRequested = false;
   const environment = authenticatedAdminEnv("user");
@@ -269,4 +244,12 @@ test("Admin Console exposes the server-issued audit reference after a decision",
   const html = await readFile(new URL("../src/admin.html", import.meta.url), "utf8");
   assert.match(html, /Audit ID: "\+d\.auditId/);
   assert.match(html, /await load\(\);statusEl\.textContent="Permintaan "\+d\.status\+" berhasil dicatat\. Audit ID: "\+d\.auditId/);
+});
+
+test("governance migration preflight is read-only and flags duplicate pending emails", async () => {
+  const sql = await readFile(new URL("../scripts/governance-migration-preflight.sql", import.meta.url), "utf8");
+  assert.match(sql, /SELECT lower\(trim\(email\)\)/);
+  assert.match(sql, /WHERE status = 'pending'/);
+  assert.match(sql, /HAVING COUNT\(\*\) > 1/);
+  assert.doesNotMatch(sql, /\b(DELETE|UPDATE|INSERT|REPLACE)\b/i);
 });
