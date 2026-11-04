@@ -1,4 +1,4 @@
-name: CerdikChat isolated Preview version upload
+name: CerdikChat isolated branch Preview
 
 on:
   push:
@@ -17,17 +17,18 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerdikchat-preview-upload
+  group: cerdikchat-branch-preview
   cancel-in-progress: false
 
 jobs:
-  upload-preview:
+  preview:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout authorized PR branch
         uses: actions/checkout@v4
         with:
           ref: atlas9/admin-governance-control-center
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -36,9 +37,9 @@ jobs:
         run: npm test
       - name: Install pinned Wrangler
         run: npm install --no-save wrangler@4.153.0
-      - name: Upload isolated Preview version (no traffic promotion)
+      - name: Create or update isolated branch Preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "CLOUDFLARE_API_TOKEN repository secret is not configured"; exit 1; }
-          npx wrangler versions upload --config wrangler.toml --message "ATLAS-9 PR #52 controlled field-test Preview"
+          npx wrangler preview --config wrangler.toml
