@@ -2,7 +2,10 @@
   "name": "cerdikchat-mvp",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node --test" },
+  "scripts": {
+    "doctor": "node scripts/doctor.mjs",
+    "test": "node --test"
+  },
   "engines": { "node": ">=20" },
   "dependencies": {
     "@modelcontextprotocol/server": "2.3.1",
