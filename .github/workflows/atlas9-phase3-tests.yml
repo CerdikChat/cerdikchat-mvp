@@ -9,6 +9,8 @@ on:
       - "worker.js"
       - "auth/**"
       - "multimodal/**"
+      - "integrations/**"
+      - "mcp/**"
       - "tests/**"
       - "package.json"
       - ".github/workflows/atlas9-phase3-tests.yml"
@@ -35,5 +37,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
       - name: Run regression tests
         run: npm test
