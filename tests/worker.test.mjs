@@ -1,4 +1,5 @@
 import test from "node:test";
+import { readFile } from "node:fs/promises";
 import assert from "node:assert/strict";
 import worker from "../worker.js";
 import { verifyGoogleIdToken, googleLogin } from "../auth/google-auth.js";
