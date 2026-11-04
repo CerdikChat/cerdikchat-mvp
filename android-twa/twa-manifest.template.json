@@ -1,0 +1,33 @@
+{
+  "_note": "NON-BUILDABLE TEMPLATE. Replace all placeholders only after the approved Preview host, icon assets, package registration, and signing plan are verified. Do not store secrets here.",
+  "packageId": "id.cerdikgo.app",
+  "host": "REPLACE_WITH_APPROVED_PREVIEW_HOST",
+  "name": "CerdikGo — AI Workspace",
+  "launcherName": "CerdikGo",
+  "display": "standalone",
+  "themeColor": "#0b1220",
+  "themeColorDark": "#0b1220",
+  "navigationColor": "#0b1220",
+  "navigationColorDark": "#0b1220",
+  "navigationDividerColor": "#00000000",
+  "navigationDividerColorDark": "#00000000",
+  "backgroundColor": "#0b1220",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://REPLACE_WITH_APPROVED_PREVIEW_HOST/icon-512.png",
+  "maskableIconUrl": "",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "LOCAL_PROTECTED_KEYSTORE_NOT_IN_REPOSITORY",
+    "alias": "REPLACE_WITH_LOCAL_ALIAS"
+  },
+  "appVersionCode": 1,
+  "appVersion": "0.1.0",
+  "generatorApp": "Bubblewrap",
+  "fallbackType": "customtabs",
+  "enableSiteSettingsShortcut": true,
+  "minSdkVersion": 23,
+  "orientation": "portrait",
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}
