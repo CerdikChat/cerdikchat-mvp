@@ -13,22 +13,28 @@ Append every test execution. Never mark a test passed without its exact candidat
 | PR #58 same head | `41876151036` | VERIFIED / success | ATLAS-9 Phase 3 regression completed successfully |
 | PR #58 same head | `41876151233` | VERIFIED / success | Hybrid gateway tests completed successfully |
 | PR #58 same head | `41876151056` | VERIFIED / success | TypeScript foundation workflow completed successfully |
-| PR #59 head `de11d34257005ba72a621312230489a7d161ff53` | `41877325687` | VERIFIED / success | Regression/install passed; companion readiness run failed separately |
-| PR #59 same earlier head | `41877325709` | FAILED | Safety scan matched its own literal command pattern; install, doctor, typecheck and 127-test regression steps passed |
-| PR #60 head `4284935e76e978f0f133216e1702d87706216529` | `41879349569` | VERIFIED / success | Regression/install completed successfully |
-| PR #60 same earlier candidate | `41879349586` | FAILED | Inherited readiness scan false-positive before PR #59 correction |
-| PR #59 corrected head `e6e7b17eaac1e0a94724cf9ff56b6d2a04e80ba3` | `41917081910` | VERIFIED / success | Exact PR merge candidate `96ba7681c3a0167ac2551edfa4db59b196176d3f`; doctor, typecheck, all 127 tests, safety scan and machine gate passed |
-| PR #59 corrected head, same candidate | `41917081974` | VERIFIED / success | Regression/install workflow completed successfully |
-| PR #60 benchmark pilot additions | commits `5185b6263cea02efb7eec73fb9e8f29b9d4bab0e`, `241b28d02bfe6bcff7add5782612d6b71c84f514` | PLANNED pending CI | Added 35-task manifest and manifest-structure tests; model benchmark has not run |
+| PR #59 corrected head `637ff536011ed25fc598888f62f520b4cfdccd3c` | `41917635551` | VERIFIED / success | Readiness gate; exact tested merge candidate `25f416f68c9db0d2ce5a9a22ad38a003e2e36939`; all steps passed |
+| PR #59 corrected head, same candidate | `41917635482` | VERIFIED / success | Regression/install workflow completed successfully |
+| PR #59 earlier head `de11d34257005ba72a621312230489a7d161ff53` | `41877325709` | FAILED / superseded | False-positive safety scan; install, typecheck and 127 tests passed |
+| PR #60 head `6b24a410de3925f649189fba6450265be7318236` | `41917922881` | VERIFIED / success | Readiness gate; exact tested merge candidate `26cd4038e4d9ef79bbe1320dc1b8fb3b290687b0`; all steps passed |
+| PR #60 same candidate | `41917922855` | VERIFIED / success | Regression/install workflow completed successfully |
+| PR #60 same candidate | `41917922823` | VERIFIED / success | ATLAS-9 Phase 3 regression completed successfully |
+| PR #60 same candidate | `41917922865` | VERIFIED / success | Hybrid gateway tests completed successfully |
+| PR #60 earlier branch state | `41917595755` | FAILED / superseded | Branch push used stale inherited readiness workflow; PR #60 branch was synced to corrected PR #59 workflow before successful runs |
+| PR #60 benchmark additions | `41917922881` | VERIFIED / structural only | 129/129 tests passed, including 35-task manifest structure tests; no model inference benchmark executed |
+| PR #61 head `17760f85b01e0db2e7a09679324d55adfe1fcf95` | `41917776597` | VERIFIED / success | 99/99 auth/governance tests passed and auth log redaction source check passed |
+| PR #61 same head | `41917776653` | VERIFIED / success | Existing regression workflow completed successfully |
 
-## Root cause and corrective action
-The readiness workflow originally searched workflow files for a literal pattern that was also present in its own grep expression. This caused a false failure even though no remote deploy or D1 migration command was present. PR #59 commit `e6e7b17eaac1e0a94724cf9ff56b6d2a04e80ba3` split the regex fragments so the safety scan no longer matches itself. Run `41917081910` verified the correction on merge candidate `96ba7681c3a0167ac2551edfa4db59b196176d3f`.
+## Root cause and corrective actions
+1. PR #59 readiness grep originally matched its own literal command pattern. The regex fragments were split; PR #59 head `637ff536011ed25fc598888f62f520b4cfdccd3c` now passes on merge candidate `25f416f68c9db0d2ce5a9a22ad38a003e2e36939`.
+2. PR #60 initially carried the stale parent workflow. Its readiness workflow file was synchronized to the corrected PR #59 version in commit `6b24a410de3925f649189fba6450265be7318236`; both branch-push and PR-merge readiness checks then passed.
+3. PR #61 removes email/request identifiers from access-request auth logs and adds a regression assertion. Its isolated CI passes; it remains a draft PR and is not merged into PR #52.
 
 ## Remaining verification
-- PR #60 must pass its own readiness gate on the updated merged candidate; its earlier green regression does not substitute for that gate.
-- Execute the 35-task pilot against model(s) only after a controlled, repeatable harness exists; current manifest test checks structure, not model quality.
+- Execute the fixed model benchmark against actual models; the 35-task manifest test validates structure only.
 - Full seven-dimension suites, Preview runtime, real Google OAuth, Android acceptance, voice hardware, live research, load, backup restore and DR remain NOT TESTED unless separately recorded with evidence.
-- Human Verification may begin only after Auto Pilot passes for the exact candidate commit to be verified.
+- PR #52 governance integration still needs security review; PR #61's remediation is proposed but not yet integrated.
+- Human Verification is eligible only for the exact PR #59 and PR #60 candidates whose readiness gates passed. No Preview deployment or Android human acceptance was performed by this run.
 
 ## Required evidence per run
 Record UTC timestamp, branch, full head and tested checkout SHA (including PR merge SHA where applicable), workflow/run/job IDs, environment, tool/model versions, commands, expected and actual results, logs/artifact links, defect IDs, reviewer, and retest outcome.
