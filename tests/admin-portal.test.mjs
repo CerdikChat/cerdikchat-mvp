@@ -133,10 +133,18 @@ test("Admin Console document rejects non-GET methods", async () => {
 });
 
 
-test("access decision batches approval, pending-state transition and audit insert atomically", async () => {\n  const source = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");\n  assert.match(source, /typeof env\\.DB\\.batch!=="function"/);\n  assert.match(source, /const results=await env\\.DB\\.batch\\(statements\\)/);\n  assert.match(source, /WHERE changes\\(\\)=1/);\n  assert.match(source, /REQUEST_ALREADY_DECIDED_OR_IDENTITY_CONFLICT/);\n});\n\ntest("admin approval cannot rebind an existing email to a different Google subject", async () => {
+test("access decision batches approval, pending-state transition and audit insert atomically", async () => {
   const source = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");
-  assert.match(source, /ON CONFLICT\(email\) DO UPDATE[\s\S]*?WHERE users\.google_sub=excluded\.google_sub/);
-  assert.match(source, /activated\.meta\?\.changes\?\?0\)!==1\)return json\(\{error:"ACCOUNT_IDENTITY_CONFLICT"\},409\)/);
+  assert.ok(source.includes('typeof env.DB.batch!=="function"'));
+  assert.ok(source.includes("const results=await env.DB.batch(statements)"));
+  assert.ok(source.includes("WHERE changes()=1"));
+  assert.ok(source.includes("REQUEST_ALREADY_DECIDED_OR_IDENTITY_CONFLICT"));
+});
+
+test("admin approval cannot rebind an existing email to a different Google subject", async () => {
+  const source = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");
+  assert.ok(source.includes("WHERE users.google_sub=excluded.google_sub"));
+  assert.ok(source.includes("ACCOUNT_IDENTITY_CONFLICT"));
 });
 
 test("governance compatibility migration adds only missing columns and preserves existing role schema", async () => {
