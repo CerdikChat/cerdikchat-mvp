@@ -56,3 +56,33 @@ test("create_task_plan does not execute actions", () => {
 test("rejects unsupported tool names", () => {
   assert.throws(() => executeTool("cerdikgo.run_shell", {}), /UNKNOWN_TOOL/);
 });
+
+test("tools/call executes get_capabilities through JSON-RPC", async () => {
+  const response = await handleMcpRequest(request({
+    jsonrpc: "2.0", id: 3, method: "tools/call",
+    params: { name: "cerdikgo.get_capabilities", arguments: {} },
+  }, auth), env);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.result.isError, false);
+  const payload = JSON.parse(body.result.content[0].text);
+  assert.equal(payload.product, "CerdikGo");
+  assert.equal(payload.execution_mode, "plan_only");
+});
+
+test("tools/call creates a plan without external execution or database writes", async () => {
+  const response = await handleMcpRequest(request({
+    jsonrpc: "2.0", id: 4, method: "tools/call",
+    params: {
+      name: "cerdikgo.create_task_plan",
+      arguments: { intent: "Validate MCP Preview tool execution", action_class: "controlled_action" },
+    },
+  }, auth), env);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.result.isError, false);
+  const payload = JSON.parse(body.result.content[0].text);
+  assert.equal(payload.status, "awaiting_human_approval");
+  assert.equal(payload.external_calls_made, false);
+  assert.equal(payload.database_writes, false);
+});
