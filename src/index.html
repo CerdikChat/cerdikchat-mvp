@@ -592,6 +592,11 @@
     .settings-body .auth-panel{max-width:none;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
     .auth-unavailable{padding:11px 12px;border:1px solid #765a28;border-radius:10px;background:#302617;color:#f2d59a!important}
     .settings-note{margin:16px 0 0}
+    .admin-settings-section{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+    .admin-settings-link{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;margin-top:10px;padding:12px 14px;border:1px solid #2678a9;border-radius:12px;background:linear-gradient(120deg,#102b49,#0d2035);color:var(--text);font-weight:750;text-decoration:none}
+    .admin-settings-link:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
+    .admin-settings-link span:last-child{font-size:20px;color:var(--mint)}
+    html[data-theme="light"] .admin-settings-link,html[data-theme="light-blue"] .admin-settings-link{background:#e5f3ff;color:#123653;border-color:#9bc8e8}
     .prompt,.suggest,.send{min-height:44px}
     body,.app,.main{min-height:var(--app-viewport-height,100dvh)}
     body.nav-scroll-locked{overflow:hidden}
@@ -1370,9 +1375,16 @@
             <p>Masuk menggunakan akun Google yang telah diizinkan. Hak akses tetap diverifikasi oleh server.</p>
             <section class="auth-panel" id="authPanel" hidden aria-live="polite">
               <div><strong id="authTitle">Akses CerdikChat</strong><br><small id="authMessage">Masuk dengan akun Google yang telah diizinkan.</small></div>
-              <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><a class="auth-logout" id="adminConsoleLink" href="/admin" hidden>Panel Admin</a><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
+              <div class="auth-actions"><div id="googleSignIn"></div><span class="auth-user" id="authUser"></span><button class="auth-logout" id="authLogout" type="button" hidden>Keluar</button></div>
             </section>
             <p id="authUnavailable" class="auth-unavailable" role="status" aria-live="polite" hidden></p>
+          </section>
+          <section class="admin-settings-section" id="adminSettingsSection" aria-labelledby="adminSettingsTitle" hidden>
+            <strong id="adminSettingsTitle">Administrasi</strong>
+            <p>Akses khusus administrator untuk pengelolaan pengguna dan tata kelola CerdikGo.</p>
+            <a class="admin-settings-link" id="adminConsoleLink" href="/admin" hidden>
+              <span>Admin Control Center</span><span aria-hidden="true">›</span>
+            </a>
           </section>
           <p class="settings-note">Jangan bagikan kata sandi, token, atau informasi rahasia. Keluar akan mencabut sesi aktif pada server.</p>
         </div>
@@ -1523,6 +1535,7 @@
     const authUser = document.querySelector("#authUser");
     const authLogout = document.querySelector("#authLogout");
     const adminConsoleLink = document.querySelector("#adminConsoleLink");
+    const adminSettingsSection = document.querySelector("#adminSettingsSection");
     const authUnavailable = document.querySelector("#authUnavailable");
     const settingsDialog = document.querySelector("#settingsDialog");
     const settingsOpen = document.querySelector("#settingsOpen");
@@ -1618,6 +1631,7 @@
       if (!adminConsoleLink) return;
       if (!isAuthenticated) {
         adminConsoleLink.hidden = true;
+        adminSettingsSection.hidden = true;
         return;
       }
       try {
@@ -1627,13 +1641,14 @@
           headers: { "Accept": "application/json" }
         });
         const payload = await response.json().catch(() => ({}));
-        adminConsoleLink.hidden = !(
-          response.ok &&
+        const canAccessAdmin = response.ok &&
           payload.authenticated === true &&
-          ["admin", "superior_admin", "super_admin"].includes(payload.role)
-        );
+          ["admin", "superior_admin", "super_admin"].includes(payload.role);
+        adminConsoleLink.hidden = !canAccessAdmin;
+        adminSettingsSection.hidden = !canAccessAdmin;
       } catch {
         adminConsoleLink.hidden = true;
+        adminSettingsSection.hidden = true;
       }
       if (!isAuthenticated) adminConsoleLink.hidden = true;
     }
@@ -1650,8 +1665,10 @@
       authUser.hidden = !isAuthenticated;
       googleSignIn.hidden = isAuthenticated || !authConfigured;
       authLogout.hidden = !isAuthenticated;
-      if (!isAuthenticated) adminConsoleLink.hidden = true;
-      else void refreshAdminConsoleLink();
+      if (!isAuthenticated) {
+        adminConsoleLink.hidden = true;
+        adminSettingsSection.hidden = true;
+      } else void refreshAdminConsoleLink();
       input.disabled = authRequired && !isAuthenticated;
       send.disabled = authRequired && !isAuthenticated;
     }
