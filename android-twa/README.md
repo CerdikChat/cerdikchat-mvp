@@ -4,7 +4,7 @@ Status: preparation only. This directory is not a generated or buildable Android
 
 ## Package identity
 
-- Requested candidate: `id.cerdikgo.app`
+- Preferred candidate: `id.cerdikgo.app`
 - Candidate format: syntactically valid reverse-DNS Android application ID.
 - Google Play availability/registration: **NOT VERIFIED**.
 - Lock status: **PROVISIONAL — DO NOT REGISTER OR PUBLISH YET**.
@@ -17,14 +17,21 @@ Indonesia is included in the Android developer verification rollout: package reg
 
 Use a Trusted Web Activity (TWA) generated with Bubblewrap, reusing the existing CerdikGo PWA. Do not introduce Capacitor or a second native frontend unless a required native capability proves TWA insufficient.
 
+## PWA assets — repository inspection
+
+- The PWA repository contains `src/icons/icon-192.png` and `src/icons/icon-512.png`, plus `src/cerdikgo-mark.svg`.
+- The web manifest now declares the two PNG assets and retains the SVG mark.
+- The repository does **not** yet contain a separately validated maskable icon. Do not mark the ordinary app icon as `maskable` without checking its safe zone and visual crop.
+- File names alone do not prove image dimensions, alpha treatment, or visual suitability. Verify the actual image files and Android launcher rendering before TWA build.
+
 ## Preconditions before Bubblewrap generation
 
 1. Confirm the exact approved **Preview** HTTPS hostname and that it serves the intended candidate PWA. Do not use a Production hostname for this preparation.
-2. Verify the deployed `/manifest.webmanifest`, `/service-worker.js`, icon assets, and offline behavior on Android Chrome.
-3. The current web manifest references only an SVG icon. Bubblewrap needs a suitable raster icon (minimum 512 px); add/validate a PNG icon and a separately designed maskable icon before generating the final Android project.
+2. Verify the deployed `/manifest.webmanifest`, `/service-worker.js`, `/icons/icon-192.png`, `/icons/icon-512.png`, and offline behavior on Android Chrome.
+3. Verify PNG pixel dimensions and visual quality; create and validate a separate maskable icon with safe-zone padding.
 4. Confirm domain ownership and ability to serve `/.well-known/assetlinks.json` on the exact host.
 5. Decide signing-key custody. Keep private keystore files and passwords outside GitHub and outside CI logs. Do not generate or upload a release key in this preparation phase.
-6. Review TWA's generated Gradle configuration and explicitly verify `targetSdkVersion >= 36` before any Play upload.
+6. Review the generated TWA Gradle configuration and explicitly verify `targetSdkVersion >= 36` before any Play upload.
 
 ## Planned generation (not executed)
 
@@ -40,6 +47,7 @@ Review the generated `twa-manifest.json`, then set:
 - `host`: exact approved Preview hostname during Preview validation.
 - `startUrl`: `/` (or the approved app entry route).
 - `appVersion`: `0.1.0`; `appVersionCode`: `1` for the first internal candidate.
+- `iconUrl`: verified 512 px PNG hosted on the approved Preview host.
 - `signingKey.path` and `signingKey.alias`: local protected keystore only; never commit credentials.
 
 Bubblewrap build is deliberately not run here. A signed AAB, Play upload, asset-link publication, OAuth changes, DNS changes, Worker deployment, D1 writes/migrations, billing, external tester invitations and Production release are outside this mission.
@@ -49,7 +57,8 @@ Bubblewrap build is deliberately not run here. A signed AAB, Play upload, asset-
 - [ ] Play Console package availability and registration eligibility confirmed by account owner.
 - [ ] Developer identity verified in the intended Play Console account.
 - [ ] Canonical Preview host confirmed; not Production.
-- [ ] PWA manifest has suitable 192 px and 512 px PNG icons plus a separately validated maskable icon.
+- [ ] PWA PNG icon files dimension-checked and Android launcher rendering reviewed.
+- [ ] Separate maskable icon designed and validated.
 - [ ] TWA project generated from the approved Preview manifest.
 - [ ] Gradle target SDK verified as API 36 or higher.
 - [ ] Upload-key custody and Play App Signing plan approved.
