@@ -39,7 +39,7 @@ export function listAgentCapabilities() {
     providers: {
       cloudflare_workers_ai: "existing_provider_not_invoked_by_this_gateway",
       openai_api: "adapter_not_configured",
-      chatgpt_mcp: "protocol_gateway_not_yet_exposed",
+      mcp_preview_worker: "separate_stateless_plan_only_endpoint",
     },
   };
 }
