@@ -1719,13 +1719,13 @@
           body: JSON.stringify({ credential: response.credential, nonce })
         });
         const payload = await result.json().catch(() => ({}));
+        if (result.status === 202 && payload.error === "ACCESS_REQUEST_SUBMITTED" && payload.requestSubmitted === true) {
+          authMessage.textContent = "Permintaan akses berhasil dikirim. Administrator akan meninjau permintaan Anda.";
+          setStatus("Permintaan akses tercatat. Silakan tunggu persetujuan administrator.");
+          await renderGoogleButton();
+          return;
+        }
         if (!result.ok) {
-          if (payload.error === "ACCESS_REQUEST_SUBMITTED" && payload.requestSubmitted === true) {
-            authMessage.textContent = "Permintaan akses berhasil dikirim. Administrator akan meninjau permintaan Anda.";
-            setStatus("Permintaan akses tercatat. Silakan tunggu persetujuan administrator.");
-            await renderGoogleButton();
-            return;
-          }
           if (payload.error === "USER_NOT_ALLOWLISTED") {
             throw new Error(`Akun ${payload.email || "Google"} belum diizinkan. Silakan kirim permintaan akses.`);
           }
