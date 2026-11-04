@@ -1,5 +1,6 @@
 import { AGENT_REGISTRY, listAgentCapabilities, buildAgentPlan } from "./agent-gateway.js";
 
+const SUPPORTED_PROTOCOL_VERSION = "2025-03-26";
 const MAX_BODY_BYTES = 16 * 1024;
 const MAX_REQUESTS_PER_MINUTE = 60;
 const WINDOW_MS = 60_000;
@@ -118,7 +119,9 @@ export async function handleMcpRequest(request, env) {
     let result;
     if (message.method === "initialize") {
       result = {
-        protocolVersion: typeof message.params?.protocolVersion === "string" ? message.params.protocolVersion : "2025-03-26",
+        // Negotiate only a protocol version implemented by this stateless server.
+        // Unsupported client versions fall back to the server-supported version.
+        protocolVersion: SUPPORTED_PROTOCOL_VERSION,
         capabilities: { tools: { listChanged: false } },
         serverInfo: { name: "cerdikgo-atlas9", version: "0.1.1" },
         instructions: "CerdikGo MCP is read-only and plan-only. No tool executes an agent or writes data.",
