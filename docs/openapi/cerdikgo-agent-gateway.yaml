@@ -1,0 +1,74 @@
+openapi: 3.1.0
+info:
+  title: CerdikGo Hybrid Agent Gateway
+  version: 0.1.0
+  description: Authenticated, plan-only agent registry and planning endpoints. No agent execution is exposed.
+servers:
+  - url: https://{worker-host}
+    variables:
+      worker-host:
+        default: example.workers.dev
+security:
+  - cerdikGoSession: []
+paths:
+  /api/agents/registry:
+    get:
+      operationId: getAgentRegistry
+      summary: Read registered ATLAS specialist capabilities
+      responses:
+        '200':
+          description: Registry and provider integration status
+        '401':
+          description: Authentication required
+        '404':
+          description: Feature flag disabled
+  /api/agents/plan:
+    post:
+      operationId: createAgentPlan
+      summary: Create a non-executing plan
+      description: Does not invoke models, tools, external services, or database writes. controlled_action only marks the plan as awaiting human approval.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [intent]
+              properties:
+                intent:
+                  type: string
+                  minLength: 1
+                  maxLength: 4000
+                agents:
+                  type: array
+                  minItems: 1
+                  maxItems: 3
+                  uniqueItems: true
+                  items:
+                    type: string
+                    enum: [ATLAS-01, ATLAS-02, ATLAS-03, ATLAS-04, ATLAS-05, ATLAS-06, ATLAS-07, ATLAS-08, ATLAS-09]
+                action_class:
+                  type: string
+                  enum: [read_only, controlled_action]
+      responses:
+        '200':
+          description: Plan created; no action executed
+        '400':
+          description: Invalid plan input
+        '401':
+          description: Authentication required
+        '403':
+          description: Origin not allowed
+        '404':
+          description: Feature flag disabled
+        '413':
+          description: Request too large
+        '429':
+          description: Rate limit exceeded
+components:
+  securitySchemes:
+    cerdikGoSession:
+      type: apiKey
+      in: cookie
+      name: __Host-cerdikchat_session
