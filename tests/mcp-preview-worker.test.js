@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { executeTool, handleMcpRequest } from "../mcp-preview/worker.js";
+import { executeTool, handleMcpRequest } from "../mcp-preview-worker.js";
 
 const token = "test-only-preview-token-0123456789abcdef";
 
