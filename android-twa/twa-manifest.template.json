@@ -15,7 +15,6 @@
   "enableNotifications": false,
   "startUrl": "/",
   "iconUrl": "https://REPLACE_WITH_APPROVED_PREVIEW_HOST/icon-512.png",
-  "maskableIconUrl": "",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "LOCAL_PROTECTED_KEYSTORE_NOT_IN_REPOSITORY",
