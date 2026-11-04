@@ -34,7 +34,7 @@ function renderInbox() {
   }
 }
 function download(value) {
-  const blob=new Blob([JSON.stringify(value.schema ? value : makeTaskEnvelope(value.task),null,2)],{type:"application/json"});
+  const blob=new Blob([JSON.stringify(makeTaskEnvelope(value.task),null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="cerdikgo-task-"+(value.task?.task_id||"export")+".json"; a.click(); URL.revokeObjectURL(url);
 }
 function parseAndValidate(raw) {
