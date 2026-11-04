@@ -26,7 +26,7 @@ Append decisions. General permission to improve code does not authorize privileg
 
 ## Current approval state
 - PR #59 head `637ff536011ed25fc598888f62f520b4cfdccd3c`: Auto Pilot VERIFIED on merge candidate `25f416f68c9db0d2ce5a9a22ad38a003e2e36939`; eligible for subsequent Preview/human validation, not itself approval to deploy.
-- PR #60 head `6b24a410de3925f649189fba6450265be7318236`: Auto Pilot VERIFIED on merge candidate `26cd4038e4d9ef79bbe1320dc1b8fb3b290687b0`; eligible for subsequent Preview/human validation, not itself approval to deploy.
+- PR #60 head `a32a800f19ad57a40f2e48f7e71e622070a21c8b`: Auto Pilot VERIFIED on merge candidate `a6215155fe39d37f44ecf468bdee944ba4a852dc`; readiness `41918309854` and companion checks passed; eligible for subsequent Preview/human validation, not itself approval to deploy.
 - PR #61 auth-log privacy remediation: isolated CI VERIFIED; draft/open/unmerged, not yet integrated into PR #52.
 - PR #52 Preview upload and D1 migration 0007: BLOCKED pending separate explicit scoped authorization and review.
 - PR #53 external Google Drive upload: remains opt-in/manual; no upload authorization granted in this run.
