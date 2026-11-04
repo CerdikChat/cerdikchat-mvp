@@ -29,7 +29,7 @@ database_name = "cerdikchat-db"
 database_id = "e5116f7b-53f0-4671-afca-28bfdc366ded"
 
 # Preview-only D1 binding: isolated staging database; never points to Production.
-[previews.d1_databases]
+[[previews.d1_databases]]
 binding = "DB"
 database_name = "cerdikchat-staging"
 database_id = "79267e63-e57f-4237-8b88-f1e477397771"
