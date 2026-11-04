@@ -1605,7 +1605,7 @@ export default {
         });
         return jsonResponse(plan, 200, corsHeaders);
       } catch (error) {
-        const known = ["INVALID_PLAN_INPUT", "INVALID_INTENT", "INVALID_AGENT_SELECTION", "AGENT_NOT_ALLOWED", "ACTION_CLASS_NOT_ALLOWED"];
+        const known = ["INVALID_PLAN_INPUT", "INVALID_INTENT", "INVALID_AGENT_SELECTION", "AGENT_NOT_ALLOWED", "ACTION_CLASS_NOT_ALLOWED", "UNKNOWN_PLAN_FIELD"];
         const code = known.includes(error?.message) ? error.message : "AGENT_PLAN_REJECTED";
         return errorResponse(code, "Rencana agen tidak valid atau tidak diizinkan.", 400, corsHeaders);
       }
