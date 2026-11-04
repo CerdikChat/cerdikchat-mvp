@@ -247,3 +247,19 @@ test("Admin document is denied after administrator access expires", async () => 
   assert.equal(assetRequested, false);
 });
 
+
+
+test("access decisions persist an explicitly identifiable audit record and return its trace ID", async () => {
+  const source = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");
+  assert.match(source, /const auditId=crypto\.randomUUID\(\)/);
+  assert.match(source, /INSERT INTO admin_audit_events \(audit_id,actor_email,action,target_email,details,created_at\)/);
+  assert.match(source, /"access_"\+status/);
+  assert.match(source, /JSON\.stringify\(\{requestId,role:decision==="approve"\?requestedTier:null\}\)/);
+  assert.match(source, /results\[auditIndex\]\?\.meta\?\.changes\?\?0\)!==1/);
+  assert.match(source, /return json\(\{success:true,requestId,status,auditId\}\)/);
+  assert.ok(
+    source.indexOf("if((results[auditIndex]?.meta?.changes??0)!==1)") <
+    source.indexOf("return json({success:true,requestId,status,auditId})"),
+    "the API must not report success before confirming the audit insert"
+  );
+});
