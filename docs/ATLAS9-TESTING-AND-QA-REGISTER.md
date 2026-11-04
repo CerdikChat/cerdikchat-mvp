@@ -40,3 +40,12 @@ Append every test execution. Never mark a test passed without its exact candidat
 Record UTC timestamp, branch, full head and tested checkout SHA (including PR merge SHA where applicable), workflow/run/job IDs, environment, tool/model versions, commands, expected and actual results, logs/artifact links, defect IDs, reviewer, and retest outcome.
 
 CI success does not prove Preview runtime health, Android acceptance, or Production readiness.
+
+## Final PR #60 candidate — 2026-11-05
+- PR #60 head: `a32a800f19ad57a40f2e48f7e71e622070a21c8b`.
+- Tested merge candidate: `a6215155fe39d37f44ecf468bdee944ba4a852dc` (PR head merged into corrected PR #59 head `637ff536011ed25fc598888f62f520b4cfdccd3c`).
+- Auto Pilot readiness `41918309854`: VERIFIED / success; exact merge candidate checked out; all gate steps passed.
+- Regression/install `41918309389`, Phase 3 `41918309358`, hybrid gateway `41918309299`: VERIFIED / success.
+- Readiness output: 129 tests, 129 passed, 0 failed. The new 35-task manifest structural test is included; model outputs were not benchmarked.
+- Branch-push gate `41918299433` and regression/install `41918299401`: VERIFIED / success.
+- Later documentation-only register commits are not application-code changes; do not relabel them as a new model benchmark.
