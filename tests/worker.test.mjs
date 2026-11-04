@@ -815,3 +815,23 @@ test("file analysis fails closed when antivirus is unavailable before AI process
   assert.equal(conversionCalls, 0);
   assert.equal(inferenceCalls, 0);
 });
+
+
+test("Google Drive backup workflow uses read-only checkout credentials and configured Gitleaks license", async () => {
+  const workflow = await readFile(new URL("../.github/workflows/google-drive-backup.yml", import.meta.url), "utf8");
+  assert.match(workflow, /permissions:\s+contents: read/);
+  assert.match(workflow, /persist-credentials: false/);
+  assert.match(workflow, /GITLEAKS_LICENSE:\s*\$\{\{ secrets\.GITLEAKS_LICENSE \}\}/);
+  assert.match(workflow, /upload_to_google_drive/);
+  assert.match(workflow, /default: false/);
+});
+
+test("Google Drive backup uploader requires explicit secrets and verifies uploaded byte size", async () => {
+  const source = await readFile(new URL("../scripts/backup-to-drive.mjs", import.meta.url), "utf8");
+  for (const key of ["GDRIVE_CLIENT_ID", "GDRIVE_CLIENT_SECRET", "GDRIVE_REFRESH_TOKEN", "GDRIVE_FOLDER_ID"]) {
+    assert.ok(source.includes(key), "missing required secret: " + key);
+  }
+  assert.match(source, /names\.length !== 3/);
+  assert.match(source, /Number\(result\.size\) !== info\.size/);
+  assert.doesNotMatch(source, /console\.log\([^\n]*(access_token|refresh_token|client_secret)/i);
+});
