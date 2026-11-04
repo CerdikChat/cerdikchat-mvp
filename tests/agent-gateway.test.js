@@ -44,3 +44,7 @@ test("invalid intent and action class fail closed", () => {
   assert.throws(() => buildAgentPlan({ intent: "x".repeat(4001) }, "r"), /INVALID_INTENT/);
   assert.throws(() => buildAgentPlan({ intent: "x", action_class: "production_write" }, "r"), /ACTION_CLASS_NOT_ALLOWED/);
 });
+
+test("unknown plan fields are rejected to prevent unreviewed capability smuggling", () => {
+  assert.throws(() => buildAgentPlan({ intent: "x", execute: true }, "r"), /UNKNOWN_PLAN_FIELD/);
+});
