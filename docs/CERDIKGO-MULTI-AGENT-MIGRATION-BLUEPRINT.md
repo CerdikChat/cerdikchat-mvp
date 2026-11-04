@@ -124,3 +124,17 @@ This feature branch may contain source and tests. Separate explicit approval rem
 - DNS/domain changes;
 - paid provider/service activation or billing;
 - external beta invitations or public release.
+
+
+## 10. Implemented feature-branch scaffold (2026-11-04)
+
+The feature branch now contains an initial, deliberately non-executing gateway scaffold:
+- `integrations/agent-gateway.js`: nine-specialist registry, capability declaration, and bounded task-plan validator.
+- `tests/agent-gateway.test.js`: tests for registry completeness, plan bounds, unknown/duplicate agents, invalid intent, and controlled-action approval state.
+- `worker.js`: authenticated, opt-in `GET /api/agents/registry` and `POST /api/agents/plan` routes. Both require an existing user session and `CERDIKGO_AGENT_GATEWAY_ENABLED=true`; plan requests are same-origin, rate-limited, and body-limited to 8 KiB.
+
+The planner defaults to ATLAS-01/02/09, accepts at most three registered specialists, and never invokes tools, model providers, external services, or database writes. A controlled-action plan returns `awaiting_human_approval`, but no approval execution endpoint exists in this phase.
+
+**Not implemented yet:** OpenAI API adapter, ChatGPT MCP protocol server, provider routing, independent agent inference, task persistence, approval execution, Durable Objects/Workflows, or UI integration. No secrets, OAuth, DNS, remote database, billing, or Production settings were changed. No deployment was performed.
+
+**Validation state:** source files and tests are committed; automated test/CI results remain pending until a workflow run is observed. Do not enable the feature flag in a live environment before reviewing auth/session and environment bindings.
