@@ -1,4 +1,4 @@
-import { AGENT_REGISTRY, listAgentCapabilities, buildAgentPlan } from "./integrations/agent-gateway.js";
+import { AGENT_REGISTRY, listAgentCapabilities, buildAgentPlan } from "./agent-gateway.js";
 
 const MAX_BODY_BYTES = 16 * 1024;
 const MAX_REQUESTS_PER_MINUTE = 60;
