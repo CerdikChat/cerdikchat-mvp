@@ -853,3 +853,11 @@ test("mobile feature request trigger opens the dialog through delegated click ha
   assert.match(html, /requestFeatureDialog\.setAttribute\("open", ""\)/);
   assert.match(html, /requestFeatureCategory\?\.focus\(\)/);
 });
+
+test("approved user access policy is limited to 76 hours and expired access is rejected", async () => {
+  const source = await readFile(new URL("../auth/google-auth.js", import.meta.url), "utf8");
+  assert.match(source, /SESSION_TTL_SECONDS = 76 \* 60 \* 60/);
+  assert.match(source, /access_expires_at IS NULL OR u\.access_expires_at > \?/);
+  const admin = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");
+  assert.match(admin, /now\+\(76\*60\*60\)/);
+});
