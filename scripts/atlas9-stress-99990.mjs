@@ -10,10 +10,10 @@ const env = {
 };
 const cases = [
   ["auth-config", "/api/auth/config", "GET", 200],
-  ["admin-session-fail-closed", "/api/admin/session", "GET", 503],
-  ["pending-queue-fail-closed", "/api/admin/users/pending", "GET", 503],
+  ["admin-session-fail-closed", "/api/admin/session", "GET", 401],
+  ["pending-queue-fail-closed", "/api/admin/users/pending", "GET", 401],
   ["decision-method-guard", "/api/admin/users/decide", "GET", 405],
-  ["decision-auth-fail-closed", "/api/admin/users/decide", "POST", 503],
+  ["decision-auth-fail-closed", "/api/admin/users/decide", "POST", 401],
   ["unknown-route", "/__atlas9_unknown__", "GET", 404]
 ];
 const samples = new Array(TOTAL);
@@ -25,7 +25,7 @@ async function execute(i) {
   const c = cases[i % cases.length];
   const request = new Request(base + c[1], {
     method: c[2],
-    headers: c[2] === "POST" ? { "content-type": "application/json" } : {}
+    headers: { origin: base, ...(c[2] === "POST" ? { "content-type": "application/json" } : {}) }
   });
   const before = performance.now();
   const response = await worker.fetch(request, env, {});
