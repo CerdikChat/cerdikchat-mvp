@@ -32,6 +32,15 @@ test("initialize returns Streamable HTTP MCP metadata", async () => {
   assert.ok(body.result.capabilities.tools);
 });
 
+test("initialize falls back to the server-supported protocol version", async () => {
+  const response = await handleMcpRequest(request({
+    jsonrpc: "2.0", id: 11, method: "initialize",
+    params: { protocolVersion: "2099-01-01", capabilities: {}, clientInfo: { name: "future-client", version: "1" } },
+  }, auth), env);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.result.protocolVersion, "2025-03-26");
+});
 test("tools/list exposes exactly three read-only planning tools", async () => {
   const response = await handleMcpRequest(request({ jsonrpc: "2.0", id: 2, method: "tools/list" }, auth), env);
   const body = await response.json();
