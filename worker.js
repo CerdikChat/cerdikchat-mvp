@@ -94,7 +94,7 @@ ATURAN IDENTITAS DAN JUMLAH:
   ke registry melalui perubahan kode dan pengujian.
 
 TRANSPARANSI EKSEKUSI:
-- Chat utama saat ini menggunakan satu model Workers AI.
+- Chat utama saat ini menggunakan satu model AI melalui Workers AI.
   Sembilan profil adalah kerangka spesialisasi analitis, bukan
   sembilan model atau sembilan agen independen yang sedang berjalan.
 - Agent Gateway saat ini berada pada mode plan_only:
