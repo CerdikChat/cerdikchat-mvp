@@ -49,6 +49,11 @@ export function buildAgentPlan(input, requestId) {
     throw new Error("INVALID_PLAN_INPUT");
   }
 
+  const allowedKeys = new Set(["intent", "agents", "action_class"]);
+  if (Object.keys(input).some((key) => !allowedKeys.has(key))) {
+    throw new Error("UNKNOWN_PLAN_FIELD");
+  }
+
   const intent = typeof input.intent === "string" ? input.intent.trim() : "";
   if (!intent || intent.length > MAX_INTENT_CHARS) {
     throw new Error("INVALID_INTENT");
