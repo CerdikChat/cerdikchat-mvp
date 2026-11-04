@@ -22,6 +22,17 @@ jobs:
     steps:
       - name: Checkout exact candidate commit
         uses: actions/checkout@v4
+      - name: Record exact tested checkout and PR refs
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Candidate identity"
+            echo "- Tested checkout SHA: $(git rev-parse HEAD)"
+            echo "- Workflow event SHA: ${GITHUB_SHA}"
+            echo "- PR head SHA: ${{ github.event.pull_request.head.sha || github.sha }}"
+            echo "- PR base SHA: ${{ github.event.pull_request.base.sha || 'not-applicable' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -38,7 +49,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RniE 'wrangler deploy([[:space:]]|$)|wrangler d1 migrations apply.*--remote' .github/workflows; then
+          # Split the command fragments so this safety check does not match its own source.
+          deploy_pattern='wrangler[[:space:]]+deploy([[:space:]]|$)'
+          remote_d1_pattern='wrangler[[:space:]]+d1 migrations apply.*--remote'
+          if grep -RniE "${deploy_pattern}|${remote_d1_pattern}" .github/workflows; then
             echo "::error::Unapproved remote deployment or remote migration command found in workflow files."
             exit 1
           fi
@@ -54,6 +68,6 @@ jobs:
             echo "- Automated regression suite: PASS"
             echo "- Workflow deployment safety scan: PASS"
             echo
-            echo "This status is valid only for this exact commit. It does not prove remote Preview health, Android usability, or Production readiness."
+            echo "This status is valid only for this exact tested checkout SHA, recorded above. It does not prove remote Preview health, Android usability, or Production readiness."
             echo "No deployment, D1 write/migration, OAuth/secrets change, DNS change, or billing action is performed by this workflow."
           } >> "$GITHUB_STEP_SUMMARY"
