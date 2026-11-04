@@ -1,0 +1,35 @@
+name: CerdikGo Hybrid Gateway Tests
+
+on:
+  push:
+    branches:
+      - atlas9/cerdikgo-multi-agent-evolution
+    paths:
+      - "integrations/**"
+      - "tests/**"
+      - "worker.js"
+      - "package.json"
+      - ".github/workflows/cerdikgo-hybrid-gateway.yml"
+  pull_request:
+    paths:
+      - "integrations/**"
+      - "tests/**"
+      - "worker.js"
+      - "package.json"
+      - ".github/workflows/cerdikgo-hybrid-gateway.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run unit tests
+        run: npm test
