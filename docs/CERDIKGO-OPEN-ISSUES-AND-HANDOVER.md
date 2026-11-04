@@ -1,17 +1,33 @@
 # CerdikGo Open Issues & Handover
 
-## Open items — 2026-11-05
-1. **PR dependency chain:** #57 → #58 → #59; all recorded open/draft/unmerged. Review and validate in dependency order; do not merge automatically.
-2. **CI readiness:** PR #59 candidate `de11d34257005ba72a621312230489a7d161ff53`; runs #41877325687 and #41877325709 were QUEUED at last recorded check. Recheck before any Human Verification.
-3. **Benchmark coverage:** seven-dimension reproducible benchmark suite and scoring rubric require implementation and execution.
-4. **Security review:** complete authentication/RBAC, session, CSRF, rate-limit, file-scanning, retention, and observability review.
-5. **Runtime validation:** Preview runtime and Android acceptance remain separate from CI and are NOT TESTED in this handover.
-6. **Scale/recovery:** define SLOs and execute load, backup/restore, and disaster-recovery tests.
-7. **Agent execution:** nine roles are specialist profiles/registry; gateway remains `plan_only`, not nine independently executing agents.
+## Active priority — 2026-11-05
+
+### A. Readiness chain
+1. **PR #57** `atlas9/cerdikgo-installation-hardening` — head `570471a9303cda3beb110d04c80445a4db104039`; draft/open/unmerged. Known regression, Phase 3 and hybrid gateway workflows passed.
+2. **PR #58** `atlas9/cerdikgo-typescript-foundation` — head `5b482b05e832ed342791763eba7a84d4c9951c34`; draft/open/unmerged. Regression, Phase 3, hybrid gateway and TypeScript workflows passed.
+3. **PR #59** `atlas9/cerdikgo-autopilot-readiness` — corrected head `e6e7b17eaac1e0a94724cf9ff56b6d2a04e80ba3`; draft/open/unmerged. Readiness run `41917081910` and regression run `41917081974` passed; tested PR merge candidate `96ba7681c3a0167ac2551edfa4db59b196176d3f`. Eligible for subsequent human/Preview validation on this exact candidate; no deployment was performed.
+4. **PR #60** `atlas9/cerdikgo-100-percent-scorecard` — draft/open/unmerged. It adds the KPI scorecard, 35-task smoke manifest and append-oriented registers. Earlier regression `41879349569` passed; earlier gate `41879349586` failed because the parent workflow contained the self-matching scan. Re-run PR #60 readiness on its current merged candidate after PR #59 correction and new benchmark-manifest test. Do not infer readiness from PR #59 green.
+
+### B. Feature integration dependency map
+- UX/product chain: PR #47 (Android UX) → #48 (workspace redesign) → #49 (feature-preserving migration) → #50 (multilingual UI) → #51 (Prompt Intelligence) → #52 (Admin governance). All remain open/unmerged; PR #52 is non-draft and needs security review before acceptance.
+- Independent/parallel beta work: PR #53 (backup reconciliation) and #54 (product identity/system unification), both based on the beta-pilot branch.
+- Research/document/voice work: PR #34 (research architecture), #35 (document research/access policy), #41 (Voice-to-AI), all based on the PDF/image integration branch. PR #35 was reported non-mergeable at last metadata check.
+- Additional parallel controls: PR #42 (agent contracts), #43 (controlled beta fallback), #44 (fail-closed auth default), #45 (mobile protection/connectivity), #46 (controlled autopilot). Review each branch's base and workflow before integration; do not merge a divergent stack by title alone.
+
+## Open technical issues
+1. **Benchmark execution:** pilot manifest v0.1 has 35 smoke tasks; full acceptance suites require 100 reasoning, 50 coding, 50 research, 50 governance, 30 workflow, 90 specialist-routing/quality tasks and ecosystem SLO/restore/load evidence. Model scores remain NOT MEASURED.
+2. **PR #52 security:** remove PII email from auth logs; justify 76-hour session lifetime; test revocation/rotation, atomic approval/audit writes, role escalation and concurrent decisions. Preview workflow requires scoped Cloudflare authorization. Migration 0007 needs human-reviewed duplicate preflight and separate Preview D1 authorization.
+3. **PR #53 backup:** review Drive OAuth scope, secret access, full-history archive exposure and retention; perform a real restore/checksum drill only in an authorized isolated environment. No upload performed.
+4. **Live Web Research:** PR #34 documents provider abstraction but states provider selection/configuration is required. No active provider health or source-retrieval test is evidenced.
+5. **Document research:** PR #35 is uploaded-document research; do not label it live web search. Validate source/claim traceability and parser resource limits.
+6. **Voice:** PR #41 Preview capability requires Android microphone permission, speech recognition/playback, interruption, network-loss and accessibility tests on actual devices.
+7. **Runtime & scale:** Preview health, real Google OAuth, D1 bindings, model availability, load, SLO, backup restore and disaster recovery are not proven by local CI.
+8. **Observability:** review 100% head sampling for privacy, retention and operational impact.
+9. **Agent architecture:** nine role profiles exist; gateway remains `plan_only`. Independent agents/tools are not enabled.
 
 ## Handover format
 - Current branch and full SHA:
-- Last known passing CI run (exact commit):
+- Last successful Auto Pilot gate and exact tested checkout/merge SHA:
 - Current blockers:
 - Changes made and links:
 - Tests run/results:
@@ -19,3 +35,6 @@
 - Decisions/approvals required:
 - Next safe actions:
 - Explicitly prohibited actions still on hold:
+
+## Standing controls
+No merge, Production deployment, remote D1 write/migration, OAuth/secrets change, DNS change, billing activation, or privileged external operation without separate explicit authorization. Human Verification starts only after the Auto Pilot gate passes for the exact candidate being verified.
