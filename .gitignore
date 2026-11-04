@@ -1,5 +1,4 @@
 node_modules/
-.cer​​dikgo-exec-agent-state.json
 .env
 .env.*
 !.env.example
