@@ -136,9 +136,14 @@
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        if (response.status === 401) throw new Error("AUTH_REQUIRED");
-        if (response.status === 429) throw new Error("RATE_LIMIT_EXCEEDED");
-        throw new Error(payload.message || payload.error || "AI_REQUEST_FAILED");
+        const code = typeof payload.error === "string" ? payload.error : "";
+        if (response.status === 401 || code === "AUTH_REQUIRED") throw new Error("AUTH_REQUIRED");
+        if (response.status === 429 || code === "RATE_LIMIT_EXCEEDED") throw new Error("RATE_LIMIT_EXCEEDED");
+        if (code === "AI_QUOTA_EXCEEDED") throw new Error("AI_QUOTA_EXCEEDED");
+        if (code === "AI_MODEL_UNAVAILABLE") throw new Error("AI_MODEL_UNAVAILABLE");
+        if (code === "AI_TIMEOUT") throw new Error("AI_TIMEOUT");
+        if (code === "AI_BINDING_MISSING") throw new Error("AI_BINDING_MISSING");
+        throw new Error("AI_REQUEST_FAILED");
       }
       if (typeof payload.reply !== "string" || !payload.reply.trim()) throw new Error("EMPTY_AI_RESPONSE");
       result.value = payload.reply.trim().slice(0,8000);
@@ -146,9 +151,16 @@
       setFeedback(copy[currentLanguage].done);
     } catch (error) {
       const code = String(error.message || "");
-      setFeedback(code === "AUTH_REQUIRED" ? "Silakan login terlebih dahulu untuk menggunakan Prompt Intelligence."
-        : code === "RATE_LIMIT_EXCEEDED" ? "Batas permintaan tercapai. Tunggu sebentar lalu coba kembali."
-        : copy[currentLanguage].failed, true);
+      const messages = {
+        AUTH_REQUIRED: "Silakan login terlebih dahulu untuk menggunakan Prompt Intelligence.",
+        RATE_LIMIT_EXCEEDED: "Batas permintaan tercapai. Tunggu sebentar lalu coba kembali.",
+        AI_QUOTA_EXCEEDED: "Kuota Workers AI sedang habis. Prompt Anda tetap tersimpan di editor; coba lagi setelah kuota pulih.",
+        AI_MODEL_UNAVAILABLE: "Model AI yang dikonfigurasi belum tersedia. Hubungi administrator; prompt Anda tetap aman di editor.",
+        AI_TIMEOUT: "Respons AI melewati batas waktu. Prompt Anda tetap aman di editor; silakan coba kembali.",
+        AI_BINDING_MISSING: "Layanan AI belum terhubung pada environment ini. Hubungi administrator.",
+        AI_REQUEST_FAILED: copy[currentLanguage].failed
+      };
+      setFeedback(messages[code] || messages.AI_REQUEST_FAILED, true);
     } finally {
       button.disabled = false;
       generate.disabled = false;
