@@ -2,10 +2,11 @@
   "name": "cerdikchat-mvp",
   "private": true,
   "type": "module",
-  "scripts": {
-    "test": "node --test"
-  },
-  "engines": {
-    "node": ">=20"
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.3.1",
+    "agents": "0.31.0",
+    "zod": "4.1.12"
   }
 }
