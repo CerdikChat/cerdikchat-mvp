@@ -1,7 +1,7 @@
 {
-  "_note": "NON-BUILDABLE TEMPLATE. Replace all placeholders only after the approved Preview host, icon assets, package registration, and signing plan are verified. Do not store secrets here.",
+  "_note": "NON-BUILDABLE TEMPLATE. Preview hostname is approved by the Human Team Leader, but HTTPS endpoint, deployed PWA assets, Play package eligibility, and signing plan must still be verified. Do not store secrets here.",
   "packageId": "id.cerdikgo.app",
-  "host": "REPLACE_WITH_APPROVED_PREVIEW_HOST",
+  "host": "id.cerdikgo.app",
   "name": "CerdikGo — AI Workspace",
   "launcherName": "CerdikGo",
   "display": "standalone",
@@ -14,7 +14,7 @@
   "backgroundColor": "#0b1220",
   "enableNotifications": false,
   "startUrl": "/",
-  "iconUrl": "https://REPLACE_WITH_APPROVED_PREVIEW_HOST/icons/icon-512.png",
+  "iconUrl": "https://id.cerdikgo.app/icons/icon-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "LOCAL_PROTECTED_KEYSTORE_NOT_IN_REPOSITORY",
