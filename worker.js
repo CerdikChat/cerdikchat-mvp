@@ -1418,7 +1418,7 @@ async function handleChat(request, env, ctx) {
           reply: `Hasil perhitungan: ${formatCalculatorResult(
             toolResult.result
           )}`,
-          model: CONFIG.MODEL,
+          model: modelRoute.model,
           tool: toolResult,
         },
         200,
@@ -1431,7 +1431,7 @@ async function handleChat(request, env, ctx) {
     --------------------------------------------- */
 
     console.log("CERDIKCHAT_TOOL_NOT_CALLED", {
-      model: CONFIG.MODEL,
+      model: modelRoute.model,
     });
 
     const reply = extractReply(result);
@@ -1450,7 +1450,7 @@ async function handleChat(request, env, ctx) {
     return jsonResponse(
       {
         reply,
-        model: CONFIG.MODEL,
+        model: modelRoute.model,
         tool: {
           name: "calculate_expression",
           executed: false,
