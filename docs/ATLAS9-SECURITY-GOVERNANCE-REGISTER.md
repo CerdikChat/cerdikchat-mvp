@@ -27,9 +27,9 @@ Append findings with exact branch/commit and reproducible evidence. Never copy s
 
 ### Research and multimodal boundaries
 - PR #34 describes a bounded live-search provider adapter but states that a production search provider must be selected/configured separately. Live Web Research is NOT TESTED / NOT VERIFIED as an active provider.
-- PR #35 adds structured research on user-supplied documents. This is not evidence of live web retrieval or independent source verification.
+- PR #35 adds structured research on user-supplied documents. This is not evidence of live web retrieval or independent source verification. Its parser validates that a non-null reference string occurs in extracted text but does not independently validate the returned evidence text; require a verbatim excerpt/quote contract and negative tests before claiming claim-level traceability.
 - File-analysis code has negative tests for authentication, CSRF, MIME/signature mismatch, size, encrypted PDFs, scanner unavailability and non-persistence. Parser hardening, polyglot files, extraction resource limits, scanner runtime and retention still need review.
-- Voice capability in PR #41 is described as Preview capability; real-device microphone/speech playback acceptance remains NOT TESTED.
+- Voice capability in PR #41 is described as Preview capability; real-device microphone/speech playback acceptance remains NOT TESTED. The route hardcodes the Whisper model and accepts a bounded audio MIME/signature set; verify compatibility with Android recorder formats and central free-only model policy.
 
 ## Finding template
 - ID / date / severity:
