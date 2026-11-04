@@ -4,12 +4,16 @@
   "type": "module",
   "scripts": {
     "doctor": "node scripts/doctor.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "typecheck": "tsc --noEmit"
   },
   "engines": { "node": ">=20" },
   "dependencies": {
     "@modelcontextprotocol/server": "2.3.1",
     "agents": "0.31.0",
     "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
   }
 }
