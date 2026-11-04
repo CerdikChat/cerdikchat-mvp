@@ -1319,7 +1319,8 @@ async function handleChat(request, env, ctx) {
     const toolCalls = extractToolCalls(result);
 
     console.log("CERDIKCHAT_TOOL_DECISION", {
-      model: CONFIG.MODEL,
+      model: modelRoute.model,
+      provider: modelRoute.provider,
       toolCallDetected: toolCalls.length > 0,
       toolCallCount: toolCalls.length,
     });
