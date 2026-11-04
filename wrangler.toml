@@ -2,6 +2,7 @@
 name = "cerdikchat-mvp"
 main = "worker.js"
 compatibility_date = "2026-10-27"
+compatibility_flags = ["nodejs_compat"]
 
 [assets]
 directory = "./src"
