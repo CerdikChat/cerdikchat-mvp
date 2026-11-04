@@ -1,53 +1,74 @@
-# CerdikGo Remote MCP — Feature-Branch Implementation
+# CerdikGo Remote MCP — Preview Integration
 
-## Current implementation
+## Canonical implementation
 
-- Endpoint path: `/mcp`
-- Transport: Streamable HTTP through Cloudflare Agents SDK `createMcpHandler`.
-- Handler lifecycle: stateless; no MCP protocol session or Durable Object is required.
-- Tools:
-  - `cerdikgo.get_capabilities`
-  - `cerdikgo.get_agent_registry`
-  - `cerdikgo.create_task_plan`
-- Tool execution is read-only / plan-only. No provider calls, external data fetches, or database writes are exposed.
-- MCP route is disabled unless `CERDIKGO_MCP_ENABLED=true`.
-- Authentication requires a dedicated `CERDIKGO_MCP_BEARER_TOKEN` secret with at least 32 characters.
-- Requests are rate-limited through the existing Worker rate-limit binding.
+- Canonical Worker source: `mcp-preview-worker.js`.
+- Compatibility entrypoint: `mcp-preview/worker.js` re-exports the canonical module; do not maintain a second implementation.
+- Endpoint path: `/mcp`.
+- Transport: stateless Streamable HTTP JSON-RPC subset.
+- Server identity: `cerdikgo-atlas9`.
+- Tools: `cerdikgo.get_capabilities`, `cerdikgo.get_agent_registry`, `cerdikgo.create_task_plan`.
+- All tools are read-only / plan-only. No model-provider calls, arbitrary fetch, database writes, or agent execution.
 
-## Human-gated activation
+## Gemini CLI — supported client configuration
 
-Do not set the flag or secret automatically.
+Gemini CLI supports remote MCP over Streamable HTTP using `httpUrl`, custom `headers`, `includeTools`, and `trust`. Configure only after Preview has been deliberately activated and the token is stored locally in the operator's environment. Never commit a real token.
 
-After explicit approval, an operator may configure the Preview Worker only:
-1. Generate a random token of at least 32 characters using a trusted password manager or local cryptographic generator.
-2. Store it as a Worker secret named `CERDIKGO_MCP_BEARER_TOKEN`; never place it in source, chat, CI logs, or a client-side bundle.
-3. Set the Preview-only variable `CERDIKGO_MCP_ENABLED=true`.
-4. Keep Production disabled.
-5. Revoke and rotate the token immediately if exposed.
+Example addition to Gemini CLI `settings.json`:
 
-The current branch does not configure either value and does not activate the endpoint.
+```json
+{
+  "mcpServers": {
+    "cerdikgo-preview": {
+      "httpUrl": "https://cerdikgo-mcp-preview.ngyoonseong.workers.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer $CERDIKGO_MCP_TOKEN"
+      },
+      "timeout": 30000,
+      "trust": false,
+      "includeTools": [
+        "cerdikgo.get_capabilities",
+        "cerdikgo.get_agent_registry",
+        "cerdikgo.create_task_plan"
+      ]
+    }
+  }
+}
+```
 
-## Gemini CLI client configuration
+The environment variable must be defined in the shell/session that launches Gemini CLI. Do not put the token literal in this file, source code, screenshots, chat, or logs. Keep `trust:false` so Gemini CLI retains per-tool confirmation behavior. The endpoint URL above is the known Preview endpoint; this documentation does not assert that it is currently enabled or reachable.
 
-Use the Preview MCP URL only after the endpoint is activated and a token has been provisioned through the approved secret workflow. Configure Gemini CLI's remote MCP server entry with the HTTPS URL ending in `/mcp` and an Authorization Bearer header. Exact CLI configuration keys must be checked against the installed Gemini CLI version before use.
+Useful checks in Gemini CLI:
+- `gemini mcp list` — inspect connection status.
+- `/mcp` — inspect discovered tools in an interactive session.
+- Invoke `cerdikgo.get_capabilities` and `cerdikgo.get_agent_registry` first.
+- Use `cerdikgo.create_task_plan` only for non-executing planning.
 
-Do not use the Google account password as an MCP token. Google OAuth for Gemini CLI login and CerdikGo MCP bearer authentication are separate credentials.
+Gemini CLI Google sign-in and the CerdikGo MCP Bearer token are separate credentials. Do not use a Google account password as an MCP token.
 
-## ChatGPT compatibility
+## ChatGPT Go — Context Bridge
 
-The endpoint uses standard Streamable HTTP, but successful connection depends on the ChatGPT plan, client surface, and supported authentication flow. Static bearer authentication may not satisfy a ChatGPT connector that requires OAuth. Do not claim ChatGPT connectivity until an actual authenticated handshake and tool call are verified.
+ChatGPT Go remains on the manual Context Bridge path. Open `/bridge.html` from the CerdikGo workspace, export a task envelope from ChatGPT Go, and import it into CerdikGo. This is not direct MCP connectivity, shared memory, or an OpenAI API integration.
+
+## Preview security and activation
+
+- Closed by default: `CERDIKGO_MCP_ENABLED=false`.
+- Requires Preview secret `CERDIKGO_MCP_BEARER_TOKEN` with at least 32 characters.
+- Configure the secret through Cloudflare's secure secret interface only.
+- Set the Preview flag to `true` only after confirming secret presence and passing source/CI checks.
+- Do not change Production settings, secrets, bindings, routes, or deployments.
+- Never disclose the token or include it in logs.
 
 ## Verification gates
 
-1. Source review.
-2. Dependency installation and unit tests.
-3. Wrangler dry-run bundle validation.
-4. Preview secret and flag setup — Human approval required.
-5. Preview MCP initialize / tools/list / tools/call.
-6. Gemini CLI authenticated test — Human performs sign-in / token setup.
-7. ChatGPT connection test — subject to supported account capability and OAuth requirements.
-8. Production release — separate Human approval.
+1. Source review and canonical-entrypoint test.
+2. Node.js regression suite and Wrangler dry-run.
+3. Human-approved Preview secret and flag configuration.
+4. Authenticated MCP initialize, initialized notification, tools/list, and tools/call.
+5. Gemini CLI `gemini mcp list` and real tool invocation.
+6. ChatGPT Go Context Bridge import/export and Android verification.
+7. Production release — separate approval only.
 
-## Current non-goals
+## Explicit non-goals
 
-No OpenAI API adapter, Gemini API adapter, model inference routing, autonomous agent execution, task persistence, OAuth authorization server, or cross-provider data transfer is enabled by this implementation.
+No ChatGPT Go custom MCP connector, OAuth authorization server, OpenAI API adapter, Gemini model inference adapter, cross-provider conversation sync, autonomous agent execution, task persistence, or billing is enabled by this work.
