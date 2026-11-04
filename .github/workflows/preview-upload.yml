@@ -45,4 +45,4 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "CLOUDFLARE_API_TOKEN repository secret is not configured"; exit 1; }
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "CLOUDFLARE_ACCOUNT_ID is not configured"; exit 1; }
-          npx wrangler preview --config wrangler.toml --name atlas9-admin-governance-control-center --ignore-base-config --json
+          npx wrangler preview --config wrangler.toml --name atlas9-prompt-intelligence-mvp --ignore-base-config --json
