@@ -12,7 +12,7 @@ const GOOGLE_ISSUERS = new Set([
 const SESSION_COOKIE = "__Host-cerdikchat_session";
 const CSRF_COOKIE = "__Host-cerdikchat_csrf";
 const CSRF_TTL_SECONDS = 8 * 60 * 60;
-const SESSION_TTL_SECONDS = 8 * 60 * 60;
+const SESSION_TTL_SECONDS = 76 * 60 * 60;
 const MAX_TOKEN_LENGTH = 12_000;
 let jwksCache = { keys: null, expiresAt: 0 };
 
@@ -265,12 +265,12 @@ export async function googleLogin(request, env, options = {}) {
   let user;
   try {
     user = await env.DB.prepare(
-      "SELECT google_sub, email, display_name, status, role, governance_tier FROM users WHERE google_sub = ? LIMIT 1"
+      "SELECT google_sub, email, display_name, status, role, governance_tier, access_expires_at FROM users WHERE google_sub = ? LIMIT 1"
     ).bind(identity.sub).first();
   } catch {
     return authJson({ error: "AUTH_DATABASE_UNAVAILABLE" }, 503);
   }
-  if (!user || user.status !== "active") {
+  if (!user || user.status !== "active" || (user.access_expires_at != null && user.access_expires_at <= Math.floor(Date.now() / 1000))) {
     const now = Math.floor(Date.now() / 1000);
     const requestId = crypto.randomUUID();
     try {
@@ -320,8 +320,8 @@ export async function currentSession(request, env) {
   const now = Math.floor(Date.now() / 1000);
   try {
     const row = await env.DB.prepare(
-      "SELECT s.google_sub, u.email, u.display_name FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
-    ).bind(hash, now).first();
+      "SELECT s.google_sub, u.email, u.display_name FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' AND (u.access_expires_at IS NULL OR u.access_expires_at > ?) LIMIT 1"
+    ).bind(hash, now, now).first();
     if (!row) return authJson({ authenticated: false }, 401, { "set-cookie": clearCookieHeader() });
     return authJson({ authenticated: true, user: { email: row.email, displayName: row.display_name || "" } });
   } catch {
@@ -339,8 +339,8 @@ export async function requireSession(request, env) {
   const now = Math.floor(Date.now() / 1000);
   try {
     const row = await env.DB.prepare(
-      "SELECT s.google_sub, u.email FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' LIMIT 1"
-    ).bind(hash, now).first();
+      "SELECT s.google_sub, u.email FROM sessions s JOIN users u ON u.google_sub = s.google_sub WHERE s.session_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ? AND u.status = 'active' AND (u.access_expires_at IS NULL OR u.access_expires_at > ?) LIMIT 1"
+    ).bind(hash, now, now).first();
     if (!row) return { ok: false, response: authJson({ error: "AUTH_REQUIRED" }, 401, { "set-cookie": clearCookieHeader() }) };
     return { ok: true, subject: row.google_sub, email: row.email };
   } catch {
