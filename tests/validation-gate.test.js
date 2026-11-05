@@ -61,3 +61,19 @@ test("WPS bridge requires HTTP 200, model identifier and non-empty reply before 
   assert.match(wps, /cerdikgo:ai-core-verified/);
   assert.match(wps, /gate\("ai-core","rejected"/);
 });
+
+test("Conversation workspace exposes the four requested tool cards", () => {
+  for (const action of ["documents", "voice", "research", "validation"]) {
+    assert.match(index, new RegExp('data-workspace-action="' + action + '"'));
+  }
+  assert.match(index, /id="cgToolsTitle">Alat kerja/);
+});
+
+test("Composer shortcuts are connected to existing attachment, voice and tools controls", () => {
+  assert.match(index, /id="composerAttach"/);
+  assert.match(index, /id="composerVoice"/);
+  assert.match(index, /id="composerMore"/);
+  assert.match(index, /querySelector\("#chooseAnalysisFile"\)\?\.click\(\)/);
+  assert.match(index, /querySelector\("#voiceRecord"\)\?\.click\(\)/);
+  assert.match(index, /querySelector\("#cerdikgoValidationGate"\)\?\.scrollIntoView/);
+});
