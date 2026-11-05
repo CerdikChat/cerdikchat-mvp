@@ -78,3 +78,27 @@ No merge, Production deployment, remote D1 write/migration, OAuth/secrets change
 
 ### Explicitly unchanged controls
 No merge, Production deployment, remote D1 write/migration, OAuth/secrets/DNS change, billing, MCP activation, or independent agent execution. Gateway remains plan_only; exactly nine specialist profiles remain.
+
+## Handover correction — 2026-11-05: primary Preview and new hardening PRs
+
+### Existing primary Preview
+- PR #52 source head 9be9a8c3f6df416d66452c3d8c69c5112c853207 was deployed as Preview by workflow 41825376685.
+- Stable URL: https://atlas9-prompt-intelligence-mvp-cerdikchat-mvp.ngyoonseong.workers.dev .
+- Immutable deployment URL: https://29f5c85f-cerdikchat-mvp.ngyoonseong.workers.dev .
+- D1 is isolated cerdikchat-staging ID 79267e63-e57f-4237-8b88-f1e477397771. No HTTP health or Android acceptance is evidenced.
+- This deployed Preview does not include PR #64 Connectors UI or PR #65/66 changes.
+
+### New open draft PRs
+- PR #65: https://github.com/CerdikChat/cerdikchat-mvp/pull/65 — branch atlas9/cerdikgo-document-evidence-integrity, head 2529b05efa4fd02883eb493a2683218a7be2e83f. Regression 95/95 (runs 41949338154, 41949364570). No Auto Pilot gate; Human Verification BLOCKED. Base is PR #35 branch; PR #35 remains dirty against PR #32.
+- PR #66: https://github.com/CerdikChat/cerdikchat-mvp/pull/66 — branch atlas9/cerdikgo-observability-redaction, head 1efff727f6c208d3c030b1162f2065abad5bdf7a. Regression 102/102 (41949598277); Wrangler config dry-run passed twice (41949598379, 41949605643). No Preview deploy and no Auto Pilot gate; Human Verification BLOCKED.
+
+### Updated blockers
+1. Existing Preview reports redact_query_string=false; PR #66 proposes the correction but it is not deployed.
+2. PR #52 session TTL remains 76 hours and requires explicit policy review.
+3. PR #52 stress campaign is local in-process simulation, not real edge load.
+4. PR #53 backup/restore remains NOT TESTED; no current-head backup workflow run or restore drill.
+5. PR #64 Connectors menu remains unverified on the deployed primary Preview; its own workflow has not been dispatched.
+6. Live Web Research provider remains unconfigured; document evidence hardening does not enable web search.
+7. Android Voice, document scanning UX, offline chat/radio mesh, load/SLO and disaster recovery remain NOT TESTED.
+
+Next actions: obtain exact-head Auto Pilot gates for PR #65/#66; resolve PR #35 base conflict; after approval, deploy only the isolated Preview for PR #64/PR #66; run health and Android tests; verify log redaction; perform isolated restore and edge load testing.

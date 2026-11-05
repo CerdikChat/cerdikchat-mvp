@@ -94,3 +94,11 @@ This section supersedes earlier head references for the PRs listed below without
 - PR #61 head 17760f85b01e0db2e7a09679324d55adfe1fcf95: push security/regression runs 41917776597 and 41917776653 success; 99/99 security tests. Remediation remains unmerged into PR #52.
 
 The 35-task v0.1 manifest is a structural smoke-test fixture only. It does not execute model inference, assign model scores, establish statistical confidence, or demonstrate parity/superiority over Gemini. Untested criteria earn no points. A 100% dimension requires every mandatory KPI, sample-size requirement and evidence condition in Section 2 to pass.
+
+## Additional evidence boundaries — 2026-11-05
+
+- PR #52 Preview deployment success (run 41825376685) proves a Preview was created with staging D1, not that the application passed HTTP health, authenticated user journeys, Android usability, or SLO checks.
+- PR #52's 99,990-request campaign calls worker.fetch() in-process using synthetic requests and no external network, D1 writes, Google calls, AI inference, or Production traffic. It is not the 100-concurrent-user Cloudflare edge benchmark required by the ecosystem dimension.
+- PR #65 regression (95/95) validates source-span checks, not model research quality or semantic entailment.
+- PR #66 regression (102/102) and Wrangler dry-run validate configuration and tests, not deployed observability behavior.
+- The current measured score for every competitive dimension remains NOT MEASURED. No score is awarded for feature presence, local synthetic stress, CI pass, Preview creation alone, or smoke-manifest completeness.

@@ -72,3 +72,18 @@ Append findings with exact branch/commit and reproducible evidence. Never copy s
 ### Standing controls
 - Exactly nine specialist profiles; Optimus Prime remains coordinator; gateway remains plan_only.
 - No Production deploy, remote D1 write/migration, OAuth/secrets/DNS changes, billing, MCP activation or independent agent execution.
+
+## Correction — 2026-11-05: PR #52 Preview observability evidence
+
+The PR #52 Preview workflow did deploy exact source commit 9be9a8c3f6df416d66452c3d8c69c5112c853207 successfully (run 41825376685). The deployment result identifies Preview ID 72913c7e45014dcca1d5489eab6bc989, deployment ID 29f5c85f-af7c-46fa-9f0a-7f0f6587de92, stable URL https://atlas9-prompt-intelligence-mvp-cerdikchat-mvp.ngyoonseong.workers.dev and immutable URL https://29f5c85f-cerdikchat-mvp.ngyoonseong.workers.dev. Its D1 binding is cerdikchat-staging ID 79267e63-e57f-4237-8b88-f1e477397771. This confirms isolated Preview creation, not application health or user acceptance.
+
+### Privacy finding
+- Preview observability returned head_sampling_rate=1, logs.persist=true, invocation_logs=true, and redact_query_string=false.
+- Cloudflare's configuration reference indicates query-string redaction defaults to false. Request URLs may therefore retain query strings in persisted invocation telemetry. This is a privacy risk where query strings contain tokens, identifiers, or sensitive search terms.
+- PR #66 (head 1efff727f6c208d3c030b1162f2065abad5bdf7a) enables redact_query_string=true at top-level and Preview scope. Regression 41949598277 (102/102) and Wrangler dry-runs 41949598379/41949605643 passed. The fix has not been deployed; do not claim the existing Preview is already redacted.
+- Query-string redaction does not sanitize request bodies, headers, application log strings, or personal data manually written to console logs. Data minimization remains required.
+
+### Other corrections
+- PR #52's 99,990 stress script is synthetic in-process Worker testing (worker.fetch), not a Cloudflare edge test or proof of real-user scale.
+- PR #53 backup implementation has no current-head backup run and no restore evidence.
+- PR #65 evidence excerpt validation checks normalized verbatim source spans; it does not prove semantic entailment or relevance. Human review remains necessary for material claims.

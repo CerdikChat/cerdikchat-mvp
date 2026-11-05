@@ -104,3 +104,36 @@ Workflow URLs:
 - PR #63 MCP hardening is CI-verified only; MCP remains opt-in and agent execution remains disabled.
 - The current documentation branch commit is a separate candidate; run its own Auto Pilot gate against the exact resulting SHA before Human Verification.
 - CI logs emitted non-blocking Node.js 20 action deprecation and punycode deprecation warnings; no failure resulted.
+
+## Additional exact-head and runtime evidence — 2026-11-05
+
+| PR / candidate | Run ID | Status | Result |
+|---|---:|---|---|
+| #52 9be9a8c3f6df416d66452c3d8c69c5112c853207 | 41825376685 | VERIFIED | Wrangler Preview deployment completed; stable and immutable URLs returned; staging D1 binding reported. No health probe. |
+| #65 2529b05efa4fd02883eb493a2683218a7be2e83f | 41949338154 | VERIFIED | Push regression, 95/95 tests |
+| #65 same head | 41949364570 | VERIFIED | Pull-request regression, 95/95 tests |
+| #66 1efff727f6c208d3c030b1162f2065abad5bdf7a | 41949598277 | VERIFIED | Regression, 102/102 tests |
+| #66 same head | 41949598379 | VERIFIED | Wrangler 4.153.0 config dry-run, no deployment |
+| #66 same head | 41949605643 | VERIFIED | Wrangler 4.153.0 config dry-run, no deployment |
+| #34 4e0a695c7c1aa8aed362f842772cabe00f5ec769 | 41262519352 | VERIFIED | Regression |
+| #34 same head | 41262511152 | VERIFIED | Push regression |
+| #35 2fc68d4660d0a1562c7ad78428d6b7c8d26d8953 | 41268353266 | VERIFIED | Pull-request regression |
+| #35 same head | 41268349267 | VERIFIED | Push regression |
+| #35 same head | 41949231803 | VERIFIED | Push regression |
+| #41 e07d18c59f28247e18ebd2018931aaf289e7d214 | 41327582399 | VERIFIED | Pull-request regression |
+| #41 same head | 41327577104 | VERIFIED | Push regression |
+| #45 5207d5ef23f0f10563f9b8ea38ffbc621f17104b | 41582157556 | VERIFIED | UI protection regression |
+| #45 same head | 41582157563 | VERIFIED | Pull-request regression |
+| #45 same head | 41582153906 | VERIFIED | Push regression |
+
+Key links:
+- #52 Preview: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41825376685 .
+- #65: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949338154 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949364570 .
+- #66: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949598277 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949598379 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949605643 .
+
+## Interpretation and test gaps
+- PR #52 Preview creation is VERIFIED, but HTTP health, authenticated end-to-end flow, Android acceptance, and SLO are NOT TESTED.
+- PR #52 99,990-request stress script is in-process Worker simulation, not edge load; no scale KPI is earned from it.
+- PR #53 backup workflow was not run on the current PR head; restore remains NOT TESTED.
+- PR #65/66 have regression/config dry-run evidence but no Auto Pilot readiness workflow on their exact heads. Human Verification remains BLOCKED until an exact-head gate exists and passes.
+- PR #66 Wrangler dry-run is explicitly local validation only; no deployment occurred.

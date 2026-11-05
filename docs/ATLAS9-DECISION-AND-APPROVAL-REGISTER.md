@@ -40,3 +40,11 @@ Append decisions. General permission to improve code does not authorize privileg
 5. No merge, Production deployment, remote D1 write/migration, OAuth/secrets change, DNS change, billing activation, MCP activation, or privileged external action is approved by this audit.
 6. Free-tier/Workers AI-only policy remains in force. Do not add paid dependencies or enable external providers without a separate decision.
 7. The 100% VERIFIED goal remains a per-dimension acceptance threshold, not a measured score or claim of superiority over Gemini.
+
+## Decision update — 2026-11-05: Preview evidence and new draft PRs
+
+1. PR #52 Preview creation is VERIFIED for source commit 9be9a8c3f6df416d66452c3d8c69c5112c853207 via run 41825376685. It uses cerdikchat-staging D1 ID 79267e63-e57f-4237-8b88-f1e477397771. This is not Production and is not PR #64's Connectors candidate. Runtime health and Android acceptance remain unverified.
+2. PR #65 document evidence hardening is regression-verified (95/95; runs 41949338154 and 41949364570), but no exact-head Auto Pilot readiness gate has run. Human Verification is not authorized to start.
+3. PR #66 observability query redaction is regression-verified (102/102; run 41949598277) and Wrangler dry-run verified (41949598379, 41949605643), but no Preview deployment or exact-head Auto Pilot readiness gate has run. Human Verification is not authorized to start.
+4. PR #66 preserves 100% log sampling and persistence while enabling query-string redaction. Do not silently change sampling/retention policy without a separate decision.
+5. No additional Preview deployment was initiated by this audit. No merge, Production deploy, remote D1 write/migration, OAuth/secrets/DNS change, billing, or other privileged action was performed.

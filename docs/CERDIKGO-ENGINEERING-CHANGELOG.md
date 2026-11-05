@@ -77,3 +77,21 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 - Files: docs/ATLAS9-MASTER-DEVELOPMENT-LEDGER.md; docs/CERDIKGO-ENGINEERING-CHANGELOG.md; docs/ATLAS9-TESTING-AND-QA-REGISTER.md; docs/ATLAS9-SECURITY-GOVERNANCE-REGISTER.md; docs/ATLAS9-DECISION-AND-APPROVAL-REGISTER.md; docs/CERDIKGO-OPEN-ISSUES-AND-HANDOVER.md; docs/CERDIKGO-SEVEN-DIMENSION-BENCHMARK.md.
 - Scope is documentation-only; no application code, runtime configuration, secrets, database, or deployment changed.
 - CI for the resulting documentation commit must be checked on its exact SHA before treating that candidate as Auto Pilot ready.
+
+## 2026-11-05 — Document evidence integrity hardening (PR #65)
+- Branch/head: atlas9/cerdikgo-document-evidence-integrity / 2529b05efa4fd02883eb493a2683218a7be2e83f; base PR #35 branch.
+- Changed files: multimodal/file-analysis.js; tests/worker.test.mjs; docs/RESEARCH-EVIDENCE-VALIDATION.md.
+- Supported findings now require a normalized-verbatim excerpt from extracted text; unsupported findings must be explicitly marked insufficient_evidence with no fabricated excerpt or reference.
+- Regression runs 41949338154 and 41949364570 passed; 95/95 tests. Draft/open/unmerged; no Auto Pilot readiness run for this head.
+
+## 2026-11-05 — Observability query-string redaction (PR #66)
+- Branch/head: atlas9/cerdikgo-observability-redaction / 1efff727f6c208d3c030b1162f2065abad5bdf7a; base PR #52 branch.
+- Changed files: wrangler.toml; tests/observability-config.test.mjs; docs/CERDIKGO-OBSERVABILITY-PRIVACY-HARDENING.md; .github/workflows/observability-config-validation.yml.
+- Enables redact_query_string for top-level and Preview observability, keeps current sampling/persistence, and tests Preview D1 staging isolation.
+- Regression 41949598277 passed 102/102 tests; Wrangler config dry-run 41949598379 and 41949605643 passed. No deployment performed. Draft/open/unmerged; no Auto Pilot readiness run for this head.
+
+## 2026-11-05 — Existing Preview deployment evidence correction (PR #52)
+- PR #52 exact head 9be9a8c3f6df416d66452c3d8c69c5112c853207 was Preview-deployed successfully by run 41825376685 on 2026-11-04.
+- Stable URL: https://atlas9-prompt-intelligence-mvp-cerdikchat-mvp.ngyoonseong.workers.dev ; immutable URL: https://29f5c85f-cerdikchat-mvp.ngyoonseong.workers.dev .
+- Deployment used cerdikchat-staging D1 ID 79267e63-e57f-4237-8b88-f1e477397771. No health probe or Android acceptance was performed. This is not the PR #64 Connectors candidate.
+- Deployment logs exposed query-string redaction disabled. PR #66 proposes the config fix; it has passed dry-run only and has not been deployed.

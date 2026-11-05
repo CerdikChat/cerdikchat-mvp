@@ -83,3 +83,50 @@ The first ledger/QA snapshot described PR #57–#59 workflows as queued or untes
 ## Correction — 2026-11-05: PR #60 evidence snapshot superseded
 - Older scorecard entries reference PR #60 heads f36cafa56f2d2b99e88eecf88a2c615859f839fe and earlier. The current PR #60 head at this audit is d90c492116729f886a9adca329c581151e1884f5; its exact-head workflow IDs are 41919509234, 41919509283, 41919509532, and 41919509348.
 - This correction supplements rather than deletes prior chronology.
+
+## Correction and extension — 2026-11-05: Preview deployment evidence and PR #65–#66
+
+### Existing primary Preview — PR #52
+- Exact source commit: 9be9a8c3f6df416d66452c3d8c69c5112c853207 on atlas9/admin-governance-control-center.
+- Workflow run 41825376685 completed SUCCESS on 2026-11-04. It executed npx wrangler preview --config wrangler.toml --name atlas9-prompt-intelligence-mvp --ignore-base-config --json.
+- Stable Preview URL: https://atlas9-prompt-intelligence-mvp-cerdikchat-mvp.ngyoonseong.workers.dev .
+- Immutable deployment URL: https://29f5c85f-cerdikchat-mvp.ngyoonseong.workers.dev .
+- Preview ID 72913c7e45014dcca1d5489eab6bc989; deployment ID 29f5c85f-af7c-46fa-9f0a-7f0f6587de92; deployment number 12.
+- Runtime configuration evidence shows ENVIRONMENT=preview, GOOGLE_AUTH_REQUIRED=true, and D1 bound to cerdikchat-staging ID 79267e63-e57f-4237-8b88-f1e477397771. No Production D1 binding was reported in this Preview result.
+- This confirms Preview creation only. No HTTP health probe, Android acceptance, end-to-end authenticated test, or 7-day SLO evidence was performed in this audit. This Preview does not contain PR #64 Connectors UI because its source is PR #52 commit 9be9a8c.
+- The run reported observability sampling 1.0, persisted invocation logs, and redact_query_string=false. This privacy finding motivated PR #66.
+
+### PR #52 synthetic stress-test interpretation
+- scripts/atlas9-stress-99990.mjs uses in-process worker.fetch() against an atlas9-test.invalid base with synthetic requests and no public network, D1 writes, Google calls, AI inference, or Production traffic.
+- Its 99,990-request/100-lane result is a local handler stress simulation, not a Cloudflare edge load test or evidence of 100 concurrent real users. Ecosystem scale KPIs remain NOT TESTED.
+
+### PR #53 backup
+- PR #53 head 142f4d8a893ba81d5f926da65f53b9e077ad1cad has regression runs 41825322436, 41825322322, 41825276515 successful. No google-drive-backup.yml workflow run is present for this head. Bundle verification and SHA-256 generation are not a restore drill; Google Drive upload and restore remain NOT TESTED.
+
+### PR #65 — document evidence integrity
+- Branch atlas9/cerdikgo-document-evidence-integrity; head 2529b05efa4fd02883eb493a2683218a7be2e83f; base PR #35 branch atlas9/beta-user-access-policy-document-research.
+- Files: multimodal/file-analysis.js, tests/worker.test.mjs, docs/RESEARCH-EVIDENCE-VALIDATION.md.
+- Exact-head regression runs 41949338154 (push) and 41949364570 (pull_request) passed; 95/95 tests, 0 failures.
+- Change requires normalized-verbatim source excerpts for supported findings; unsupported findings must be explicitly marked insufficient_evidence with empty evidence and null reference. This is a source-span check, not semantic entailment.
+- PR #65 is draft/open/unmerged and clean relative to PR #35 branch. PR #35 itself remains dirty against its base PR #32, so downstream integration depends on resolving PR #35's base conflict. No Auto Pilot readiness gate ran for PR #65; Human Verification is BLOCKED pending an exact-head readiness gate.
+
+### PR #66 — observability query-string redaction
+- Branch atlas9/cerdikgo-observability-redaction; head 1efff727f6c208d3c030b1162f2065abad5bdf7a; base PR #52 branch atlas9/admin-governance-control-center.
+- Files: wrangler.toml, tests/observability-config.test.mjs, docs/CERDIKGO-OBSERVABILITY-PRIVACY-HARDENING.md, .github/workflows/observability-config-validation.yml.
+- Exact-head regression run 41949598277 passed 102/102 tests. Wrangler configuration dry-run runs 41949598379 and 41949605643 both passed using npx --yes wrangler@4.153.0 deploy --dry-run --outdir /tmp/cerdikgo-observability-config. Dry-run is not a deployment.
+- Query-string redaction is enabled in top-level and Preview observability config; existing 100% sampling/persist behavior and Preview D1 binding are retained.
+- PR #66 is draft/open/unmerged and clean relative to PR #52 branch. No Preview redeployment or Auto Pilot readiness gate has run for this exact head; Human Verification is BLOCKED pending readiness gate and separate Preview validation.
+
+### Related older PR evidence
+- PR #34 head 4e0a695c7c1aa8aed362f842772cabe00f5ec769: regression runs 41262519352 and 41262511152 passed. Live web provider remains unconfigured by design; no external search provider or credentials were added.
+- PR #35 head 2fc68d4660d0a1562c7ad78428d6b7c8d26d8953: regression runs 41268353266, 41268349267, and 41949231803 passed. PR is dirty against base PR #32; evidence-span weakness is addressed in downstream PR #65.
+- PR #41 head e07d18c59f28247e18ebd2018931aaf289e7d214: regression runs 41327582399 and 41327577104 passed. Whisper route is code-level only; Android voice interaction remains NOT TESTED.
+- PR #45 head 5207d5ef23f0f10563f9b8ea38ffbc621f17104b: UI protection run 41582157556 and regression runs 41582157563, 41582153906 passed. Service worker caches app shell; no offline chat or radio mesh is proven.
+- PR #52 remains open/non-draft and requires policy review of 76-hour session TTL, atomic approval/audit writes, and preview workflow permissions.
+
+Workflow links:
+- PR #52 Preview: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41825376685 .
+- PR #65: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949338154 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949364570 .
+- PR #66: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949598277 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949598379 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949605643 .
+
+No Production deploy, remote D1 write/migration, OAuth/secrets/DNS change, billing, or other privileged action was performed.
