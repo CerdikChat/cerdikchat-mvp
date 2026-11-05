@@ -9,7 +9,9 @@ const wps = await readFile(new URL("../src/wps-office-bridge.js", import.meta.ur
 test("CerdikGo exposes a visible, accessible Validation Gate", () => {
   assert.match(index, /validation-gate\.js/);
   assert.match(gate, /VALIDATION GATE/);
-  assert.match(gate, /aria-expanded/);
+  assert.match(index, /id="validationGateMenu"/);
+  assert.match(index, /id="validationGateMount"/);
+  assert.match(gate, /validationGateMount/);
   assert.match(gate, /aria-live|aria-label/);
 });
 
@@ -53,4 +55,17 @@ test("Voice transcription preserves Android Tap-to-Open keyboard behavior", () =
   assert.doesNotMatch(transcriptHandler, /input\.focus\(\)/);
   const transcriptionReady = index.slice(index.indexOf('voiceTranscript.value = String(result.text'), index.indexOf('} catch (error)', index.indexOf('voiceTranscript.value = String(result.text')));
   assert.doesNotMatch(transcriptionReady, /voiceTranscript\.focus\(\)/);
+});
+
+
+test("Validation Gate, Protection Mode and Hybrid Connectivity are exposed from header menus", () => {
+  const header = index.slice(index.indexOf('<header class="top">'), index.indexOf('</header>', index.indexOf('<header class="top">')));
+  assert.match(header, /id="validationGateMenu"/);
+  assert.match(header, /id="systemStatusMenu"/);
+  assert.match(header, /id="protectionStatusCard"/);
+  assert.match(header, /Hybrid Connectivity/);
+  assert.match(index, /id="validationGateMount"/);
+  const deckStart = index.indexOf('<section class="status-deck"');
+  const deckEnd = index.indexOf('</section>', deckStart);
+  assert.doesNotMatch(index.slice(deckStart, deckEnd), /status-cards|protectionStatusCard/);
 });
