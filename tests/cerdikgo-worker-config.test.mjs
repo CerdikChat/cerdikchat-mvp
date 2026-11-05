@@ -12,3 +12,11 @@ test("isolated CerdikGo Worker does not reuse shared D1 or rate-limit resources"
   assert.doesNotMatch(config, /^\s*\[\[d1_databases\]\]/m);
   assert.doesNotMatch(config, /^\s*\[\[ratelimits\]\]/m);
 });
+
+
+test("isolated Primary Worker uses a CerdikGo-specific Preview name", async () => {
+  const config = await readFile(new URL("../wrangler.cerdikgo.toml", import.meta.url), "utf8");
+  assert.match(config, /^name\s*=\s*"cerdikgo-primary-preview"$/m);
+  assert.doesNotMatch(config, /atlas9-prompt-intelligence-mvp-cerdikchat-mvp/);
+  assert.match(config, /^PRODUCT_ID\s*=\s*"cerdikgo"$/m);
+});
