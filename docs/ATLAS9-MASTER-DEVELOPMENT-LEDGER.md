@@ -443,3 +443,13 @@ Branch: atlas9/cerdikgo-100-percent-scorecard
 - Open issues/handover: ba98cf08840c7821c0880347df05cf7af6fdd6d1
 
 These append-only entries record the main-branch authentication default uncertainty and the Draft PR #44 fail-closed candidate with its 40/40 regression evidence. No Production environment value was inspected or changed.
+
+
+## PR #60 mergeability and final-head correction — 2026-11-05
+
+This entry supersedes the earlier point-in-time statement that PR #60 was non-mergeable.
+- Earlier GitHub PR metadata returned mergeable=false while the branch was being updated.
+- Latest PR metadata for head a6d00bbdec7ba6d49460441ef2327224f6a41ba5 returns mergeable=true.
+- Compare remains diverged: base branch head 637ff536011ed25fc598888f62f520b4cfdccd3c, merge base de11d34257005ba72a621312230489a7d161ff53, 79 commits ahead / 2 behind. GitHub's mergeable=true indicates no current merge conflict; it does not establish that integrating this stacked branch is safe or authorized. No merge was performed.
+- Final exact candidate head a6d00bbdec7ba6d49460441ef2327224f6a41ba5 passed Auto Pilot 42003333775 (129/129; doctor 16/16; strict TypeScript; dry-run), regression/install 42003333772, Phase 3 42003333754, and Hybrid Gateway 42003333825 — all SUCCESS.
+- PR #60 remains DRAFT. Human Verification was not started. The scorecard branch remains a stacked development candidate, not Production or Preview runtime evidence.
