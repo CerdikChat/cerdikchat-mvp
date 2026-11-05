@@ -1,0 +1,87 @@
+name: CerdikGo Legacy JavaScript Auto Pilot Readiness Gate
+
+on:
+  pull_request:
+    branches: [main, "atlas9/**"]
+  push:
+    branches: ["atlas9/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerdikgo-legacy-autopilot-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  automated-validation:
+    name: Exact-candidate installation, regression and config gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact candidate commit
+        uses: actions/checkout@v4
+      - name: Record exact tested checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Candidate identity"
+            echo "- Tested checkout SHA: $(git rev-parse HEAD)"
+            echo "- Workflow event SHA: ${GITHUB_SHA}"
+            echo "- PR head SHA: ${{ github.event.pull_request.head.sha || github.sha }}"
+            echo "- PR base SHA: ${{ github.event.pull_request.base.sha || 'not-applicable' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies without lifecycle scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Repository configuration preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { access, readFile } from "node:fs/promises";
+          const pkg = JSON.parse(await readFile("package.json", "utf8"));
+          if (!pkg.scripts || typeof pkg.scripts.test !== "string") throw new Error("TEST_SCRIPT_MISSING");
+          await access("worker.js");
+          await access("wrangler.toml");
+          console.log("Repository preflight: PASS");
+          console.log("TypeScript check: NOT CONFIGURED on this JavaScript branch (not silently counted as passed).");
+          NODE
+      - name: Full automated regression suite
+        run: npm test
+      - name: Wrangler configuration and bundle dry-run (no deployment)
+        run: npx --yes wrangler@4.153.0 deploy --dry-run --outdir /tmp/cerdikgo-legacy-readiness
+      - name: Verify no unapproved remote deployment or D1 migration workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          deploy_pattern='wrangler(@[^[:space:]]+)?[[:space:]]+deploy([[:space:]]|$)'
+          remote_d1_pattern='wrangler(@[^[:space:]]+)?[[:space:]]+d1[[:space:]]+migrations[[:space:]]+apply.*--remote'
+          matches=$(grep -RniE "${deploy_pattern}|${remote_d1_pattern}" .github/workflows || true)
+          unsafe=$(printf '%s\n' "$matches" | grep -v -- '--dry-run' || true)
+          if [ -n "$unsafe" ]; then
+            printf '%s\n' "$unsafe"
+            echo "::error::Unapproved remote deployment or remote D1 migration command found."
+            exit 1
+          fi
+          echo "Workflow safety scan: PASS (dry-run commands only)."
+      - name: Publish machine gate result
+        if: success()
+        run: |
+          {
+            echo "## READY FOR HUMAN VERIFICATION"
+            echo
+            echo "- Dependency installation: PASS"
+            echo "- Repository configuration preflight: PASS"
+            echo "- Automated regression: PASS"
+            echo "- Wrangler dry-run: PASS (no deployment)"
+            echo "- Workflow safety scan: PASS"
+            echo "- TypeScript: NOT CONFIGURED on this JavaScript branch; not counted as passed."
+            echo
+            echo "This result applies only to the exact tested checkout SHA above. It does not prove Preview runtime health, model benchmark scores, Android usability, backup restore, scale, or Production readiness."
+            echo "No deployment, D1 write/migration, OAuth/secrets change, DNS change, or billing action is performed by this workflow."
+          } >> "$GITHUB_STEP_SUMMARY"
