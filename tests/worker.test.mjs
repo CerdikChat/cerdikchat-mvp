@@ -106,8 +106,22 @@ test("unlisted Google account response does not disclose Google subject identifi
       })
     }
   });
-  const response = await googleLogin(request, env, { fetch: fixture.fetchJwks });
+  const originalInfo = console.info;
+  const infoEntries = [];
+  console.info = (...args) => infoEntries.push(args);
+  let response;
+  try {
+    response = await googleLogin(request, env, { fetch: fixture.fetchJwks });
+  } finally {
+    console.info = originalInfo;
+  }
   const payload = await json(response);
+  const serializedLogs = JSON.stringify(infoEntries);
+  assert.equal(infoEntries.length, 1);
+  assert.match(serializedLogs, /CERDIKCHAT_ACCESS_REQUEST_SUBMITTED/);
+  assert.equal(serializedLogs.includes("pilot.user@example.com"), false);
+  assert.equal(serializedLogs.includes("12345678901234567890"), false);
+  assert.equal(serializedLogs.includes(fixture.token), false);
   assert.equal(response.status, 202);
   assert.equal(payload.error, "ACCESS_REQUEST_SUBMITTED");
   assert.equal(payload.requestSubmitted, true);
