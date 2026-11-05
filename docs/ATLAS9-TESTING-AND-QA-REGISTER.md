@@ -427,3 +427,13 @@ Open test gaps: 100 reasoning tasks, 50 coding tasks, 50 research tasks, 50 gove
 - PR #60 compare remains diverged: 79 ahead / 2 behind; do not count branch CI as integration readiness.
 
 All seven competitive capability scores remain NOT MEASURED. CI results are engineering evidence only.
+
+
+## Authentication-default regression evidence — 2026-11-05
+
+- PR #44 head 30e05c23ce56116d80c3d5b872e3f9b5c7adef91.
+- Workflow run 41383765675: SUCCESS.
+- Command: npm test.
+- Results: 40 passed / 0 failed.
+- Covered: Production chat rejects missing GOOGLE_AUTH_REQUIRED with 401 AUTH_REQUIRED; Production auth config reports required; explicit false cannot disable Production auth; D1-backed deployments require auth by default.
+- Scope: unit/regression evidence only. No live Production flag inspection, Preview/Production authentication runtime test, or deployment was performed.
