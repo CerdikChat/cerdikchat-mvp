@@ -412,3 +412,32 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Current main/Primary prompt still has legacy identity terminology. Exactly nine specialists are verified only in candidate PR branches; Optimus Prime remains coordinator, not a tenth agent. Gateway stays `plan_only`.
 - All seven capability scores remain NOT MEASURED; evidence-credit 0/100 per dimension until the complete reproducible benchmark samples are executed. No Gemini superiority/parity claim.
 - No merge, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, billing activation or other privileged operation. Human Verification NOT STARTED.
+
+ 
+## 2026-11-05 — Auto Pilot engineering continuation
+
+### VERIFIED — clean Primary identity candidate
+- PR #85, branch atlas9/cerdikgo-primary-identity-clean-20261105, head efdc6390a5555aa5050ec8b797a7f4004bb4d202, base 679a6719fcfa1492f984c094adbcaa1dad2ddff3.
+- Changed files: worker.js; tests/atlas9-primary-identity.test.mjs; docs/ATLAS9-PRIMARY-IDENTITY-CORRECTION.md.
+- Reapplied the canonical ordered ATLAS-01 through ATLAS-09 prompt on the current governance base without force-pushing or rewriting PR #69.
+- Auto Pilot run 42041437992 SUCCESS: 107/107 tests, repository preflight PASS, Wrangler 4.153.0 dry-run PASS, workflow safety scan PASS. TypeScript NOT CONFIGURED on this legacy JavaScript branch.
+- Draft PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/85 .
+
+### VERIFIED — clean observability privacy candidate
+- PR #86, branch atlas9/cerdikgo-observability-clean-20261105, head ebf500bd10738580bb7001a8fec772ad463000e4, base 679a6719fcfa1492f984c094adbcaa1dad2ddff3.
+- Changed files: wrangler.toml; tests/observability-config.test.mjs; docs/CERDIKGO-OBSERVABILITY-PRIVACY-HARDENING.md; .github/workflows/observability-config-validation.yml.
+- Added top-level and Preview redact_query_string=true, retained existing sampling/persistence, and documented that this does not sanitize request bodies, headers or application log strings.
+- Auto Pilot 42041734344 SUCCESS: 107/107 tests; repository preflight PASS; Wrangler 4.153.0 dry-run PASS; workflow safety scan PASS. Dedicated config dry-run 42041734530 SUCCESS. TypeScript NOT CONFIGURED.
+- Draft PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/86 .
+- No live Cloudflare settings were changed. Current deployed settings still report query-string redaction false.
+
+### VERIFIED — scorecard and candidate CI evidence
+- PR #60 exact candidate 9d3e7d67e62acbd1eae1ea01b7d49d99243b1d6a: Auto Pilot 42039500315, regression/install 42039500670, Phase 3 42039500314, Hybrid Gateway 42039500262 all SUCCESS. Auto Pilot reports 129/129 tests, 16/16 preflight, strict TypeScript PASS; Hybrid Gateway dry-run PASS.
+- PR #81 exact candidate f1b5d39b42c4200eeb42b8cb899558ae3984866e: run 42007916625 SUCCESS, 85/85, Wrangler dry-run PASS; TypeScript NOT CONFIGURED.
+- PR #82 exact candidate 89786c607446fd49fc21b7d0def4b30bd9cb3999: run 42009783294 SUCCESS, 89/89, Wrangler dry-run PASS; TypeScript NOT CONFIGURED.
+- PR #84 exact candidate 04ed345fdbc5f9d6b87d7f3c873ea5eb34b0635d: run 42039038468 SUCCESS, 97/97, isolated Worker dry-run PASS; dedicated resources not provisioned.
+
+### FAILED / BLOCKED — unresolved operations
+- Scheduled backup runs 41695574776 and 41890146458 remain FAILED at Gitleaks; PR #74 scan correction passes full-history scan 41975715983 (816 commits, no leaks), but scheduled archive/Drive/restore remain NOT TESTED.
+- Real ClamAV remains BLOCKED by paid Containers access; PR #76 mocks only the service-binding contract.
+- No application runtime, Android acceptance, live inference, backup restore, edge load or Production deployment was performed.
