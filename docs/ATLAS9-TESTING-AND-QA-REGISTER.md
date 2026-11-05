@@ -445,3 +445,13 @@ All seven competitive capability scores remain NOT MEASURED. CI results are engi
 - PR #53 backup reconciliation candidate head 142f4d8a893ba81d5f926da65f53b9e077ad1cad: regression 41825322436 SUCCESS; Phase 3 41825322322 SUCCESS. No live Drive upload or restore drill was run.
 - Main scheduled backup runs 41890146458 and 41695574776 FAILED at Gitleaks before archive creation. The scheduled workflow's Drive upload condition is false for schedule events; schedule creates a GitHub artifact only, while Drive upload requires manual workflow_dispatch with upload_to_google_drive=true.
 - Main backup checkout retains credentials by default; PR #53 proposes persist-credentials=false. No backup workflow was manually dispatched during this audit.
+
+
+## Final scorecard exact-head QA result — 2026-11-05
+
+Candidate: d0ffbd53864be9c1bb6afbb608658cd532179727
+- Auto Pilot 42003589723 — SUCCESS; 129 passed / 0 failed; doctor/preflight 16/16; strict TypeScript contracts PASS; workflow safety scan PASS; Wrangler dry-run only.
+- Regression/install 42003589760 — SUCCESS.
+- Phase 3 42003589756 — SUCCESS.
+- Hybrid Gateway 42003589653 — SUCCESS.
+- No Human Verification, Preview runtime campaign, Android acceptance, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, or billing activation was performed.
