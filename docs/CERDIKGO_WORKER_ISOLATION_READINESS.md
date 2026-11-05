@@ -82,3 +82,19 @@ Keep this PR draft and unmerged. The isolated configuration remains a readiness/
 - No OAuth, secrets, DNS, billing, or scanner-service changes.
 - No changes to the existing CerdikChat Worker configuration.
 - No deploy step exists in this PR workflow. Cloudflare's repository integration may independently trigger Preview deployments; see the audit addendum above.
+
+
+### Cloudflare account inventory — read-only check, 2026-11-05
+
+The connected Cloudflare account was queried using read-only Worker inventory and settings endpoints. No Worker, secret, DNS, D1, or billing settings were changed.
+
+- The account's Worker Script inventory returned `cerdikchat-mvp` and `cerdikgo-mcp-preview`. It did not return a script named `atlas9-prompt-intelligence-mvp-cerdikchat-mvp`.
+- A direct read of settings and deployments for `atlas9-prompt-intelligence-mvp-cerdikchat-mvp` returned HTTP 404 (script not found).
+- The supplied CerdikGo Primary hostname therefore must not be represented as an independently provisioned Worker on the evidence available. GitHub's Cloudflare deployment bot identifies it as the branch Preview hostname for the `cerdikchat-mvp` service. The separate `cerdikgo-mcp-preview` script is an MCP service, not the CerdikGo web application.
+- The deployed `cerdikchat-mvp` Worker currently has `AI`, `ASSETS`, `CHAT_RATE_LIMITER`, and `DB` bindings. Its observed settings show invocation logs enabled and persisted at 100% sampling, while `redact_query_string` is false. Treat this as a P2 observability/privacy hardening gap; review actual logged URL patterns and enable query-string redaction through a separately approved change.
+- The deployed `cerdikchat-mvp` settings also list legacy `GEMINI_API_KEY` and `OPENAI_API_KEY` secret bindings. Secret values were not read or exposed. Their necessity should be verified against the deployed code before any separately authorized cleanup.
+- The five most recent deployment records returned for `cerdikchat-mvp` show the latest deployment at 2026-11-01 14:59 UTC. This inventory does not by itself establish which source commit is deployed; correlate the active version with the release record before claiming code parity.
+
+### Consequence for product identity and release status
+
+As of this read-only inventory, CerdikGo Primary is **not verified as a separate deployed Cloudflare Worker**. The supplied hostname is associated with a branch Preview deployment; `cerdikgo-mcp-preview` is a different service. The separate Worker name in `wrangler.cerdikgo.toml` is only a candidate target until a dedicated script exists and has been provisioned under explicit authorization.
