@@ -67,3 +67,14 @@ Keep the canonical nine specialist IDs and Optimus Prime coordinator as the requ
 
 ## MCP parser failure decision record — 2026-11-05
 The initial PR #63 candidate was FAILED due to Bearer parser whitespace escaping (401 on valid token). The parser was corrected and malformed-token coverage added; final exact head 4c5276f2ff5307949f912451d554d9be879223b6 passed all four required workflows. Preserve this failure history; do not count the initial candidate as verified. MCP remains opt-in and execution remains disabled.
+
+
+## Decision and approval update — 2026-11-05: archive controls and exact-head CI
+
+1. Continue the 100% VERIFIED objective as a per-dimension acceptance target only. Current measured competitive scores remain NOT MEASURED.
+2. PR #70 archive implementation may proceed on its isolated draft branch. Its six new regression cases are NOT TESTED by CI at head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1`; do not start Human Verification until an exact-head Auto Pilot gate passes.
+3. PR #70 migration `0008_feature_request_archive.sql` remains unapplied. Applying it to Preview requires separate explicit, environment-scoped approval. No Production migration is permitted by this mandate.
+4. A legacy JavaScript Auto Pilot workflow was added to PR #52 branch at `4114cfa5ca082dfb8736d9d7aa68bb297087d8c0`. No workflow result is visible for that exact SHA; GitHub reports PR #52 mergeable=false. Status: BLOCKED pending exact CI and mergeability diagnosis.
+5. PR #60 head `ad3cbd61b6467675e71e8445f113635c45beb8c9` passed exact-head workflows 41950862476, 41950862498, 41950862526 and 41950862654 (129/129 tests; no failures). This validates code/test readiness for that candidate, not Preview or Production.
+6. Preserve exactly nine specialist IDs; Optimus Prime remains coordinator. Keep gateway `plan_only`. No merge, deployment, remote D1 write/migration, OAuth/secrets/DNS change, billing activation or destructive action was performed.
+7. The CI evidence for PR #61/#62–#69 applies only to their exact recorded SHAs and named workflow scopes. It does not transfer to later commits or another branch.
