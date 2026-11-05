@@ -286,3 +286,32 @@ No secrets, OAuth settings, DNS, Production resources, remote D1, or billing wer
 - Main backup workflow uses actions/checkout with persist-credentials=true and contents:read. PR #53 proposes persist-credentials=false. This is a least-privilege hardening opportunity; PR #53 head 142f4d8a893ba81d5f926da65f53b9e077ad1cad; regression 41825322436 and Phase 3 41825322322 SUCCESS; still Draft.
 - The scheduled backup workflow does not upload to Google Drive. The Drive upload step runs only for workflow_dispatch when upload_to_google_drive=true; scheduled runs create a GitHub artifact with 30-day retention. The latest two scheduled runs (41890146458 and 41695574776) failed at Gitleaks before artifact generation. Therefore automated off-site Drive backup is NOT VERIFIED.
 - No workflow was dispatched, no Google Drive upload was triggered, and no repository secrets or tokens were accessed or modified.
+
+## Security and governance continuation — 2026-11-05 20:31 WIB
+
+**Status:** VERIFIED for source-level controls and isolated regression evidence; NOT VERIFIED for live Production configuration.
+
+### P0 — Production authentication default
+- Main head `bc6545d6d19fd4b749d0b65fefba3d74775e0221` still gates chat authentication on `GOOGLE_AUTH_REQUIRED === "true"`. Main Wrangler configuration declares the flag under Preview variables; actual out-of-band Production variables were not inspected. Production auth state is NOT TESTED.
+- PR #44 head `c7a11a58716048a9170586dd8b26436193ee5e59` adds a test proving an explicit false flag cannot bypass auth in Production or reach rate limiting/AI. Run `42036693384`: SUCCESS, 41/41. Draft and NOT INTEGRATED.
+- No OAuth client, secret, environment variable, D1 or Production setting was changed.
+
+### Isolated CerdikGo Worker — fail closed
+- PR #84 branch `atlas9/cerdikgo-worker-isolation-readiness`; config commit `c827b1c3cc08027ee036d0f82465046521b6993e`; test commit `e3c0a6295001c07476aa3900a6075b37f7bc7b6f`; doc-only current head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a`.
+- `wrangler.cerdikgo.toml` now sets `GOOGLE_AUTH_REQUIRED=true`. The config intentionally lacks D1, CHAT_RATE_LIMITER, Google OAuth Client ID/origin, secrets and FILE_SCANNER; it is not a functional user-facing Worker. Missing bindings must not be filled by reusing CerdikChat Production/Preview resources.
+- Tests assert auth is required and no shared D1/rate-limit binding is configured. Code/test head passed 97/97 and Wrangler 4.153.0 dry-run; run IDs are recorded in the QA register. The doc-only current head was not re-run.
+
+### Cloudflare identity evidence
+- Read-only Worker Script inventory for the connected Cloudflare account returned only `cerdikchat-mvp` and `cerdikgo-mcp-preview`.
+- No independently provisioned Worker script named `atlas9-prompt-intelligence-mvp-cerdikchat-mvp` was present. The supplied hostname is a PR #51 branch Preview hostname under the CerdikChat Worker service; the MCP Preview script is not the CerdikGo web application.
+- No Cloudflare resource was created, changed, deleted or deployed.
+
+### Other active security/availability gaps
+- Main query-string observability redaction remains unconfigured; PR #66 is a Draft candidate, not integrated.
+- Main scheduled backup failures `41890146458` and `41695574776` remain FAILED historical runs. PR #74's full-history Gitleaks fix passes on its branch, but archive creation and restore are not established.
+- PR #76 scanner remains fail-closed; FILE_SCANNER/ClamAV runtime is not provisioned. No paid Containers entitlement or billing upgrade is approved.
+- Voice Production requires `VOICE_RATE_LIMITER`; reviewed configuration only provisions it for Preview. Production voice remains BLOCKED/NOT TESTED.
+- Live Web Research provider, source retrieval and semantic citation verification remain NOT TESTED.
+- Keep gateway `plan_only`; preserve exactly nine specialist seats; Optimus Prime is coordinator, not an additional agent.
+
+No merge, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, billing activation or privileged action occurred.
