@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#081522">
+  <meta name="description" content="Pembaruan keamanan CerdikGo dan CerdikChat: pengembangan Antivirus Security Gateway dengan prinsip fail-closed.">
+  <title>Security Update — CerdikGo & CerdikChat</title>
+  <style>
+    :root{color-scheme:dark;--bg:#081522;--panel:#102338;--panel2:#142d43;--line:#25445c;--text:#edf7ff;--muted:#a4b8ca;--cyan:#56d8d0;--blue:#76b7ff;--amber:#f4c879;--green:#70dfb4;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#17476a 0,transparent 48%),var(--bg);color:var(--text);line-height:1.6}
+    a{color:inherit}.wrap{width:min(920px,calc(100% - 32px));margin:0 auto;padding:24px 0 52px}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 0 24px;border-bottom:1px solid var(--line)}
+    .brand{font-weight:850;letter-spacing:-.4px;font-size:18px}.brand em{font-style:normal;color:var(--cyan)}.back{color:#b7d6eb;font-size:13px;text-decoration:none}.back:hover{text-decoration:underline}
+    .hero{padding:48px 0 28px}.eyebrow{color:var(--cyan);font-size:11px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}
+    h1{max-width:760px;margin:12px 0;font-size:clamp(32px,6vw,54px);line-height:1.08;letter-spacing:-1.8px}
+    .lead{max-width:700px;color:var(--muted);font-size:17px}.status{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:7px 12px;border:1px solid #80602d;border-radius:30px;background:#332716;color:var(--amber);font-size:12px;font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:24px 0}
+    .card{padding:20px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#122c43,#0c1d2d)}
+    .icon{font-size:23px}.card h2{margin:9px 0 6px;font-size:17px}.card p,.card li{color:var(--muted);font-size:14px}
+    .wide{margin-top:14px}.steps{display:grid;gap:12px;margin:16px 0 0;padding:0;list-style:none}.steps li{display:flex;gap:12px;align-items:flex-start}.num{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;border-radius:9px;background:#123d4b;color:var(--cyan);font-weight:850;font-size:12px}
+    .notice{margin-top:18px;padding:16px;border:1px solid #6c542c;border-radius:14px;background:#2b2418;color:#f3d9a5;font-size:13px}
+    .principle{margin-top:20px;padding:22px;border:1px solid #28675f;border-radius:18px;background:linear-gradient(130deg,#0d302f,#102b3c);text-align:center}
+    .principle strong{display:block;color:#8ef0d4;font-size:clamp(18px,3vw,25px)}.principle p{margin:7px 0 0;color:#b5d8d5;font-size:13px}
+    .foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);color:#839bb0;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    @media(max-width:620px){.wrap{width:min(100% - 24px,920px)}.hero{padding-top:34px}.grid{grid-template-columns:1fr}.card{padding:17px}.lead{font-size:15px}}
+    @media(prefers-reduced-motion:no-preference){.card{transition:transform .18s ease,border-color .18s ease}.card:hover{transform:translateY(-2px);border-color:#3d718e}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <nav class="nav" aria-label="Navigasi utama">
+      <a class="brand" href="/">Cerdik<em>Go</em> <span aria-hidden="true">·</span> CerdikChat</a>
+      <a class="back" href="/">← Kembali ke workspace</a>
+    </nav>
+    <section class="hero">
+      <div class="eyebrow">ATLAS-9 · Security & Trust Update</div>
+      <h1>Keamanan file sedang kami tingkatkan.</h1>
+      <p class="lead">CerdikGo dan CerdikChat sedang menyiapkan Antivirus Security Gateway untuk memperkuat perlindungan pada alur analisis dokumen dan gambar.</p>
+      <div class="status" role="status">● Pengembangan & validasi Preview berlangsung</div>
+    </section>
+    <section class="grid" aria-label="Ringkasan status keamanan">
+      <article class="card">
+        <div class="icon" aria-hidden="true">🛡️</div>
+        <h2>Antivirus Security Gateway</h2>
+        <p>Lapisan pemeriksaan file telah dikembangkan dengan kontrak integrasi ClamAV. Scanner engine masih dalam tahap penyediaan dan belum dinyatakan aktif.</p>
+      </article>
+      <article class="card">
+        <div class="icon" aria-hidden="true">🔒</div>
+        <h2>Fail-closed protection</h2>
+        <p>Jika scanner tidak tersedia, timeout, atau memberikan hasil yang tidak dapat diverifikasi, file ditolak dan tidak diteruskan ke AI.</p>
+      </article>
+      <article class="card">
+        <div class="icon" aria-hidden="true">🧪</div>
+        <h2>Automated tests passed</h2>
+        <p>Regression CI untuk adapter scanner dan perilaku fail-closed telah lulus. Ini adalah hasil pengujian kode, bukan bukti bahwa engine antivirus sudah berjalan.</p>
+      </article>
+      <article class="card">
+        <div class="icon" aria-hidden="true">📱</div>
+        <h2>Preview validation next</h2>
+        <p>Berikutnya: integrasi scanner privat, pengujian file bersih dan EICAR, lalu verifikasi alur upload melalui Android Chrome.</p>
+      </article>
+    </section>
+    <section class="card wide">
+      <div class="eyebrow">Roadmap verifikasi</div>
+      <h2>Empat langkah sebelum perlindungan dinyatakan aktif</h2>
+      <ol class="steps">
+        <li><span class="num">01</span><span><strong>Provision scanner</strong><br><span style="color:var(--muted)">Menyiapkan engine ClamAV privat dan pembaruan signature database.</span></span></li>
+        <li><span class="num">02</span><span><strong>Isolated Preview binding</strong><br><span style="color:var(--muted)">Menghubungkan scanner hanya ke lingkungan Preview, terpisah dari Production.</span></span></li>
+        <li><span class="num">03</span><span><strong>Security test</strong><br><span style="color:var(--muted)">Memastikan file bersih dapat diproses dan file uji EICAR ditolak sebelum AI processing.</span></span></li>
+        <li><span class="num">04</span><span><strong>Android end-to-end validation</strong><br><span style="color:var(--muted)">Memeriksa upload, respons, batas ukuran, kegagalan scanner, dan pengalaman pengguna.</span></span></li>
+      </ol>
+    </section>
+    <div class="notice"><strong>Transparansi status:</strong> Antivirus belum aktif pada layanan pengguna. Sampai engine ClamAV terpasang dan seluruh pengujian runtime lulus, fitur analisis file akan menolak permintaan ketika scanner tidak tersedia. Kami tidak akan mengklaim file telah dipindai jika pemeriksaan belum benar-benar dilakukan.</div>
+    <section class="principle">
+      <strong>Security by design. Fail closed. Verify before trust.</strong>
+      <p>Keamanan bukan sekadar fitur — keamanan adalah proses yang harus dibuktikan.</p>
+    </section>
+    <footer class="foot">
+      <span>Developed by Dr. Steven · ATLAS-9</span>
+      <span>CerdikGo & CerdikChat · Security Update</span>
+    </footer>
+  </main>
+</body>
+</html>
