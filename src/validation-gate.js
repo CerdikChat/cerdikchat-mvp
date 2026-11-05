@@ -64,12 +64,11 @@
   host.className = "cg-gate";
   host.setAttribute("aria-label",copy[language].aria);
   host.innerHTML = `
-    <button type="button" class="cg-gate-toggle" aria-expanded="true" aria-controls="cgGateDetails">
+    <div class="cg-gate-toggle">
       <span class="cg-gate-symbol" aria-hidden="true">i</span>
       <span class="cg-gate-heading"><strong>VALIDATION GATE</strong><small></small></span>
       <span class="cg-gate-summary" id="cgGateSummary" role="status" aria-live="polite"></span>
-      <span aria-hidden="true">⌄</span>
-    </button>
+    </div>
     <div id="cgGateDetails" class="cg-gate-details">
       <p class="cg-gate-note"></p>
       <div id="cgGateRows"></div>
@@ -97,8 +96,8 @@
     @media(max-width:520px){.cg-gate{margin-left:10px;margin-right:10px}.cg-gate-toggle{gap:7px;padding:10px}.cg-gate-summary{max-width:104px;font-size:10px}}
   `;
   document.head.append(style);
-  const deck = document.querySelector(".status-deck");
-  if (deck) deck.insertAdjacentElement("afterend",host);
+  const mount = document.getElementById("validationGateMount");
+  if (mount) mount.append(host);
   else document.body.prepend(host);
   const rows = host.querySelector("#cgGateRows");
   function render(){
@@ -131,11 +130,6 @@
     render();
     return true;
   }
-  host.querySelector(".cg-gate-toggle").addEventListener("click",event=>{
-    const button=event.currentTarget,details=host.querySelector("#cgGateDetails");
-    const expanded=button.getAttribute("aria-expanded")==="true";
-    button.setAttribute("aria-expanded",String(!expanded));details.hidden=expanded;
-  });
   window.addEventListener("cerdikgo:ui-language-changed",event=>applyLanguage(event.detail?.language));
   window.CerdikGoValidationGate={
     report(id,status,reason){
