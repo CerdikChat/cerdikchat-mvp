@@ -44,7 +44,7 @@ test("Core workspace controls and network status have ID, EN and ZH translations
   }
   assert.match(index, /#workspaceTools > summary strong/);
   assert.match(index, /#voiceConversationState/);
-  assert.match(index, /#networkStatusText/);
+  assert.match(index, /id="networkStatusText"/);
 });
 
 test("Voice transcription preserves Android Tap-to-Open keyboard behavior", () => {
