@@ -30,8 +30,8 @@
 <div class="actions"><button class="primary" id="importPackage">Validasi & masukkan Inbox</button></div>
 </section>
 <section class="panel wide">
-<h2>3 · Task Inbox & Governance Gate</h2><p>Inbox sementara pada tab/sesi browser. Pilih tugas yang tervalidasi untuk membuat rencana melalui endpoint Preview yang sudah tersedia. Jika endpoint belum diaktifkan atau sesi belum sah, sistem akan menolak secara tertutup.</p>
-<div class="note">P0 safeguard: tidak ada eksekusi agent, tidak ada database write, tidak ada panggilan provider eksternal, dan tidak ada akses Production. Rencana controlled action tetap menunggu persetujuan manusia.</div>
+<h2>3 · Task Inbox & Governance Gate</h2><p>Inbox sementara pada tab/sesi browser. Pilih tugas tervalidasi untuk membuat ringkasan rencana lokal. Fitur ini tidak mengirim data ke server dan tidak mengeksekusi agent.</p>
+<div class="note">P0 safeguard: pertukaran JSON dan Inbox berlangsung lokal pada tab ini. Tidak ada eksekusi agent, database write, panggilan provider eksternal, atau akses Production. Rencana controlled action tetap menunggu persetujuan manusia.</div>
 <div class="inbox" id="inbox"><p class="muted">Belum ada tugas dalam sesi ini.</p></div>
 <div class="status" id="status" role="status" aria-live="polite"></div>
 </section>
