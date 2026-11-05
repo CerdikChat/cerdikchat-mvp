@@ -192,3 +192,14 @@ Run links:
 7. **Document privacy.** WPS AI remains manual and user-authorized only; no confidential file transfer or API integration is approved by PR #77.
 
 These decisions preserve the existing safety boundary and do not authorize integration or deployment. Any later change to execution mode, billing, external document transfer, or Production access requires separate explicit approval and a traceable decision entry.
+
+
+## Final control decision — 2026-11-05
+
+- Current open PR count is 57 after creation of PR #80; earlier 56 count remains the pre-#80 snapshot.
+- PR #60's final exact candidate passed its Auto Pilot readiness gate (8ed0be04b883e8f1639728290528de87cc16fe6b; run 42002779910), but the PR is non-mergeable because its branch diverged 79 commits ahead / 2 behind its base. A green gate does not authorize merge or integration.
+- PR #80 exact candidate passed its own gate (724fdb092d584cead6f34612693de8cb9336c7eb; run 42002523884), but it remains a Draft child of PR #75. This is not system-wide Preview or Android acceptance.
+- Keep gateway plan_only; preserve exactly nine specialists; Optimus Prime remains coordinator only.
+- No Human Verification was started. It remains a separate activity requiring a green gate on the exact candidate selected for that verification and a separate deliberate decision to begin.
+- No merge, Production deploy, remote D1 migration/write, OAuth/secret/DNS change, billing activation, external document transfer, or privileged operation was performed or approved.
+- Free-tier scanner route remains unresolved: Cloudflare Containers require Workers Paid in the connected account response; no upgrade is approved. GitHub Actions scanner is only a design proposal and cannot be represented as a live service.
