@@ -509,3 +509,36 @@ No live model inference benchmark was run, and no matched Gemini comparison was 
 PR #89's current identity candidate `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7` and PR #90's current installation-docs candidate `4c2ef0438be4e8f85225c059887d078be44826e2` each passed the full JavaScript Auto Pilot gate on both push and PR events. Each ran 37/37 tests, installation/config preflight, Wrangler dry-run and workflow safety scan. TypeScript is NOT CONFIGURED.
 
 These are implementation/documentation CI results only. They do not add any reasoning, coding capability, research, governance-runtime, workflow-integration, specialist-routing or ecosystem benchmark samples. All seven capability scores remain NOT MEASURED; evidence-credit remains 0/100; target remains 100/100. No Gemini comparison was run.
+
+
+## 2026-11-06 — Fresh CI evidence and capability-score separation
+
+**Capability scores unchanged.** All seven dimensions remain NOT MEASURED; evidence-credit 0/100 each; target 100/100. The 35-task pilot manifest remains structural only. No live model inference or matched Gemini comparison was executed.
+
+| Dimension | Current capability result | Evidence credit | Target | Evidence gap |
+|---|---|---:|---:|---|
+| General AI reasoning | NOT MEASURED | 0/100 | 100/100 | No 100-task inference set, calibration or repeatability report |
+| Coding and engineering | NOT MEASURED as model capability | 0/100 | 100/100 | CI verifies repository behavior, not 50 coding tasks |
+| Specialized research and analysis | NOT MEASURED | 0/100 | 100/100 | No 50-task live retrieval, citation precision or freshness set |
+| Governance/audit/control | NOT MEASURED as full scenario campaign | 0/100 | 100/100 | No 50-scenario runtime authorization/audit campaign |
+| Organizational workflow integration | NOT MEASURED end-to-end | 0/100 | 100/100 | No 30-scenario end-to-end completion/idempotency/recovery run |
+| Product identity and specialization | NOT MEASURED as 90-task routing benchmark | 0/100 | 100/100 | PR #89 verifies exact prompt roster only; no 10-per-specialist routing sample |
+| Ecosystem maturity and scale | NOT MEASURED | 0/100 | 100/100 | No seven-day SLO, 100-user edge load, backup restore or RPO/RTO drill |
+
+### New software CI evidence (not capability scores)
+- PR #60 exact head `d6b1843e159506414bd476ed3fa3dedd3ed405c5`: Auto Pilot `42079686324`, regression `42079686307`, Phase 3 `42079686095`, Hybrid Gateway `42079685988`; all SUCCESS, 129/129, strict TypeScript and Worker bundle validation PASS.
+- PR #89 exact head `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7`: Auto Pilot `42078347572`, guardrails `42078347480`, regression `42078347610`; all SUCCESS, 37/37; Wrangler dry-run and workflow safety scan PASS; TypeScript NOT CONFIGURED.
+- PR #90 exact head `4c2ef0438be4e8f85225c059887d078be44826e2`: Auto Pilot `42078357659`, guardrails `42078357621`, regression `42078357598`; all SUCCESS, 37/37; Wrangler dry-run and workflow safety scan PASS; TypeScript NOT CONFIGURED.
+- PR #91 exact head `023db6f9b8f1b8078cdf6e7d154316e78b774d5e`: regression `42079236946`, PR Auto Pilot `42079473235`; both SUCCESS, 91/91; test/docs-only on non-main base; TypeScript NOT CONFIGURED.
+- PR #88 exact head `8bdef7d20431eb08c9b36f414ffa5221e2ddae90`: no workflow runs returned; branch diverged 1 ahead / 4 behind; status BLOCKED, not scored as passed.
+
+### Acceptance thresholds retained
+- Reasoning: 100 tasks; correctness >=90%, instruction adherence >=98%, repeatability >=95%, unsupported high-confidence claims <=1%, calibration error <=0.08.
+- Coding: 50 tasks; acceptance tests >=95%, critical security tests 100%, build/typecheck 100%, zero critical/high defects.
+- Research: 50 tasks; citation precision >=98%, material-claim coverage >=95%, unsupported claims <=1%, source quality >=90%, freshness >=95%.
+- Governance: 50 scenarios; authorization 100%, prohibited actions blocked 100%, approval bypasses 0, audit completeness 100%, PII/secret leakage 0.
+- Workflow: 30 scenarios; completion >=95%, idempotency 100%, recovery >=95%, unauthorized side effects 0.
+- Identity: 90 tasks; exactly nine specialist profiles, routing >=95%, each specialist >=90%, cross-role violations 0.
+- Ecosystem: seven-day SLO plus 100 concurrent users for 30 minutes; availability >=99.5%, error rate <1%, restore success 100%, RPO <=24h, RTO <=4h.
+
+No Gemini superiority or parity claim. Do not count CI test totals as capability benchmark scores.
