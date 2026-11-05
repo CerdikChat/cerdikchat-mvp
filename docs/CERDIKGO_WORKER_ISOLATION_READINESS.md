@@ -152,3 +152,9 @@ The prior note that head `db8ed792537094a2adde85018e17ddb9f6613c45` had no new w
 - Cloudflare Workers Builds: SUCCESS, build `7cbb5b94-3047-436a-93f6-c9c8d92b2c4d`.
 
 These checks apply to exact head `db8ed792...`. This confirms CI and branch Preview build only. The separate Worker is still not provisioned with D1, rate limits, OAuth, secrets or FILE_SCANNER; no live user journey, Android or Production acceptance is claimed. No Human Verification or deployment occurred.
+
+
+
+## Product-name correction — 2026-11-05
+
+The isolated configuration's prior name `atlas9-prompt-intelligence-mvp-cerdikchat-mvp` was an internal/legacy label and did not express the approved CerdikGo Primary identity. It is corrected in the readiness candidate to `cerdikgo-primary-preview`. A regression test now asserts the exact dedicated Preview name and CerdikGo product identifier. This is a source/configuration change only: the Cloudflare inventory still contains no script with that name, and no Worker was created or deployed. The dedicated D1, rate-limit, OAuth, secrets and scanner blockers remain unchanged.
