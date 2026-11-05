@@ -561,7 +561,7 @@ test("CerdikGo exposes honest network, Protection Mode and Hybrid Connectivity s
   assert.match(html, /Layanan AI diverifikasi saat permintaan dijalankan/);
   assert.match(html, /id="protectionStatusCard"/);
   assert.match(html, /Protection Mode/);
-  assert.match(html, /Perlindungan sesi & akses/);
+  assert.match(html, /Perlindungan sesi &amp; akses/);
   assert.match(html, /Hybrid Connectivity/);
   assert.match(html, /SIMULATOR/);
   assert.match(html, /Fiber · Cellular · Wi-Fi Mesh · LoRa/);
