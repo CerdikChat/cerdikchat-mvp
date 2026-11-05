@@ -101,3 +101,15 @@ Append-only handover. Status applies to the exact evidence and scope named.
 - Correction: appended a dated baseline and transparent failure note to the benchmark document; correction commit `68db999e24f854aa9137904054f53433a865b8a1`.
 - Status: correction commit recorded; retest on the final exact branch head is PENDING. Do not report PR #94 as green until that exact-head run succeeds.
 - No prior failure was removed or overwritten. No merge, deployment, D1 operation, credential change, DNS change or billing action occurred.
+
+
+## 2026-11-06 — Corrected main-based register candidate regression result
+
+- PR #95: https://github.com/CerdikChat/cerdikchat-mvp/pull/95.
+- Branch: `atlas9/cerdikgo-main-governance-registers-rerun-20261106`.
+- Exact tested head: `518c580894cab90d99c4f129bb7f207e8973532a`; base main `bc6545d6d19fd4b749d0b65fefba3d74775e0221`.
+- Regression workflow `42114354000`: SUCCESS; `npm test` 37/37 passed, 0 failed. The three new structural tests passed, including dated-register coverage, unique 35-task pilot manifest coverage, and seven independent acceptance gates.
+- Workflow link: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42114354000.
+- Scope: regression/structural validation only. Exact-head Auto Pilot readiness is NOT TESTED on PR #95; therefore the Auto Pilot gate has not been declared passed for this candidate and Human Verification remains NOT STARTED.
+- PR #94's earlier 36/37 failure at head `005402e41eb807c0ec44e2629fef1c7d16325341` and run `42114199024` remains preserved; the correction is recorded in commit `68db999e24f854aa9137904054f53433a865b8a1`. PR #94 was annotated as superseded by PR #95; no history was overwritten.
+- No merge, deployment, remote D1 operation, OAuth/secret/DNS change or billing action occurred.
