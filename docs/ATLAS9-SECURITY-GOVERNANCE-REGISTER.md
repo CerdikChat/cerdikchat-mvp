@@ -1,0 +1,82 @@
+# ATLAS-9 Security and Governance Register
+
+Append-only security register. Distinguish source review, automated tests, live runtime evidence and Production assurance.
+
+## 2026-11-06 — Main-branch security review
+
+### Authentication and RBAC
+
+- Main snapshot reviewed: `bc6545d6d19fd4b749d0b65fefba3d74775e0221`.
+- Main `worker.js` describes Google authentication as optional and the inspected implementation requires it when `GOOGLE_AUTH_REQUIRED=true`. A Production/D1-backed deployment with the flag absent or false could fail open.
+- Status on main: FAILED against the required fail-closed policy.
+- Candidate PR #92: `0a5fdea7f1c1c4091ff5fb674a1bac6bbb6ce8fb`, branch `atlas9/cerdikgo-main-auth-fail-closed-20261106`; tests 41/41; Auto Pilot 42081225451, regression 42081225364, Controlled Guardrails 42081225068 — SUCCESS.
+- Candidate policy: authentication required for Production, any D1-backed Worker, or explicit `GOOGLE_AUTH_REQUIRED=true`; same rule applies to `/api/auth/config`.
+- PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/92.
+- Status: VERIFIED in isolated tests; NOT INTEGRATED; live OAuth/session acceptance NOT TESTED.
+- Existing eight-hour session lifetime unchanged. No OAuth or session settings were modified.
+
+### Observability privacy
+
+- Main `wrangler.toml` does not explicitly enable query-string redaction.
+- Candidate PR #93: `276430ca45b91c6bfe418c712555427c83f35624`, branch `atlas9/cerdikgo-main-observability-redaction-20261106`.
+- Candidate enables `redact_query_string=true` at top-level and Preview scopes; tests 37/37.
+- Auto Pilot 42081620404, regression 42081620294, Controlled Guardrails 42081620327 — SUCCESS.
+- PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/93.
+- Status: VERIFIED in repository/configuration tests; NOT LIVE-APPLIED.
+- Limitation: query-string redaction does not sanitize request bodies, headers or application log messages. The separate MCP Worker is not covered.
+
+### D1 environment separation
+
+- Main `wrangler.toml` defines top-level `DB` as `cerdikchat-db` and a Preview-specific D1 entry named `cerdikchat-staging`.
+- A dry-run on a main-based candidate showed the default binding as `cerdikchat-db`; a dry-run is not proof of the actual Preview runtime binding.
+- Status: BLOCKED pending read-only confirmation of environment-specific binding resolution before Preview release.
+- No D1 records were read, written or migrated.
+
+### Secrets and external providers
+
+- Historical read-only Cloudflare inventory recorded secret binding names `GEMINI_API_KEY` and `OPENAI_API_KEY` on the existing CerdikChat Worker. Their values were not accessed.
+- This run did not re-query live Cloudflare secret metadata. Treat the names as a prior finding requiring read-only reconfirmation.
+- Main application code reviewed uses `env.AI`; do not infer that legacy bindings are required or safe to delete.
+- Status: NOT TESTED for current live binding inventory. No secret was read, changed, rotated or deleted.
+
+### Specialist and gateway controls
+
+- Required registry: exactly ATLAS-01 through ATLAS-09.
+- Optimus Prime is coordinator, not a tenth specialist.
+- PR #89 identity candidate: `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7`; tests 37/37; Auto Pilot 42078347572, Guardrails 42078347480, regression 42078347610 — SUCCESS.
+- Candidate accurately states that the nine profiles are roles within one model; it does not claim nine independent runtime models.
+- Gateway remains `plan_only`; autonomous specialist execution is not authorized.
+- Status: VERIFIED on isolated candidate; NOT INTEGRATED on main.
+
+### Document scanning
+
+- PR #76 scanner contract uses fail-closed behavior and mocked contract tests.
+- Actual ClamAV runtime, clean/infected/EICAR file tests and private scanner binding are NOT TESTED.
+- A prior design assessment reported Cloudflare Containers capability requiring a paid plan. No paid plan or dependency was added.
+- PR #78 is an asynchronous design proposal, not a deployed scanner.
+- Status: BLOCKED for real runtime acceptance. Never bypass scanning to make file analysis appear available.
+
+### Voice
+
+- PR #41 automated regression passed historically; Android microphone, permission, transcription and playback acceptance remain NOT TESTED.
+- Production `VOICE_RATE_LIMITER` binding is not evidenced in the reviewed configuration.
+- Status: NOT TESTED for runtime; do not claim Production readiness.
+
+### Backup and recovery
+
+- Scheduled backup runs 41695574776 and 41890146458 were FAILED in prior evidence.
+- PR #74 candidate `abeca194672349e799bcfdd9d8f9c9dc82675947` passed full-history Gitleaks run 41975715983 and regression 41975716157. Scan covered 816 commits; no leaks reported.
+- PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/74.
+- Status: VERIFIED for secret scanning only; backup archive generation, off-site copy and restore remain NOT TESTED.
+
+### Prior live observability snapshot — not revalidated in this run
+
+The earlier PR #60 register records a read-only Cloudflare snapshot dated 2026-11-06 in which both `cerdikchat-mvp` and `cerdikgo-mcp-preview` reported query redaction disabled, persisted invocation logs and 100% sampling. This run did not repeat the Cloudflare API query. Do not describe that prior snapshot as a new live check.
+
+## Security decisions
+
+- Fail closed for Production authentication and scanner availability.
+- Do not expose PII, session tokens, OAuth tokens or secrets in logs.
+- Do not infer Preview isolation from a local dry-run.
+- Do not alter OAuth, secrets, DNS, D1 or billing without separate authorization.
+- Preserve gateway `plan_only`.
