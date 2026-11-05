@@ -30,3 +30,20 @@ test("AI workspace reports only the outcome of its own request", () => {
   assert.match(wps, /gate\("ai-core","rejected"/);
   assert.match(wps, /Permintaan analisis teks gagal:/);
 });
+
+test("Main chat reports AI Core ACCEPTED only after a successful HTTP response and non-empty reply", () => {
+  assert.match(index, /let aiResponseVerified = false/);
+  assert.match(index, /if \(!response\.ok\)/);
+  assert.match(index, /if \(!answer\)/);
+  assert.match(index, /aiResponseVerified = true/);
+  assert.match(index, /CerdikGoValidationGate\?\.report\(\s*"ai-core",\s*"accepted"/);
+  assert.match(index, /CerdikGoValidationGate\?\.report\(\s*"ai-core",\s*"rejected"/);
+  assert.match(index, /if \(!aiResponseVerified\)/);
+});
+
+test("Main chat does not mark AI Core accepted from online status or model-generated text alone", () => {
+  const acceptedAt = index.indexOf('"accepted"');
+  const replyCheckAt = index.indexOf('if (!answer)');
+  assert.ok(acceptedAt > replyCheckAt, "ACCEPTED report must follow the non-empty reply check");
+  assert.match(index, /Endpoint \/api\/chat mengembalikan HTTP/);
+});
