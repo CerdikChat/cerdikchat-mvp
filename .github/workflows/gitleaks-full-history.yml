@@ -38,3 +38,10 @@ jobs:
         uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Scan full history across every fetched ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          GITLEAKS_BIN="/tmp/gitleaks-8.24.3/gitleaks"
+          test -x "$GITLEAKS_BIN"
+          "$GITLEAKS_BIN" detect --source . --log-opts="--all" --redact --exit-code 2 --no-banner
