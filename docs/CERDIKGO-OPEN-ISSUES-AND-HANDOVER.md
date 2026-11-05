@@ -352,3 +352,12 @@ Final exact candidate a6d00bbdec7ba6d49460441ef2327224f6a41ba5 passed:
 - Hybrid Gateway 42003333825 — SUCCESS.
 
 PR #60 remains Draft; no merge or Human Verification was initiated. Production, Preview runtime, Android, and capability benchmarks remain separate.
+
+
+## Additional handover — observability and off-site backup
+
+- Main wrangler.toml has 100% observability sampling but no query-string redaction. PR #66 candidate (head 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1) passed runs 41950007358 and 41950007360 but remains Draft/non-integrated. Main log privacy is therefore not fully verified.
+- Main auth session/CSRF TTL is 8 hours. PR #52's 76-hour session value is branch-specific and must not be misreported as main configuration.
+- Main backup checkout uses persist-credentials=true; PR #53 candidate proposes false and passed 41825322436 / 41825322322. Review and integrate only through its dependency chain.
+- The scheduled backup workflow creates a GitHub artifact only. Google Drive upload is conditional on a manual workflow_dispatch input explicitly set true. No scheduled Drive backup exists in the current workflow, and the latest two scheduled runs failed at Gitleaks before archive creation. The Drive upload script has not been live-tested; no restore drill exists.
+- Next: after PR #74 secret-scan correction and PR #53 workflow review, run an explicitly approved backup workflow, verify artifact and Drive object SHA-256, then restore into an isolated location. Do not trigger the Drive upload or restore as part of this audit.
