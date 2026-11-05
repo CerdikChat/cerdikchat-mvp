@@ -280,7 +280,7 @@ export async function googleLogin(request, env, options = {}) {
     } catch {
       return authJson({ error: "ACCESS_REQUEST_UNAVAILABLE", message: "Permintaan akses belum dapat dicatat. Silakan hubungi administrator." }, 503);
     }
-    console.info("ACCESS_REQUEST_SUBMITTED", { requestId, email: identity.email });
+    console.info({ event: "CERDIKCHAT_ACCESS_REQUEST_SUBMITTED" });
     return authJson({
       error: "ACCESS_REQUEST_SUBMITTED",
       requestSubmitted: true,
