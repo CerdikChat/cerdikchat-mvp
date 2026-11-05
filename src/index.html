@@ -1171,6 +1171,62 @@
     [data-theme="light"] .pi-home-card,[data-theme="light-blue"] .pi-home-card{background:#e7f3fc;color:#17324f;border-color:#b8d5eb}
     @media(max-width:720px){.pi-shell{margin:4px auto;padding:10px}.pi-card{padding:12px}.pi-btn{flex:1 1 130px}.pi-vault-item{align-items:flex-start}}
 
+      .connector-nav{display:flex;align-items:center;gap:11px;width:100%;margin:6px 0;padding:9px 11px;border:1px solid #1d6286;border-radius:13px;background:linear-gradient(120deg,#0d2d4b,#10233c);color:#eaf8ff;text-align:left;font-weight:750;cursor:pointer}
+    .connector-nav:hover{border-color:#2dd7df;background:linear-gradient(120deg,#104365,#12304c)}
+    .connector-nav img{width:34px;height:34px;flex:0 0 34px;border-radius:10px;box-shadow:0 0 14px #16b9e955}
+    .connector-nav-copy{display:flex;flex:1;flex-direction:column;gap:1px}.connector-nav-copy small{color:#9bbbd5;font-size:10px;font-weight:500}
+    .connector-nav-dot{width:8px;height:8px;border-radius:50%;background:#e8b65b;box-shadow:0 0 9px #e8b65b88}
+    .connector-mobile{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 9px;border:1px solid #1d6286;border-radius:10px;background:#0d2d4b;color:#dffaff;font-size:11px;font-weight:750;cursor:pointer}
+    .connector-mobile img{width:21px;height:21px;border-radius:6px}
+    .connectors-dialog{width:min(620px,calc(100vw - 24px));max-height:min(86dvh,760px);overflow:auto;padding:0;border:1px solid #21658a;border-radius:20px;background:#0b1b30;color:#eef7ff;box-shadow:0 24px 90px #000a}
+    .connectors-dialog::backdrop{background:#020817b8;backdrop-filter:blur(5px)}
+    .connectors-hero{display:flex;align-items:center;gap:14px;padding:18px;background:radial-gradient(ellipse at 15% 0%,#1265a955,transparent 70%),linear-gradient(135deg,#0c2948,#0b1b30);border-bottom:1px solid #1a496c}
+    .connectors-hero img{width:76px;height:76px;border-radius:18px;box-shadow:0 0 24px #12bfe944}.connectors-hero h2{margin:0;font-size:20px}.connectors-hero p{margin:4px 0 0;color:#a9c2da;font-size:12px}
+    .connector-list{display:grid;gap:9px;padding:16px}.connector-row{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #214664;border-radius:13px;background:#10243a}.connector-row .connector-glyph{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:11px;background:#123c5a;color:#7fe7e5;font-size:18px}.connector-row strong{display:block;font-size:13px}.connector-row small{display:block;margin-top:3px;color:#9bb4d1;font-size:11px;line-height:1.45}.connector-state{margin-left:auto;padding:4px 8px;border:1px solid #7a6034;border-radius:99px;background:#302719;color:#f1d08c;font-size:9px;font-weight:800;white-space:nowrap}
+    .connectors-note{margin:0 16px 16px;padding:11px 12px;border:1px solid #27566c;border-radius:12px;background:#0c2935;color:#a8e5e2;font-size:11px;line-height:1.55}.connectors-close{margin:0 16px 16px;min-height:38px;padding:8px 14px;border:1px solid #286182;border-radius:10px;background:#143654;color:#effaff;font-weight:750;cursor:pointer}
+    html[data-theme="light"] .connector-nav{background:linear-gradient(120deg,#e6f5ff,#edf7fb);color:#15334c;border-color:#a8cce0}html[data-theme="light"] .connector-nav-copy small{color:#526d83}html[data-theme="light"] .connector-mobile{background:#e6f5ff;color:#15334c;border-color:#a8cce0}html[data-theme="light"] .connectors-dialog{background:#f5f9ff;color:#14243a;border-color:#a8cce0}html[data-theme="light"] .connectors-hero{background:linear-gradient(135deg,#e3f4ff,#f5f9ff);border-color:#c5d8e8}html[data-theme="light"] .connectors-hero p,html[data-theme="light"] .connector-row small{color:#52657d}html[data-theme="light"] .connector-row{background:#fff;border-color:#cbd7e6}html[data-theme="light"] .connectors-note{background:#e8f6f5;color:#17635e;border-color:#b7ded9}html[data-theme="light"] .connectors-close{background:#e8f1fa;color:#183b59;border-color:#b9cde0}
+    @media(max-width:720px){.connector-nav{margin-top:8px}.connector-mobile{padding:5px 7px;font-size:10px}.connector-mobile img{width:18px;height:18px}.connectors-hero img{width:60px;height:60px}}
+
+    /* Connectors visibility hardening: prevent mobile header clipping on narrow Android screens. */
+    @media (max-width: 720px) {
+      .top {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 0;
+        padding: 9px 12px;
+      }
+      .top > strong { display: none; }
+      .top-actions {
+        display: flex;
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 7px;
+        min-width: 0;
+      }
+      .connector-mobile {
+        display: inline-flex !important;
+        flex: 1 1 132px;
+        justify-content: center;
+        min-height: 40px;
+        padding: 7px 10px;
+        font-size: 12px;
+      }
+      .bridge-top-link, .pill, .settings-button, .theme-toggle {
+        flex: 0 1 auto;
+        min-height: 38px;
+      }
+    }
+    @media (max-width: 380px) {
+      .top-actions { gap: 6px; }
+      .connector-mobile { flex-basis: 100%; }
+      .bridge-top-link { flex: 1 1 auto; justify-content: center; }
+    }
+
   </style>
 </head>
 
@@ -1240,6 +1296,13 @@
         </details>
       </div>
 
+      <h2>Integrasi</h2>
+      <button class="connector-nav" id="connectorsOpenSide" type="button" aria-haspopup="dialog" aria-controls="connectorsDialog">
+        <img src="/connector-hub.svg" alt="" aria-hidden="true">
+        <span class="connector-nav-copy">Connectors<small>Kelola konektivitas sistem</small></span>
+        <span class="connector-nav-dot" aria-label="Status perlu verifikasi"></span>
+      </button>
+
       <h2>Tentang beta</h2>
       <div class="side-note">
         CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting
@@ -1257,6 +1320,7 @@
         </div>
         <strong>CerdikGo · Innovation Workspace</strong>
         <div class="top-actions">
+          <button class="connector-mobile" id="connectorsOpenTop" type="button" aria-haspopup="dialog" aria-controls="connectorsDialog"><img src="/connector-hub.svg" alt="" aria-hidden="true"> Connectors</button>
           <button id="languageOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="languageDialog" aria-label="Pilih bahasa">🌐 <span id="languageCurrent">ID</span></button>
           <span class="pill">● AI · Beta</span>
           <button id="loginOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
@@ -1362,6 +1426,18 @@
           </select>
           <p class="settings-note" id="languageNotice">Preferensi bahasa disimpan pada perangkat ini.</p>
         </div>
+      </dialog>
+
+      <dialog class="connectors-dialog" id="connectorsDialog" aria-labelledby="connectorsTitle">
+        <div class="connectors-hero"><img src="/connector-hub.svg" alt="Ikon Connectors CerdikGo"><div><h2 id="connectorsTitle">CerdikGo Connectors</h2><p>Integration hub · Status berdasarkan konfigurasi dan verifikasi yang tersedia</p></div></div>
+        <div class="connector-list">
+          <article class="connector-row"><span class="connector-glyph" aria-hidden="true">⌘</span><div><strong>Model Context Protocol (MCP)</strong><small>Endpoint /mcp tersedia dalam kode dan dilindungi feature flag serta bearer token. Belum ada bukti koneksi runtime pada tampilan ini.</small></div><span class="connector-state">Perlu verifikasi</span></article>
+          <article class="connector-row"><span class="connector-glyph" aria-hidden="true">✦</span><div><strong>Cloudflare Workers AI</strong><small>Provider adapter tersedia pada Core. Ketersediaan binding dan inferensi harus diverifikasi di environment aktif.</small></div><span class="connector-state">Runtime check</span></article>
+          <article class="connector-row"><span class="connector-glyph" aria-hidden="true">▤</span><div><strong>Cloudflare D1</strong><small>Binding database dipisahkan per environment. Konektivitas dan izin tidak diuji oleh panel ini.</small></div><span class="connector-state">Runtime check</span></article>
+          <article class="connector-row"><span class="connector-glyph" aria-hidden="true">⇄</span><div><strong>Context Bridge</strong><small>Halaman Context Bridge tersedia untuk alur pertukaran konteks yang terpisah.</small></div><a class="connector-state" href="/bridge.html" style="text-decoration:none">Buka</a></article>
+        </div>
+        <p class="connectors-note">Indikator kuning berarti status koneksi belum diverifikasi. Ikon dan menu ini tidak mengaktifkan konektor, mengubah secrets, atau memberikan akses baru. Status hijau hanya boleh ditampilkan setelah health check berhasil.</p>
+        <button class="connectors-close" id="connectorsClose" type="button">Tutup</button>
       </dialog>
 
       <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
@@ -1545,6 +1621,16 @@
     const navToggle = document.querySelector("#navToggle");
     const navBackdrop = document.querySelector("#navBackdrop");
     const sideNavigation = document.querySelector("#sideNavigation");
+
+    const connectorsDialog = document.querySelector("#connectorsDialog");
+    const connectorsOpenSide = document.querySelector("#connectorsOpenSide");
+    const connectorsOpenTop = document.querySelector("#connectorsOpenTop");
+    const connectorsClose = document.querySelector("#connectorsClose");
+    const openConnectors = () => { if (connectorsDialog && !connectorsDialog.open) connectorsDialog.showModal(); };
+    connectorsOpenSide?.addEventListener("click", openConnectors);
+    connectorsOpenTop?.addEventListener("click", openConnectors);
+    connectorsClose?.addEventListener("click", () => connectorsDialog?.close());
+    connectorsDialog?.addEventListener("click", event => { if (event.target === connectorsDialog) connectorsDialog.close(); });
 
     function openAccountDialog() {
       if (!settingsDialog.open) settingsDialog.showModal();
