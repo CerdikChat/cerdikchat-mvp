@@ -730,3 +730,27 @@ The preceding audit append initially recorded the new documentation head as NOT 
 - Fresh Cloudflare read-only inventory: only `cerdikchat-mvp` and `cerdikgo-mcp-preview`; no `cerdikgo-primary-preview`. Both existing scripts have query redaction disabled with 100% sampled persisted invocation logs. The CerdikChat Worker has a DB binding and legacy secret-binding names; secret values were not read. D1 environment label remains unconfirmed.
 - All seven capability dimensions remain NOT MEASURED, evidence-credit 0/100 each, target 100/100. No model inference or Gemini comparison.
 - Exactly nine specialist profiles; Optimus Prime coordinator; gateway `plan_only`. No Human Verification, merge, deployment, D1 operation, OAuth/secrets/DNS change or billing action.
+
+
+## 2026-11-06 — Observability remediation candidate and final branch snapshot
+
+### PR #60 scorecard branch — exact candidate verification
+- Tested head `0469d1b5a4394204c31d7be7dcc6930a3640544a` on `atlas9/cerdikgo-100-percent-scorecard`.
+- Auto Pilot `42081479622`: SUCCESS; doctor and strict TypeScript PASS; 129/129; workflow safety PASS.
+- Regression/install `42081479574`: SUCCESS, 129/129.
+- Phase 3 `42081479572`: SUCCESS, 129/129.
+- Hybrid Gateway `42081479943`: SUCCESS, 129/129; Wrangler 4.153.0 Worker bundle dry-run PASS, no deployment.
+- Current PR #60 comparison: DIVERGED, 179 ahead / 2 behind against base `atlas9/cerdikgo-autopilot-readiness` at `637ff536011ed25fc598888f62f520b4cfdccd3c`; merge base `de11d34257005ba72a621312230489a7d161ff53`. GitHub currently reports mergeable=true, but keep Draft and do not rebase/merge automatically.
+
+### PR #93 — main-based observability privacy candidate
+- Draft PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/93.
+- Branch `atlas9/cerdikgo-main-observability-redaction-20261106`; exact head `276430ca45b91c6bfe418c712555427c83f35624`; base main `bc6545d6d19fd4b749d0b65fefba3d74775e0221`.
+- Changed files: `wrangler.toml`, `tests/observability-config.test.mjs`, `docs/CERDIKGO-OBSERVABILITY-PRIVACY-HARDENING-MAIN.md`, `.github/workflows/atlas9-controlled-autopilot.yml`, `.github/workflows/autopilot-readiness-legacy.yml`.
+- Regression `42081620294`: SUCCESS, 37/37. Controlled Autopilot `42081620327`: SUCCESS, 37/37. Legacy Auto Pilot `42081620404`: SUCCESS; config preflight, 37/37, Wrangler 4.153.0 dry-run and workflow safety scan PASS. TypeScript NOT CONFIGURED and not counted.
+- Top-level and Preview query-string redaction are enabled in the candidate. This does not sanitize bodies, headers or application log messages and does not change live Cloudflare settings. The separate MCP Worker is not covered.
+
+### Repository and benchmark status
+- Open PR inventory: 68. PR #88 remains BLOCKED (1 ahead / 4 behind / diverged, mergeable=false, no workflow run); PR #91 remains a test/docs-only lock on a non-main base.
+- Live Cloudflare read-only inventory remains two scripts only (`cerdikchat-mvp`, `cerdikgo-mcp-preview`); no dedicated `cerdikgo-primary-preview`. Both scripts still report query redaction false and persisted invocation logs at 100% sampling. No live settings changed.
+- All seven capability scores remain NOT MEASURED, evidence credit 0/100 each, target 100/100. No live model inference, matched Gemini benchmark, Android acceptance, scanner runtime, backup restore or edge-load campaign.
+- Exactly nine specialist profiles; Optimus Prime coordinator; gateway `plan_only`. No Human Verification or privileged operations.
