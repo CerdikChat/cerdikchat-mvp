@@ -722,3 +722,11 @@ Both PRs remain Draft, open and mergeable; neither was merged or deployed. Their
 
 - PR #84's latest GitHub metadata now reports `mergeable=true`; this supersedes the earlier `mergeable=false` observation. The fresh commit comparison remains `diverged`, 27 ahead / 6 behind against current base `41d7f30d7a1bedbd763504970ad059050f9f2188` (merge base `afa2ad537b3979b5e2361d0a3242059ea639f59c`). Mergeability does not remove the six-commit base drift or prove semantic integration. Keep Draft pending review; no rebase/merge.
 - Read-only Cloudflare settings for `cerdikchat-mvp` also list legacy secret binding names `GEMINI_API_KEY` and `OPENAI_API_KEY`. Values were not accessed. Current Worker source uses Workers AI `env.AI`; the presence of legacy bindings is not evidence that they are used. Do not remove or rotate them without a separately approved review.
+
+
+## 2026-11-06 — Workspace regression-lock PR #91
+
+- The source-level status-deck correction is present on `atlas9/prompt-intelligence-mvp` at `41d7f30d7a1bedbd763504970ad059050f9f2188`; that source commit passed regression `42077076800` and Legacy Auto Pilot `42077076781` (90/90).
+- Draft PR #91 adds only a focused test and audit note; branch `atlas9/workspace-tools-order-regression-20261106`; exact head `023db6f9b8f1b8078cdf6e7d154316e78b774d5e`; base `atlas9/prompt-intelligence-mvp` at `41d7f30d7a1bedbd763504970ad059050f9f2188`.
+- Regression `42079236946`: SUCCESS, 91/91. PR-triggered Legacy Auto Pilot `42079473235`: SUCCESS; install/config preflight, 91/91, Wrangler dry-run and workflow safety scan PASS. TypeScript NOT CONFIGURED.
+- Push-triggered Auto Pilot `42079236993` remains PENDING; the exact-head PR-triggered gate passed. Human Verification was not started. https://github.com/CerdikChat/cerdikchat-mvp/pull/91.

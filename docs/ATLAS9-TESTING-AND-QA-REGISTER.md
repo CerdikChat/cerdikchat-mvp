@@ -668,3 +668,12 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 | #90 install docs | `4c2ef0438be4e8f85225c059887d078be44826e2` | `42078344776` | `42078357659` | Both SUCCESS; 37/37; install/config PASS; Wrangler dry-run PASS; safety scan PASS |
 
 TypeScript is NOT CONFIGURED on these JavaScript branches and is not counted as a pass. The earlier heads `7befbfa...` and `358a99f...` had only the lighter guardrail/regression checks and are superseded by the exact heads above. Human Verification remains NOT STARTED.
+
+
+## 2026-11-06 — PR #91 exact-head verification
+
+- Candidate: `023db6f9b8f1b8078cdf6e7d154316e78b774d5e`; branch `atlas9/workspace-tools-order-regression-20261106`; base `atlas9/prompt-intelligence-mvp` at `41d7f30d7a1bedbd763504970ad059050f9f2188`.
+- Regression push `42079236946`: SUCCESS, 91/91, including the new visible-status/outside-drawer assertion.
+- Legacy Auto Pilot PR `42079473235`: SUCCESS; installation/config preflight PASS; 91/91; Wrangler 4.153.0 dry-run PASS; workflow safety scan PASS.
+- TypeScript NOT CONFIGURED on this JavaScript branch; not counted as passed. Push-triggered Auto Pilot `42079236993` remains PENDING; PR-triggered exact-head gate is successful.
+- Human Verification NOT STARTED. This is test/CI evidence, not Android visual acceptance or Production readiness.

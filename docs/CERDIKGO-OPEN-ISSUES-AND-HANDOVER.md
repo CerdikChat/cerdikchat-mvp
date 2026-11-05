@@ -586,3 +586,11 @@ No stale branch was rebased, force-pushed, closed or merged. The exact compariso
 
 - PR #84: current GitHub metadata reports `mergeable=true`, but a fresh compare remains 27 ahead / 6 behind / diverged against current base `41d7f30d7a1bedbd763504970ad059050f9f2188`. The earlier `mergeable=false` status was superseded; the branch is still stale relative to its moving base and requires review before any integration.
 - The live `cerdikchat-mvp` script lists legacy secret binding names `GEMINI_API_KEY` and `OPENAI_API_KEY`. Secret values were not read. The current Worker source uses Workers AI `env.AI`; do not infer the legacy bindings are active, and do not remove them without explicit approval.
+
+
+## 2026-11-06 — Workspace regression-lock handover
+
+- Draft PR #91: https://github.com/CerdikChat/cerdikchat-mvp/pull/91.
+- Exact head `023db6f9b8f1b8078cdf6e7d154316e78b774d5e`; base `atlas9/prompt-intelligence-mvp` at `41d7f30d7a1bedbd763504970ad059050f9f2188`.
+- Source fix already exists on base; PR #91 adds only the test and audit note. Regression `42079236946` 91/91; PR Auto Pilot `42079473235` SUCCESS including install/config, Wrangler dry-run and safety scan. TypeScript NOT CONFIGURED.
+- Push Auto Pilot `42079236993` remains PENDING; PR-triggered gate passed. Human Verification not started; no Android visual acceptance claimed.

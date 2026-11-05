@@ -373,3 +373,10 @@ No merge, Production/Preview deployment, D1 operation, OAuth/secret/DNS change, 
 - Read-only script settings list legacy secret binding names `GEMINI_API_KEY` and `OPENAI_API_KEY` on `cerdikchat-mvp`; values were not accessed.
 - Although the current Worker source uses Workers AI `env.AI`, no secret binding will be deleted or rotated based solely on source inspection. Require a dependency/use review and explicit approval first.
 - PR #84 mergeability correction: GitHub currently reports `mergeable=true`, while the branch comparison remains 27 ahead / 6 behind / diverged. Keep Draft; mergeability is not approval or proof of integration.
+
+
+## 2026-11-06 — PR #91 test-only review boundary
+
+- PR #91 is Draft and adds a regression lock only; source correction is already on its base branch `41d7f30d7a1bedbd763504970ad059050f9f2188`.
+- Exact candidate `023db6f9b8f1b8078cdf6e7d154316e78b774d5e` passed regression 91/91 and PR-triggered Legacy Auto Pilot `42079473235`.
+- Decision: no Human Verification until the gate passes; it has passed for this exact head, but Human Verification remains NOT STARTED pending separate manual action. No merge/deploy authorized.

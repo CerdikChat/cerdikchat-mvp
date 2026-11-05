@@ -493,3 +493,10 @@ The 76-hour session TTL remains unchanged. Live authentication, Google OAuth, RB
 - PR #89 current head `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7`: added `.github/workflows/autopilot-readiness-legacy.yml` to the earlier identity candidate. Full Auto Pilot push/PR runs `42078337644` and `42078347572` passed; 37/37 tests, install/config preflight, Wrangler dry-run and workflow safety scan all PASS. TypeScript NOT CONFIGURED.
 - PR #90 current head `4c2ef0438be4e8f85225c059887d078be44826e2`: added the same full readiness workflow to the installation-docs candidate. Full Auto Pilot push/PR runs `42078344776` and `42078357659` passed with the same results; TypeScript NOT CONFIGURED.
 - Earlier heads `7befbfa...` and `358a99f...` remain historical candidates and were superseded; no history was rewritten. Both PRs remain Draft and unmerged.
+
+
+## 2026-11-06 — Workspace status visibility regression lock
+
+- The source fix already exists on base branch commit `41d7f30d7a1bedbd763504970ad059050f9f2188` (status deck moved before collapsed tools drawer).
+- Draft PR #91 adds `tests/workspace-tools-order.test.mjs` and `docs/WORKSPACE-TOOLS-ORDER-REGRESSION-LOCK.md`; no runtime source change.
+- Candidate `023db6f9b8f1b8078cdf6e7d154316e78b774d5e`: regression `42079236946` SUCCESS 91/91; PR Auto Pilot `42079473235` SUCCESS with install/config, Wrangler dry-run and safety scan. TypeScript NOT CONFIGURED. No merge/deploy.
