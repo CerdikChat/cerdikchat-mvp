@@ -68,3 +68,39 @@ CI success does not prove Preview runtime health, Android acceptance, or Product
 - Head: `a78a460c20245590b29d6bc2e0abd68b7117cf31`; exact tested merge candidate: `66b1c84950516479b8fd4cd115742e55fc306cbe`.
 - Auto Pilot readiness `41919279174`, regression/install `41919279316`, Phase 3 `41919279181`, hybrid gateway `41919279202`, branch-push readiness `41919271022`, and branch-push regression `41919271037`: all VERIFIED / success.
 - Readiness output: 129/129 tests passed, 0 failed. This includes manifest-structure tests only; no model inference benchmark was run.
+
+## Exact-head verification update — 2026-11-05
+
+| PR / exact head | Workflow run | Result | Evidence |
+|---|---:|---|---|
+| #60 d90c492116729f886a9adca329c581151e1884f5 | 41919509283 | VERIFIED / success | Auto Pilot readiness; 129/129 tests |
+| #60 same head | 41919509234 | VERIFIED / success | Regression and installation checks |
+| #60 same head | 41919509532 | VERIFIED / success | ATLAS-9 Phase 3 regression |
+| #60 same head | 41919509348 | VERIFIED / success | Hybrid Gateway tests |
+| #62 1fa32453e9569b136ec890b7c32562dda510612f | 41921781561 | VERIFIED / success | Auto Pilot readiness |
+| #62 same head | 41921781474 | VERIFIED / success | Regression and installation checks |
+| #62 same head | 41921781529 | VERIFIED / success | ATLAS-9 Phase 3 regression |
+| #62 same head | 41921781630 | VERIFIED / success | Hybrid Gateway tests |
+| #63 4c5276f2ff5307949f912451d554d9be879223b6 | 41945833375 | VERIFIED / success | Auto Pilot readiness; exact-head log confirms 139/139 tests, 0 failed |
+| #63 same head | 41945833224 | VERIFIED / success | Regression and installation checks; 139/139 tests |
+| #63 same head | 41945833236 | VERIFIED / success | ATLAS-9 Phase 3 regression; 139/139 tests |
+| #63 same head | 41945833238 | VERIFIED / success | Hybrid Gateway tests; 139/139 tests and Wrangler dry-run build |
+| #64 929e5bcf9d2be683c94b9cd882209ce194fc9119 | 41944458347 | VERIFIED / success | Auto Pilot readiness; exact-head log confirms 134/134 tests, 0 failed |
+| #64 same head | 41944458563 | VERIFIED / success | Regression and installation checks |
+| #64 same head | 41944458558 | VERIFIED / success | ATLAS-9 Phase 3 regression |
+| #64 same head | 41944458354 | VERIFIED / success | Hybrid Gateway tests |
+| #61 17760f85b01e0db2e7a09679324d55adfe1fcf95 | 41917776597 | VERIFIED / success | Push-triggered security regression; 99/99 tests and log-redaction check |
+| #61 same head | 41917776653 | VERIFIED / success | Push-triggered regression workflow |
+
+Workflow URLs:
+- #60: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41919509283 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41919509234 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41919509532 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41919509348 .
+- #62: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41921781561 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41921781474 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41921781529 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41921781630 .
+- #63: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833375 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833224 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833236 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833238 .
+- #64: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41944458347 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41944458563 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41944458558 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41944458354 .
+- #61: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41917776597 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41917776653 .
+
+## Verification boundaries
+- PR #64 workflow-dispatch Preview was not run. Its 4/4 CI success is not Preview runtime verification or Android acceptance.
+- PR #63 MCP hardening is CI-verified only; MCP remains opt-in and agent execution remains disabled.
+- The current documentation branch commit is a separate candidate; run its own Auto Pilot gate against the exact resulting SHA before Human Verification.
+- CI logs emitted non-blocking Node.js 20 action deprecation and punycode deprecation warnings; no failure resulted.

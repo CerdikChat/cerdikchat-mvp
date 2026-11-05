@@ -71,3 +71,26 @@ Historical percentage ranges previously discussed (reasoning 15–25%, coding 20
 A dimension is 100% VERIFIED only when every mandatory KPI reaches its threshold with reproducible evidence and no unresolved critical/high-severity defect relevant to that dimension. Any exception requires an explicit, recorded risk acceptance and must be shown as an exception—not silently counted as a pass.
 
 CI success is not Preview runtime health, Android human acceptance, or Production readiness. Human Verification may begin only after Auto Pilot passes for the exact candidate being verified.
+
+## Evidence reconciliation — 2026-11-05: current PR #60–#64 heads
+
+This section supersedes earlier head references for the PRs listed below without deleting the historical snapshots above.
+
+| Dimension | Current measured score | Evidence status as of this update | 100% acceptance target |
+|---|---:|---|---:|
+| General AI reasoning | NOT MEASURED | NOT TESTED; no 100-task model run | 100/100 |
+| Coding & engineering | NOT MEASURED | PARTIALLY VERIFIED; CI/typecheck/regression and dry-run build pass, but no 50-task model engineering benchmark | 100/100 |
+| Specialized research & analysis | NOT MEASURED | NOT TESTED; no 50-task source-grounded run; live provider not evidenced as configured | 100/100 |
+| Governance, audit & control | NOT MEASURED | PARTIALLY VERIFIED; auth/file/MCP negative tests and log-redaction CI pass, but no 50-scenario full governance suite | 100/100 |
+| Organizational workflow integration | NOT MEASURED | NOT TESTED; no 30-scenario end-to-end integration run | 100/100 |
+| Product identity & specialization | NOT MEASURED | PARTIALLY VERIFIED; exact nine-role registry contract and plan_only boundaries have passing CI; per-specialist 10-task quality/routing benchmark not run | 100/100 |
+| Ecosystem maturity & scale | NOT MEASURED | PARTIALLY VERIFIED; local preflight and Wrangler dry-run pass; Preview runtime, 7-day SLO, Android, 100-user load, restore and DR not tested | 100/100 |
+
+### Current exact-head CI evidence
+- PR #60 head d90c492116729f886a9adca329c581151e1884f5: runs 41919509234, 41919509283, 41919509532, 41919509348 all success; 129/129 tests.
+- PR #62 head 1fa32453e9569b136ec890b7c32562dda510612f: runs 41921781529, 41921781474, 41921781561, 41921781630 all success.
+- PR #63 head 4c5276f2ff5307949f912451d554d9be879223b6: runs 41945833238, 41945833224, 41945833375, 41945833236 all success; 139/139 tests.
+- PR #64 head 929e5bcf9d2be683c94b9cd882209ce194fc9119: runs 41944458563, 41944458347, 41944458558, 41944458354 all success; 134/134 tests.
+- PR #61 head 17760f85b01e0db2e7a09679324d55adfe1fcf95: push security/regression runs 41917776597 and 41917776653 success; 99/99 security tests. Remediation remains unmerged into PR #52.
+
+The 35-task v0.1 manifest is a structural smoke-test fixture only. It does not execute model inference, assign model scores, establish statistical confidence, or demonstrate parity/superiority over Gemini. Untested criteria earn no points. A 100% dimension requires every mandatory KPI, sample-size requirement and evidence condition in Section 2 to pass.

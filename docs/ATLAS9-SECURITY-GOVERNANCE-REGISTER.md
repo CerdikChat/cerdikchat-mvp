@@ -40,3 +40,35 @@ Append findings with exact branch/commit and reproducible evidence. Never copy s
 - Verification test and result:
 - Residual risk / approval:
 - Status: VERIFIED / FAILED / BLOCKED / NOT TESTED / PLANNED.
+
+## Security review update — 2026-11-05: PR #62–#64
+
+### PR #63 — MCP authentication and rate limiting
+- Branch/head: atlas9/cerdikgo-mcp-security-hardening / 4c5276f2ff5307949f912451d554d9be879223b6; PR https://github.com/CerdikChat/cerdikchat-mvp/pull/63 .
+- Changed files: worker.js, tests/mcp-security.test.mjs, docs/MCP-SECURITY-HARDENING.md.
+- Controls: pre-auth IP rate limit, fail-closed missing limiter/client IP, SHA-256 credential fingerprint bucket, constant-time digest comparison, case-insensitive Bearer parsing, POST-only endpoint, malformed-token regression coverage.
+- Runs 41945833375, 41945833224, 41945833236, 41945833238 all VERIFIED / success; 139/139 tests passed in the readiness job.
+- Residual risk: MCP remains opt-in; no runtime token rotation, external MCP client penetration test, or live rate-limit capacity test is evidenced. Do not infer endpoint activation from merged code or UI.
+- Status: VERIFIED for exact-head CI controls; NOT TESTED for deployed runtime and external security testing.
+
+### PR #64 — Connectors menu
+- Branch/head: atlas9/cerdikgo-connectors-menu / 929e5bcf9d2be683c94b9cd882209ce194fc9119; PR https://github.com/CerdikChat/cerdikchat-mvp/pull/64 .
+- UI explicitly states connector runtime connectivity is not verified and does not activate MCP, Workers AI, D1, or Context Bridge.
+- Runs 41944458347, 41944458563, 41944458558, 41944458354 all VERIFIED / success; 134/134 tests passed in readiness.
+- Preview workflow .github/workflows/preview-pr64.yml is manual only and was not dispatched. Preview credentials/secret scope were not inspected. Status: BLOCKED for Preview runtime validation by unavailable workflow-dispatch action in the connected GitHub tool; NOT TESTED for Android acceptance.
+
+### Related open security and governance issues
+- PR #61 head 17760f85b01e0db2e7a09679324d55adfe1fcf95 has push-triggered security/regression success (41917776597, 41917776653; 99/99 security tests). Its PII-log remediation remains proposed and unmerged into PR #52.
+- PR #52 head 9be9a8c3f6df416d66452c3d8c69c5112c853207 still requires review of 76-hour session lifetime, atomic account/request/audit writes, role escalation, CSRF and concurrent decisions. Preview workflow side effect and D1 migration 0007 remain blocked pending separate scoped authorization.
+- PR #53 head 142f4d8a893ba81d5f926da65f53b9e077ad1cad includes full Git bundle, source archive and SHA-256 manifest. Bundle creation/verification is not a restore drill. Google Drive upload remains opt-in/manual; OAuth scope, historical archive sensitivity, retention and restore checksum require review. No upload or restore was run.
+- PR #34 live research architecture still requires a configured provider and end-to-end source freshness/citation tests. Live Web Research remains NOT TESTED.
+- PR #35 document research is not live web research. Existing validation checks reference presence but does not fully prove returned evidence text is a verbatim source excerpt; claim-level evidence integrity remains REVIEW REQUIRED.
+- PR #41 Voice-to-AI is a Preview capability. Android microphone, playback, interruption, recorder MIME compatibility and network-loss behavior remain NOT TESTED.
+- PR #45 service worker caches static app shell only. It is not offline chat, peer-to-peer transport, or radio mesh.
+- Model routing policy is free_only and Workers AI only; document analysis and voice routes still contain hardcoded model choices. Add policy-drift tests and centralize routes before expanding providers.
+- Wrangler observability head_sampling_rate=1 (100%) requires privacy, retention and access-control review.
+- CI warnings: checkout/setup-node v4 Node.js 20 deprecation and Node punycode deprecation are non-blocking but should be addressed in dependency/workflow maintenance.
+
+### Standing controls
+- Exactly nine specialist profiles; Optimus Prime remains coordinator; gateway remains plan_only.
+- No Production deploy, remote D1 write/migration, OAuth/secrets/DNS changes, billing, MCP activation or independent agent execution.

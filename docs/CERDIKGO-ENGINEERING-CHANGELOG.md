@@ -49,3 +49,31 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 ## 2026-11-05 — PR #60 current branch final gate
 - Head `84c2d48857436519a9d712e8d3f7987c01397e0f`; tested merge candidate `2629ad5b03bd85a5229ebd88f003a281a63a6206`.
 - Readiness `41918816079`, regression/install `41918816057`, Phase 3 `41918816053`, hybrid `41918816105`, push readiness `41918810790`, and push regression `41918810833`: all passed, 129/129 tests.
+
+## 2026-11-05 — MCP authentication regression fix (PR #63)
+- Corrected the Bearer authorization parser in worker.js: the whitespace expression is now interpreted as whitespace rather than a literal escaped sequence.
+- Added malformed-Bearer regression coverage in tests/mcp-security.test.mjs; retained fail-closed rate-limit behavior, pre-auth IP throttling, credential-fingerprint throttling, and POST-only MCP.
+- Added security scope and residual limitations in docs/MCP-SECURITY-HARDENING.md.
+- Branch: atlas9/cerdikgo-mcp-security-hardening; head: 4c5276f2ff5307949f912451d554d9be879223b6; PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/63 .
+- Exact-head CI: 41945833238, 41945833224, 41945833375, 41945833236 — all success; Auto Pilot log: 139/139 tests passed, 0 failed.
+- Risk/status: MCP remains disabled unless CERDIKGO_MCP_ENABLED is explicitly enabled in an environment; this PR does not activate it or add executing tools. Draft/open/unmerged.
+
+## 2026-11-05 — Connectors navigation and Preview workflow (PR #64)
+- Added desktop/mobile Connectors entry points, accessible dialog/panel, honest non-connected status copy, and scalable icon.
+- Changed files: src/index.html, src/connector-hub.svg, tests/connectors-menu.test.mjs, .github/workflows/preview-pr64.yml.
+- Branch: atlas9/cerdikgo-connectors-menu; head: 929e5bcf9d2be683c94b9cd882209ce194fc9119; PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/64 .
+- Exact-head CI: 41944458563, 41944458347, 41944458558, 41944458354 — all success; Auto Pilot log: 134/134 tests passed, 0 failed.
+- Preview workflow is manual-dispatch only. It was not dispatched and no Preview URL was generated. UI does not activate connectors or prove runtime connectivity.
+- Risk/status: Android visual acceptance and Preview runtime remain NOT TESTED. Draft/open/unmerged.
+
+## 2026-11-05 — ATLAS-9 identity and specialist registry verification (PR #62)
+- Canonical nine-role identity fix is present at head 1fa32453e9569b136ec890b7c32562dda510612f on atlas9/cerdikgo-atlas9-identity-fix.
+- Preserves ATLAS-01 through ATLAS-09 exactly; Optimus Prime remains coordinator outside the nine specialist seats; legacy TITAN/GENESIS/TERRA are not active specialist IDs.
+- Exact-head runs 41921781529, 41921781474, 41921781561, 41921781630 all passed. Registry contract tests do not establish nine independent model workers; gateway remains plan_only.
+- PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/62 .
+
+## 2026-11-05 — Documentation evidence reconciliation
+- Append-only records updated on atlas9/cerdikgo-100-percent-scorecard from parent d90c492116729f886a9adca329c581151e1884f5.
+- Files: docs/ATLAS9-MASTER-DEVELOPMENT-LEDGER.md; docs/CERDIKGO-ENGINEERING-CHANGELOG.md; docs/ATLAS9-TESTING-AND-QA-REGISTER.md; docs/ATLAS9-SECURITY-GOVERNANCE-REGISTER.md; docs/ATLAS9-DECISION-AND-APPROVAL-REGISTER.md; docs/CERDIKGO-OPEN-ISSUES-AND-HANDOVER.md; docs/CERDIKGO-SEVEN-DIMENSION-BENCHMARK.md.
+- Scope is documentation-only; no application code, runtime configuration, secrets, database, or deployment changed.
+- CI for the resulting documentation commit must be checked on its exact SHA before treating that candidate as Auto Pilot ready.

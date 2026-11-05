@@ -30,3 +30,13 @@ Append decisions. General permission to improve code does not authorize privileg
 - PR #61 auth-log privacy remediation: isolated CI VERIFIED; draft/open/unmerged, not yet integrated into PR #52.
 - PR #52 Preview upload and D1 migration 0007: BLOCKED pending separate explicit scoped authorization and review.
 - PR #53 external Google Drive upload: remains opt-in/manual; no upload authorization granted in this run.
+
+## Decision and approval reconciliation — 2026-11-05
+
+1. Exact-head CI status is VERIFIED for PR #62 head 1fa32453e9569b136ec890b7c32562dda510612f (runs 41921781529, 41921781474, 41921781561, 41921781630), PR #63 head 4c5276f2ff5307949f912451d554d9be879223b6 (runs 41945833238, 41945833224, 41945833375, 41945833236), and PR #64 head 929e5bcf9d2be683c94b9cd882209ce194fc9119 (runs 41944458563, 41944458347, 41944458558, 41944458354).
+2. Human Verification is eligible only for those exact candidates whose Auto Pilot readiness run passed; it has not been started in this audit. A later commit changes the candidate and requires a new exact-SHA gate.
+3. PR #64 Preview workflow is manual-dispatch only. The connected GitHub capability set does not expose workflow_dispatch; no Preview deploy was initiated. The workflow's secret checks have not been evaluated.
+4. Keep exactly nine specialist roles; Optimus Prime is coordinator, not a tenth agent. Keep Agent Gateway plan_only.
+5. No merge, Production deployment, remote D1 write/migration, OAuth/secrets change, DNS change, billing activation, MCP activation, or privileged external action is approved by this audit.
+6. Free-tier/Workers AI-only policy remains in force. Do not add paid dependencies or enable external providers without a separate decision.
+7. The 100% VERIFIED goal remains a per-dimension acceptance threshold, not a measured score or claim of superiority over Gemini.
