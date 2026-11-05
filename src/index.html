@@ -1297,7 +1297,7 @@
     let googleClientId = "";
 
     async function loadPendingUsers() {
-      if (!isAuthenticated || currentRole !== "admin") return;
+      if (!isAuthenticated || (currentRole !== "admin" && currentRole !== "super_admin")) return;
       pendingUsersStatus.textContent = "Memuat permintaan…";
       pendingUsersList.replaceChildren();
       try {
