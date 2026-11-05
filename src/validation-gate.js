@@ -88,6 +88,18 @@
     },
     snapshot(){return entries.map(({id,name,status,reason})=>({id,name,status,reason}));}
   };
+  // AI Core is accepted only from a successful same-origin chat response
+  // carrying a non-empty reply and the server-reported model identifier.
+  window.addEventListener("cerdikgo:ai-core-verified", event => {
+    const detail = event && event.detail;
+    if (!detail || detail.ok !== true || detail.httpStatus !== 200 ||
+        typeof detail.model !== "string" || !detail.model.trim() ||
+        typeof detail.reply !== "string" || !detail.reply.trim()) return;
+    window.CerdikGoValidationGate.report(
+      "ai-core", "accepted",
+      "HTTP 200; respons non-kosong diterima dari Worker menggunakan model " + detail.model.trim() + "."
+    );
+  });
   window.dispatchEvent(new CustomEvent("cerdikgo:validation-gate-ready"));
   render();
 })();
