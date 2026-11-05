@@ -85,3 +85,13 @@ Append-only engineering history. A CI pass applies only to the exact branch and 
 - `npm run typecheck` / strict TypeScript workflow — PASS on PR #60 scorecard branch only; TypeScript NOT CONFIGURED on the JavaScript-only PRs.
 
 No merge, deployment, remote D1 write/migration, credential change, DNS change or billing activation occurred.
+
+
+## 2026-11-06 — PR #94 first CI failure and transparent correction
+
+- Candidate initially tested: `005402e41eb807c0ec44e2629fef1c7d16325341`, branch `atlas9/cerdikgo-main-governance-registers-20261106`, PR #94.
+- Regression run `42114199024`: FAILED; 36 passed / 1 failed. The single failure was the new structural test requiring a dated entry in `docs/CERDIKGO-SEVEN-DIMENSION-BENCHMARK.md`; the benchmark specification lacked that date marker. This was a documentation/test-fixture mismatch. No product runtime test failed.
+- Exact failure log: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42114199024.
+- Correction: appended a dated baseline and transparent failure note to the benchmark document; correction commit `68db999e24f854aa9137904054f53433a865b8a1`.
+- Status: correction commit recorded; retest on the final exact branch head is PENDING. Do not report PR #94 as green until that exact-head run succeeds.
+- No prior failure was removed or overwritten. No merge, deployment, D1 operation, credential change, DNS change or billing action occurred.
