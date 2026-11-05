@@ -347,3 +347,174 @@ test("Admin approval refuses role escalation beyond the administrator tier", asy
   assert.equal(response.status, 403);
   assert.equal(payload.error, "ROLE_ESCALATION_FORBIDDEN");
 });
+
+test("Admin feature-request archive is super-admin only and requires CSRF", async () => {
+  const regular=await worker.fetch(adminRequest("/api/admin/feature-requests/archive",{method:"POST",origin:"https://cerdikchat.test"}),authenticatedAdminEnv("admin"));
+  assert.equal(regular.status,403);
+  assert.equal((await regular.json()).error,"ADMIN_REQUIRED");
+  const missingCsrf=await worker.fetch(adminRequest("/api/admin/feature-requests/archive",{method:"POST",origin:"https://cerdikchat.test"}),authenticatedAdminEnv());
+  assert.equal(missingCsrf.status,403);
+  assert.equal((await missingCsrf.json()).error,"CSRF_VALIDATION_FAILED");
+});
+
+test("Admin feature-request archive endpoint is routed and guarded", async () => {
+  const source=await readFile(new URL("../worker.js",import.meta.url),"utf8");
+  assert.match(source,/\/api\/admin\/feature-requests\/archive/);
+  assert.match(source,/archiveFeatureRequest/);
+});
+
+test("Admin feature request UI provides active/archive filter and safe archive action", async () => {
+  const html=await readFile(new URL("../src/admin.html",import.meta.url),"utf8");
+  assert.match(html,/proposalArchiveFilter/);
+  assert.match(html,/Hapus dari daftar/);
+  assert.match(html,/Usulan akan hilang dari daftar aktif, tetapi tetap tersimpan/);
+  assert.match(html,/X-CSRF-Token/);
+});
+
+
+function featureArchiveEnvironment(batchResults, role = "super_admin", rows = []) {
+  const DB = {
+    prepare(sql) {
+      return {
+        sql,
+        bind(...args) {
+          return {
+            sql,
+            args,
+            first: async () => {
+              if (sql.includes("FROM sessions s")) {
+                return { google_sub: "test-admin-sub", email: "admin@example.test" };
+              }
+              if (sql.includes("SELECT role, governance_tier, access_expires_at FROM users")) {
+                return { role, governance_tier: role, access_expires_at: null };
+              }
+              return null;
+            },
+            all: async () => ({ results: rows })
+          };
+        }
+      };
+    },
+    batch: async statements => {
+      DB.lastBatch = statements;
+      return batchResults;
+    }
+  };
+  return { DB };
+}
+
+function featureArchiveRequest(path, { method = "GET", body } = {}) {
+  const session = "A".repeat(43);
+  const csrf = "C".repeat(43);
+  const headers = {
+    origin: "https://cerdikchat.test",
+    "sec-fetch-site": "same-origin",
+    cookie: `__Host-cerdikchat_session=${session}; __Host-cerdikchat_csrf=${csrf}`
+  };
+  if (method !== "GET") {
+    headers["content-type"] = "application/json";
+    headers["x-csrf-token"] = csrf;
+  }
+  return new Request("https://cerdikchat.test" + path, {
+    method,
+    headers,
+    ...(body === undefined ? {} : { body: JSON.stringify(body) })
+  });
+}
+
+test("feature-request archive performs one guarded update and one traceable audit insert", async () => {
+  const environment = featureArchiveEnvironment([
+    { meta: { changes: 1 } },
+    { meta: { changes: 1 } }
+  ]);
+  const response = await worker.fetch(featureArchiveRequest("/api/admin/feature-requests/archive", {
+    method: "POST",
+    body: { requestId: "00000000-0000-4000-8000-000000000001" }
+  }), environment);
+  const payload = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(payload.success, true);
+  assert.match(payload.auditId, /^[0-9a-f-]{36}$/i);
+  assert.equal(environment.DB.lastBatch.length, 2);
+  assert.match(environment.DB.lastBatch[0].sql, /UPDATE feature_requests SET archived_at/);
+  assert.match(environment.DB.lastBatch[0].sql, /archived_at IS NULL/);
+  assert.match(environment.DB.lastBatch[1].sql, /INSERT INTO admin_audit_events/);
+  assert.match(environment.DB.lastBatch[1].sql, /WHERE changes\(\)=1/);
+  assert.equal(environment.DB.lastBatch[1].args[2], "feature_request_archived");
+});
+
+test("feature-request archive refuses a missing or already archived request", async () => {
+  const environment = featureArchiveEnvironment([
+    { meta: { changes: 0 } },
+    { meta: { changes: 0 } }
+  ]);
+  const response = await worker.fetch(featureArchiveRequest("/api/admin/feature-requests/archive", {
+    method: "POST",
+    body: { requestId: "00000000-0000-4000-8000-000000000001" }
+  }), environment);
+  assert.equal(response.status, 409);
+  assert.equal((await response.json()).error, "FEATURE_REQUEST_NOT_FOUND_OR_ALREADY_ARCHIVED");
+});
+
+test("feature-request archive never reports success when the audit insert is not confirmed", async () => {
+  const environment = featureArchiveEnvironment([
+    { meta: { changes: 1 } },
+    { meta: { changes: 0 } }
+  ]);
+  const response = await worker.fetch(featureArchiveRequest("/api/admin/feature-requests/archive", {
+    method: "POST",
+    body: { requestId: "00000000-0000-4000-8000-000000000001" }
+  }), environment);
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).error, "GOVERNANCE_AUDIT_FAILED");
+});
+
+test("feature-request archive listing separates active and archived rows in SQL", async () => {
+  const statements = [];
+  const environment = featureArchiveEnvironment([]);
+  environment.DB.prepare = sql => {
+    statements.push(sql);
+    return {
+      sql,
+      bind: () => ({
+        first: async () => {
+          if (sql.includes("FROM sessions s")) return { google_sub: "test-admin-sub", email: "admin@example.test" };
+          if (sql.includes("SELECT role, governance_tier, access_expires_at FROM users")) {
+            return { role: "super_admin", governance_tier: "super_admin", access_expires_at: null };
+          }
+          return null;
+        },
+        all: async () => ({ results: [] })
+      })
+    };
+  };
+  const active = await worker.fetch(featureArchiveRequest("/api/admin/feature-requests"), environment);
+  assert.equal(active.status, 200);
+  const archived = await worker.fetch(featureArchiveRequest("/api/admin/feature-requests?archived=1"), environment);
+  assert.equal(archived.status, 200);
+  const queueQueries = statements.filter(sql => sql.includes("FROM feature_requests"));
+  assert.match(queueQueries[0], /archived_at IS NULL/);
+  assert.match(queueQueries[1], /archived_at IS NOT NULL/);
+});
+
+test("feature request UI wires archive action only for super-admin and reloads after filter changes", async () => {
+  const html = await readFile(new URL("../src/admin.html", import.meta.url), "utf8");
+  assert.match(html, /if\(adminRole===\"super_admin\"\)/);
+  assert.match(html, /archiveProposal\(item\.request_id/);
+  assert.match(html, /proposalArchiveFilter.*addEventListener\(\"change\",loadFeatureRequests\)/s);
+});
+
+
+test("feature-request archive rejects malformed IDs and non-POST mutation attempts", async () => {
+  const environment = featureArchiveEnvironment([]);
+  const malformed = await worker.fetch(featureArchiveRequest("/api/admin/feature-requests/archive", {
+    method: "POST",
+    body: { requestId: "not-a-uuid" }
+  }), environment);
+  assert.equal(malformed.status, 400);
+  assert.equal((await malformed.json()).error, "INVALID_REQUEST_ID");
+
+  const wrongMethod = await worker.fetch(featureArchiveRequest("/api/admin/feature-requests/archive"), environment);
+  assert.equal(wrongMethod.status, 405);
+  assert.equal((await wrongMethod.json()).error, "METHOD_NOT_ALLOWED");
+});
