@@ -4,12 +4,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b1220">
+  <meta name="theme-color" content="#eaf5ff">
   <meta name="description" content="CerdikGo — ruang kerja AI terpadu untuk riset, analisis, penulisan, dan inovasi.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="CerdikGo">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light">
   <link rel="manifest" href="/manifest.webmanifest">
   <title>CerdikGo — AI Innovation Workspace</title>
 
@@ -654,46 +654,81 @@
     @media(max-width:360px){.workspace-launcher{padding:10px}.suggest{min-height:132px;padding:9px}}
     @media(prefers-reduced-motion:reduce){.suggest{transition:none!important;transform:none!important}}
 
-  </style>
+  
+    /* CerdikGo v2.0 — approved light workspace visual system */
+    :root{color-scheme:light;--bg:#edf7ff;--panel:#fff;--panel2:#f4f9ff;--line:#c9deef;--text:#102d50;--muted:#58718d;--blue:#0878df;--mint:#22c6cf;--danger:#bd334b}
+    body{background:linear-gradient(180deg,#f8fcff 0%,#eaf5ff 48%,#e3f2ff 100%);color:var(--text)}
+    .app{max-width:1600px;grid-template-columns:258px minmax(0,1fr)}
+    .side{background:rgba(255,255,255,.88);border-right:1px solid #d4e5f3;color:#112f55;padding:20px 15px}
+    .brand{display:flex;align-items:center;gap:10px;color:#062d70;font-size:22px}
+    .brand small{display:block;font-size:9px;letter-spacing:1px;color:#4d6b8d}
+    .logo{border-radius:14px;background:linear-gradient(140deg,#00b7e7,#1558d6);color:white;box-shadow:0 5px 16px #148bd533}
+    .tag{margin:16px 0 22px;background:#e7f4ff;border:1px solid #c5e2f7;color:#1764a9}
+    .side h2{margin:18px 8px 8px;color:#67809b;font-size:10px;letter-spacing:1px}
+    .prompt.nav-item{display:flex;align-items:center;gap:12px;min-height:45px;padding:10px 12px;margin:4px 0;border-radius:12px;color:#15345b;font-weight:650}
+    .prompt.nav-item:hover,.prompt.nav-item.active{background:linear-gradient(100deg,#14b8ef,#1455d5);color:#fff;box-shadow:0 5px 14px #1685db26}
+    .prompt.nav-item span{font-size:13px}
+    .side-note{margin-top:22px;padding:12px;border-radius:14px;background:linear-gradient(130deg,#e3f4ff,#d6ebff);color:#17427a;text-align:center;font-weight:650;line-height:1.7}
+    .top{min-height:72px;padding:10px 24px;background:#ffffffdf;border-bottom:1px solid #d7e7f4;color:#183b68}
+    .top:before{content:"";display:block}
+    .top strong{color:#163d72}
+    .pill{background:#e2fff1;border-color:#a8e8c9;color:#087d50}
+    .feed{padding:24px 28px;background:radial-gradient(ellipse at 50% 0%,#d9efff 0,transparent 62%)}
+    .workspace-intro{max-width:960px;margin:4px auto 20px;text-align:center}
+    .workspace-intro:before{content:"CerdikGo";display:block;margin:0 auto 2px;color:#0752bd;font-size:clamp(36px,5vw,58px);font-weight:900;letter-spacing:-2px;text-shadow:0 3px 0 #fff}
+    .workspace-intro:after{content:"AI INNOVATION WORKSPACE";display:block;margin:0 auto 12px;color:#1c538f;font-size:12px;font-weight:800;letter-spacing:2.4px}
+    .workspace-intro .eyebrow{display:none}
+    .workspace-intro h1{margin:5px 0 8px;color:#0d2e62;font-size:clamp(28px,4vw,42px)}
+    .workspace-intro h1 span{background:linear-gradient(90deg,#0875dd,#24bfc9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .workspace-intro p{color:#355779;font-size:15px}
+    .workspace-launcher{max-width:1000px;margin:18px auto 0;padding:18px;border:1px solid #c8dfef;border-radius:20px;background:#ffffffd9;box-shadow:0 12px 34px #5b99c51a}
+    .launcher-heading strong{color:#173d70}.launcher-heading small{color:#637f9d}
+    .workspace-status{background:#e5fff4;color:#087b53;border-color:#b5ebd2}
+    .suggestions{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+    .suggest{min-height:124px;align-items:center;text-align:center;justify-content:center;background:linear-gradient(155deg,#fff,#f2f9ff);border:1px solid #c8dff0;box-shadow:0 5px 16px #4d86b21a;color:#123766}
+    .suggest:hover{border-color:#48bce6;box-shadow:0 8px 22px #248bce22}
+    .suggest-icon{width:42px;height:42px;background:#edf7ff;border:1px solid #c8e2f4;color:#0879df;font-size:23px}
+    .suggest b{color:#123766;font-size:13px}.suggest small{color:#58718d}
+    .workspace-footnote{border-color:#d9e8f3;color:#6b829a}
+    .composer-wrap{background:#ffffffeb;border-top:1px solid #cfe2f1;backdrop-filter:blur(16px)}
+    .composer{background:#fff;border-color:#bdd8ed;box-shadow:0 7px 24px #3c78a41a}
+    .composer textarea{color:#17395f}.composer textarea::placeholder{color:#738ba3}
+    .send{background:linear-gradient(110deg,#0784ed,#1cc9d0);color:#fff}
+    .footer{color:#6d849c}.footer .developer{color:#1485b9}
+    .settings-dialog{background:#fff;color:#17395f;border-color:#c6deef}
+    .settings-button,.nav-toggle,.auth-logout,.settings-close{background:#edf6ff;color:#17416f;border-color:#c9dfef}
+    @media(max-width:900px){.app{grid-template-columns:220px minmax(0,1fr)}.suggestions{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:720px){
+      .app{display:block}.side{background:#fff}.top{background:#ffffffef;min-height:58px;padding:8px 10px}.feed{padding:16px 12px}
+      .workspace-intro{margin:6px auto 14px}.workspace-intro:before{font-size:38px}.workspace-intro:after{font-size:9px;letter-spacing:1.6px}
+      .workspace-intro h1{font-size:clamp(25px,7vw,32px)}.workspace-intro p{font-size:12px}
+      .workspace-launcher{padding:12px;background:#ffffffed}.suggestions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+      .suggest{min-height:112px;padding:10px}.suggest-icon{width:36px;height:36px}
+      .composer-wrap{background:#ffffffef}.composer{background:#fff}
+      .app>.side{background:#fff;box-shadow:18px 0 48px #143a5c22}
+    }
+
+</style>
 </head>
 
 <body>
   <div class="app">
     <aside class="side" id="sideNavigation" aria-label="Navigasi utama">
-      <div class="brand">
-        <div class="logo" aria-hidden="true">C</div>
-        CerdikGo
-      </div>
-
-      <div class="tag">CLOSED BETA · v0.1</div>
-
-      <h2>Mulai dari sini</h2>
-
-      <button class="prompt" type="button"
-        data-prompt="Bantu saya menyusun rencana kerja yang realistis untuk minggu ini.">
-        ✦ Rencana kerja
-      </button>
-
-      <button class="prompt" type="button"
-        data-prompt="Analisis masalah berikut secara terstruktur: akar masalah, dampak, opsi solusi, risiko, dan rekomendasi.">
-        ⌘ Analisis masalah
-      </button>
-
-      <button class="prompt" type="button"
-        data-prompt="Bantu saya menulis ulang teks ini agar jelas, profesional, dan alami: ">
-        ✎ Menulis profesional
-      </button>
-
-      <button class="prompt" type="button"
-        data-prompt="Jelaskan topik ini dari dasar, beri contoh praktis, lalu tutup dengan ringkasan: ">
-        ◎ Belajar topik baru
-      </button>
-
-      <h2>Tentang beta</h2>
-      <div class="side-note">
-        CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting
-        secara mandiri. Hindari memasukkan data pribadi atau rahasia.
-      </div>
+      <div class="brand"><div class="logo" aria-hidden="true">C</div><div><strong>CerdikGo</strong><small>AI INNOVATION WORKSPACE</small></div></div>
+      <div class="tag">CERDIKGO v2.0 · PREVIEW</div>
+      <h2>Navigasi workspace</h2>
+      <button class="prompt nav-item active" type="button" data-prompt="Mari mulai percakapan baru. Bantu saya menentukan tujuan dan langkah pertama.">⌂ <span>Beranda</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Buka AI Workspace. Saya ingin bertanya dan melakukan analisis.">▣ <span>AI Workspace</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Bantu saya membuat, mengevaluasi, atau mengoptimalkan prompt AI.">▱ <span>Prompt Intelligence</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Saya ingin mengolah dokumen dan data. Jelaskan kemampuan yang tersedia dan minta file bila diperlukan.">▤ <span>Dokumen & Data</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Saya ingin melakukan riset web. Bantu tentukan pertanyaan dan sumber yang perlu diverifikasi.">◎ <span>Riset & Web</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Bantu saya menilai opsi konektivitas dan status jaringan.">⌁ <span>Konektivitas</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Bantu saya meninjau governance, risiko, kontrol, dan administrasi.">⛨ <span>Governance & Admin</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Jelaskan arsitektur ATLAS-9 dan batas kemampuan agen yang benar-benar tersedia.">♧ <span>ATLAS-9 Agents</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Saya ingin bekerja dengan dokumen Office. Jelaskan alur WPS Office yang didukung saat ini.">W <span>WPS Office</span></button>
+      <h2>Workspace Hub</h2>
+      <button class="prompt nav-item" type="button" data-prompt="Tampilkan ringkasan alat operasional, validasi, dan monitoring yang tersedia.">▦ <span>Workspace Hub</span></button>
+      <div class="side-note"><strong>CerdikGo v2.0</strong><br>Think Better · Act Smarter<br>Build for Humanity</div>
     </aside>
     <button id="navBackdrop" class="nav-backdrop" type="button" aria-label="Tutup navigasi"></button>
 
@@ -771,7 +806,7 @@
             disabled
             rows="2"
             maxlength="8000"
-            placeholder="Tanyakan sesuatu kepada CerdikChat…"
+            placeholder="Tulis pesan Anda..."
             aria-label="Pesan Anda"
             aria-describedby="composerHint status"
             required></textarea>
