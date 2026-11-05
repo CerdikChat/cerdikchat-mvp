@@ -180,3 +180,9 @@ The PR #52 deployed source uses CHAT_RATE_LIMITER for voice transcription, and t
 
 Failure log: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949291912 .
 Correction runs: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949338154 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949364570 .
+
+## Preview identity parity — 2026-11-05
+- Source inspected: worker.js from deployed PR #52 commit 9be9a8c3f6df416d66452c3d8c69c5112c853207.
+- Observed prompt roles: ATLAS coordinator plus seven specialist labels; prompt says all are analytical approaches in one model. This is not the canonical nine-specialist registry contract.
+- Status: FAILED for identity parity on current Preview (source inspection); NOT TESTED for live UI/model behavior.
+- Canonical PR #62 candidate 1fa32453e9569b136ec890b7c32562dda510612f passed exact-head runs 41921781529, 41921781474, 41921781561, 41921781630. It remains unmerged and undeployed.

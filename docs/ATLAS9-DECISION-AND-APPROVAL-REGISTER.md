@@ -61,3 +61,6 @@ For the PR #52 deployed commit, voice transcription uses the existing CHAT_RATE_
 
 ## Evidence integrity decision record — 2026-11-05
 The first PR #65 implementation commit 0be3cfeaa52dcd639bf62f62bba13fb53825b66c failed regression due to a literal escaped newline in the test source (run 41949291912; 35 pass, 1 fail). The implementation was corrected in commit 2529b05efa4fd02883eb493a2683218a7be2e83f and re-tested at 95/95. Final candidate 154301128cc8824b76969b5da603807f5125b414 passed exact-head readiness. The failed attempt remains visible in Git history and the QA register.
+
+## Identity parity decision — 2026-11-05
+Keep the canonical nine specialist IDs and Optimus Prime coordinator as the required identity contract. The current PR #52 Preview is not compliant: its deployed prompt enumerates only seven specialist labels plus ATLAS coordinator. PR #62 is the approved candidate fix with 4/4 CI success, but no merge or Preview deployment is authorized by this audit. Do not claim current Preview identity parity until the exact canonical candidate is integrated and revalidated.

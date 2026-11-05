@@ -115,3 +115,6 @@ The PR #52 deployed source uses CHAT_RATE_LIMITER for voice transcription, and t
 
 ## Benchmark integrity note — 2026-11-05
 The PR #65 evidence validator's first implementation candidate failed its regression workflow (run 41949291912: 35 passed, 1 failed due to malformed test-source escaping). The corrected implementation passed 95/95 on commit 2529b05efa4fd02883eb493a2683218a7be2e83f and the final readiness gate passed on 154301128cc8824b76969b5da603807f5125b414. This is software-regression evidence only; it does not add points to specialized research or AI capability scores.
+
+## Product identity evidence boundary — 2026-11-05
+The canonical nine-role identity contract is CI-verified on PR #62, but the current primary Preview from PR #52 still contains the legacy ATLAS-plus-seven-role prompt. Therefore product identity/specialization is PARTIALLY VERIFIED in the development candidate and FAILED for parity in the deployed Preview. No independent nine-agent execution is evidenced, and the seven-dimension score remains NOT MEASURED.

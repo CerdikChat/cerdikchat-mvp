@@ -121,3 +121,6 @@ The primary PR #52 Preview uses multimodal/voice-assistance.js that calls CHAT_R
 
 ## Transparent remediation history — 2026-11-05
 PR #65 first implementation commit 0be3cfeaa52dcd639bf62f62bba13fb53825b66c failed run 41949291912 (35 pass, 1 fail) due to a literal escaped newline in tests/worker.test.mjs:587; an over-escaped evidence whitespace regex was also corrected. Commit 2529b05efa4fd02883eb493a2683218a7be2e83f passed 95/95 in runs 41949338154 and 41949364570. Final head 154301128cc8824b76969b5da603807f5125b414 passed readiness runs 41949989419 and 41949995940. Keep this failed intermediate commit in the audit trail.
+
+## Identity parity blocker — 2026-11-05
+The primary Preview at PR #52 head 9be9a8c3f6df416d66452c3d8c69c5112c853207 still has the legacy worker.js prompt: ATLAS coordinator plus seven specialist labels. It does not implement the canonical nine specialist registry or Optimus Prime coordinator identity. PR #62 has the fix and passed 4/4 CI but is not merged/deployed. Keep this as FAILED for current Preview identity parity. Next action: integrate PR #62 through the approved branch chain, then run exact-head Auto Pilot and isolated Preview validation; do not deploy or merge as part of this audit.

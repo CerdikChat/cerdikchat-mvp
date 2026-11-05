@@ -184,3 +184,14 @@ A prior entry incorrectly stated that the PR #52 deployed Preview lacked VOICE_R
 - Parent/current candidate before this append: 24d9520e973a343ff5b0b6aba57de16faac5b127 on atlas9/cerdikgo-100-percent-scorecard.
 - Exact-head CI on that parent: push regression 41950413546, push readiness 41950413823, PR regression 41950419748, PR readiness 41950419727, Phase 3 41950419849, Hybrid Gateway 41950419718 — all SUCCESS; 129/129 tests in each relevant suite.
 - This final append records the intermediate PR #65 failure transparently. The resulting documentation commit must pass its own exact-head gate before any Human Verification.
+
+## Preview identity parity finding — 2026-11-05
+
+- Exact deployed Preview source: PR #52 head 9be9a8c3f6df416d66452c3d8c69c5112c853207.
+- Its worker.js system instruction lists ATLAS as coordinator plus NEXUS, TITAN, SENTINEL, GENESIS, TERRA, AEGIS, ORACLE (seven specialist labels). It explicitly describes these as analytical approaches in one model. It does not match the canonical nine ATLAS-01..ATLAS-09 specialist registry or Optimus Prime coordinator identity.
+- PR #62 head 1fa32453e9569b136ec890b7c32562dda510612f contains the canonical nine-role identity contract and passed exact-head CI runs 41921781529, 41921781474, 41921781561, 41921781630. PR #62 is not merged/deployed into the PR #52 Preview.
+- Status: PR #62 branch identity contract VERIFIED by CI; identity parity in the current primary Preview FAILED against the approved canonical structure. No independent nine-model agents are running; gateway remains plan_only in the candidate architecture.
+- No merge or Preview redeployment was performed. Next action is to integrate the approved identity fix through the normal PR dependency chain and revalidate the exact Preview candidate before claiming parity.
+
+## Documentation candidate CI — 2026-11-05
+- Parent commit d0ea6afe4d300b9bbbb79962a7b5159b86c30e7f on atlas9/cerdikgo-100-percent-scorecard passed exact-head push readiness 41950554539, push regression 41950554542, PR readiness 41950560458, PR regression 41950560505, Phase 3 41950560449, Hybrid Gateway 41950560428 — all SUCCESS; 129/129 tests.

@@ -101,3 +101,6 @@ The exact PR #52 source uses CHAT_RATE_LIMITER for the voice endpoint (key prefi
 
 ## Evidence integrity remediation chronology — 2026-11-05
 PR #65's first implementation commit failed CI because of a test-source formatting error and an over-escaped whitespace expression. The exact failure was recorded in run 41949291912 (35 passed, 1 failed). The follow-up commit 2529b05efa4fd02883eb493a2683218a7be2e83f corrected the parser and test source; 95/95 tests then passed in runs 41949338154 and 41949364570. The final candidate 154301128cc8824b76969b5da603807f5125b414 passed exact-head readiness in 41949989419 and 41949995940. No failed evidence has been removed from the audit history.
+
+## Identity governance drift — 2026-11-05
+The deployed PR #52 Preview worker.js prompt still enumerates ATLAS as coordinator and only seven specialist labels (NEXUS, TITAN, SENTINEL, GENESIS, TERRA, AEGIS, ORACLE). It does not match the canonical nine ATLAS-01..ATLAS-09 specialist roles with Optimus Prime as coordinator. The prompt itself states that roles are analytical approaches in a single model; no independent agents are evidenced. PR #62 contains the canonical correction and CI passed, but it is not in the deployed Preview. Status: FAILED for Preview identity parity; no autonomous execution enabled.
