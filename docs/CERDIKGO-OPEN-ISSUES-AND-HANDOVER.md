@@ -127,3 +127,32 @@ The primary Preview at PR #52 head 9be9a8c3f6df416d66452c3d8c69c5112c853207 stil
 
 ## PR #63 remediation history — 2026-11-05
 Initial candidate c9a5b7f5575e4571a7fefe3f7df39827a4a76439 failed 4/4 PR workflows and two push workflows because a valid Bearer credential was rejected with 401 by an over-escaped whitespace regex. Fix commit 0df022076c6bcd1ce19620470943defacce27fba corrected the parser; final head 4c5276f2ff5307949f912451d554d9be879223b6 passed 4/4 exact-head workflows with 139/139 tests. MCP remains opt-in. Retain the failed candidate and correction commits in the audit trail.
+
+
+## Handover checkpoint — 2026-11-05: latest repository audit
+
+### Verified exact-head CI candidates
+- PR #60 `ad3cbd61b6467675e71e8445f113635c45beb8c9`: 4/4 workflows passed; 129/129 tests; Wrangler dry-run only.
+- PR #68 `973ea276a93bc8d47419d11b29be3259190cbe97`: legacy readiness passed; 104/104.
+- PR #69 `cb5264803ca3efad03a8d168592c0b02d395354e`: legacy readiness passed; 102/102.
+- PR #62, #63, #64, #65 and #66 have exact-head workflow evidence recorded in the QA register. Their scope limitations remain in force.
+- PR #61 has 99/99 security/regression push evidence but no PR readiness run recorded.
+
+### Blockers and work remaining
+1. PR #70 archive-controls head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1`: six additional archive tests are committed; no exact-head CI run or combined status exists. **BLOCKED** for Auto Pilot/Human Verification.
+2. PR #52 head `4114cfa5ca082dfb8736d9d7aa68bb297087d8c0`: legacy readiness workflow was added, but no exact-head run/status is visible and GitHub reports mergeable=false. Diagnose before relying on the branch or its descendants.
+3. PR #70 D1 migration `0008_feature_request_archive.sql` remains unapplied; request explicit Preview-only approval before any migration.
+4. PR #52 migration `0007_governance_control_center.sql` remains blocked pending separate scoped authorization and preflight.
+5. PR #61 auth-log remediation and PR #66 query-string redaction are not integrated/deployed.
+6. PR #62 canonical identity candidate is not deployed to the PR #52 Preview; current Preview identity parity remains failed until integration and runtime validation.
+7. PR #65 evidence validator proves verbatim source-span matching only; semantic entailment and claim relevance remain unverified.
+8. Google Drive backup has no current-head restore drill. Live Web Research provider remains unconfigured/not evidenced. Android voice, document scanning, offline chat/radio mesh, 7-day SLO, 100-concurrent-user edge load and disaster recovery remain NOT TESTED.
+9. All seven competitive model scores remain NOT MEASURED. The 35-task pilot smoke manifest is not a full comparative benchmark.
+
+### Next actions
+- Obtain a visible exact-head CI result for PR #70; if workflow triggering remains blocked, use the repository Actions UI or an authorized workflow-dispatch path rather than asserting success.
+- Diagnose PR #52 mergeability and verify the new workflow on its exact branch commit.
+- After separate approval, apply migration #0008 only to isolated Preview, then test archive/unarchive visibility and audit integrity against D1. Do not run on Production.
+- Integrate privacy and identity fixes through the branch dependency chain and revalidate exact candidate SHAs.
+- Implement a full benchmark runner and expand datasets to the KPI sample sizes in the benchmark protocol; run model comparisons only when provider credentials and free-tier constraints are available.
+- Run Preview health, Android acceptance, backup restore and load/SLO tests as separate evidence packages.
