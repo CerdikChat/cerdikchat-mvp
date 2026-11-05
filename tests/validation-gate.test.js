@@ -42,9 +42,10 @@ test("Main chat reports AI Core ACCEPTED only after a successful HTTP response a
 });
 
 test("Main chat does not mark AI Core accepted from online status or model-generated text alone", () => {
-  const acceptedAt = index.indexOf('"accepted"');
+  const acceptedEventAt = index.indexOf('cerdikgo:ai-core-verified');
   const replyCheckAt = index.indexOf('if (!answer)');
-  assert.ok(acceptedAt > replyCheckAt, "ACCEPTED report must follow the non-empty reply check");
+  assert.ok(acceptedEventAt > replyCheckAt, "AI evidence event must follow the non-empty reply check");
+  assert.match(index, /const model = typeof data\.model === "string" \? data\.model\.trim\(\) : ""/);
   assert.match(index, /response\.status !== 200 \|\| !model/);
 });
 
