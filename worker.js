@@ -1530,17 +1530,44 @@ async function handleChat(request, env, ctx) {
    MCP BEARER TOKEN VERIFICATION
 ========================================================= */
 
+async function sha256Hex(value) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 async function verifyMcpBearerToken(supplied, configured) {
-  const encoder = new TextEncoder();
+  if (typeof supplied !== "string" || typeof configured !== "string") return false;
   const [left, right] = await Promise.all([
-    crypto.subtle.digest("SHA-256", encoder.encode(supplied)),
-    crypto.subtle.digest("SHA-256", encoder.encode(configured)),
+    crypto.subtle.digest("SHA-256", new TextEncoder().encode(supplied)),
+    crypto.subtle.digest("SHA-256", new TextEncoder().encode(configured)),
   ]);
   const a = new Uint8Array(left);
   const b = new Uint8Array(right);
   let difference = 0;
   for (let i = 0; i < a.length; i++) difference |= a[i] ^ b[i];
   return difference === 0;
+}
+
+async function applyMcpRateLimit(request, env, scope, identity = null) {
+  if (!env.CHAT_RATE_LIMITER || typeof env.CHAT_RATE_LIMITER.limit !== "function") {
+    return errorResponse("MCP_RATE_LIMIT_UNAVAILABLE", "MCP rate limiting is not configured.", 503);
+  }
+  const ip = request.headers.get("CF-Connecting-IP");
+  if (!ip) {
+    return errorResponse("MCP_CLIENT_ID_UNAVAILABLE", "MCP client identity is unavailable.", 403);
+  }
+  const key = identity
+    ? `mcp:${scope}:client:${identity}`
+    : `mcp:${scope}:ip:${ip}`;
+  try {
+    const result = await env.CHAT_RATE_LIMITER.limit({ key });
+    if (!result?.success) {
+      return errorResponse("MCP_RATE_LIMITED", "Too many MCP requests. Try again later.", 429, {}, { "retry-after": "60" });
+    }
+    return null;
+  } catch {
+    return errorResponse("MCP_RATE_LIMIT_UNAVAILABLE", "MCP rate limiting is temporarily unavailable.", 503);
+  }
 }
 
 /* =========================================================
@@ -1567,17 +1594,27 @@ export default {
       });
     }
 
-    // Remote MCP is disabled until a dedicated bearer secret and feature flag are configured.
+    // Remote MCP remains opt-in and is protected by IP and per-credential limits.
     if (url.pathname === "/mcp") {
       if (env.CERDIKGO_MCP_ENABLED !== "true") {
         return errorResponse("MCP_DISABLED", "MCP endpoint is not enabled in this environment.", 404);
       }
+
+      const ipLimitError = await applyMcpRateLimit(request, env, "preauth");
+      if (ipLimitError) return ipLimitError;
+
+      if (request.method !== "POST") {
+        return errorResponse("MCP_METHOD_NOT_ALLOWED", "Use POST for stateless MCP requests.", 405, {}, { allow: "POST" });
+      }
+
       const configuredToken = env.CERDIKGO_MCP_BEARER_TOKEN;
       if (typeof configuredToken !== "string" || configuredToken.length < 32) {
         return errorResponse("MCP_AUTH_NOT_CONFIGURED", "MCP authentication is not configured.", 503);
       }
+
       const authorization = request.headers.get("Authorization") || "";
-      const suppliedToken = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+      const match = authorization.match(/^Bearer\s+(.+)$/i);
+      const suppliedToken = match?.[1]?.trim() || "";
       if (!suppliedToken || !(await verifyMcpBearerToken(suppliedToken, configuredToken))) {
         return jsonResponse(
           { error: "UNAUTHORIZED", message: "A valid bearer token is required." },
@@ -1585,8 +1622,12 @@ export default {
           { "www-authenticate": 'Bearer realm="CerdikGo MCP"' }
         );
       }
-      const mcpRateLimitError = await applyRateLimit(request, env, {}, null);
-      if (mcpRateLimitError) return mcpRateLimitError;
+
+      // Use a one-way credential fingerprint as the client bucket; never log or store the bearer token.
+      const clientFingerprint = await sha256Hex(suppliedToken);
+      const clientLimitError = await applyMcpRateLimit(request, env, "authenticated", clientFingerprint);
+      if (clientLimitError) return clientLimitError;
+
       return cerdikgoMcpHandler(request, env, ctx);
     }
 
