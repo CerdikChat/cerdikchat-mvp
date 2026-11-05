@@ -130,3 +130,40 @@ Workflow links:
 - PR #66: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949598277 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949598379 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949605643 .
 
 No Production deploy, remote D1 write/migration, OAuth/secrets/DNS change, billing, or other privileged action was performed.
+
+## Exact-head readiness correction — 2026-11-05: PR #65 and #66 gates
+
+### PR #65 — final candidate
+- Branch: atlas9/cerdikgo-document-evidence-integrity.
+- Final head: 154301128cc8824b76969b5da603807f5125b414.
+- PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/65 .
+- Changed files: multimodal/file-analysis.js; tests/worker.test.mjs; docs/RESEARCH-EVIDENCE-VALIDATION.md; .github/workflows/autopilot-readiness-legacy.yml.
+- Exact-head readiness runs: 41949995940 (pull_request) and 41949989419 (push) — both SUCCESS; 95/95 tests, 0 failures; dependency install, repository preflight, Wrangler 4.153.0 dry-run, workflow safety scan all passed.
+- Companion regression runs: 41949995918 (pull_request) and 41949989433 (push) — SUCCESS.
+- TypeScript is NOT CONFIGURED on this legacy JavaScript branch; the gate explicitly records it as not passed. No doctor script exists; the repository configuration preflight is the applicable check.
+- PR #65 is draft/open/unmerged and clean relative to PR #35 branch. PR #35 remains dirty against PR #32. Human Verification is eligible for this exact head but has not started.
+
+### PR #66 — final candidate
+- Branch: atlas9/cerdikgo-observability-redaction.
+- Final head: 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1.
+- PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/66 .
+- Changed files: wrangler.toml; tests/observability-config.test.mjs; docs/CERDIKGO-OBSERVABILITY-PRIVACY-HARDENING.md; .github/workflows/observability-config-validation.yml; .github/workflows/autopilot-readiness-legacy.yml.
+- Exact-head readiness runs: 41950007358 (pull_request) and 41950001066 (push) — both SUCCESS; 102/102 tests, 0 failures; dependency install, repository preflight, Wrangler 4.153.0 dry-run, workflow safety scan all passed.
+- Companion regression run: 41950000882 (push) — SUCCESS. Wrangler configuration dry-run run 41950007360 (pull_request) — SUCCESS.
+- TypeScript is NOT CONFIGURED on this legacy JavaScript branch and is not counted as passed. No doctor script exists; repository preflight is the applicable check.
+- PR #66 is draft/open/unmerged and clean relative to PR #52 branch. Human Verification is eligible for this exact head but has not started. No Preview redeployment occurred.
+
+### PR #60 documentation branch
+- Final audited head at this checkpoint: 06d45e7ddb2588bf5ca529f55e25a4fe2f498069 on atlas9/cerdikgo-100-percent-scorecard.
+- Exact-head Auto Pilot readiness 41949807568, regression/install 41949807519, Phase 3 41949807537, Hybrid Gateway 41949807546 — all SUCCESS; 129/129 tests. Push gate 41949798504 and push regression 41949798450 also SUCCESS.
+- The documentation commit after this checkpoint will have a new exact SHA and must pass its own readiness gate before Human Verification.
+
+### Primary Preview binding gap
+- PR #52 Preview deployment 41825376685 reported no FILE_SCANNER and no VOICE_RATE_LIMITER binding in the deployed Preview environment.
+- The document-analysis route requires FILE_SCANNER and fails closed if the scanner is unavailable. The voice-transcription route requires VOICE_RATE_LIMITER and fails closed if the limiter is missing.
+- Thus document scanning and voice transcription are not runtime-verified on the current primary Preview and are expected to fail closed until the required bindings/services are safely provisioned and verified. Do not substitute a fake scanner or silently bypass the rate limiter.
+
+Readiness links:
+- PR #65 gate: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949995940 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949989419 .
+- PR #66 gate: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950007358 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950001066 .
+- PR #60 exact head: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807568 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807519 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807537 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807546 .

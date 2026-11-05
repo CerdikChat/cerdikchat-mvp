@@ -87,3 +87,11 @@ The PR #52 Preview workflow did deploy exact source commit 9be9a8c3f6df416d66452
 - PR #52's 99,990 stress script is synthetic in-process Worker testing (worker.fetch), not a Cloudflare edge test or proof of real-user scale.
 - PR #53 backup implementation has no current-head backup run and no restore evidence.
 - PR #65 evidence excerpt validation checks normalized verbatim source spans; it does not prove semantic entailment or relevance. Human review remains necessary for material claims.
+
+## Primary Preview capability gap — 2026-11-05
+
+The PR #52 Preview deployment metadata (run 41825376685) lists AI, ASSETS, CHAT_RATE_LIMITER, DB, ENVIRONMENT, GOOGLE_AUTH_REQUIRED, and GOOGLE_CLIENT_ID. It does not list FILE_SCANNER or VOICE_RATE_LIMITER.
+
+- multimodal/file-analysis.js imports the scanner guard and fails closed when FILE_SCANNER is absent/unavailable; therefore document scanning is not expected to succeed in this Preview.
+- multimodal/voice-assistance.js returns VOICE_RATE_LIMIT_UNAVAILABLE when VOICE_RATE_LIMITER is absent; therefore voice transcription is not expected to succeed in this Preview.
+- No binding was fabricated, no scanner bypass was added, and no Cloudflare resource was created. Provisioning a real scanner service and dedicated rate-limit binding requires a separate scoped implementation and Preview verification.

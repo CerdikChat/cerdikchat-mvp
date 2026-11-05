@@ -102,3 +102,10 @@ The 35-task v0.1 manifest is a structural smoke-test fixture only. It does not e
 - PR #65 regression (95/95) validates source-span checks, not model research quality or semantic entailment.
 - PR #66 regression (102/102) and Wrangler dry-run validate configuration and tests, not deployed observability behavior.
 - The current measured score for every competitive dimension remains NOT MEASURED. No score is awarded for feature presence, local synthetic stress, CI pass, Preview creation alone, or smoke-manifest completeness.
+
+## Exact-head readiness does not change competitive scores — 2026-11-05
+
+- PR #65 passed 95/95 tests and its exact-head legacy readiness gate; this validates document evidence-source-span handling and branch installation/config safety only.
+- PR #66 passed 102/102 tests and its exact-head legacy readiness gate plus Wrangler dry-run; this validates query-string redaction configuration, not actual deployed telemetry behavior.
+- The PR #52 primary Preview lacks FILE_SCANNER and VOICE_RATE_LIMITER bindings, so document scanning and voice transcription are NOT VERIFIED at runtime.
+- All seven competitive model scores remain NOT MEASURED. CI, readiness gates, source-span checks and configuration dry-runs earn no AI capability score.

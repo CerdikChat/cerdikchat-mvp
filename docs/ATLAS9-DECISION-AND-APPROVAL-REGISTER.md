@@ -48,3 +48,10 @@ Append decisions. General permission to improve code does not authorize privileg
 3. PR #66 observability query redaction is regression-verified (102/102; run 41949598277) and Wrangler dry-run verified (41949598379, 41949605643), but no Preview deployment or exact-head Auto Pilot readiness gate has run. Human Verification is not authorized to start.
 4. PR #66 preserves 100% log sampling and persistence while enabling query-string redaction. Do not silently change sampling/retention policy without a separate decision.
 5. No additional Preview deployment was initiated by this audit. No merge, Production deploy, remote D1 write/migration, OAuth/secrets/DNS change, billing, or other privileged action was performed.
+
+## Readiness decision — 2026-11-05: PR #65/#66 exact candidates
+
+- PR #65 final head 154301128cc8824b76969b5da603807f5125b414 passed exact-head readiness runs 41949995940 and 41949989419 (95/95). It is eligible for Human Verification; Human Verification has not started.
+- PR #66 final head 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1 passed exact-head readiness runs 41950007358 and 41950001066 (102/102); config dry-run 41950007360 passed. It is eligible for Human Verification; Human Verification has not started.
+- These legacy JS gates explicitly mark TypeScript NOT CONFIGURED. They do not prove Preview runtime or Android acceptance.
+- Existing PR #52 Preview lacks FILE_SCANNER and VOICE_RATE_LIMITER bindings; document and voice routes must remain fail-closed until approved service/binding configuration exists.

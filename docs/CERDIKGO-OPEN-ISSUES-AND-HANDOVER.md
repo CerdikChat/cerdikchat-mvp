@@ -102,3 +102,16 @@ No merge, Production deployment, remote D1 write/migration, OAuth/secrets/DNS ch
 7. Android Voice, document scanning UX, offline chat/radio mesh, load/SLO and disaster recovery remain NOT TESTED.
 
 Next actions: obtain exact-head Auto Pilot gates for PR #65/#66; resolve PR #35 base conflict; after approval, deploy only the isolated Preview for PR #64/PR #66; run health and Android tests; verify log redaction; perform isolated restore and edge load testing.
+
+## Final readiness update — 2026-11-05: PR #65/#66
+
+- PR #65 final head 154301128cc8824b76969b5da603807f5125b414: Auto Pilot legacy readiness passed on push run 41949989419 and PR run 41949995940; regression runs 41949989433 and 41949995918 passed. 95/95 tests. Eligible for Human Verification; not started.
+- PR #66 final head 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1: Auto Pilot legacy readiness passed on push run 41950001066 and PR run 41950007358; regression 41950000882 and Wrangler dry-run 41950007360 passed. 102/102 tests. Eligible for Human Verification; not started.
+- Both legacy gates record TypeScript NOT CONFIGURED and do not claim it passed. They are JavaScript branches with repository preflight, regression, Wrangler dry-run and safety scan.
+
+### Primary Preview binding blocker
+- Preview from PR #52 commit 9be9a8c3f6df416d66452c3d8c69c5112c853207 is available at https://atlas9-prompt-intelligence-mvp-cerdikchat-mvp.ngyoonseong.workers.dev .
+- Its deployment metadata does not list FILE_SCANNER or VOICE_RATE_LIMITER. Document analysis and voice transcription are expected to fail closed. No fake scanner or rate-limit bypass should be used.
+- PR #66 redaction change is not deployed to this Preview. PR #64 Connectors UI is also not deployed to this Preview.
+
+Next actions: start Human Verification only for the exact PR #65/#66 candidates if desired; first resolve Preview bindings and run isolated Preview/Android checks. Continue to keep all Production and privileged operations blocked.

@@ -137,3 +137,30 @@ Key links:
 - PR #53 backup workflow was not run on the current PR head; restore remains NOT TESTED.
 - PR #65/66 have regression/config dry-run evidence but no Auto Pilot readiness workflow on their exact heads. Human Verification remains BLOCKED until an exact-head gate exists and passes.
 - PR #66 Wrangler dry-run is explicitly local validation only; no deployment occurred.
+
+## Final exact-head readiness results — 2026-11-05
+
+| PR / final SHA | Run ID | Event | Status | Evidence |
+|---|---:|---|---|---|
+| #65 154301128cc8824b76969b5da603807f5125b414 | 41949995940 | pull_request | VERIFIED | Legacy Auto Pilot readiness; 95/95 tests, install/preflight/dry-run/safety pass |
+| #65 same SHA | 41949989419 | push | VERIFIED | Legacy Auto Pilot readiness; 95/95 tests |
+| #65 same SHA | 41949995918 | pull_request | VERIFIED | Regression |
+| #65 same SHA | 41949989433 | push | VERIFIED | Regression |
+| #66 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1 | 41950007358 | pull_request | VERIFIED | Legacy Auto Pilot readiness; 102/102 tests, install/preflight/dry-run/safety pass |
+| #66 same SHA | 41950001066 | push | VERIFIED | Legacy Auto Pilot readiness; 102/102 tests |
+| #66 same SHA | 41950000882 | push | VERIFIED | Regression |
+| #66 same SHA | 41950007360 | pull_request | VERIFIED | Wrangler 4.153.0 config dry-run; no deployment |
+| #60 06d45e7ddb2588bf5ca529f55e25a4fe2f498069 | 41949807568 | pull_request | VERIFIED | Auto Pilot readiness; 129/129 tests |
+| #60 same SHA | 41949807519 | pull_request | VERIFIED | Regression/install; 129/129 tests |
+| #60 same SHA | 41949807537 | pull_request | VERIFIED | Phase 3; 129/129 tests |
+| #60 same SHA | 41949807546 | pull_request | VERIFIED | Hybrid Gateway; 129/129 tests |
+
+Links:
+- #65: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949995940 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949989419 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949995918 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949989433 .
+- #66: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950007358 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950001066 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950000882 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950007360 .
+- #60: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807568 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807519 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807537 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807546 .
+
+## Gate interpretation
+- PR #65 and #66 exact heads published READY FOR HUMAN VERIFICATION. Human Verification has not been started.
+- The legacy gate transparently records TypeScript as NOT CONFIGURED and does not count it as passed. No doctor script exists on those branches; repository preflight ran instead.
+- Neither gate proves Preview runtime, Android, backup restore, model benchmark performance, scale, or Production readiness.

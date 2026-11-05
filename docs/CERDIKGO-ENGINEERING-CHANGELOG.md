@@ -95,3 +95,8 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 - Stable URL: https://atlas9-prompt-intelligence-mvp-cerdikchat-mvp.ngyoonseong.workers.dev ; immutable URL: https://29f5c85f-cerdikchat-mvp.ngyoonseong.workers.dev .
 - Deployment used cerdikchat-staging D1 ID 79267e63-e57f-4237-8b88-f1e477397771. No health probe or Android acceptance was performed. This is not the PR #64 Connectors candidate.
 - Deployment logs exposed query-string redaction disabled. PR #66 proposes the config fix; it has passed dry-run only and has not been deployed.
+
+## 2026-11-05 — Exact-candidate readiness gates for legacy JavaScript branches
+- PR #65 final head 154301128cc8824b76969b5da603807f5125b414 adds .github/workflows/autopilot-readiness-legacy.yml. Exact-head readiness runs 41949995940 and 41949989419 passed; 95/95 tests. It runs safe dependency installation, repository preflight, npm test, Wrangler dry-run, and workflow safety scan. TypeScript is not configured and is explicitly not counted as passed.
+- PR #66 final head 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1 adds the same legacy readiness gate. Runs 41950007358 and 41950001066 passed; 102/102 tests. Wrangler dry-run run 41950007360 also passed. No deployment occurred.
+- Both PRs remain draft/open/unmerged. Their exact candidates are eligible for Human Verification, but no Human Verification was initiated.
