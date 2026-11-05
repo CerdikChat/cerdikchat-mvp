@@ -400,3 +400,32 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Current main/Primary prompt still has legacy identity terminology. Exactly nine specialists are verified only in candidate PR branches; Optimus Prime remains coordinator, not a tenth agent. Gateway stays `plan_only`.
 - All seven capability scores remain NOT MEASURED; evidence-credit 0/100 per dimension until the complete reproducible benchmark samples are executed. No Gemini superiority/parity claim.
 - No merge, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, billing activation or other privileged operation. Human Verification NOT STARTED.
+
+ 
+## Security and governance continuation — 2026-11-05 20:58 WIB
+
+### VERIFIED — read-only Cloudflare configuration findings
+- Cloudflare Worker inventory contains cerdikchat-mvp and cerdikgo-mcp-preview; no dedicated CerdikGo Primary Worker was found.
+- Both scripts report observability enabled, head sampling 1.0, persisted invocation logs enabled, and redact_query_string=false.
+- cerdikchat-mvp script settings report a DB binding named DB to cerdikchat-db, not cerdikchat-staging. Its annotation labels the deployment as a controlled field-test Preview. This discrepancy means Preview D1 isolation is NOT VERIFIED; treat it as a release blocker until environment-specific settings are confirmed. No D1 operation was performed.
+- cerdikchat-mvp settings list secret binding names GEMINI_API_KEY and OPENAI_API_KEY. Values were not read. The inspected scorecard Worker/model-router do not reference these names. Do not rotate, remove or change secrets without a separate approval.
+- cerdikgo-mcp-preview settings list CERDIKGO_MCP_ENABLED=true and a bearer-token secret binding, but no D1, AI or rate-limit binding. This is the MCP service, not a Primary application runtime.
+
+### VERIFIED — privacy remediation candidate
+- PR #86 adds redact_query_string=true at top-level and Preview scopes, plus tests for both and Preview D1 staging binding.
+- Candidate ebf500bd10738580bb7001a8fec772ad463000e4; Auto Pilot 42041734344 SUCCESS (107/107); config dry-run 42041734530 SUCCESS.
+- This is source/configuration evidence only. Live Cloudflare settings still report false. No deployment or live setting change was made.
+- Existing PR #66 candidate 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1 passed runs 41950007358 and 41950007360, but its branch is 3 ahead / 3 behind and diverged. PR #86 is the clean current-base candidate; PR #66 remains unmerged.
+
+### VERIFIED / NOT INTEGRATED — authentication and identity
+- Governance branch auth/google-auth.js currently defines SESSION_TTL_SECONDS = 76 * 60 * 60. This is a 76-hour session policy and requires explicit risk review; no runtime expiry/revocation campaign was run.
+- PR #44 fail-closed Production default candidate c7a11a58716048a9170586dd8b26436193ee5e59 has regression run 42036705542 SUCCESS, but no full exact-candidate Auto Pilot or live Production-equivalent Preview authentication test is evidenced.
+- PR #73 PII log redaction candidate 98423d8aa14317052511cc69e98a8341713a3381 passed Auto Pilot 41974840542 (104/104); remains stacked on governance work and is not integrated.
+- PR #85 clean Primary identity candidate efdc6390a5555aa5050ec8b797a7f4004bb4d202 passed Auto Pilot 42041437992 (107/107). It declares exactly ATLAS-01 through ATLAS-09 and keeps Optimus Prime outside the nine. No integration or autonomous execution.
+- PR #62 has a separate canonical Core prompt candidate; Primary parity was not assumed from that branch.
+
+### FAILED / BLOCKED — secret scan and scanner
+- PR #74 full-history Gitleaks run 41975715983 scans 816 commits and reports no leaks. This is VERIFIED scanner configuration on the PR branch.
+- Scheduled backup runs 41695574776 and 41890146458 remain FAILED; backup archive generation and restore are NOT TESTED.
+- PR #76 real ClamAV runtime remains BLOCKED by paid Containers access. Mocked contract tests do not prove malware detection.
+- No secret values, OAuth credentials or tokens were read or changed.
