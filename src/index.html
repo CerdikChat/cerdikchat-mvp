@@ -1142,6 +1142,30 @@
   #requestFeatureDialog .settings-content textarea { min-height:72px; }
 }
 
+  
+    /* Prompt Intelligence: additive module styles; existing workspace layout remains intact. */
+    .pi-nav{display:flex;align-items:center;gap:9px;margin:8px 0;padding:12px;border:1px solid #1979bd;border-radius:12px;background:linear-gradient(110deg,#0c3154,#103b60);color:#f2f8ff;font:inherit;font-weight:750;text-align:left;cursor:pointer}
+    .pi-nav:hover,.pi-home-card:hover{border-color:#24c6e8;box-shadow:0 0 0 2px #24c6e822}
+    .pi-home-card{display:block;width:min(100%,760px);margin:18px auto 0;padding:16px;border:1px solid #1979bd;border-radius:16px;background:linear-gradient(125deg,#0c3154,#102d4a);color:#f2f8ff;text-align:left;cursor:pointer}
+    .pi-home-card strong{display:block;font-size:15px}.pi-home-card small{display:block;margin-top:4px;color:#b8d4eb}
+    .pi-shell{width:min(100%,1040px);margin:14px auto;padding:clamp(12px,2.5vw,24px);color:var(--text)}
+    .pi-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+    .pi-heading h1{margin:0;font-size:clamp(23px,4vw,32px)}.pi-heading p{margin:5px 0;color:var(--muted);font-size:13px}
+    .pi-card{padding:15px;border:1px solid var(--line);border-radius:15px;background:var(--panel);margin:12px 0}
+    .pi-label{display:block;margin:0 0 7px;font-size:12px;font-weight:750;color:var(--muted)}
+    .pi-input,.pi-select{width:100%;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font:inherit;font-size:16px}
+    .pi-input{min-height:110px;resize:vertical}.pi-row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+    .pi-btn{min-height:44px;padding:10px 14px;border:1px solid #2675a8;border-radius:10px;background:#103b60;color:#f2f8ff;font:inherit;font-size:13px;font-weight:750;cursor:pointer}
+    .pi-btn.primary{background:linear-gradient(110deg,#1688dc,#08a99c);border:0;color:#fff}.pi-btn:disabled{opacity:.55;cursor:wait}
+    .pi-output{min-height:140px;white-space:pre-wrap;overflow-wrap:anywhere;padding:13px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);font:13px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .pi-score{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.pi-score strong{font-size:26px;color:var(--mint)}
+    .pi-feedback{min-height:20px;margin:8px 0;color:var(--muted);font-size:12px}.pi-vault{display:grid;gap:8px}.pi-vault-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+    .pi-vault-item span{min-width:0;overflow-wrap:anywhere;font-size:12px}.pi-back{border:0;background:transparent;color:var(--blue);font:inherit;cursor:pointer;padding:8px 0}
+    [data-theme="light"] .pi-card,[data-theme="light-blue"] .pi-card{background:#fff;color:#172b43}
+    [data-theme="light"] .pi-input,[data-theme="light"] .pi-select,[data-theme="light"] .pi-output,[data-theme="light"] .pi-vault-item,[data-theme="light-blue"] .pi-input,[data-theme="light-blue"] .pi-select,[data-theme="light-blue"] .pi-output,[data-theme="light-blue"] .pi-vault-item{background:#f4f8fc;color:#17324f;border-color:#c7d5e4}
+    [data-theme="light"] .pi-home-card,[data-theme="light-blue"] .pi-home-card{background:#e7f3fc;color:#17324f;border-color:#b8d5eb}
+    @media(max-width:720px){.pi-shell{margin:4px auto;padding:10px}.pi-card{padding:12px}.pi-btn{flex:1 1 130px}.pi-vault-item{align-items:flex-start}}
+
   </style>
 </head>
 
@@ -1154,6 +1178,7 @@
       </div>
 
       <div class="tag">CLOSED BETA · V3</div>
+      <button class="pi-nav" type="button" data-pi-open aria-controls="promptIntelligence" aria-label="Open Prompt Intelligence">✧ <span data-pi-text="nav">Prompt Intelligence</span></button>
 
       <h2>Mulai dari sini</h2>
 
@@ -1399,16 +1424,57 @@
             <div class="eyebrow">CERDIKGO · AI INNOVATION WORKSPACE</div>
             <h1>Selamat datang di <span>Ruang Kerja AI</span></h1>
             <p>Satu ruang untuk berpikir lebih jernih, mengolah informasi, dan mengubah ide menjadi langkah nyata.</p>
+            <button class="pi-home-card" type="button" data-pi-open><strong>✧ Prompt Intelligence</strong><small data-pi-text="home">Ubah ide menjadi instruksi AI profesional, optimalkan, dan simpan.</small></button>
           </div>
 
         </div>
+      </section>
+
+      <section id="promptIntelligence" class="pi-shell" hidden aria-labelledby="piTitle">
+        <button class="pi-back" type="button" data-pi-back>← <span data-pi-text="back">Kembali ke workspace</span></button>
+        <div class="pi-heading"><div><h1 id="piTitle">✧ Prompt Intelligence</h1><p data-pi-text="subtitle">Professional Prompt Engineering & Quality System</p></div><span class="pill">ATLAS-9 · MVP</span></div>
+        <div class="pi-card">
+          <label class="pi-label" for="piIntent" data-pi-text="intentLabel">Apa yang ingin Anda capai dengan AI?</label>
+          <textarea id="piIntent" class="pi-input" maxlength="5000" placeholder="Contoh: Susun studi kelayakan ekspor ikan kerapu hidup ke Hong Kong..."></textarea>
+          <div class="pi-row" style="margin-top:12px">
+            <div style="flex:1 1 220px"><label class="pi-label" for="piDomain" data-pi-text="domainLabel">Domain profesional</label>
+              <select id="piDomain" class="pi-select">
+                <option value="blue">Blue Economy & Aquaculture</option><option value="research">Strategic Research & Advisory</option><option value="audit">Audit, Governance & Quality</option><option value="trade">International Trade & Business</option><option value="life">Life Sciences & Clinical Research</option><option value="creative">Creative & Digital Productivity</option>
+              </select>
+            </div>
+            <div style="flex:1 1 160px"><label class="pi-label" for="piOutput" data-pi-text="outputLabel">Format hasil</label>
+              <select id="piOutput" class="pi-select"><option value="structured report">Structured professional report</option><option value="action plan">Action plan</option><option value="research protocol">Research protocol</option><option value="executive brief">Executive brief</option><option value="checklist">Operational checklist</option><option value="presentation outline">Presentation outline</option></select>
+            </div>
+          </div>
+          <div class="pi-row" style="margin-top:12px">
+            <button class="pi-btn primary" id="piGenerate" type="button">✧ <span data-pi-text="generate">Generate prompt</span></button>
+            <button class="pi-btn" id="piOptimize" type="button" data-pi-text="optimize">Optimize existing prompt</button>
+            <button class="pi-btn" id="piEvaluate" type="button" data-pi-text="evaluate">Evaluate quality</button>
+          </div>
+          <p class="pi-feedback" id="piFeedback" role="status" aria-live="polite"></p>
+        </div>
+        <div class="pi-card">
+          <div class="pi-heading"><div><strong data-pi-text="resultTitle">Prompt workspace</strong><p data-pi-text="resultHint">Tinjau dan edit prompt sebelum digunakan.</p></div><div class="pi-score"><strong id="piScore">—</strong><span data-pi-text="scoreLabel">Quality score / 100 · heuristic</span></div></div>
+          <textarea id="piResult" class="pi-input" style="min-height:220px" maxlength="8000" placeholder="Prompt hasil generasi akan muncul di sini..."></textarea>
+          <div class="pi-row" style="margin-top:12px">
+            <button class="pi-btn" id="piCopy" type="button" data-pi-text="copy">Copy prompt</button>
+            <button class="pi-btn" id="piSave" type="button" data-pi-text="save">Save to Vault</button>
+            <button class="pi-btn primary" id="piSend" type="button" data-pi-text="send">Use in Chat</button>
+          </div>
+          <div id="piRubric" class="pi-feedback"></div>
+        </div>
+        <div class="pi-card">
+          <div class="pi-heading"><div><strong data-pi-text="vaultTitle">Prompt Vault</strong><p data-pi-text="vaultHint">Disimpan secara lokal di perangkat ini.</p></div><button class="pi-btn" id="piClearVault" type="button" data-pi-text="clear">Clear vault</button></div>
+          <div id="piVault" class="pi-vault"><p class="pi-feedback">Belum ada prompt tersimpan.</p></div>
+        </div>
+        <p class="pi-feedback" data-pi-text="disclaimer">Skor QA adalah pemeriksaan heuristik desain prompt, bukan jaminan kebenaran hasil AI. Periksa sumber dan keputusan penting secara independen.</p>
       </section>
 
 
       
       <div class="composer-wrap">
         <form id="chatForm" class="composer">
-          <div class="composer-heading"><span>Pesan Anda</span><button type="button" id="expandComposer" class="composer-expand" aria-expanded="false" aria-controls="message">⤢ Perbesar kolom</button></div>
+          <div class="composer-heading"><span>Pesan Anda</span><button type="button" class="composer-expand" data-pi-open aria-label="Improve with Prompt Intelligence">✧ Prompt Intelligence</button><button type="button" id="expandComposer" class="composer-expand" aria-expanded="false" aria-controls="message">⤢ Perbesar kolom</button></div>
           <textarea
             id="message"
             disabled
@@ -1439,6 +1505,7 @@
     </main>
   </div>
 
+  <script src="/prompt-intelligence.js"></script>
   <script>
     "use strict";
 
@@ -2925,6 +2992,7 @@
         if (message) message.placeholder = p.placeholder;
         if (current) current.textContent = lang.toUpperCase();
         if (select) select.value = lang;
+        window.CerdikGoPromptI18n?.(lang);
         try { localStorage.setItem("cerdikgo-ui-language", lang); } catch (_) {}
       }
       if (open && dialog) open.addEventListener("click", () => dialog.showModal());
@@ -2939,5 +3007,7 @@
     })();
 
   </script>
+  <script src="/wps-office-bridge.js" defer></script>
+  <script src="/validation-gate.js" defer></script>
 </body>
 </html>
