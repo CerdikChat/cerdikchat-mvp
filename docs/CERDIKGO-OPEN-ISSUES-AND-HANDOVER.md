@@ -330,3 +330,12 @@ Run links:
 - Backup restore, seven-day SLO, 100-concurrent-user test, p95 latency, and RPO/RTO remain NOT TESTED.
 
 Next actions: resolve branch graph; integrate only after conflict review; add Preview-only voice and scanner bindings after separate safe approval; verify actual runtime; complete benchmarks. Keep all privileged actions disabled.
+
+
+## P0 handover — Production authentication assurance
+
+Main worker.js only requires Google authentication when GOOGLE_AUTH_REQUIRED is true. Main wrangler.toml explicitly sets the flag for Preview, but does not declare a repository-level Production default. Cloudflare environment variables outside the repository were not accessible; therefore actual Production auth state is NOT TESTED, not proven disabled.
+
+PR #44 (head 30e05c23ce56116d80c3d5b872e3f9b5c7adef91) proposes fail-closed behavior for Production or any D1-backed Worker and passed regression run 41383765675 (40/40). It remains DRAFT and is not integrated.
+
+Before any Production-readiness claim: review/integrate the fail-closed default through an approved branch, run exact-head Auto Pilot, then verify auth behavior in an isolated Preview. Do not change OAuth or environment secrets as part of this audit. No Production deployment is authorized.
