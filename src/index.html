@@ -1171,6 +1171,9 @@
     [data-theme="light"] .pi-home-card,[data-theme="light-blue"] .pi-home-card{background:#e7f3fc;color:#17324f;border-color:#b8d5eb}
     @media(max-width:720px){.pi-shell{margin:4px auto;padding:10px}.pi-card{padding:12px}.pi-btn{flex:1 1 130px}.pi-vault-item{align-items:flex-start}}
 
+  
+    .connector-nav{display:flex;align-items:center;gap:10px;width:100%;margin:6px 0;padding:9px 11px;border:1px solid #1d6286;border-radius:12px;background:#102b46;color:#eaf8ff;text-align:left;font-weight:700;cursor:pointer}.connector-nav img{width:32px;height:32px}.connector-nav-copy{display:flex;flex-direction:column;flex:1}.connector-nav-copy small{font-size:10px;color:#9bbbd5;font-weight:500}.connector-glyph{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:#123c5a;color:#7fe7e5}.connector-mobile{display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:6px 9px;border:1px solid #1d6286;border-radius:10px;background:#0d2d4b;color:#dffaff;font-size:11px;font-weight:750}.connector-mobile img{width:20px;height:20px}.connectors-dialog{width:min(620px,calc(100vw - 24px));max-height:86dvh;overflow:auto;padding:0;border:1px solid #21658a;border-radius:18px;background:#0b1b30;color:#eef7ff}.connectors-dialog::backdrop{background:#020817b8}.connectors-hero{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid #1a496c}.connectors-hero img{width:58px;height:58px}.connectors-hero h2{margin:0}.connectors-hero p{margin:4px 0;color:#a9c2da;font-size:12px}.connector-list{display:grid;gap:8px;padding:14px}.connector-row{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #214664;border-radius:12px;background:#10243a}.connector-row small{display:block;color:#9bb4d1;font-size:11px}.connector-state{margin-left:auto;color:#f1d08c;font-size:10px;white-space:nowrap}.connectors-note{margin:0 14px 14px;padding:10px;background:#0c2935;color:#a8e5e2}.connectors-close{margin:0 14px 14px;padding:9px 14px;border-radius:9px;background:#143654;color:white}@media(max-width:720px){.top{flex-wrap:wrap}.top-actions{display:flex;flex:1 1 100%;flex-wrap:wrap;gap:6px}.connector-mobile{display:inline-flex!important;flex:1 1 130px;justify-content:center}}@media(max-width:380px){.connector-mobile{flex-basis:100%}}
+
   </style>
 </head>
 
@@ -1240,6 +1243,19 @@
         </details>
       </div>
 
+      <h2>Integrasi</h2>
+      <button class="connector-nav" id="connectorsOpenSide" type="button" aria-haspopup="dialog" aria-controls="connectorsDialog">
+        <img src="/connector-hub.svg" alt="" aria-hidden="true">
+        <span class="connector-nav-copy">Connectors<small>Kelola konektivitas sistem</small></span>
+        <span class="connector-nav-dot" aria-label="Status perlu verifikasi"></span>
+      </button>
+      <button class="connector-nav" id="bridgeOpenSide" type="button" aria-haspopup="dialog" aria-controls="bridgeDialog">
+        <span class="connector-glyph">⇄</span><span class="connector-nav-copy">Context Bridge<small>Integrasi konteks eksternal</small></span>
+      </button>
+      <button class="connector-nav" id="antivirusOpenSide" type="button" aria-haspopup="dialog" aria-controls="antivirusDialog">
+        <span class="connector-glyph">🛡</span><span class="connector-nav-copy">Antivirus Gateway<small>Pemindaian dokumen dan file</small></span>
+      </button>
+
       <h2>Tentang beta</h2>
       <div class="side-note">
         CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting
@@ -1257,6 +1273,8 @@
         </div>
         <strong>CerdikGo · Innovation Workspace</strong>
         <div class="top-actions">
+          <button class="connector-mobile" id="connectorsOpenTop" type="button" aria-haspopup="dialog" aria-controls="connectorsDialog"><img src="/connector-hub.svg" alt="" aria-hidden="true"> Connectors</button>
+          <button class="connector-mobile" id="bridgeOpenTop" type="button" aria-haspopup="dialog" aria-controls="bridgeDialog">⇄ Context Bridge</button>
           <button id="languageOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="languageDialog" aria-label="Pilih bahasa">🌐 <span id="languageCurrent">ID</span></button>
           <span class="pill">● AI · Beta</span>
           <button id="loginOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
@@ -1347,6 +1365,27 @@
         </form>
       </dialog>
 
+
+      <dialog class="connectors-dialog" id="connectorsDialog" aria-labelledby="connectorsTitle">
+        <div class="connectors-hero"><img src="/connector-hub.svg" alt=""><div><h2 id="connectorsTitle">CerdikGo Connectors</h2><p>Integration hub · status berdasarkan verifikasi</p></div></div>
+        <div class="connector-list">
+          <article class="connector-row"><span class="connector-glyph">⌘</span><div><strong>MCP</strong><small>Endpoint opt-in; koneksi runtime belum diverifikasi.</small></div><span class="connector-state">Perlu verifikasi</span></article>
+          <article class="connector-row"><span class="connector-glyph">✦</span><div><strong>Cloudflare Workers AI</strong><small>Adapter tersedia; binding dan inferensi perlu health check.</small></div><span class="connector-state">Runtime check</span></article>
+          <article class="connector-row"><span class="connector-glyph">▤</span><div><strong>Cloudflare D1</strong><small>Binding environment perlu verifikasi.</small></div><span class="connector-state">Runtime check</span></article>
+        </div>
+        <p class="connectors-note">Panel ini tidak mengaktifkan konektor, mengubah secrets, atau memberi akses baru.</p>
+        <button class="connectors-close" data-dialog-close="connectorsDialog" type="button">Tutup</button>
+      </dialog>
+      <dialog class="connectors-dialog" id="bridgeDialog" aria-labelledby="bridgeTitle">
+        <div class="connectors-hero"><div><h2 id="bridgeTitle">Context Bridge</h2><p>Jalur pertukaran konteks CerdikGo</p></div></div>
+        <div class="connector-list"><p>Entry point Primary telah disediakan. Integrasi ChatGPT Go/MCP dan sinkronisasi lintas akun belum aktif atau diverifikasi. Jangan masukkan API key atau kredensial rahasia di sini.</p></div>
+        <button class="connectors-close" data-dialog-close="bridgeDialog" type="button">Tutup</button>
+      </dialog>
+      <dialog class="connectors-dialog" id="antivirusDialog" aria-labelledby="antivirusTitle">
+        <div class="connectors-hero"><div><h2 id="antivirusTitle">Security Update · Antivirus Gateway</h2><p>Perlindungan file dan dokumen</p></div></div>
+        <div class="connector-list"><p>Gateway pemindaian masih memerlukan verifikasi scanner runtime. Upload harus tetap ditolak bila scanner tidak tersedia (fail-closed). Status antivirus aktif belum dapat diklaim.</p></div>
+        <button class="connectors-close" data-dialog-close="antivirusDialog" type="button">Tutup</button>
+      </dialog>
 
       <dialog class="settings-dialog" id="languageDialog" aria-labelledby="languageTitle">
         <div class="settings-head">
@@ -1546,6 +1585,9 @@
     const navBackdrop = document.querySelector("#navBackdrop");
     const sideNavigation = document.querySelector("#sideNavigation");
 
+    const primaryDialogs=["connectorsDialog","bridgeDialog","antivirusDialog"];
+    for(const id of primaryDialogs){const dialog=document.getElementById(id);document.querySelectorAll('[aria-controls="'+id+'"]').forEach(button=>button.addEventListener("click",()=>dialog?.showModal()));}
+    document.querySelectorAll("[data-dialog-close]").forEach(button=>button.addEventListener("click",()=>document.getElementById(button.dataset.dialogClose)?.close()));
     function openAccountDialog() {
       if (!settingsDialog.open) settingsDialog.showModal();
     }
