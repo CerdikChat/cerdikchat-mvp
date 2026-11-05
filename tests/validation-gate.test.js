@@ -37,7 +37,7 @@ test("AI workspace reports only the outcome of its own request", () => {
 
 test("Core workspace controls and network status have ID, EN and ZH translations", () => {
   for (const language of ["id", "en", "zh"]) {
-    assert.match(index, new RegExp(`\${language}: \\\{`));
+    assert.ok(index.includes(`${language}: {`), `Missing language pack: ${language}`);
   }
   for (const key of ["tools:", "voiceConversation:", "docLabel:", "composer:", "networkOnline:", "networkOffline:"]) {
     assert.ok(index.includes(key), `Missing translation key: ${key}`);
