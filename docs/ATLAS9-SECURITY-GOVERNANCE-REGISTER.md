@@ -498,3 +498,16 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Main `wrangler.toml` has observability enabled with 100% sampling but does not set `redact_query_string=true`. PR #86 is a Draft configuration candidate only; no live change occurred. The separate MCP Worker is not covered by PR #86 and needs a separately reviewed source/configuration path.
 - Main `worker.js` still describes optional Google authentication enforced only when `GOOGLE_AUTH_REQUIRED=true`; the canonical identity fix is in PR #89, and fail-closed Production/D1 auth remains a separate Draft candidate (#87 stacked on #85). No live auth test or OAuth change was performed.
 - Decision: do not delete/rotate legacy secret bindings or change observability/D1/auth settings without separate approval. Continue plan_only and no privileged operations.
+
+
+## Correction — 2026-11-06: exact-head CI completed successfully
+
+The preceding audit append initially recorded the new documentation head as NOT TESTED while workflows were still starting. That interim status is superseded by completed exact-head evidence:
+
+- Tested head: `7180e970676dcf52d30a054e26ab24a0d485db23` on `atlas9/cerdikgo-100-percent-scorecard`.
+- Auto Pilot Readiness `42080700327`: SUCCESS; `npm run doctor` PASS; strict TypeScript PASS; `npm test` 129/129; workflow safety scan PASS.
+- Regression/install `42080700334`: SUCCESS, 129/129.
+- Phase 3 regression `42080700361`: SUCCESS, 129/129.
+- Hybrid Gateway `42080700595`: SUCCESS, 129/129; Wrangler 4.153.0 Worker bundle `deploy --dry-run` PASS, no deployment.
+- Failed tests: 0. Non-blocking runner warnings: Node.js 20 deprecation for checkout/setup-node v4 under Node.js 24 and Node `punycode` deprecation; neither failed a workflow.
+- This is exact-commit CI/configuration evidence only. It does not prove live Preview, Android, Production, scanner, backup restore, scale, or competitive model benchmark acceptance. Human Verification remains NOT STARTED.
