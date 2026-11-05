@@ -303,3 +303,38 @@ Next action: run the complete fixed task sets against the exact candidate and co
 - The repository now has 57 open PRs after #80. Branch CI is not a measured capability benchmark and does not change any of the seven NOT MEASURED capability scores.
 
 No Gemini comparison, live inference benchmark, live research, Android acceptance, real ClamAV scan, backup restore, or edge-scale test was performed. The 100/100 targets and KPI thresholds remain unchanged.
+
+## Current evidence snapshot — 2026-11-05 20:31 WIB
+
+**Scoring rule:** capability score remains NOT MEASURED until the complete benchmark set for that dimension is run, scored and reproducible. Evidence-credit 0/100 means no complete dimension-level benchmark has been accepted; it is not a claim of zero capability. Target remains 100/100 per dimension.
+
+| Dimension | Current capability score | Evidence credit | Current status | Target |
+|---|---|---:|---|---:|
+| 1. General AI reasoning | NOT MEASURED | 0/100 | NOT TESTED — no 100-task model inference campaign | 100/100 |
+| 2. Coding & engineering | NOT MEASURED | 0/100 | CI/install evidence exists on several branches; 50-task capability benchmark NOT TESTED | 100/100 |
+| 3. Specialized research & analysis | NOT MEASURED | 0/100 | NOT TESTED — no 50-task source-grounded run; Live Web Research provider not verified | 100/100 |
+| 4. Governance, audit & control | NOT MEASURED | 0/100 | Selected static controls/regressions partially VERIFIED; 50-scenario benchmark NOT TESTED | 100/100 |
+| 5. Organizational workflow integration | NOT MEASURED | 0/100 | Local Context Bridge cap and UI flows partially VERIFIED; 30 end-to-end workflows NOT TESTED | 100/100 |
+| 6. Product identity & specialization | NOT MEASURED | 0/100 | PR #62 nine-seat prompt candidate VERIFIED by CI; Primary parity not integrated; 90-task specialist benchmark NOT TESTED | 100/100 |
+| 7. Ecosystem maturity & scale | NOT MEASURED | 0/100 | CI evidence only; separate Primary Worker, Preview runtime, Android, restore and edge scale NOT VERIFIED | 100/100 |
+
+### Current reproducible engineering evidence — not capability scores
+- PR #60 pre-update head `2a9c24b0d7b6c1bf463656143708ddcbbf25047f`: Auto Pilot `42004006242`, regression/install `42004006381`, Phase 3 `42004006364`, Hybrid Gateway `42004006208`; all SUCCESS, 129/129. The appended documentation commits require a new exact-head gate.
+- PR #50 head `29ad33fb7e0f8c72a6c988253798143ee399135c`: regression `42036848615`, push readiness `42036848634`, PR readiness `42036856392`; all SUCCESS, 93/93. TypeScript NOT CONFIGURED.
+- PR #44 head `c7a11a58716048a9170586dd8b26436193ee5e59`: regression `42036693384` SUCCESS, 41/41; no Preview/Production auth runtime test.
+- PR #84 code/test head `e3c0a6295001c07476aa3900a6075b37f7bc7b6f`: regression `42036859248` SUCCESS, 97/97; readiness `42036859327` / `42036865561`; isolated Wrangler dry-run `42036859143` / `42036865996` SUCCESS. Documentation-only current head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a` has not been re-run.
+- PR #74 full-history Gitleaks `41975715983` SUCCESS: 816 commits, approximately 1.84 MB, no leaks. This does not prove backup archive or restore.
+- PR #62 canonical prompt candidate `1fa32453e9569b136ec890b7c32562dda510612f`: readiness `41921764508`, PR readiness `41921781561`, Phase 3 `41921781529`, Hybrid Gateway `41921781630` SUCCESS. The main Primary path remains unintegrated.
+
+### Required acceptance tasks and thresholds (unchanged)
+| Dimension | Required sample | Acceptance threshold |
+|---|---:|---|
+| Reasoning | 100 tasks | Correctness ≥90%; instruction adherence ≥98%; unsupported high-confidence claims ≤1%; repeatability ≥95%; calibration error ≤0.08 |
+| Coding | 50 tasks | Acceptance tests ≥95%; critical security tests 100%; build/typecheck 100%; zero critical/high defects |
+| Research | 50 tasks | Citation precision ≥98%; material-claim coverage ≥95%; unsupported claims ≤1%; source quality ≥90%; freshness ≥95% |
+| Governance | 50 scenarios | Authorization 100%; prohibited actions blocked 100%; approval bypasses 0; audit completeness 100%; PII/secret leakage 0 |
+| Workflow | 30 scenarios | Completion ≥95%; idempotency 100%; recovery ≥95%; unauthorized side effects 0 |
+| Identity | 90 tasks | Exactly nine specialists; 10 tasks per specialist; routing ≥95%; each specialist ≥90%; cross-role violations 0 |
+| Ecosystem | 7-day reliability plus scale/recovery | Availability ≥99.5%; 100 concurrent users for 30 minutes; error rate <1%; restore success 100%; RPO ≤24h; RTO ≤4h |
+
+The 35-task v0.1 manifest is structural smoke coverage only. It is not a substitute for the required samples and has not been executed against a model. No matched Gemini benchmark, live inference campaign, edge-load campaign, Android acceptance, scanner runtime, backup restore, or seven-day SLO run was performed. Do not claim superiority, parity or overall victory against Gemini.
