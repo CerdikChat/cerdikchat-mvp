@@ -208,3 +208,19 @@ These decisions preserve the existing safety boundary and do not authorize integ
 ## PR #60 mergeability correction — 2026-11-05
 
 Latest GitHub PR metadata reports mergeable=true for head a6d00bbdec7ba6d49460441ef2327224f6a41ba5, superseding earlier transient mergeable=false observations. The compare graph remains 79 ahead / 2 behind. This metadata does not authorize merge; PR #60 remains Draft and no integration was performed. Exact-head Auto Pilot 42003333775, regression/install 42003333772, Phase 3 42003333754, and Hybrid Gateway 42003333825 all passed. Human Verification remains NOT STARTED.
+
+## Decision and approval record — 2026-11-05 20:31 WIB
+
+1. **Seven-dimension target:** retain 100/100 as a measurable acceptance target. Current capability scores are NOT MEASURED; evidence-credit remains 0/100 per dimension. Do not infer model quality from feature presence or CI.
+2. **Model comparison:** no matched Workers AI/Gemini benchmark was executed. No superiority, parity or overall competitive win is claimed.
+3. **Exactly nine specialists:** preserve ATLAS-01 through ATLAS-09. Optimus Prime is coordinator outside the nine; do not add a tenth specialist or treat legacy labels as current seats.
+4. **Gateway control:** remain `plan_only`; no autonomous specialist execution, external tool execution, remote writes or privileged side effects.
+5. **Authentication:** PR #44 is the Draft fail-closed Production-auth candidate (head `c7a11a58716048a9170586dd8b26436193ee5e59`, regression `42036693384`, 41/41). It is not integrated; Production runtime state is NOT TESTED.
+6. **Isolated Worker:** PR #84 sets `GOOGLE_AUTH_REQUIRED=true` on its isolated config and passes 97/97 plus Wrangler dry-run on code/test head `e3c0a6295001c07476aa3900a6075b37f7bc7b6f`. It lacks dedicated D1, rate-limit, OAuth, secret and scanner resources and remains a non-functional readiness package. No deployment authorized.
+7. **PR #50:** exact head `29ad33fb7e0f8c72a6c988253798143ee399135c` passes 93/93 and readiness checks. Keep Draft pending Human Leader's device acceptance; do not misrepresent a share sheet as confirmed WPS launch.
+8. **PR #60:** pre-update head `2a9c24b0d7b6c1bf463656143708ddcbbf25047f` passed its exact Auto Pilot gate and 129/129 tests. Current base compare is 103 ahead / 2 behind, merge base `de11d34257005ba72a621312230489a7d161ff53`; GitHub reports mergeable=true but no merge/rebase is authorized. The appended docs require fresh exact-head CI.
+9. **Human Verification:** NOT STARTED. The Auto Pilot gate must pass for the exact candidate commit selected for any later Human Verification. Preview runtime, Android acceptance and Production readiness remain separate gates.
+10. **Free-tier and privacy:** no paid scanner/container, billing activation, confidential document transfer, OAuth/secret change or external service purchase is approved.
+11. **Prohibited operations:** no merge, Production deployment, remote D1 write/migration, DNS change, OAuth/secret modification, billing activation or other privileged operation was performed.
+
+These decisions preserve the existing approval boundary. Any later change to execution mode, resource provisioning, billing, external document transfer or Production release requires separate explicit approval and a traceable decision entry.
