@@ -34,3 +34,10 @@ test("Connector icon is a scalable, accessible SVG hub mark", () => {
   assert.match(icon, /linearGradient/);
   assert.match(html, /src="\/connector-hub\.svg"/);
 });
+
+test("Connectors action remains visible and reachable on narrow Android layouts", () => {
+  assert.match(html, /\.top-actions\s*\{[\s\S]*?flex-wrap:\s*wrap/);
+  assert.match(html, /\.connector-mobile\s*\{[\s\S]*?display:\s*inline-flex\s*!important/);
+  assert.match(html, /@media\s*\(max-width:\s*380px\)/);
+  assert.match(html, /\.connector-mobile\s*\{[\s\S]*?flex-basis:\s*100%/);
+});
