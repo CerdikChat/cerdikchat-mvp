@@ -2872,7 +2872,7 @@
             voiceTranscript.value = String(result.text || "").slice(0, 8000);
             voiceReview.hidden = false;
             voiceState.textContent = "Transkripsi siap. Edit bila perlu, lalu pilih tindakan berikutnya.";
-            voiceTranscript.focus();
+            // Tap-to-Open: do not move focus to the transcript after recording.
           } catch (error) {
             voiceState.textContent = "Transkripsi gagal: " + String(error.message || "Kesalahan layanan").slice(0,120);
           }
