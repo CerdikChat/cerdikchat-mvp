@@ -631,3 +631,31 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 
 ### Safety and release boundary
 No PR merge, Production deployment, remote D1 read/write/migration, OAuth/secret/DNS change, billing activation, live inference, or autonomous agent execution was performed. Human Verification was NOT STARTED. CI readiness, Preview runtime, Android acceptance and Production readiness remain separate gates.
+
+ 
+## Security and product-identity continuation — 2026-11-05 21:12 WIB
+
+### Repository and exact-head snapshot
+- Open PR count: 62.
+- Scorecard branch: atlas9/cerdikgo-100-percent-scorecard. Before this append-only update, head fda4216b843704276de17ea122547a839cfbd01a passed all four exact-head workflows: Auto Pilot 42042175701, regression/install 42042175507, Phase 3 42042175599, Hybrid Gateway 42042175436. All SUCCESS; 129/129 tests; preflight 16/16; strict TypeScript PASS; Wrangler 4.153.0 dry-run PASS; safety scan PASS.
+- The scorecard branch comparison before this documentation continuation was 145 ahead / 2 behind its base. Do not rebase or merge in this run.
+
+### VERIFIED — CerdikGo Worker identity correction
+- PR #84 latest head: 2d37dea6fa190d37b887d648ede7d943f8024edd on atlas9/cerdikgo-worker-isolation-readiness.
+- Changed files: wrangler.cerdikgo.toml; tests/cerdikgo-worker-config.test.mjs; docs/CERDIKGO_WORKER_ISOLATION_READINESS.md.
+- Replaced legacy target name atlas9-prompt-intelligence-mvp-cerdikchat-mvp with cerdikgo-primary-preview and added an exact-name regression assertion.
+- Auto Pilot 42042384546 SUCCESS, 98/98; Worker readiness 42042384481 SUCCESS, 98/98; Wrangler dry-run confirms GOOGLE_AUTH_REQUIRED=true.
+- This is a configuration candidate only. Cloudflare inventory still contains no script named cerdikgo-primary-preview; no Worker was created or deployed. Dedicated D1, rate limiter, OAuth, secrets and scanner remain unprovisioned. PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/84 .
+
+### VERIFIED — Primary authentication fail-closed candidate
+- PR #87 head: 5ef76571da95398373ad4f91620971b7b03fe45a on atlas9/cerdikgo-primary-auth-fail-closed-20261105.
+- Base: PR #85 identity candidate efdc6390a5555aa5050ec8b797a7f4004bb4d202; branch is 5 ahead / 0 behind that base.
+- Changed files: worker.js; auth/google-auth.js; tests/production-auth-default.test.mjs; tests/production-d1-auth-default.test.mjs; docs/PRIMARY-AUTH-FAIL-CLOSED.md.
+- Enforces auth for ENVIRONMENT=production, any D1-backed Worker, or explicit GOOGLE_AUTH_REQUIRED=true; auth config endpoint mirrors the same rule. Tests prove unauthenticated chat is rejected before rate limiting or AI inference.
+- Auto Pilot 42042622138 SUCCESS: 114/114 tests; repository preflight PASS; Wrangler 4.153.0 dry-run PASS; workflow safety scan PASS. TypeScript NOT CONFIGURED on this legacy branch.
+- Draft PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/87 .
+
+### Release and safety boundary
+- The 76-hour Primary session TTL remains unchanged and requires policy review; no session expiry/revocation runtime test was performed.
+- Live Cloudflare script settings still report cerdikchat-mvp DB -> cerdikchat-db, redact_query_string=false, and persisted invocation logs at 100% sampling. PR #86 is a code-only redaction candidate; no live settings changed.
+- No PR merge, deployment, D1 operation, OAuth/secret/DNS change, billing action, live inference or autonomous execution. Human Verification NOT STARTED.
