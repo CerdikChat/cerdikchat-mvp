@@ -257,3 +257,13 @@ Run links:
 - **PR #80 — local Context Bridge Inbox cap:** head `724fdb092d584cead6f34612693de8cb9336c7eb`, run 42002523884 SUCCESS. The 50-item cap limits local in-tab memory growth; it is not a server-side quota or cross-tab control.
 
 No secrets, OAuth settings, DNS, Production resources, remote D1, or billing were modified during this continuation. Keep the scanner fail-closed and gateway `plan_only`.
+
+
+## Security/availability audit correction — 2026-11-05
+
+- Main scheduled backup run 41890146458 (2026-11-04) and 41695574776 (2026-11-03) both failed in the Gitleaks step before archive creation. Logs explicitly report no .gitleaks.toml and default-rule detection. PR #74's narrow reviewed exception and full-history scan pass on its branch, but remain unintegrated; therefore main backup remains FAILED. No backup archive, Drive upload, or restore is evidenced for those failed runs.
+- PR #52 auth implementation uses server-side Google ID-token verification, opaque hashed sessions, HttpOnly/Secure cookies, double-submit CSRF, same-origin checks, D1 allowlist, and role/governance-tier checks. Session TTL is 76 hours; this requires an explicit risk/expiry policy review before broad deployment. Governance migration 0007 is only a Draft PR artifact and has not been applied to remote D1.
+- PR #32 voice handler requires env.VOICE_RATE_LIMITER and fails closed if missing. The reviewed wrangler.toml at PR #32 head defines VOICE_RATE_LIMITER only under [previews.ratelimits], with no top-level Production ratelimit binding. If deployed unchanged to Production, the voice endpoint will return 503 rather than operate. This is a verified configuration gap, not an authorization bypass.
+- PR #76 file-analysis path requires env.FILE_SCANNER before AI processing and rejects absent/unavailable scanner. The reviewed wrangler.toml does not define a FILE_SCANNER service binding. Scanner runtime is therefore NOT PROVISIONED; fail-closed upload behavior is safer than bypassing malware scanning.
+- PR #35 document research and main Core currently hardcode Gemma 4 26B A4B; PR #32 voice hardcodes Workers AI Whisper. No centralized model router/fallback policy or live inference benchmark is verified.
+- No OAuth, secrets, DNS, D1, billing, or Production configuration was changed during this review.
