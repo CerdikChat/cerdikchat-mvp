@@ -1476,7 +1476,8 @@ export default {
     if (url.pathname === "/api/feature-requests") return submitFeatureRequest(request, env, corsHeaders);
     if (url.pathname === "/api/admin/session") return adminSession(request, env);
     if (url.pathname === "/api/admin/users/pending") return pendingAdminUsers(request, env);
-    if (url.pathname === "/api/admin/feature-requests") return adminFeatureRequests(request, env);\n    if (url.pathname === "/api/admin/feature-requests/archive") return archiveFeatureRequest(request, env);
+    if (url.pathname === "/api/admin/feature-requests") return adminFeatureRequests(request, env);
+    if (url.pathname === "/api/admin/feature-requests/archive") return archiveFeatureRequest(request, env);
     if (url.pathname === "/api/admin/users/decide") return decideAccessRequest(request, env);
 
     // The Admin Console is a distinct document and is served only after a server-side role check.
