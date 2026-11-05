@@ -156,3 +156,8 @@ Initial candidate c9a5b7f5575e4571a7fefe3f7df39827a4a76439 failed 4/4 PR workflo
 - Integrate privacy and identity fixes through the branch dependency chain and revalidate exact candidate SHAs.
 - Implement a full benchmark runner and expand datasets to the KPI sample sizes in the benchmark protocol; run model comparisons only when provider credentials and free-tier constraints are available.
 - Run Preview health, Android acceptance, backup restore and load/SLO tests as separate evidence packages.
+
+
+## Handover correction — 2026-11-05: PR #60 exact-head blocker
+
+The passing PR #60 checkpoint is parent SHA `ad3cbd61b6467675e71e8445f113635c45beb8c9` only. Append-only audit updates advanced the branch; the pre-correction observed head was `d8fd4d04b119f4e8a63bffa6624396ead9f723f3`. No workflow run or combined status is available for that later head. Compare reports 59 commits ahead and 2 behind base; PR metadata reports mergeable=false. Do not start Human Verification or merge PR #60 until the branch is reconciled without losing the append-only audit trail and a new exact-head gate passes.
