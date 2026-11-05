@@ -1613,7 +1613,7 @@ export default {
       }
 
       const authorization = request.headers.get("Authorization") || "";
-      const match = authorization.match(/^Bearer\\s+(.+)$/i);
+      const match = authorization.match(/^Bearer\s+(.+)$/i);
       const suppliedToken = match?.[1]?.trim() || "";
       if (!suppliedToken || !(await verifyMcpBearerToken(suppliedToken, configuredToken))) {
         return jsonResponse(
