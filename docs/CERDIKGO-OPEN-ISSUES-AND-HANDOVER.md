@@ -309,3 +309,24 @@ Run links:
 5. Keep PR #76/78 scanner fail-closed and free-tier; no billing or public scanner fallback.
 6. Finish Android voice/document tests, live research, workflow idempotency, and full benchmark suites.
 7. Keep Human Verification and Production readiness separate from CI success.
+
+
+## Handover correction — 2026-11-05
+
+### Repository and branch state
+- Direct GitHub REST listing now returns 57 open PRs (56 existed before PR #80 was opened).
+- Main head remains bc6545d6d19fd4b749d0b65fefba3d74775e0221. Main package.json has only the node --test test script and Node >=20; doctor/strict TypeScript gates are on candidate branches, not yet main.
+- PR #60 final head 8ed0be04b883e8f1639728290528de87cc16fe6b passes all four exact-head workflows (42002779910, 42002779876, 42002779803, 42002779818), but compare is diverged 79 ahead / 2 behind base. PR #60 is DRAFT and non-mergeable. Do not rebase or force-push without a reviewed dependency plan.
+- PR #80 head 724fdb092d584cead6f34612693de8cb9336c7eb passes Auto Pilot (42002523884, 113/113), regression (42002508692), and push Auto Pilot (42002508523). It is a DRAFT child of #75 and mergeable.
+
+### Additional verified blockers
+- Main backup scheduled runs 41890146458 and 41695574776 both FAILED at Gitleaks before archive creation. PR #74 fix is not integrated. The main branch's last observed regression run is 41318847530 on 2026-11-01 (SUCCESS); no later main regression is evidenced.
+- Voice code requires VOICE_RATE_LIMITER. The inspected PR #32 Wrangler configuration defines it only in Preview; Production binding is absent, so Production voice requests would fail closed with 503 if that configuration were deployed unchanged.
+- File analysis on PR #76 requires FILE_SCANNER before AI processing, but the inspected Wrangler configuration has no FILE_SCANNER service binding. ClamAV runtime is not provisioned; upload analysis remains blocked/fail-closed.
+- PR #52 auth design has 76-hour sessions and migration 0007; session duration needs review and remote D1 migration remains NOT PERFORMED.
+- Document analysis and Core use a hardcoded Gemma 4 26B A4B route; voice uses Whisper. Central model routing/fallback and live inference are NOT TESTED.
+- PR #35 structured document research is not proof of live web research. No configured live web retrieval provider or persistent RAG runtime was verified.
+- Android voice, document scan, UX and accessibility acceptance remain NOT TESTED.
+- Backup restore, seven-day SLO, 100-concurrent-user test, p95 latency, and RPO/RTO remain NOT TESTED.
+
+Next actions: resolve branch graph; integrate only after conflict review; add Preview-only voice and scanner bindings after separate safe approval; verify actual runtime; complete benchmarks. Keep all privileged actions disabled.
