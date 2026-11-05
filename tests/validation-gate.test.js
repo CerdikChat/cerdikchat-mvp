@@ -48,7 +48,7 @@ test("Core workspace controls and network status have ID, EN and ZH translations
 });
 
 test("Voice transcription preserves Android Tap-to-Open keyboard behavior", () => {
-  const transcriptHandler = index.slice(index.indexOf('voiceUseTranscript.addEventListener'), index.indexOf('voiceSendToAI.addEventListener'));
+  const transcriptHandler = index.slice(index.indexOf('voiceUseTranscript.addEventListener("click"'), index.indexOf('voiceSendToAI.addEventListener("click"'));
   assert.match(transcriptHandler, /input.value = transcript/);
   assert.doesNotMatch(transcriptHandler, /input\.focus\(\)/);
   const transcriptionReady = index.slice(index.indexOf('voiceTranscript.value = String(result.text'), index.indexOf('} catch (error)', index.indexOf('voiceTranscript.value = String(result.text')));
