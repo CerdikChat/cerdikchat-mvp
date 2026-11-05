@@ -26,7 +26,7 @@ test("Gate rejects failure reports without an explicit reason", () => {
 });
 
 test("AI workspace reports only the outcome of its own request", () => {
-  assert.match(wps, /gate\("ai-core","accepted"/);
+  assert.match(wps, /cerdikgo:ai-core-verified/);
   assert.match(wps, /gate\("ai-core","rejected"/);
   assert.match(wps, /Permintaan analisis teks gagal:/);
 });
@@ -36,7 +36,7 @@ test("Main chat reports AI Core ACCEPTED only after a successful HTTP response a
   assert.match(index, /if \(!response\.ok\)/);
   assert.match(index, /if \(!answer\)/);
   assert.match(index, /aiResponseVerified = true/);
-  assert.match(index, /CerdikGoValidationGate\?\.report\(\s*"ai-core",\s*"accepted"/);
+  assert.match(index, /cerdikgo:ai-core-verified/);
   assert.match(index, /CerdikGoValidationGate\?\.report\(\s*"ai-core",\s*"rejected"/);
   assert.match(index, /if \(!aiResponseVerified\)/);
 });
@@ -45,5 +45,18 @@ test("Main chat does not mark AI Core accepted from online status or model-gener
   const acceptedAt = index.indexOf('"accepted"');
   const replyCheckAt = index.indexOf('if (!answer)');
   assert.ok(acceptedAt > replyCheckAt, "ACCEPTED report must follow the non-empty reply check");
-  assert.match(index, /Endpoint \/api\/chat mengembalikan HTTP/);
+  assert.match(index, /response\.status !== 200 \|\| !model/);
+});
+
+test("Validation Gate accepts AI Core only through strict evidence event", () => {
+  assert.match(gate, /cerdikgo:ai-core-verified/);
+  assert.match(gate, /detail\.httpStatus !== 200/);
+  assert.match(gate, /typeof detail\.model !== "string"/);
+  assert.match(gate, /typeof detail\.reply !== "string"/);
+});
+
+test("WPS bridge requires HTTP 200, model identifier and non-empty reply before reporting AI evidence", () => {
+  assert.match(wps, /response\.status!==200\|\|!reply\|\|!model/);
+  assert.match(wps, /cerdikgo:ai-core-verified/);
+  assert.match(wps, /gate\("ai-core","rejected"/);
 });
