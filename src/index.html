@@ -977,7 +977,15 @@
             </div>
             <div id="pendingUsersList" aria-live="polite"></div>
           </article>
-          <article class="admin-module"><h3>Security & Audit</h3><p>Area pemantauan autentikasi dan audit trail. Data audit belum ditampilkan karena endpoint dashboard belum tersedia.</p><small>Awaiting verified API</small></article>
+          <article class="admin-module" id="superAdminAuditModule" hidden>
+            <h3>Security & Audit · Super Admin</h3>
+            <p>Audit trail read-only: 100 peristiwa terbaru. Tidak ada kontrol untuk mengubah atau menghapus catatan audit.</p>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0">
+              <button class="settings-button" id="refreshAdminAudit" type="button">↻ Muat audit trail</button>
+              <span id="adminAuditStatus" role="status" aria-live="polite">Menunggu verifikasi Super Admin…</span>
+            </div>
+            <div id="adminAuditList" aria-live="polite"></div>
+          </article>
           <article class="admin-module"><h3>Platform Operations</h3><p>Area status layanan dan konfigurasi platform. Tidak ada metrik simulasi atau kontrol operasional palsu.</p><small>Awaiting verified API</small></article>
         </div>
       </section>
@@ -1271,6 +1279,11 @@
     const refreshPendingUsersButton = document.querySelector("#refreshPendingUsers");
     const pendingUsersStatus = document.querySelector("#pendingUsersStatus");
     const pendingUsersList = document.querySelector("#pendingUsersList");
+    const superAdminAuditModule = document.querySelector("#superAdminAuditModule");
+    const refreshAdminAuditButton = document.querySelector("#refreshAdminAudit");
+    const adminAuditStatus = document.querySelector("#adminAuditStatus");
+    const adminAuditList = document.querySelector("#adminAuditList");
+    refreshAdminAuditButton.addEventListener("click", loadAdminAuditEvents);
     refreshPendingUsersButton.addEventListener("click", loadPendingUsers);
     const authUser = document.querySelector("#authUser");
     const authLogout = document.querySelector("#authLogout");
@@ -1284,7 +1297,7 @@
     let googleClientId = "";
 
     async function loadPendingUsers() {
-      if (!isAuthenticated || currentRole !== "admin") return;
+      if (!isAuthenticated || (currentRole !== "admin" && currentRole !== "super_admin")) return;
       pendingUsersStatus.textContent = "Memuat permintaan…";
       pendingUsersList.replaceChildren();
       try {
@@ -1319,6 +1332,45 @@
       }
     }
 
+    async function loadAdminAuditEvents() {
+      if (!isAuthenticated || currentRole !== "super_admin") return;
+      adminAuditStatus.textContent = "Memuat audit trail read-only…";
+      adminAuditList.replaceChildren();
+      try {
+        const response = await fetch("/api/admin/audit", {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Accept": "application/json" }
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || payload.error || "Audit trail tidak tersedia.");
+        const events = Array.isArray(payload.events) ? payload.events : [];
+        adminAuditStatus.textContent = events.length
+          ? events.length + " peristiwa terbaru · read-only"
+          : "Belum ada peristiwa audit.";
+        for (const event of events) {
+          const row = document.createElement("div");
+          row.style.cssText = "padding:10px 0;border-top:1px solid var(--line);display:grid;gap:4px";
+          const heading = document.createElement("strong");
+          heading.textContent = String(event.action || "EVENT");
+          const meta = document.createElement("small");
+          const date = Number(event.createdAt);
+          meta.textContent = [
+            Number.isFinite(date) ? new Date(date * 1000).toLocaleString() : "Waktu tidak tersedia",
+            "oleh " + (event.actorEmail || "Administrator"),
+            event.targetEmail ? "target " + event.targetEmail : ""
+          ].filter(Boolean).join(" · ");
+          const detail = document.createElement("span");
+          detail.textContent = JSON.stringify(event.details || {});
+          row.append(heading, meta, detail);
+          adminAuditList.append(row);
+        }
+      } catch (error) {
+        adminAuditStatus.textContent = error instanceof Error ? error.message : "Audit trail gagal dimuat.";
+      }
+    }
+
     async function approvePendingUser(email, button) {
       if (!isAuthenticated || currentRole !== "admin" || !email) return;
       button.disabled = true;
@@ -1348,8 +1400,9 @@
       authPanel.hidden = !authRequired && !authConfigured;
       authGate.hidden = !(authRequired && !isAuthenticated);
       portalGate.hidden = !(authRequired && authConfigured && !isAuthenticated);
-      const isAdminSession = isAuthenticated && currentRole === "admin";
+      const isAdminSession = isAuthenticated && (currentRole === "admin" || currentRole === "super_admin");
       adminPlaceholder.hidden = !isAdminSession;
+      superAdminAuditModule.hidden = !(isAuthenticated && currentRole === "super_admin");
       document.querySelector("#adminSettingsSection").hidden = !isAdminSession;
       adminDisplayName.textContent = user?.displayName || "Administrator";
       adminEmail.textContent = user?.email || "Sesi administrator aktif";
@@ -1371,7 +1424,8 @@
       if (voiceRecord) voiceRecord.disabled = !isAuthenticated || currentRole !== "user" || isSending;
       send.disabled = authRequired && !isAuthenticated;
       if (typeof updateUploadControls === "function") updateUploadControls();
-      if (isAuthenticated && currentRole === "admin") loadPendingUsers();
+      if (isAuthenticated && (currentRole === "admin" || currentRole === "super_admin")) loadPendingUsers();
+      if (isAuthenticated && currentRole === "super_admin") loadAdminAuditEvents();
     }
 
     function createNonce() {
@@ -1469,7 +1523,7 @@
           throw new Error(payload.message || payload.error || "Google Sign-In gagal.");
         }
         isAuthenticated = true;
-        currentRole = (payload.user?.role === "admin" || payload.user?.role === "super_admin") ? "admin" : "user";
+        currentRole = (payload.user?.role === "admin" || payload.user?.role === "super_admin") ? payload.user.role : "user";
         updateAuthUI(payload.user || null);
         if (currentRole === "admin") {
           const check = await fetch("/api/admin/session", { credentials: "same-origin", headers: { "Accept": "application/json" } });
@@ -1546,7 +1600,7 @@
           if (sessionResponse.ok) {
             const session = await sessionResponse.json();
             isAuthenticated = session.authenticated === true;
-            currentRole = (session.user?.role === "admin" || session.user?.role === "super_admin") ? "admin" : (isAuthenticated ? "user" : "");
+            currentRole = (session.user?.role === "admin" || session.user?.role === "super_admin") ? session.user.role : (isAuthenticated ? "user" : "");
             updateAuthUI(session.user || null);
           } else if (sessionResponse.status === 401) {
             isAuthenticated = false;
