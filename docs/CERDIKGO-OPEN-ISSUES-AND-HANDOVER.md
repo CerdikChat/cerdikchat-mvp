@@ -594,3 +594,25 @@ No stale branch was rebased, force-pushed, closed or merged. The exact compariso
 - Exact head `023db6f9b8f1b8078cdf6e7d154316e78b774d5e`; base `atlas9/prompt-intelligence-mvp` at `41d7f30d7a1bedbd763504970ad059050f9f2188`.
 - Source fix already exists on base; PR #91 adds only the test and audit note. Regression `42079236946` 91/91; PR Auto Pilot `42079473235` SUCCESS including install/config, Wrangler dry-run and safety scan. TypeScript NOT CONFIGURED.
 - Push Auto Pilot `42079236993` remains PENDING; PR-triggered gate passed. Human Verification not started; no Android visual acceptance claimed.
+
+
+## 2026-11-06 — Fresh handover and blocker prioritization
+
+### Verified candidate heads
+- PR #60 scorecard: `d6b1843e159506414bd476ed3fa3dedd3ed405c5`; runs `42079686324`, `42079686307`, `42079686095`, `42079685988`; all SUCCESS, 129/129. Compare is 158 ahead / 2 behind / diverged against `atlas9/cerdikgo-autopilot-readiness` at `637ff536011ed25fc598888f62f520b4cfdccd3c` (merge base `de11d34257005ba72a621312230489a7d161ff53`).
+- PR #89 canonical main identity: `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7`; Auto Pilot `42078347572`, guardrails `42078347480`, regression `42078347610`; 37/37.
+- PR #90 Workers AI install docs: `4c2ef0438be4e8f85225c059887d078be44826e2`; Auto Pilot `42078357659`, guardrails `42078357621`, regression `42078357598`; 37/37.
+- PR #91 workspace status regression lock: `023db6f9b8f1b8078cdf6e7d154316e78b774d5e`; regression `42079236946`, Auto Pilot `42079473235`; 91/91. Its source correction is on a non-main base branch.
+
+### Current blockers and next actions
+1. **P0 — Live privacy:** query-string redaction is false on both deployed scripts while invocation logs persist at 100% sampling. PR #86 changes repository config only; separately design and review MCP Worker remediation. No live settings change without approval.
+2. **P0 — Runtime identity:** only `cerdikchat-mvp` and `cerdikgo-mcp-preview` exist in the account; `cerdikgo-primary-preview` is not provisioned. PR #84 is a config/readiness candidate, not a deployed Primary.
+3. **P0 — D1 environment:** repo config defines top-level `cerdikchat-db` and Preview `cerdikchat-staging`; live settings show a DB binding without environment label. Confirm isolation before Preview runtime testing; do not read/write/migrate D1.
+4. **P1 — Authentication:** main prompt is legacy; PR #89 corrects identity. Fail-closed Production/D1 auth remains separate PR #87 stacked on #85. Live OAuth/RBAC acceptance is NOT TESTED.
+5. **P1 — PR #88 UI:** BLOCKED, 1 ahead / 4 behind / diverged, no CI. Reconcile latest base without blind rebase, add UI regression tests, then obtain visual/Android acceptance.
+6. **P1 — Backup:** scheduled archive/restore evidence remains incomplete; backup workflow still has `persist-credentials: true`; PR #53 should be reviewed for least-privilege checkout and restore proof. No backup run/restore was started.
+7. **P1 — Voice/scanner:** Android voice acceptance and real fail-closed scanner runtime remain NOT TESTED/BLOCKED; no paid Containers upgrade.
+8. **P2 — Research/benchmarks/scale:** no live web retrieval, no model inference benchmark, no matched Gemini comparison, no seven-day SLO or real edge load.
+
+- Current open PR inventory: 66. Main SHA `bc6545d6d19fd4b749d0b65fefba3d74775e0221` has no combined status entries returned by the status API; do not label it green.
+- Human Verification NOT STARTED. Gateway `plan_only`; no merge/deploy/D1/OAuth/secrets/DNS/billing operation.
