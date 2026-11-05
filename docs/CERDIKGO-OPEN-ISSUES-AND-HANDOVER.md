@@ -510,3 +510,23 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - PR #85: head efdc6390a5555aa5050ec8b797a7f4004bb4d202; run 42041437992 SUCCESS; 107/107; Draft, 4 ahead / 0 behind.
 - PR #86: head ebf500bd10738580bb7001a8fec772ad463000e4; runs 42041734344 and 42041734530 SUCCESS; 107/107; Draft, 4 ahead / 0 behind.
 - PR #74: head abeca194672349e799bcfdd9d8f9c9dc82675947; full-history Gitleaks run 41975715983 SUCCESS, 816 commits, no leaks; backup restore still NOT TESTED.
+
+ 
+## Handover update — 2026-11-05 21:12 WIB
+
+### VERIFIED candidate work
+- PR #84 head 2d37dea6fa190d37b887d648ede7d943f8024edd: 98/98 Auto Pilot and isolated Worker readiness; dedicated target renamed cerdikgo-primary-preview. No deployed script or dedicated resources.
+- PR #87 head 5ef76571da95398373ad4f91620971b7b03fe45a: 114/114 Auto Pilot; fail-closed Production/D1 auth. Stacked on PR #85; no runtime validation.
+- PR #60 head fda4216b843704276de17ea122547a839cfbd01a: 129/129 across Auto Pilot, regression/install, Phase 3 and Hybrid Gateway; scorecard branch remains diverged and Draft.
+- PR #85 identity head efdc6390a5555aa5050ec8b797a7f4004bb4d202: 107/107. PR #86 redaction head ebf500bd10738580bb7001a8fec772ad463000e4: 107/107 plus config dry-run. Both Draft.
+
+### P0 actions still required
+- Resolve cerdikchat-mvp DB -> cerdikchat-db vs Preview label. Verify environment-specific bindings without D1 operations; obtain explicit authorization before any database access/change.
+- Review and integrate fail-closed auth PR #87 and identity PR #85 in dependency order, then run authenticated/unauthenticated Preview journeys. Do not merge automatically.
+- Review PR #86 and remediate live redaction on cerdikchat-mvp; create a separate approved config path for cerdikgo-mcp-preview. No live settings changed.
+- Review 76-hour session TTL, role-based admin permissions, revocation and CSRF lifecycle.
+
+### P1/P2 remain
+- Scheduled backup runs 41695574776 and 41890146458 FAILED; PR #74 full-history scan is green but archive, Drive upload and restore are NOT TESTED.
+- Real ClamAV remains BLOCKED by paid Containers. WPS, voice, document scanning and Android remain NOT TESTED at device/runtime level.
+- Live Web Research, full benchmark sample sets, Workers AI inference, 100-user edge load, seven-day SLO, RPO/RTO remain NOT TESTED.
