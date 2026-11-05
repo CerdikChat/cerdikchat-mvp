@@ -295,3 +295,35 @@ PR #60 remains Draft and non-mergeable due branch divergence (79 ahead / 2 behin
 - Status: VERIFIED on isolated Draft PR tests; NOT INTEGRATED and Production runtime flag state NOT TESTED.
 - Risk: main repository configuration only sets GOOGLE_AUTH_REQUIRED=true in Preview variables. Actual out-of-band Production variables were not accessible; do not infer their value.
 - No merge, deployment, secret/OAuth change, D1 operation, or environment-variable change performed.
+
+## 2026-11-05 20:31 WIB — Auto Pilot engineering continuation
+
+**Status:** VERIFIED on isolated Draft branches; NOT INTEGRATED.
+
+1. **PR #44 — fail-closed Production authentication regression**
+   - Branch: `atlas9/fail-closed-auth-default`.
+   - Exact head: `c7a11a58716048a9170586dd8b26436193ee5e59`.
+   - Changed: `tests/production-auth-default.test.mjs` (additional regression).
+   - Added a negative-path test proving explicit `GOOGLE_AUTH_REQUIRED=false` cannot permit Production chat and that neither the rate limiter nor AI is called before authentication.
+   - Run `42036693384`: SUCCESS, 41 passed / 0 failed.
+   - PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/44
+   - No live environment, OAuth, D1 or Production setting changed.
+
+2. **PR #84 — isolated Worker authentication guard**
+   - Branch: `atlas9/cerdikgo-worker-isolation-readiness`.
+   - Config commit: `c827b1c3cc08027ee036d0f82465046521b6993e`; test commit: `e3c0a6295001c07476aa3900a6075b37f7bc7b6f`; documentation-only current head: `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a`.
+   - Changed: `wrangler.cerdikgo.toml`, `tests/cerdikgo-worker-config.test.mjs`, `docs/CERDIKGO_WORKER_ISOLATION_READINESS.md`.
+   - Added `GOOGLE_AUTH_REQUIRED=true`; added tests that require the auth flag and reject shared D1/rate-limit bindings in this isolated config.
+   - Code/test head runs: regression `42036859248` (97/97), readiness `42036859327` and `42036865561`, Worker dry-run `42036859143` and `42036865996` — SUCCESS. Wrangler 4.153.0 dry-run explicitly showed the auth flag. The later doc-only head was not re-run.
+   - PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/84
+   - No deployment or resource provisioning.
+
+3. **PR #50 — evidence record correction**
+   - Updated the PR description to point to exact head `29ad33fb7e0f8c72a6c988253798143ee399135c` and its 93/93 successful regression/readiness runs `42036848615`, `42036848634`, `42036856392`.
+   - The earlier failed run `42035887695` belongs to superseded SHA `935a039323ba7ed807420061a604ead7871a14b7`; the current candidate is green.
+   - PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/50
+
+4. **Scorecard and QA record maintenance**
+   - Appended this dated continuation to the six ATLAS-9 registers and the seven-dimension benchmark document on `atlas9/cerdikgo-100-percent-scorecard`.
+   - Pre-update scorecard head `2a9c24b0d7b6c1bf463656143708ddcbbf25047f` passed runs `42004006242`, `42004006381`, `42004006364`, `42004006208` (129/129; all SUCCESS). The new documentation commits require a new exact-head gate.
+   - PR #60 remains Draft; current base comparison is 103 ahead / 2 behind. No rebase/merge.
