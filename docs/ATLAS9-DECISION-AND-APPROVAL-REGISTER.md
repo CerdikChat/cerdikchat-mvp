@@ -203,3 +203,8 @@ These decisions preserve the existing safety boundary and do not authorize integ
 - No Human Verification was started. It remains a separate activity requiring a green gate on the exact candidate selected for that verification and a separate deliberate decision to begin.
 - No merge, Production deploy, remote D1 migration/write, OAuth/secret/DNS change, billing activation, external document transfer, or privileged operation was performed or approved.
 - Free-tier scanner route remains unresolved: Cloudflare Containers require Workers Paid in the connected account response; no upgrade is approved. GitHub Actions scanner is only a design proposal and cannot be represented as a live service.
+
+
+## PR #60 mergeability correction — 2026-11-05
+
+Latest GitHub PR metadata reports mergeable=true for head a6d00bbdec7ba6d49460441ef2327224f6a41ba5, superseding earlier transient mergeable=false observations. The compare graph remains 79 ahead / 2 behind. This metadata does not authorize merge; PR #60 remains Draft and no integration was performed. Exact-head Auto Pilot 42003333775, regression/install 42003333772, Phase 3 42003333754, and Hybrid Gateway 42003333825 all passed. Human Verification remains NOT STARTED.
