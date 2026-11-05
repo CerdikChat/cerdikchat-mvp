@@ -487,3 +487,14 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Secret values were NOT accessed. No secret was read, rotated, deleted or changed.
 - The current repository Worker source uses the Cloudflare Workers AI binding `env.AI`; the presence of these legacy binding names does not prove that the current code path consumes them.
 - Decision: leave bindings untouched pending a separate dependency/use review and explicit approval. PR #90's statement that the current source does not require a Gemini API key is source-scoped, not a claim that no legacy binding exists in the live account.
+
+
+## 2026-11-06 — Fresh Cloudflare read-only configuration review
+
+- Cloudflare script inventory returned exactly `cerdikchat-mvp` and `cerdikgo-mcp-preview`; lookup for `cerdikgo-primary-preview` returned HTTP 404 (Worker not provisioned). Product Primary runtime therefore remains NOT TESTED/BLOCKED.
+- `cerdikchat-mvp` active script settings: observability enabled; head sampling 1.0; persisted invocation logs enabled; `redact_query_string=false`. Bindings include AI, ASSETS, CHAT_RATE_LIMITER, DB, plus secret-binding names `GEMINI_API_KEY` and `OPENAI_API_KEY`. Secret values were not accessed.
+- `cerdikgo-mcp-preview` active settings: observability enabled; head sampling 1.0; persisted invocation logs enabled; `redact_query_string=false`. Bindings include `CERDIKGO_MCP_BEARER_TOKEN` (secret name only) and `CERDIKGO_MCP_ENABLED` (plain text). No AI, D1 or rate-limit binding appeared in this settings response.
+- Repository `wrangler.toml` defines top-level D1 `cerdikchat-db` and Preview D1 `cerdikchat-staging`, while live script settings return a DB binding but do not identify which environment mapping is active. Do not infer Production/Preview isolation from the binding name alone; status BLOCKED pending environment-specific confirmation.
+- Main `wrangler.toml` has observability enabled with 100% sampling but does not set `redact_query_string=true`. PR #86 is a Draft configuration candidate only; no live change occurred. The separate MCP Worker is not covered by PR #86 and needs a separately reviewed source/configuration path.
+- Main `worker.js` still describes optional Google authentication enforced only when `GOOGLE_AUTH_REQUIRED=true`; the canonical identity fix is in PR #89, and fail-closed Production/D1 auth remains a separate Draft candidate (#87 stacked on #85). No live auth test or OAuth change was performed.
+- Decision: do not delete/rotate legacy secret bindings or change observability/D1/auth settings without separate approval. Continue plan_only and no privileged operations.
