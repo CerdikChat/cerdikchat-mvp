@@ -39,7 +39,8 @@ async function archiveProposal(requestId,title){
     await loadFeatureRequests();
   }catch(error){statusEl.textContent="Pengarsipan gagal: "+String(error.message||"UNKNOWN").slice(0,100);}
 }
-$("#proposalRefresh")?.addEventListener("click",loadFeatureRequests);\n$("#proposalArchiveFilter")?.addEventListener("change",loadFeatureRequests);
+$("#proposalRefresh")?.addEventListener("click",loadFeatureRequests);
+$("#proposalArchiveFilter")?.addEventListener("change",loadFeatureRequests);
 $("#proposalStatus")?.addEventListener("change",loadFeatureRequests);
 refresh.addEventListener("click",()=>{load();loadFeatureRequests();});load();loadFeatureRequests();
 </script></body></html>
