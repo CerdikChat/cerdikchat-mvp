@@ -18,7 +18,7 @@
  * - Minimal, privacy-conscious observability
  *
  * Limitations:
- * - Optional Google authentication (enforced when GOOGLE_AUTH_REQUIRED=true)
+ * - Fail-closed authentication for Production/D1-backed deployments; explicit flag for isolated development
  * - No persistent conversation storage
  * - No external live-news or financial-data retrieval
  */
@@ -1047,11 +1047,15 @@ async function handleChat(request, env, ctx) {
     );
   }
 
-  // Private-pilot mode is opt-in. Enable only after Worker-level
-  // Cloudflare Access is configured for every production hostname.
+  // Production and D1-backed deployments fail closed when the flag is absent.
+  // Preview explicitly enables authentication; local/unit-test environments remain opt-in.
   let authenticatedSubject = null;
   let pilotEmail = null;
-  if (env.GOOGLE_AUTH_REQUIRED === "true") {
+  const authRequired =
+    env.ENVIRONMENT === "production" ||
+    Boolean(env.DB) ||
+    env.GOOGLE_AUTH_REQUIRED === "true";
+  if (authRequired) {
     const session = await requireSession(request, env);
     if (!session.ok) {
       return errorResponse("AUTH_REQUIRED", "Silakan masuk menggunakan akun Google yang diizinkan.", 401, corsHeaders);
