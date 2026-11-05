@@ -56,3 +56,11 @@ Do not convert missing measurements into a zero capability score or a pass.
 ## Release separation
 
 Benchmark harness/manifest CI is not live inference. Live inference is not Preview runtime acceptance. Preview runtime is not Android acceptance. Android acceptance is not Production readiness. Human Verification may begin only after Auto Pilot passes for the exact candidate commit, and that pass alone does not authorize Human Verification or privileged operations.
+
+
+## 2026-11-06 — Main-based benchmark baseline
+
+- Status: PLANNED for full benchmark execution; NOT TESTED for all seven capability dimensions.
+- The acceptance specification is now present on a clean main-based branch. The 35-task manifest is carried forward from PR #60 with its original smoke-only status.
+- Initial exact-head regression run 42114199024 failed because the structural test required a dated entry in this benchmark file. This was a documentation/test-fixture mismatch, not a model benchmark result. The benchmark file is amended here with this dated baseline; the failed run remains in the QA register and is not erased.
+- Full capability scores remain NOT MEASURED. No model inference or Gemini comparison was run.
