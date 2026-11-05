@@ -677,3 +677,19 @@ TypeScript is NOT CONFIGURED on these JavaScript branches and is not counted as 
 - Legacy Auto Pilot PR `42079473235`: SUCCESS; installation/config preflight PASS; 91/91; Wrangler 4.153.0 dry-run PASS; workflow safety scan PASS.
 - TypeScript NOT CONFIGURED on this JavaScript branch; not counted as passed. Push-triggered Auto Pilot `42079236993` remains PENDING; PR-triggered exact-head gate is successful.
 - Human Verification NOT STARTED. This is test/CI evidence, not Android visual acceptance or Production readiness.
+
+
+## 2026-11-06 — Exact-head CI reconciliation and blocked UI candidate
+
+| PR | Exact head | Workflow run IDs | Result |
+|---|---|---|---|
+| #60 scorecard | `d6b1843e159506414bd476ed3fa3dedd3ed405c5` | Auto Pilot `42079686324`; regression `42079686307`; Phase 3 `42079686095`; Hybrid `42079685988` | All SUCCESS; 129/129; install/preflight and strict TypeScript PASS; Worker bundle validated without deployment |
+| #89 canonical identity | `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7` | Auto Pilot PR `42078347572`; guardrails `42078347480`; regression `42078347610` | All SUCCESS; 37/37; Wrangler dry-run and safety scan PASS; TypeScript NOT CONFIGURED |
+| #90 install docs | `4c2ef0438be4e8f85225c059887d078be44826e2` | Auto Pilot PR `42078357659`; guardrails `42078357621`; regression `42078357598` | All SUCCESS; 37/37; Wrangler dry-run and safety scan PASS; TypeScript NOT CONFIGURED |
+| #91 workspace status lock | `023db6f9b8f1b8078cdf6e7d154316e78b774d5e` | Regression `42079236946`; Auto Pilot PR `42079473235` | Both SUCCESS; 91/91; Wrangler dry-run and safety scan PASS; TypeScript NOT CONFIGURED |
+| #88 v2.0 UI | `8bdef7d20431eb08c9b36f414ffa5221e2ddae90` | No workflow runs returned | BLOCKED; mergeable=false; compare 1 ahead / 4 behind / diverged |
+
+- PR #91 historical failure correction: earlier status-deck ordering tests failed at 88/89 and in intermediate reruns; exact current PR head now passes 91/91. Do not erase earlier failures; retain them as superseded historical evidence.
+- Main SHA `bc6545d6d19fd4b749d0b65fefba3d74775e0221` returned no combined status entries from the GitHub status API. Record as NO STATUS DATA / NOT TESTED, not green CI.
+- The PR #60 branch compare against `atlas9/cerdikgo-autopilot-readiness` is now 158 ahead / 2 behind, diverged; earlier 152/2 note is superseded.
+- Human Verification remains NOT STARTED. Passing exact-head CI does not establish live Preview, Android, Production or competitive model benchmark acceptance.
