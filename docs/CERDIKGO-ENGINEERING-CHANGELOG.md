@@ -244,3 +244,22 @@ Run links:
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975711475
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975715983
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975716157
+
+
+## 2026-11-05 — Context Bridge bounded Inbox
+
+**Status:** VERIFIED on isolated Draft PR; NOT INTEGRATED.
+
+- PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/80
+- Branch: `atlas9/context-bridge-bounded-inbox-20261105`
+- Parent/base: PR #75 branch `atlas9/bridge-runtime-fix-20261105`, base SHA `7449512923fdd6c668825a841f586a67a0a980e8`.
+- Exact candidate head: `724fdb092d584cead6f34612693de8cb9336c7eb`.
+- Changed files: `src/bridge.js`, `src/bridge-inbox.js`, `tests/bridge-inbox.test.mjs`.
+- Change: enforce a maximum of 50 local task cards per browser-tab session; reject the next import before mutating the in-memory array; expose a user-readable instruction to open a new tab.
+- Architecture: browser-only; no API endpoint, remote state, D1, external provider, specialist execution, or Production binding. Existing nine specialist IDs and `plan_only` output are unchanged.
+- Tests: isolated helper `node --test` — 3 passed / 0 failed. Exact PR Auto Pilot run 42002523884 — SUCCESS, `npm test` 113 passed / 0 failed, Wrangler 4.153.0 dry-run PASS, configuration preflight PASS. Regression run 42002508692 — SUCCESS. Push Auto Pilot run 42002508523 — SUCCESS.
+- TypeScript: NOT TESTED / NOT CONFIGURED on this legacy JavaScript branch; the readiness workflow explicitly does not count it as passed.
+- Workflow links: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42002523884 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42002508692 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42002508523
+- Decision: keep PR #80 DRAFT and stacked on #75. No merge, deployment, D1, secret, OAuth, DNS, or billing operation.
+
+Risk/limitation: the cap bounds in-memory DOM growth per tab but is not a persistent queue, cross-tab limit, account-level quota, or workflow integration. Android interaction remains NOT TESTED.
