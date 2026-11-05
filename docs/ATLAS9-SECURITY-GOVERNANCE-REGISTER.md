@@ -245,3 +245,15 @@ Run links:
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975711475
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975715983
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975716157
+
+
+## Security and governance continuation — 2026-11-05 16:25 WIB
+
+- **PR #73 — access-request log minimization:** head `98423d8aa14317052511cc69e98a8341713a3381`, Auto Pilot run 41974840542 SUCCESS. The change replaces the request-ID/email log payload with a fixed event code and adds tests that email, Google subject ID, and ID token are absent from the captured log. Status: VERIFIED on isolated Draft PR; NOT INTEGRATED into Primary. Do not imply the deployed Preview is already remediated.
+- **PR #74 — secret scanning:** head `abeca194672349e799bcfdd9d8f9c9dc82675947`, full-history scan run 41975715983 SUCCESS, regression run 41975716157 SUCCESS. The narrow allowlist requires both exact path `src/prompt-intelligence.js` and exact localStorage namespace literal `cerdikgo-prompt-vault-v1`; default Gitleaks rules remain enabled. Explicit all-ref scan covered 816 commits / approximately 1.84 MB and found no leaks. This does not establish backup archive integrity, Drive upload, or restore. Historical scheduled backup run 41890146458 remains FAILED.
+- **PR #76 — ClamAV Preview boundary:** head `e02dd2bd186ae3651c75bf5eac4ddd60d89611cd`, run 41991775472 SUCCESS. Tests use a mock Service Binding; no actual scanner runtime or signature database exists. Provisioning is BLOCKED because the connected Cloudflare account API returned HTTP 401 indicating Workers Paid is required for Containers. No billing approval exists; do not upgrade or bypass the scanner.
+- **PR #78 — on-demand Actions design:** head `5bbaaae96b2a03ac5cff5b3e93520da974014774`, run 41996461917 SUCCESS. DESIGN ONLY. GitHub Actions is asynchronous and cannot directly satisfy the existing synchronous `FILE_SCANNER` binding. Private staging, job-bound signed callback, quota hard-stop, retention, replay protection, and deletion remain PLANNED / NOT TESTED. Do not store customer files in Git, logs, cache, or Actions artifacts.
+- **PR #77 — WPS AI second opinion:** head `960ca4e8536196775831a0ec13d7cfe625007c60`, run 41993439827 SUCCESS. Manual user-operated handoff only. Do not upload confidential, personal, regulated, or commercially sensitive documents to an external AI service without explicit user authorization and review of its data terms. No WPS API or technical read-only guarantee is verified.
+- **PR #80 — local Context Bridge Inbox cap:** head `724fdb092d584cead6f34612693de8cb9336c7eb`, run 42002523884 SUCCESS. The 50-item cap limits local in-tab memory growth; it is not a server-side quota or cross-tab control.
+
+No secrets, OAuth settings, DNS, Production resources, remote D1, or billing were modified during this continuation. Keep the scanner fail-closed and gateway `plan_only`.
