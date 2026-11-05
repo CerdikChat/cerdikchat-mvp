@@ -384,3 +384,31 @@ Run links:
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975711475
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975715983
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975716157
+
+
+## QA evidence continuation — 2026-11-05 16:25 WIB
+
+**Status:** VERIFIED for listed exact-head CI runs; NOT TESTED for live inference, Android, Preview end-to-end, and Production.
+
+| Candidate | Exact SHA | Workflow run(s) | Result |
+|---|---|---|---|
+| PR #60 scorecard | `a2b10c42f4925164b59d48c499ac44265c48daed` | 41975851719, 41975851562, 41975851561, 41975851576 | All SUCCESS; Auto Pilot log: 129 pass, 0 fail |
+| PR #73 auth privacy | `98423d8aa14317052511cc69e98a8341713a3381` | 41974840542 | SUCCESS |
+| PR #74 Gitleaks | `abeca194672349e799bcfdd9d8f9c9dc82675947` | 41975715983, 41975716157 | Both SUCCESS; all-ref scan 816 commits / ~1.84 MB / no leaks |
+| PR #75 Context Bridge | `7449512923fdd6c668825a841f586a67a0a980e8` | 41988795482 | SUCCESS |
+| PR #76 ClamAV design | `e02dd2bd186ae3651c75bf5eac4ddd60d89611cd` | 41991775472 | SUCCESS; mock contract only |
+| PR #77 WPS protocol | `960ca4e8536196775831a0ec13d7cfe625007c60` | 41993439827 | SUCCESS; manual workflow only |
+| PR #78 ClamAV Actions design | `5bbaaae96b2a03ac5cff5b3e93520da974014774` | 41996461917 | SUCCESS; design only |
+| PR #80 bounded Inbox | `724fdb092d584cead6f34612693de8cb9336c7eb` | 42002523884, 42002508692, 42002508523 | All SUCCESS; Auto Pilot log: 113 pass, 0 fail |
+
+PR #80 exact commands/evidence:
+- `npm test`: 113 passed, 0 failed in the exact-candidate Auto Pilot job.
+- `npx --yes wrangler@4.153.0 deploy --dry-run --outdir /tmp/cerdikgo-legacy-readiness`: PASS; dry-run only.
+- Installation/configuration preflight: PASS.
+- Isolated helper test: `node --test tests/bridge-inbox.test.mjs` — 3 passed, 0 failed.
+- TypeScript: NOT CONFIGURED on this JavaScript branch; explicitly excluded from passing metrics.
+- Earlier superseded push readiness runs 42002503322, 42002489919, and 42002470745 were CANCELLED by concurrency after later commits; they are not counted as failures. Final exact-head runs passed.
+
+Benchmark integrity: the 35-task v0.1 manifest is a structural smoke-test fixture only. No seven-dimension model inference benchmark has been executed. All seven capability scores remain NOT MEASURED; 0/100 is evidence-credit only, not a measured capability score. Do not claim competitive parity/superiority.
+
+Open test gaps: 100 reasoning tasks, 50 coding tasks, 50 research tasks, 50 governance scenarios, 30 workflow scenarios, 90 specialist tasks, and seven-day reliability/scale/restore evidence remain outstanding. Android device acceptance, Preview runtime flows, real ClamAV scanning, voice capture/playback, live research retrieval, and backup restoration remain NOT TESTED or BLOCKED as recorded in the handover.
