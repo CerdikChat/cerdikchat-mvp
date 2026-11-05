@@ -404,6 +404,51 @@ export async function requireAdminSession(request, env) {
   return session;
 }
 
+export async function requireSuperAdminSession(request, env) {
+  const session = await requireSession(request, env);
+  if (!session.ok) return session;
+  if (session.role !== "super_admin") {
+    logAuthFailure("rbac", "super_administrator_required");
+    return { ok: false, response: authJson({ error: "SUPER_ADMIN_REQUIRED" }, 403) };
+  }
+  return session;
+}
+
+/** Read-only audit feed. Super Admin only; never returns session IDs or tokens. */
+export async function listAdminAuditEvents(request, env) {
+  if (request.method !== "GET") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "GET" });
+  const admin = await requireSuperAdminSession(request, env);
+  if (!admin.ok) return admin.response;
+  try {
+    const result = await env.DB.prepare(
+      `SELECT a.id, a.action, a.previous_role, a.new_role, a.details_json, a.created_at,
+              actor.email AS actor_email, target.email AS target_email
+       FROM admin_audit_log a
+       LEFT JOIN users actor ON actor.google_sub = a.actor_google_sub
+       LEFT JOIN users target ON target.google_sub = a.target_google_sub
+       ORDER BY a.created_at DESC, a.id DESC LIMIT 100`
+    ).all();
+    const events = (result.results || []).map((row) => {
+      let details = {};
+      try { details = JSON.parse(row.details_json || "{}"); } catch { details = { parseError: true }; }
+      return {
+        id: row.id,
+        action: row.action,
+        actorEmail: row.actor_email || "Administrator (akun tidak tersedia)",
+        targetEmail: row.target_email || null,
+        previousRole: row.previous_role || null,
+        newRole: row.new_role || null,
+        details,
+        createdAt: row.created_at,
+      };
+    });
+    return authJson({ events, count: events.length, limit: 100, readOnly: true });
+  } catch {
+    logAuthFailure("audit", "audit_list_failed");
+    return authJson({ error: "AUDIT_LOG_UNAVAILABLE", message: "Audit trail belum dapat dimuat." }, 503);
+  }
+}
+
 export async function logout(request, env) {
   if (request.method !== "POST") return authJson({ error: "METHOD_NOT_ALLOWED" }, 405, { allow: "POST" });
   if (!sameOrigin(request)) return authJson({ error: "ORIGIN_NOT_ALLOWED" }, 403);
