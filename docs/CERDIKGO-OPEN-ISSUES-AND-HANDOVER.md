@@ -580,3 +580,9 @@ No stale branch was rebased, force-pushed, closed or merged. The exact compariso
 - PR #90 current head: `4c2ef0438be4e8f85225c059887d078be44826e2`; full Auto Pilot push/PR `42078344776` / `42078357659` SUCCESS; 37/37; Wrangler dry-run PASS. Draft, mergeable, not merged.
 - TypeScript is NOT CONFIGURED on both JavaScript branches. Preview runtime and Android acceptance remain NOT TESTED. Do not equate the gate result with Production readiness.
 - The earlier candidate SHAs remain in history as superseded revisions; the PR bodies now identify the current exact heads and checks.
+
+
+## 2026-11-06 — Correction and legacy-binding note
+
+- PR #84: current GitHub metadata reports `mergeable=true`, but a fresh compare remains 27 ahead / 6 behind / diverged against current base `41d7f30d7a1bedbd763504970ad059050f9f2188`. The earlier `mergeable=false` status was superseded; the branch is still stale relative to its moving base and requires review before any integration.
+- The live `cerdikchat-mvp` script lists legacy secret binding names `GEMINI_API_KEY` and `OPENAI_API_KEY`. Secret values were not read. The current Worker source uses Workers AI `env.AI`; do not infer the legacy bindings are active, and do not remove them without explicit approval.

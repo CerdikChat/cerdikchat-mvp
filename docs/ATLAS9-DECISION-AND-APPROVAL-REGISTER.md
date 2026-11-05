@@ -366,3 +366,10 @@ No merge, Production/Preview deployment, D1 operation, OAuth/secret/DNS change, 
 - PR #90 exact head `4c2ef0438be4e8f85225c059887d078be44826e2`: full Auto Pilot push/PR runs `42078344776` and `42078357659` SUCCESS.
 - Both pass installation/configuration, 37/37 regression, Wrangler dry-run and workflow safety. TypeScript NOT CONFIGURED.
 - Decision: candidates are eligible for separately authorized Human Verification; Human Verification was NOT STARTED in this run. No merge, Preview deployment, Production deployment, D1 operation, credential change, DNS change or billing action is authorized by CI success.
+
+
+## 2026-11-06 — No implicit cleanup of legacy secrets
+
+- Read-only script settings list legacy secret binding names `GEMINI_API_KEY` and `OPENAI_API_KEY` on `cerdikchat-mvp`; values were not accessed.
+- Although the current Worker source uses Workers AI `env.AI`, no secret binding will be deleted or rotated based solely on source inspection. Require a dependency/use review and explicit approval first.
+- PR #84 mergeability correction: GitHub currently reports `mergeable=true`, while the branch comparison remains 27 ahead / 6 behind / diverged. Keep Draft; mergeability is not approval or proof of integration.

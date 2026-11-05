@@ -479,3 +479,11 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - PR #89 current exact head `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7` passed the full Auto Pilot install/config/regression/Wrangler dry-run/safety gate (`42078337644`, `42078347572`). This corrects the main prompt's specialist identity only; it does not enable agent execution or change authentication.
 - PR #90 current exact head `4c2ef0438be4e8f85225c059887d078be44826e2` passed the same gate (`42078344776`, `42078357659`). This is documentation/test hardening, not a live security configuration change.
 - Both branches report TypeScript NOT CONFIGURED. Neither candidate changes live Cloudflare settings. Query-string redaction and D1 environment isolation remain BLOCKED pending separate review; no secrets, OAuth, DNS or D1 operations were performed.
+
+
+## 2026-11-06 — Legacy secret-binding metadata (read-only)
+
+- The live `cerdikchat-mvp` script settings list secret binding names `GEMINI_API_KEY` and `OPENAI_API_KEY`.
+- Secret values were NOT accessed. No secret was read, rotated, deleted or changed.
+- The current repository Worker source uses the Cloudflare Workers AI binding `env.AI`; the presence of these legacy binding names does not prove that the current code path consumes them.
+- Decision: leave bindings untouched pending a separate dependency/use review and explicit approval. PR #90's statement that the current source does not require a Gemini API key is source-scoped, not a claim that no legacy binding exists in the live account.

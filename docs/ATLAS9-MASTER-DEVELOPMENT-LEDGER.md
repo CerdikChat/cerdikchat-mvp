@@ -716,3 +716,9 @@ The earlier entries for PR #89 head `7befbfa37764446836373acee0bc34c4d0cb654c` a
 - PR #90: `4c2ef0438be4e8f85225c059887d078be44826e2`; full Auto Pilot push `42078344776` and PR `42078357659` both SUCCESS; 37/37; install/config preflight PASS; Wrangler 4.153.0 dry-run PASS; workflow safety scan PASS. TypeScript is NOT CONFIGURED and is not counted as passed. https://github.com/CerdikChat/cerdikchat-mvp/pull/90.
 
 Both PRs remain Draft, open and mergeable; neither was merged or deployed. Their full Auto Pilot gates have passed, but Human Verification was not started. This is a correction/addendum, not a replacement of earlier history.
+
+
+## 2026-11-06 — Correction: PR #84 mergeability and legacy secret metadata
+
+- PR #84's latest GitHub metadata now reports `mergeable=true`; this supersedes the earlier `mergeable=false` observation. The fresh commit comparison remains `diverged`, 27 ahead / 6 behind against current base `41d7f30d7a1bedbd763504970ad059050f9f2188` (merge base `afa2ad537b3979b5e2361d0a3242059ea639f59c`). Mergeability does not remove the six-commit base drift or prove semantic integration. Keep Draft pending review; no rebase/merge.
+- Read-only Cloudflare settings for `cerdikchat-mvp` also list legacy secret binding names `GEMINI_API_KEY` and `OPENAI_API_KEY`. Values were not accessed. Current Worker source uses Workers AI `env.AI`; the presence of legacy bindings is not evidence that they are used. Do not remove or rotate them without a separately approved review.
