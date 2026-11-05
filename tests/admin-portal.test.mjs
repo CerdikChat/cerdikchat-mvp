@@ -503,3 +503,18 @@ test("feature request UI wires archive action only for super-admin and reloads a
   assert.match(html, /archiveProposal\(item\.request_id/);
   assert.match(html, /proposalArchiveFilter.*addEventListener\(\"change\",loadFeatureRequests\)/s);
 });
+
+
+test("feature-request archive rejects malformed IDs and non-POST mutation attempts", async () => {
+  const environment = featureArchiveEnvironment([]);
+  const malformed = await worker.fetch(featureArchiveRequest("/api/admin/feature-requests/archive", {
+    method: "POST",
+    body: { requestId: "not-a-uuid" }
+  }), environment);
+  assert.equal(malformed.status, 400);
+  assert.equal((await malformed.json()).error, "INVALID_REQUEST_ID");
+
+  const wrongMethod = await worker.fetch(featureArchiveRequest("/api/admin/feature-requests/archive"), environment);
+  assert.equal(wrongMethod.status, 405);
+  assert.equal((await wrongMethod.json()).error, "METHOD_NOT_ALLOWED");
+});
