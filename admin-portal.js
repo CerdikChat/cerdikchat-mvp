@@ -18,15 +18,39 @@ export async function adminFeatureRequests(request,env){
   const allowedStatuses=new Set(["submitted","reviewing","approved","rejected","all"]);
   const requestedStatus=url.searchParams.get("status")||"all";
   if(!allowedStatuses.has(requestedStatus))return json({error:"INVALID_STATUS"},400);
+  const archived=url.searchParams.get("archived")==="1";
   const limitValue=Number(url.searchParams.get("limit")||50);
   const limit=Number.isInteger(limitValue)?Math.min(100,Math.max(1,limitValue)):50;
   try{
+    const visibility=archived?"archived_at IS NOT NULL":"archived_at IS NULL";
     const statement=requestedStatus==="all"
-      ?env.DB.prepare("SELECT request_id,user_email,category,feature_name,description,problem,expected_benefit,status,created_at,updated_at FROM feature_requests ORDER BY created_at DESC LIMIT ?").bind(limit)
-      :env.DB.prepare("SELECT request_id,user_email,category,feature_name,description,problem,expected_benefit,status,created_at,updated_at FROM feature_requests WHERE status=? ORDER BY created_at DESC LIMIT ?").bind(requestedStatus,limit);
+      ?env.DB.prepare("SELECT request_id,user_email,category,feature_name,description,problem,expected_benefit,status,created_at,updated_at,archived_at,archived_by FROM feature_requests WHERE "+visibility+" ORDER BY created_at DESC LIMIT ?").bind(limit)
+      :env.DB.prepare("SELECT request_id,user_email,category,feature_name,description,problem,expected_benefit,status,created_at,updated_at,archived_at,archived_by FROM feature_requests WHERE "+visibility+" AND status=? ORDER BY created_at DESC LIMIT ?").bind(requestedStatus,limit);
     const result=await statement.all();
-    return json({requests:Array.isArray(result.results)?result.results:[],status:requestedStatus,limit});
+    return json({requests:Array.isArray(result.results)?result.results:[],status:requestedStatus,archived,limit});
   }catch{
     return json({error:"FEATURE_REQUEST_QUEUE_UNAVAILABLE"},503);
   }
+}
+
+export async function archiveFeatureRequest(request,env){
+  if(request.method!=="POST")return json({error:"METHOD_NOT_ALLOWED"},405);
+  const access=await requireAdmin(request,env,"super_admin");
+  if(access.response)return access.response;
+  if(!validateCsrfRequest(request))return json({error:"CSRF_VALIDATION_FAILED"},403);
+  let body;
+  try{const raw=await request.text();if(raw.length>4000)return json({error:"REQUEST_TOO_LARGE"},413);body=JSON.parse(raw);}catch{return json({error:"INVALID_JSON"},400);}
+  const requestId=typeof body?.requestId==="string"?body.requestId:"";
+  if(!/^[0-9a-f-]{36}$/i.test(requestId))return json({error:"INVALID_REQUEST_ID"},400);
+  if(typeof env.DB.batch!=="function")return json({error:"ATOMIC_GOVERNANCE_UNAVAILABLE"},503);
+  const now=Math.floor(Date.now()/1000),auditId=crypto.randomUUID();
+  try{
+    const result=await env.DB.batch([
+      env.DB.prepare("UPDATE feature_requests SET archived_at=?,archived_by=?,updated_at=? WHERE request_id=? AND archived_at IS NULL").bind(now,access.session.email,now,requestId),
+      env.DB.prepare("INSERT INTO admin_audit_events (audit_id,actor_email,action,target_email,details,created_at) SELECT ?,?,?,?,?,? WHERE changes()=1 AND EXISTS (SELECT 1 FROM feature_requests WHERE request_id=? AND archived_at=?)").bind(auditId,access.session.email,"feature_request_archived","",JSON.stringify({requestId}),now,requestId,now)
+    ]);
+    if((result[0]?.meta?.changes??0)!==1)return json({error:"FEATURE_REQUEST_NOT_FOUND_OR_ALREADY_ARCHIVED"},409);
+    if((result[1]?.meta?.changes??0)!==1)return json({error:"GOVERNANCE_AUDIT_FAILED"},503);
+    return json({success:true,requestId,archivedAt:now,auditId});
+  }catch{return json({error:"FEATURE_REQUEST_ARCHIVE_FAILED"},503);}
 }
