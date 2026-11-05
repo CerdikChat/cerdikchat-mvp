@@ -575,3 +575,36 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Current main/Primary prompt still has legacy identity terminology. Exactly nine specialists are verified only in candidate PR branches; Optimus Prime remains coordinator, not a tenth agent. Gateway stays `plan_only`.
 - All seven capability scores remain NOT MEASURED; evidence-credit 0/100 per dimension until the complete reproducible benchmark samples are executed. No Gemini superiority/parity claim.
 - No merge, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, billing activation or other privileged operation. Human Verification NOT STARTED.
+
+ 
+## QA continuation — 2026-11-05 20:58 WIB
+
+### Exact-candidate test evidence
+| PR | Candidate SHA | Workflow run | Result | Test evidence |
+|---|---|---:|---|---|
+| #60 | 9d3e7d67e62acbd1eae1ea01b7d49d99243b1d6a | 42039500315 | VERIFIED | 129/129; preflight 16/16; strict TypeScript PASS |
+| #60 | same | 42039500670 | VERIFIED | regression/install SUCCESS |
+| #60 | same | 42039500314 | VERIFIED | Phase 3 regression SUCCESS |
+| #60 | same | 42039500262 | VERIFIED | 129/129; Wrangler 4.153.0 dry-run PASS |
+| #85 | efdc6390a5555aa5050ec8b797a7f4004bb4d202 | 42041437992 | VERIFIED | 107/107; preflight, dry-run and workflow safety PASS; TypeScript NOT CONFIGURED |
+| #86 | ebf500bd10738580bb7001a8fec772ad463000e4 | 42041734344 | VERIFIED | 107/107; preflight, dry-run and workflow safety PASS; TypeScript NOT CONFIGURED |
+| #86 | same | 42041734530 | VERIFIED | dedicated Wrangler configuration dry-run SUCCESS |
+| #81 | f1b5d39b42c4200eeb42b8cb899558ae3984866e | 42007916625 | VERIFIED | 85/85; Wrangler dry-run PASS; TypeScript NOT CONFIGURED |
+| #82 | 89786c607446fd49fc21b7d0def4b30bd9cb3999 | 42009783294 | VERIFIED | 89/89; Wrangler dry-run PASS; TypeScript NOT CONFIGURED |
+| #84 | 04ed345fdbc5f9d6b87d7f3c873ea5eb34b0635d | 42039038468 | VERIFIED | 97/97; isolated Worker dry-run PASS |
+| #74 | abeca194672349e799bcfdd9d8f9c9dc82675947 | 41975715983 | VERIFIED | 816 commits / ~1.84 MB full-history scan; no leaks |
+| #74 | same | 41975711475 | VERIFIED | push scan SUCCESS |
+| #74 | same | 41975716157 | VERIFIED | regression SUCCESS |
+
+### FAILED and BLOCKED history preserved
+- Scheduled backup 41695574776 FAILED: Gitleaks default configuration reported a generic-api-key match at src/prompt-intelligence.js:18.
+- Scheduled backup 41890146458 FAILED for the same Gitleaks fingerprint. Neither run reached archive creation.
+- PR #74 full-history scan passes after a narrowly scoped file+literal allowlist; this does not change the historical FAILED run status or establish backup/restore.
+- PR #76 scanner contract tests are 9/9 with mocked bindings only. Real ClamAV/EICAR Preview test is BLOCKED by paid Containers access; no billing upgrade.
+- PR #85 and #86 are Draft; CI readiness is VERIFIED for their exact heads only. No merge or Preview runtime acceptance.
+
+### Reproducibility and benchmark boundary
+- The 35-task pilot manifest is a structural fixture, not the complete seven-dimension benchmark. Manifest validation does not execute model inference.
+- No live Workers AI inference or matched Gemini comparison was run. Model catalog listing is NOT an inference result.
+- Current capability scores: all seven dimensions NOT MEASURED; evidence-credit 0/100 each. Do not convert CI regression counts into capability scores.
+- Preview HTTP journeys, Android/WPS behavior, scanner engine, voice device flow, Live Web Research, backup restore, seven-day SLO and edge load remain NOT TESTED or BLOCKED.
