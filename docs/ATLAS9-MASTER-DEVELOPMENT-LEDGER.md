@@ -420,3 +420,14 @@ Branch: atlas9/cerdikgo-100-percent-scorecard
 - Benchmark correction: 15659feb2c36c4859ab77605f70712ef69ab9ea2
 
 This second append records the corrected 57-PR count, repeated main backup failures, missing Preview/Production bindings, PR #60 branch divergence, and final exact-head CI evidence. Historical entries remain intact.
+
+
+## Production authentication default review — 2026-11-05
+
+**Status:** NOT VERIFIED on main; candidate fix VERIFIED by regression on Draft PR #44.
+
+- Main worker.js enforces Google authentication only when GOOGLE_AUTH_REQUIRED === "true". Main wrangler.toml sets GOOGLE_AUTH_REQUIRED = "true" only inside the Preview variables block; no repository-level Production default is present.
+- Cloudflare environment variables configured out-of-band were not accessible in this review. Therefore, do not claim Production is definitely unauthenticated; the actual deployed flag state is NOT VERIFIED. The repository configuration alone does not prove fail-closed Production authentication.
+- PR #44 proposes requiring auth whenever ENVIRONMENT is production or a D1 DB binding exists, regardless of an explicit false flag. It adds tests for Production and D1-backed fail-closed behavior.
+- PR #44 head: 30e05c23ce56116d80c3d5b872e3f9b5c7adef91; Draft; base main; mergeable true. Regression run 41383765675 SUCCESS; 40 passed / 0 failed.
+- PR #44 has not been merged or deployed. No Cloudflare environment variables were read or changed. Treat Production authentication readiness as NOT VERIFIED until the fix is reviewed/integrated and the actual runtime is tested safely.
