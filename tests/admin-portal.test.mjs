@@ -347,3 +347,26 @@ test("Admin approval refuses role escalation beyond the administrator tier", asy
   assert.equal(response.status, 403);
   assert.equal(payload.error, "ROLE_ESCALATION_FORBIDDEN");
 });
+
+test("Admin feature-request archive is super-admin only and requires CSRF", async () => {
+  const regular=await worker.fetch(adminRequest("/api/admin/feature-requests/archive",{method:"POST"}),authenticatedAdminEnv("admin"));
+  assert.equal(regular.status,403);
+  assert.equal((await regular.json()).error,"ADMIN_REQUIRED");
+  const missingCsrf=await worker.fetch(adminRequest("/api/admin/feature-requests/archive",{method:"POST"}),authenticatedAdminEnv());
+  assert.equal(missingCsrf.status,403);
+  assert.equal((await missingCsrf.json()).error,"CSRF_VALIDATION_FAILED");
+});
+
+test("Admin feature-request archive endpoint is routed and guarded", async () => {
+  const source=await readFile(new URL("../worker.js",import.meta.url),"utf8");
+  assert.match(source,/\/api\/admin\/feature-requests\/archive/);
+  assert.match(source,/archiveFeatureRequest/);
+});
+
+test("Admin feature request UI provides active/archive filter and safe archive action", async () => {
+  const html=await readFile(new URL("../src/admin.html",import.meta.url),"utf8");
+  assert.match(html,/proposalArchiveFilter/);
+  assert.match(html,/Hapus dari daftar/);
+  assert.match(html,/Usulan akan hilang dari daftar aktif, tetapi tetap tersimpan/);
+  assert.match(html,/X-CSRF-Token/);
+});
