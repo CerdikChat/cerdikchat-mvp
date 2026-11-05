@@ -147,3 +147,35 @@ Run links:
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975248939
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975255549
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975255582
+
+
+## Audit correction — PR #74 full-history scan evidence — 2026-11-05
+
+An earlier entry described Gitleaks runs `41975248939` and `41975255549` as full-history evidence. Review of their command lines showed those Action runs were event-scoped (`--log-opts=-1` on push and a three-commit PR range). They passed, but did not prove all-ref history coverage. This earlier wording is superseded.
+
+PR #74 current head `abeca194672349e799bcfdd9d8f9c9dc82675947` adds a separate explicit all-ref scan after fetching every remote branch and tag:
+- Push workflow `41975711475`: SUCCESS; event scan and explicit all-ref scan passed.
+- PR workflow `41975715983`: SUCCESS; event scan and explicit all-ref scan passed.
+- Explicit command: `gitleaks detect --source . --log-opts="--all" --redact --exit-code 2 --no-banner`.
+- PR log: 816 commits scanned, approximately 1.84 MB, `no leaks found`.
+- PR regression `41975716157`: SUCCESS.
+- The allowlist remains AND-constrained to `src/prompt-intelligence.js` and the exact localStorage namespace `cerdikgo-prompt-vault-v1`; default Gitleaks rules remain enabled.
+
+This verifies the scanner configuration on PR #74's exact head. It does not rerun the scheduled backup job or prove backup archive creation, Drive upload, or restore. Scheduled backup run `41890146458` remains a historical FAILED run until a later authorized backup and restore drill pass.
+
+## Exact scorecard documentation candidate — 2026-11-05
+
+- PR #60 head `02218e5b079830b1c07c5ca0b68fd40c2dc244c0` passed Auto Pilot `41975609763`, regression/install `41975609893`, Phase 3 `41975609751`, and Hybrid Gateway `41975609793`; all four PR-triggered workflows SUCCESS.
+- Auto Pilot is the exact candidate gate; the prior log for `a2373adafa711307e842f2df7f45c0434e61d540` confirms 129/129 tests, strict TypeScript, doctor and Wrangler dry-run. The `02218e5b...` follow-up is documentation-only; its four exact-head workflows all passed.
+- PR #60 base snapshot remains `de11d34257005ba72a621312230489a7d161ff53`; current base branch head `637ff536011ed25fc598888f62f520b4cfdccd3c` is two commits ahead. No merge/rebase was performed.
+- All seven capability scores remain NOT MEASURED; evidence-credit remains 0/100 until the full mandatory task sets are executed.
+- Human Verification remains NOT STARTED. CI, Preview runtime, Android and Production remain separate gates.
+
+Run links:
+- https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975609763
+- https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975609893
+- https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975609751
+- https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975609793
+- https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975711475
+- https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975715983
+- https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975716157
