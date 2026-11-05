@@ -423,3 +423,41 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Current main/Primary prompt still has legacy identity terminology. Exactly nine specialists are verified only in candidate PR branches; Optimus Prime remains coordinator, not a tenth agent. Gateway stays `plan_only`.
 - All seven capability scores remain NOT MEASURED; evidence-credit 0/100 per dimension until the complete reproducible benchmark samples are executed. No Gemini superiority/parity claim.
 - No merge, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, billing activation or other privileged operation. Human Verification NOT STARTED.
+
+ 
+## Measurement snapshot — 2026-11-05 20:58 WIB
+
+### Current measured capability scores
+All seven capability dimensions remain NOT MEASURED. Evidence-credit is 0/100 for each dimension. This is an evidence status, not a statement that the product has zero capability.
+
+| Dimension | Current capability result | Evidence credit | Acceptance target |
+|---|---|---:|---:|
+| General AI reasoning | NOT MEASURED; no live inference set | 0/100 | 100/100 |
+| Coding and engineering | NOT MEASURED as model capability; CI only verifies repository behavior | 0/100 | 100/100 |
+| Specialized research and analysis | NOT MEASURED; no live retrieval/claim-citation benchmark | 0/100 | 100/100 |
+| Governance, audit and control | NOT MEASURED as a complete scenario benchmark; isolated control tests exist | 0/100 | 100/100 |
+| Organizational workflow integration | NOT MEASURED end-to-end; local UI/session tests only | 0/100 | 100/100 |
+| Product identity and specialization | NOT MEASURED on full 90-task routing benchmark; exact nine-seat registry and prompt tests are verified in candidate branches | 0/100 | 100/100 |
+| Ecosystem maturity and scale | NOT MEASURED; no seven-day SLO, real load or restore drill | 0/100 | 100/100 |
+
+### Existing engineering evidence is not a capability score
+- PR #60 exact candidate 9d3e7d67e62acbd1eae1ea01b7d49d99243b1d6a passed 129/129 regression tests, 16/16 installation preflight, strict TypeScript and workflow safety. This is engineering CI evidence only.
+- PR #85 Primary identity candidate efdc6390a5555aa5050ec8b797a7f4004bb4d202 passed 107/107, exact nine-role order/coordinator tests, Wrangler dry-run and safety scan. This does not prove nine independent agents.
+- PR #86 observability candidate ebf500bd10738580bb7001a8fec772ad463000e4 passed 107/107 plus a dedicated Wrangler config dry-run. This verifies configuration syntax and static privacy assertions, not deployed redaction.
+- PR #81 WPS candidate passed 85/85; PR #82 Validation Gate candidate passed 89/89; PR #84 isolated Worker candidate passed 97/97. None constitutes Android, Preview runtime or capability benchmarking.
+- PR #74 full-history Gitleaks scan covered 816 commits and reported no leaks; this does not verify scheduled archive or restore.
+- The v0.1 35-task manifest test checks task structure only. It does not call Workers AI or Gemini.
+
+### Benchmark acceptance thresholds remain unchanged
+- Reasoning: 100 tasks; correctness >=90%, instruction adherence >=98%, unsupported high-confidence claims <=1%, repeatability >=95%.
+- Coding: 50 tasks; acceptance tests >=95%, critical security tests 100%, build/typecheck 100%, zero critical/high defects.
+- Research: 50 tasks; citation precision >=98%, material-claim coverage >=95%, unsupported claims <=1%, source quality >=90%, freshness >=95%.
+- Governance: 50 scenarios; authorization 100%, prohibited actions blocked 100%, approval bypasses 0, audit completeness 100%, PII/secret leakage 0.
+- Workflow: 30 scenarios; completion >=95%, idempotency 100%, recovery >=95%, unauthorized side effects 0.
+- Identity: 90 tasks; exactly nine specialists, 10 tasks per specialist, routing >=95%, each specialist >=90%, cross-role violations 0.
+- Ecosystem: seven-day SLO plus 100 concurrent users for 30 minutes; availability >=99.5%, error rate <1%, restore 100%, RPO <=24h, RTO <=4h.
+
+### Model and quota boundary
+Cloudflare model catalog search confirms @cf/google/gemma-4-26b-a4b-it is listed for text generation and carries token-price metadata. This is catalog evidence, not inference evidence. No live inference was run because the remaining free allocation was not confirmed. Cloudflare Workers AI documentation (pricing page updated 2026-10-20) states 10,000 free neurons per day; usage above this requires Workers Paid. No billing activation or paid dependency was added.
+
+No matched Gemini benchmark was run. Do not claim Gemini superiority or parity.
