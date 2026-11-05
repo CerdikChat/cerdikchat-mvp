@@ -322,3 +322,30 @@ No merge, Production deployment, remote D1 write/migration, OAuth/secret/DNS cha
 An earlier continuation described PR #84's documentation-only head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a` as not rerun. That statement is superseded: exact-head Legacy Auto Pilot run `42037076015` and isolated Worker readiness run `42037076046` both completed SUCCESS on `b1e6e636...`, with 97/97 tests. The Worker dry-run used `wrangler.cerdikgo.toml` and explicitly showed `GOOGLE_AUTH_REQUIRED=true`; no deployment occurred. TypeScript remains NOT CONFIGURED on this JavaScript branch.
 
 A later documentation-only correction advanced PR #84 to `db8ed792537094a2adde85018e17ddb9f6613c45`. No application/config/test code changed after `b1e6e636...`; the current documentation-only head `db8ed792...` has no new exact-head workflow run. Keep Human Verification NOT STARTED and do not transfer the prior run to the later doc-only SHA.
+
+
+## PR #50 and Primary identity evidence correction — 2026-11-05
+
+### PR #50 latest corrective candidate
+An earlier entry recorded PR #50 head `29ad33fb7e0f8c72a6c988253798143ee399135c` at 93/93. That was a valid earlier snapshot but is superseded by the latest candidate:
+- Current code/test head: `1b7a9142a58f9681130fa0f3f3f9d8d600ae70eb`.
+- Regression run `42038433092`: SUCCESS, 95/95.
+- Auto Pilot PR run `42038441088`: SUCCESS, 95/95; install, repository preflight, Wrangler 4.153.0 dry-run and workflow safety scan passed.
+- TypeScript is NOT CONFIGURED on this legacy JavaScript branch and is not counted as passed.
+- Corrective history: runs `42038162766`/`42038162717` failed two tests (translation-key mismatch and residual focus); `42038285658` failed one stale network-status selector assertion. Fixes: voice focus `7ae7ab89141ec5ca9a8e243a60e7a47a8e58ff3e`, translation key `e5dc1c8c1f274cdba1822f859ded7cccf987e401`, network element assertion `47a3a215ac65f1eb9038ab4fae84c0c1802f9904`, and test-slice correction `1b7a9142a58f9681130fa0f3f3f9d8d600ae70eb`.
+- No current-head Workers Builds check was returned. Physical Android keyboard behavior and live Preview runtime remain NOT TESTED.
+
+### Primary nine-specialist identity candidate
+- PR #69 branch `atlas9/cerdikgo-primary-atlas9-identity`, head `cb5264803ca3efad03a8d168592c0b02d395354e`.
+- Source review confirms exactly ATLAS-01 through ATLAS-09; Optimus Prime is described as coordinator outside the nine.
+- Exact-head runs: PR Auto Pilot `41951721640`, push Auto Pilot `41951713253`, regression `41951713324` — all SUCCESS. Workers Builds check also SUCCESS.
+- Main branch prompt still contains legacy role terminology (eight named legacy roles); Primary identity parity is NOT VERIFIED until this candidate is safely reconciled and integrated.
+- PR #69 is BLOCKED for integration: compare with current base `atlas9/admin-governance-control-center` is 4 ahead / 3 behind; GitHub reports mergeable=false/dirty. No rebase, merge or force-push performed.
+
+### Current deployment and PR inventory correction
+- Current open PR inventory: 59.
+- Read-only Cloudflare deployment listing for script `cerdikchat-mvp` returned latest deployment record version 57, created `2026-11-01T14:59:26.759374Z`, source `wrangler`, 100% traffic. The deployment record did not expose a Git commit SHA; source parity with the current branches is NOT VERIFIED.
+- Read-only Worker Script inventory still returned only `cerdikchat-mvp` and `cerdikgo-mcp-preview`; no independent CerdikGo Primary Worker script was found.
+- PR #60 current head after documentation-only corrections: `da12d65fe9aa75afd6d2bf1ecd5ccab70027e489`; its preceding code/benchmark candidate `d23c19d292516b0174a41b54aca0a164bc9d20ba` passed exact Auto Pilot `42037452512`, regression/install `42037452506`, Phase 3 `42037452504`, Hybrid Gateway `42037452923` (129/129). Current documentation-only head has no new workflow run.
+- PR #84 current head after documentation-only correction: `db8ed792537094a2adde85018e17ddb9f6613c45`; preceding code/doc candidate `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a` passed Auto Pilot `42037076015` and isolated Worker readiness `42037076046` (97/97). Current documentation-only head has no new workflow run.
+- Keep both PRs Draft; do not transfer exact-head CI evidence across later documentation-only SHAs. Human Verification remains NOT STARTED.
