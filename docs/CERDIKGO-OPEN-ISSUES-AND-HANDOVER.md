@@ -171,3 +171,13 @@ The passing PR #60 checkpoint is parent SHA `ad3cbd61b6467675e71e8445f113635c45b
 - PR #61/#66/#68/#69 have successful prior exact-head CI but are 2 commits behind updated admin-governance base and report mergeable=false. Reconcile branch dependencies and rerun before integration.
 - PR #70 migration #0008 remains unapplied. No remote D1 write/migration or deployment occurred.
 - Seven model capability scores remain NOT MEASURED. The 35-task manifest is only a smoke fixture; no model inference benchmark has been run.
+
+
+## Final handover — 2026-11-05
+
+- PR #52 head `3653fa27ce9cbd01849b6f8a5478e7c335eb2465`: `41953302757` passed 99/99. TypeScript NOT CONFIGURED; Preview and D1 migration #0007 untested.
+- PR #70 head `0aae5032f2d6521255aefea172a27552ea3053a8`: `41953678319` passed 108/108. TypeScript NOT CONFIGURED; migration #0008 unapplied; no live D1 archive operation.
+- PR #60 head `465f8c5a6dc2f65c59537078fa98759c73299181`: four workflows passed 129/129; base snapshot two commits behind current branch. Revalidate after synchronization.
+- PR #61/#66/#68/#69 have older exact-head CI passes but are two commits behind updated admin-governance base; resolve branch drift before integration.
+- Do not merge or migrate D1. Request explicit Preview-only approval for #0008 after current-base gate and runtime plan are ready.
+- Seven dimension scores remain NOT MEASURED; no Workers AI/Gemini inference benchmark has run. 35 tasks remain a smoke manifest, not a full statistical benchmark.

@@ -278,3 +278,22 @@ Direct links:
 
 ### Base-branch reconciliation
 PR #60's tested base snapshot `de11d34257005ba72a621312230489a7d161ff53` is behind current base head `637ff536011ed25fc598888f62f520b4cfdccd3c` by two commits. PR #70's tested base snapshot `9be9a8c3f6df416d66452c3d8c69c5112c853207` is behind current admin-governance base head `3653fa27ce9cbd01849b6f8a5478e7c335eb2465` by two commits. Their head-specific test passes remain valid for the logged snapshots; rerun the merge candidate against the current base before integration or Human Verification.
+
+
+## Latest exact-head CI results — 2026-11-05
+
+| PR | Exact head | Workflow run | Tests | Result |
+|---|---|---|---:|---|
+| #52 | `3653fa27ce9cbd01849b6f8a5478e7c335eb2465` | 41953302757 | 99/99 | PASS; legacy JS gate, TypeScript NOT CONFIGURED |
+| #70 | `0aae5032f2d6521255aefea172a27552ea3053a8` | 41953678319 | 108/108 | PASS; legacy JS gate, TypeScript NOT CONFIGURED |
+| #60 | `465f8c5a6dc2f65c59537078fa98759c73299181` | 41953510364, 41953510382, 41953510361, 41953510367 | 129/129 | PASS; readiness, regression/install, Phase 3, Hybrid Gateway and Wrangler dry-run |
+
+Workflow links:
+- PR #52: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953302757
+- PR #70: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953678319
+- PR #60 readiness: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953510364
+- PR #60 regression/install: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953510382
+- PR #60 Phase 3: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953510361
+- PR #60 Hybrid Gateway: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953510367
+
+PR #52 and PR #70 legacy gates explicitly do not configure TypeScript. PR #60 gate includes strict TypeScript. PR #60 and #70 run base snapshots are respectively `de11d34257005ba72a621312230489a7d161ff53` and `9be9a8c3f6df416d66452c3d8c69c5112c853207`; each is two commits behind its current base branch. Revalidate the current merge candidate before integration or Human Verification.

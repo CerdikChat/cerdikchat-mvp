@@ -143,3 +143,11 @@ The scorecard documentation branch received further append-only audit commits af
 PR #70 head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1` passed legacy Auto Pilot run `41952747628` with 108/108 tests and zero failures. Coverage includes super-admin-only archive authorization, same-origin/CSRF guards, request validation, atomic D1 batch/audit response behavior, active/archive filtering and UI action wiring. This is automated mock/regression evidence only; no live D1 migration or runtime archive transaction was performed. Migration `0008_feature_request_archive.sql` remains unapplied.
 
 The run tested PR base snapshot `9be9a8c3f6df416d66452c3d8c69c5112c853207`; the admin-governance base has since advanced by two commits to `3653fa27ce9cbd01849b6f8a5478e7c335eb2465`. Revalidate the current merge candidate before Human Verification. Do not treat the run as Preview runtime acceptance.
+
+
+## Final archive/admin gate evidence — 2026-11-05
+
+- PR #52 admin governance head `3653fa27ce9cbd01849b6f8a5478e7c335eb2465` passed legacy gate `41953302757` (99/99). This does not verify Preview RBAC, live D1, or migration #0007.
+- PR #70 archive head `0aae5032f2d6521255aefea172a27552ea3053a8` passed legacy gate `41953678319` (108/108). Tests use isolated/mocked D1 behavior; migration #0008 remains unapplied and no real archive transaction was executed.
+- Both legacy workflows report TypeScript NOT CONFIGURED. They do not deploy or mutate remote D1.
+- Human Verification remains pending current-base synchronization and explicit Preview migration approval.

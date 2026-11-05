@@ -92,3 +92,11 @@ The PR #60 129/129 result and Auto Pilot pass apply only to parent head `ad3cbd6
 3. PR #52 head `3653fa27ce9cbd01849b6f8a5478e7c335eb2465` has a readiness workflow, but no exact-head PR run/status is visible. Do not claim readiness.
 4. PR #61/#66/#68/#69 branches are 2 commits behind their current admin-governance base and GitHub reports mergeable=false. No merge/rebase is authorized in this run.
 5. Migration #0008 remains unapplied. No remote D1 write/migration, Preview or Production deployment, OAuth/secrets/DNS change, billing activation or destructive action is approved/performed.
+
+
+## Final CI decision update — 2026-11-05
+
+1. PR #52 exact head `3653fa27ce9cbd01849b6f8a5478e7c335eb2465` passed legacy Auto Pilot `41953302757` (99/99). TypeScript is NOT CONFIGURED; no Preview runtime or migration #0007 verification.
+2. PR #70 exact head `0aae5032f2d6521255aefea172a27552ea3053a8` passed legacy Auto Pilot `41953678319` (108/108). TypeScript is NOT CONFIGURED; no live D1 archive test. Migration #0008 remains unapplied.
+3. PR #60 exact head `465f8c5a6dc2f65c59537078fa98759c73299181` passed four workflows (129/129), but the run's base snapshot is two commits behind current base.
+4. Do not treat CI as runtime acceptance. Human Verification for #70 remains pending current-base revalidation and explicit Preview migration approval. No merge, deployment, remote D1 mutation, secret/OAuth/DNS change, billing activation or deletion occurred.

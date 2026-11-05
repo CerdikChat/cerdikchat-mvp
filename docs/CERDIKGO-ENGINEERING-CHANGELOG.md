@@ -149,3 +149,11 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 - PR #60 head `62e36278386e37a47b91c4e246ac7ccb6ba9decf`: runs `41953152984`, `41953152983`, `41953153084`, `41953152956` passed; readiness/regression/Phase 3/Hybrid Gateway logs confirm 129/129 tests. Hybrid Gateway includes Wrangler dry-run. The readiness log records base snapshot `de11d34257005ba72a621312230489a7d161ff53`; current base branch has advanced to `637ff536011ed25fc598888f62f520b4cfdccd3c` (2 commits ahead of tested base). Revalidate latest merge candidate before integration.
 - PR #52 branch readiness workflow is present at `3653fa27ce9cbd01849b6f8a5478e7c335eb2465`; no exact-head PR workflow run/status is visible.
 - No deployment, D1 write/migration, secret/OAuth/DNS change, billing action or merge occurred.
+
+
+## 2026-11-05 — Final exact-head readiness evidence
+
+- PR #52 head `3653fa27ce9cbd01849b6f8a5478e7c335eb2465`: legacy readiness run `41953302757` passed 99/99; install, preflight, Wrangler dry-run and safety scan passed. TypeScript is NOT CONFIGURED. https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953302757
+- PR #70 head `0aae5032f2d6521255aefea172a27552ea3053a8`: legacy readiness run `41953678319` passed 108/108; install, preflight, Wrangler dry-run and safety scan passed. TypeScript is NOT CONFIGURED. https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953678319
+- PR #60 head `465f8c5a6dc2f65c59537078fa98759c73299181`: runs `41953510364`, `41953510382`, `41953510361`, `41953510367` passed 129/129; strict TypeScript, regression, Phase 3 and Hybrid Gateway; dry-run only. The tested base snapshot predates two commits now on the base branch.
+- These are exact-head CI results, not Preview or Production acceptance. No privileged operation occurred.

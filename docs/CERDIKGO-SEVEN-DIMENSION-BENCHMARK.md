@@ -154,3 +154,11 @@ The 129/129 CI evidence previously recorded for PR #60 applies to head `ad3cbd61
 - PR #70 archive candidate head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1`: legacy readiness `41952747628` passed 108/108 tests; install, preflight, Wrangler dry-run and safety scan passed. The run records base snapshot `9be9a8c3f6df416d66452c3d8c69c5112c853207`; current admin-governance base is two commits ahead.
 - PR #52 head `3653fa27ce9cbd01849b6f8a5478e7c335eb2465` has no exact-head PR workflow result.
 - All seven competitive model scores remain NOT MEASURED. No Workers AI or Gemini inference tasks were executed. Green CI does not award AI capability points.
+
+
+## Latest CI evidence — 2026-11-05
+
+- PR #52 `3653fa27ce9cbd01849b6f8a5478e7c335eb2465`: legacy readiness `41953302757` passed 99/99; TypeScript NOT CONFIGURED.
+- PR #70 `0aae5032f2d6521255aefea172a27552ea3053a8`: legacy readiness `41953678319` passed 108/108; TypeScript NOT CONFIGURED.
+- PR #60 `465f8c5a6dc2f65c59537078fa98759c73299181`: four workflows passed 129/129, including strict TypeScript and Wrangler dry-run; tested base snapshot is two commits behind current base.
+- These results validate bounded CI tasks only. The 35-task manifest has not been executed against any model. All seven model scores remain NOT MEASURED.
