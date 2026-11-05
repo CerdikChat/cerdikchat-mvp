@@ -361,3 +361,36 @@ PR #60 remains Draft; no merge or Human Verification was initiated. Production, 
 - Main backup checkout uses persist-credentials=true; PR #53 candidate proposes false and passed 41825322436 / 41825322322. Review and integrate only through its dependency chain.
 - The scheduled backup workflow creates a GitHub artifact only. Google Drive upload is conditional on a manual workflow_dispatch input explicitly set true. No scheduled Drive backup exists in the current workflow, and the latest two scheduled runs failed at Gitleaks before archive creation. The Drive upload script has not been live-tested; no restore drill exists.
 - Next: after PR #74 secret-scan correction and PR #53 workflow review, run an explicitly approved backup workflow, verify artifact and Drive object SHA-256, then restore into an isolated location. Do not trigger the Drive upload or restore as part of this audit.
+
+## Current handover — 2026-11-05 20:31 WIB
+
+### Verified candidates
+- PR #44 fail-closed auth test: head `c7a11a58716048a9170586dd8b26436193ee5e59`, run `42036693384`, 41/41 PASS; Draft, not integrated.
+- PR #50 multilingual/Validation Gate: head `29ad33fb7e0f8c72a6c988253798143ee399135c`, runs `42036848615`, `42036848634`, `42036856392`, 93/93 PASS; TypeScript not configured; Android acceptance not tested.
+- PR #84 isolated Worker guard: config `c827b1c3cc08027ee036d0f82465046521b6993e`, tests `e3c0a6295001c07476aa3900a6075b37f7bc7b6f`, doc-only current head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a`; 97/97 and dry-run pass on code/test head. Current doc-only head not re-run.
+- PR #60 scorecard pre-update head `2a9c24b0d7b6c1bf463656143708ddcbbf25047f`: 129/129 and four exact-head workflows pass; current documentation updates require fresh gate.
+- PR #80 local Inbox cap and PR #74 Gitleaks full-history correction remain Draft candidates with prior exact-head evidence recorded above.
+
+### Blockers / NOT TESTED
+1. Main Production auth flag is not proven fail-closed; PR #44 must be reviewed and integrated before any Production assurance.
+2. PR #60 is 103 commits ahead / 2 behind its current base. No rebase/merge was performed. Review dependency graph before integration.
+3. Primary identity still needs canonical nine-seat prompt integration. PR #62 candidate passes, but main/Primary prompt remains legacy and no integrated Primary parity is established.
+4. No separate CerdikGo Primary Worker script exists in the connected Cloudflare inventory; only `cerdikchat-mvp` and `cerdikgo-mcp-preview` were returned.
+5. PR #84's isolated config has no D1, CHAT_RATE_LIMITER, OAuth client/origin, secrets or FILE_SCANNER. It must remain a readiness package, not user-facing.
+6. PR #81 is dirty/non-mergeable despite green checks; PR #82 is stacked on #81. Physical Android WPS share/open, DOCX/XLSX/PPTX, keyboard and accessibility tests are outstanding.
+7. Main backup schedule has historical failures `41890146458` and `41695574776`; PR #74 fixes the scanner branch only. Successful archive, Drive upload and restore remain NOT TESTED.
+8. FILE_SCANNER/ClamAV runtime remains BLOCKED and fail-closed; do not bypass it or activate paid Containers.
+9. Voice Production rate-limit binding is missing from reviewed config; Android voice capture/playback NOT TESTED.
+10. Live Web Research provider, retrieval freshness, source-quality and semantic citation tests are NOT TESTED.
+11. No complete seven-dimension benchmark, 100-concurrent-user edge test, seven-day SLO, backup restore, RPO/RTO or matched Gemini comparison exists.
+
+### Next actions
+- Run the exact-head Auto Pilot gate after the current scorecard documentation append completes.
+- Review the PR #44 fail-closed fix and PR #84 isolated config guard; keep both Draft pending owner review and safe Preview prerequisites.
+- Reconcile the #60 dependency graph without force-push or history overwrite.
+- Integrate the canonical nine-seat identity only through a tested Primary branch.
+- Obtain dedicated resource decisions for D1, rate limits, OAuth and scanner before any user-facing Worker deployment.
+- Complete Android tests, live research tests, backup/restore, edge-load and all seven benchmark task sets.
+- Keep gateway `plan_only`; no Human Verification until the exact selected candidate has a green Auto Pilot gate and a separate decision to begin.
+
+No merge, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, billing activation or privileged operation was performed in this continuation.
