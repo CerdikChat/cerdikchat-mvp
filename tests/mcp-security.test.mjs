@@ -106,6 +106,14 @@ test("MCP accepts bearer scheme case-insensitively and rate-limits the credentia
   assert.equal(env.rateLimitKeys.some((key) => key.includes(TOKEN)), false);
 });
 
+test("MCP rejects malformed bearer authorization without invoking credential rate limit", async () => {
+  const env = makeEnv();
+  const response = await worker.fetch(request({ token: `Basic ${TOKEN}` }), env);
+  assert.equal(response.status, 401);
+  assert.equal((await payload(response)).error, "UNAUTHORIZED");
+  assert.deepEqual(env.rateLimitKeys, ["mcp:preauth:ip:203.0.113.25"]);
+});
+
 test("MCP accepts only POST on its stateless endpoint", async () => {
   const env = makeEnv();
   const response = await worker.fetch(request({ method: "GET", token: `Bearer ${TOKEN}` }), env);
