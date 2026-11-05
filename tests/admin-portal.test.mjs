@@ -17,7 +17,7 @@ function authenticatedAdminEnv(role = "super_admin", accessExpiresAt = null) {
                 if (sql.includes("FROM sessions s")) {
                   return { google_sub: "test-admin-sub", email: "admin@example.test" };
                 }
-                if (sql.includes("SELECT role, access_expires_at FROM users")) {
+                if (sql.includes("SELECT role, governance_tier, access_expires_at FROM users")) {
                   return { role, access_expires_at: accessExpiresAt };
                 }
                 return null;
@@ -133,6 +133,20 @@ test("Admin Console document rejects non-GET methods", async () => {
 });
 
 
+test("access decision batches approval, pending-state transition and audit insert atomically", async () => {
+  const source = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");
+  assert.ok(source.includes('typeof env.DB.batch!=="function"'));
+  assert.ok(source.includes("const results=await env.DB.batch(statements)"));
+  assert.ok(source.includes("WHERE changes()=1"));
+  assert.ok(source.includes("REQUEST_ALREADY_DECIDED_OR_IDENTITY_CONFLICT"));
+});
+
+test("admin approval cannot rebind an existing email to a different Google subject", async () => {
+  const source = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");
+  assert.ok(source.includes("WHERE users.google_sub=excluded.google_sub"));
+  assert.ok(source.includes("ACCOUNT_IDENTITY_CONFLICT"));
+});
+
 test("governance compatibility migration adds only missing columns and preserves existing role schema", async () => {
   const usersMigration = await readFile(new URL("../migrations/0001_users.sql", import.meta.url), "utf8");
   const governanceMigration = await readFile(new URL("../migrations/0006_access_governance_compat.sql", import.meta.url), "utf8");
@@ -142,4 +156,194 @@ test("governance compatibility migration adds only missing columns and preserves
   assert.match(governanceMigration, /CREATE TABLE IF NOT EXISTS access_requests/);
   assert.doesNotMatch(governanceMigration, /ADD COLUMN role/);
   assert.doesNotMatch(governanceMigration, /CREATE TABLE IF NOT EXISTS admin_audit_log/);
+  const controlMigration = await readFile(new URL("../migrations/0007_governance_control_center.sql", import.meta.url), "utf8");
+  assert.match(controlMigration, /governance_tier/);
+  assert.match(controlMigration, /superior_admin/);
+  assert.match(controlMigration, /admin_audit_events/);
+});
+
+test("Admin feature-request queue returns stored proposals to verified administrators", async () => {
+  const rows=[{request_id:"00000000-0000-4000-8000-000000000001",user_email:"pilot@example.test",feature_name:"Preview proposal",status:"submitted"}];
+  let sql="";
+  const environment=authenticatedAdminEnv();
+  environment.DB.prepare=(query)=>{sql=query;return{bind(){return{first:async()=>query.includes("FROM sessions s")?{google_sub:"test-admin-sub",email:"admin@example.test"}:{role:"super_admin",governance_tier:"super_admin",access_expires_at:null},all:async()=>({results:rows})}}}};
+  const response=await worker.fetch(adminRequest("/api/admin/feature-requests"),environment);
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  assert.equal(payload.requests.length,1);
+  assert.equal(payload.requests[0].feature_name,"Preview proposal");
+  assert.match(sql,/FROM feature_requests/);
+});
+
+test("Admin feature-request queue rejects regular users", async () => {
+  const response=await worker.fetch(adminRequest("/api/admin/feature-requests"),authenticatedAdminEnv("user"));
+  assert.equal(response.status,403);
+  assert.equal((await response.json()).error,"ADMIN_REQUIRED");
+});
+
+test("Admin feature-request queue rejects cross-site requests", async () => {
+  const response=await worker.fetch(adminRequest("/api/admin/feature-requests",{fetchSite:"cross-site",origin:"https://attacker.example"}),authenticatedAdminEnv());
+  assert.equal(response.status,403);
+  assert.equal((await response.json()).error,"ORIGIN_NOT_ALLOWED");
+});
+
+test("Admin document is denied to regular users before the asset is served", async () => {
+  let assetRequested = false;
+  const environment = authenticatedAdminEnv("user");
+  environment.ASSETS.fetch = async () => {
+    assetRequested = true;
+    return new Response("SHOULD_NOT_BE_SERVED");
+  };
+  const response = await worker.fetch(
+    adminRequest("/admin", { fetchSite: "none" }),
+    environment
+  );
+  assert.equal(response.status, 403);
+  assert.match(await response.text(), /Admin access required/);
+  assert.equal(assetRequested, false);
+});
+
+test("Admin document is denied after administrator access expires", async () => {
+  let assetRequested = false;
+  const environment = authenticatedAdminEnv(
+    "super_admin",
+    Math.floor(Date.now() / 1000) - 1
+  );
+  environment.ASSETS.fetch = async () => {
+    assetRequested = true;
+    return new Response("SHOULD_NOT_BE_SERVED");
+  };
+  const response = await worker.fetch(
+    adminRequest("/admin", { fetchSite: "none" }),
+    environment
+  );
+  assert.equal(response.status, 403);
+  assert.match(await response.text(), /governance access is verified/);
+  assert.equal(assetRequested, false);
+});
+
+
+
+test("access decisions persist an explicitly identifiable audit record and return its trace ID", async () => {
+  const source = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");
+  assert.match(source, /const auditId=crypto\.randomUUID\(\)/);
+  assert.match(source, /INSERT INTO admin_audit_events \(audit_id,actor_email,action,target_email,details,created_at\)/);
+  assert.match(source, /"access_"\+status/);
+  assert.match(source, /JSON\.stringify\(\{requestId,role:decision==="approve"\?requestedTier:null\}\)/);
+  assert.match(source, /results\[auditIndex\]\?\.meta\?\.changes\?\?0\)!==1/);
+  assert.match(source, /return json\(\{success:true,requestId,status,auditId\}\)/);
+  assert.ok(
+    source.indexOf("if((results[auditIndex]?.meta?.changes??0)!==1)") <
+    source.indexOf("return json({success:true,requestId,status,auditId})"),
+    "the API must not report success before confirming the audit insert"
+  );
+});
+
+
+test("Admin Console exposes the server-issued audit reference after a decision", async () => {
+  const html = await readFile(new URL("../src/admin.html", import.meta.url), "utf8");
+  assert.match(html, /Audit ID: "\+d\.auditId/);
+  assert.match(html, /await load\(\);statusEl\.textContent="Permintaan "\+d\.status\+" berhasil dicatat\. Audit ID: "\+d\.auditId/);
+});
+
+test("governance migration preflight is read-only and flags duplicate pending emails", async () => {
+  const sql = await readFile(new URL("../scripts/governance-migration-preflight.sql", import.meta.url), "utf8");
+  assert.match(sql, /SELECT lower\(trim\(email\)\)/);
+  assert.match(sql, /WHERE status = 'pending'/);
+  assert.match(sql, /HAVING COUNT\(\*\) > 1/);
+  const executableSql = sql.replace(/^\s*--.*$/gm, "");
+  assert.doesNotMatch(executableSql, /\b(DELETE|UPDATE|INSERT|REPLACE)\b/i);
+});
+
+
+function decisionEnvironment(batchResults, requestStatus = "pending", role = "super_admin") {
+  const requestRow = {
+    request_id: "00000000-0000-4000-8000-000000000001",
+    email: "pilot@example.test",
+    display_name: "Pilot User",
+    google_sub: "pilot-google-sub",
+    status: requestStatus
+  };
+  const statements = [];
+  const DB = {
+    prepare(sql) {
+      statements.push(sql);
+      return {
+        bind(...args) {
+          return {
+            first: async () => {
+              if (sql.includes("FROM sessions s")) {
+                return { google_sub: "admin-google-sub", email: "admin@example.test" };
+              }
+              if (sql.includes("SELECT role, governance_tier, access_expires_at FROM users")) {
+                return { role, governance_tier: role, access_expires_at: null };
+              }
+              if (sql.includes("FROM access_requests WHERE request_id")) return requestRow;
+              return null;
+            },
+            all: async () => ({ results: [] }),
+            run: async () => ({ meta: { changes: 1 } })
+          };
+        }
+      };
+    },
+    batch: async batch => {
+      DB.lastBatchSql = batch.map(statement => statement.sql || "");
+      return batchResults;
+    }
+  };
+  return { DB, statements };
+}
+
+function decisionRequest(decision = "approve", role = "user") {
+  const session = "A".repeat(43);
+  const csrf = "C".repeat(43);
+  return new Request("https://cerdikchat.test/api/admin/users/decide", {
+    method: "POST",
+    headers: {
+      origin: "https://cerdikchat.test",
+      "sec-fetch-site": "same-origin",
+      "content-type": "application/json",
+      cookie: `__Host-cerdikchat_session=${session}; __Host-cerdikchat_csrf=${csrf}`,
+      "x-csrf-token": csrf
+    },
+    body: JSON.stringify({
+      requestId: "00000000-0000-4000-8000-000000000001",
+      decision,
+      role
+    })
+  });
+}
+
+test("Admin approval endpoint validates identity and records a traceable audit result", async () => {
+  const environment = decisionEnvironment([
+    { meta: { changes: 1 } },
+    { meta: { changes: 1 } },
+    { meta: { changes: 1 } }
+  ]);
+  const response = await worker.fetch(decisionRequest("approve", "user"), environment);
+  const payload = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(payload.success, true);
+  assert.equal(payload.status, "approved");
+  assert.match(payload.auditId, /^[0-9a-f-]{36}$/i);
+});
+
+test("Admin approval rejects an already-decided request without reporting success", async () => {
+  const environment = decisionEnvironment([
+    { meta: { changes: 0 } },
+    { meta: { changes: 0 } }
+  ], "approved");
+  const response = await worker.fetch(decisionRequest("reject"), environment);
+  const payload = await response.json();
+  assert.equal(response.status, 409);
+  assert.equal(payload.error, "REQUEST_NOT_PENDING");
+});
+
+test("Admin approval refuses role escalation beyond the administrator tier", async () => {
+  const environment = decisionEnvironment([], "pending", "admin");
+  const response = await worker.fetch(decisionRequest("approve", "super_admin"), environment);
+  const payload = await response.json();
+  assert.equal(response.status, 403);
+  assert.equal(payload.error, "ROLE_ESCALATION_FORBIDDEN");
 });

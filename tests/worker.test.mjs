@@ -98,20 +98,22 @@ test("unlisted Google account response does not disclose Google subject identifi
       prepare: (sql) => ({
         bind: () => ({
           first: async () => {
-            assert.match(sql, /SELECT google_sub, email, display_name, status FROM users/);
+            assert.match(sql, /SELECT google_sub, email, display_name, status, role, governance_tier, access_expires_at FROM users/);
             return null;
-          }
+          },
+          run: async () => ({ meta: { changes: 1 } })
         })
       })
     }
   });
   const response = await googleLogin(request, env, { fetch: fixture.fetchJwks });
   const payload = await json(response);
-  assert.equal(response.status, 403);
-  assert.equal(payload.error, "USER_NOT_ALLOWLISTED");
+  assert.equal(response.status, 202);
+  assert.equal(payload.error, "ACCESS_REQUEST_SUBMITTED");
+  assert.equal(payload.requestSubmitted, true);
   assert.equal(Object.hasOwn(payload, "googleSub"), false);
   assert.equal(JSON.stringify(payload).includes("12345678901234567890"), false);
-  assert.equal(payload.email, undefined);
+  assert.equal(payload.email, "pilot.user@example.com");
 });
 
 test("Google ID token verifies signature, audience, nonce and normalized email", async () => {
@@ -776,7 +778,9 @@ test("login and logout report failures inside the open account dialog and verify
   assert.match(html, /sessionResponse = await fetch\("\/api\/auth\/me"/);
   assert.match(html, /sessionCheck\.status !== 401/);
   assert.match(html, /id="adminConsoleLink" href="\/admin" hidden/);
-  assert.match(html, /payload\.role\)\s*\)/);
+  assert.match(html, /payload\.authenticated === true/);
+  assert.match(html, /\["admin", "superior_admin", "super_admin"\]\.includes\(payload\.role\)/);
+  assert.match(html, /adminSettingsSection\.hidden = !canAccessAdmin/);
 });
 
 
@@ -850,6 +854,13 @@ test("mobile feature request trigger opens the dialog through delegated click ha
   assert.match(html, /requestFeatureCategory\?\.focus\(\)/);
 });
 
+test("approved user access policy is limited to 76 hours and expired access is rejected", async () => {
+  const source = await readFile(new URL("../auth/google-auth.js", import.meta.url), "utf8");
+  assert.match(source, /SESSION_TTL_SECONDS = 76 \* 60 \* 60/);
+  assert.match(source, /access_expires_at IS NULL OR u\.access_expires_at > \?/);
+  const admin = await readFile(new URL("../admin-portal.js", import.meta.url), "utf8");
+  assert.match(admin, /now\+\(76\*60\*60\)/);
+});
 
 test("Workers AI quota errors are classified and returned as retryable 429", async () => {
   const env = makeEnv({ AI: { run: async () => { throw new Error("daily allocation quota exceeded"); } } });

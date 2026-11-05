@@ -1,0 +1,48 @@
+name: ATLAS-9 99,990 isolated stress campaign
+
+on:
+  push:
+    branches:
+      - atlas9/admin-governance-control-center
+    paths:
+      - "scripts/atlas9-stress-99990.mjs"
+      - ".github/workflows/atlas9-stress-99990.yml"
+      - "worker.js"
+      - "auth/**"
+      - "admin-portal.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: atlas9-stress-99990
+  cancel-in-progress: false
+
+jobs:
+  isolated-stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout authorized branch
+        uses: actions/checkout@v4
+        with:
+          ref: atlas9/admin-governance-control-center
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run existing regression suite
+        run: npm test
+      - name: Execute 99,990 synthetic Worker requests
+        run: |
+          set -o pipefail
+          node scripts/atlas9-stress-99990.mjs | tee atlas9-stress-report.json
+      - name: Upload machine-readable report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas9-stress-99990-report
+          path: atlas9-stress-report.json
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,48 @@
+name: CerdikChat isolated branch Preview
+
+on:
+  push:
+    branches:
+      - atlas9/admin-governance-control-center
+    paths:
+      - "worker.js"
+      - "src/**"
+      - "auth/**"
+      - "admin-portal.js"
+      - "wrangler.toml"
+      - "package.json"
+      - "tests/**"
+      - ".github/workflows/preview-upload.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerdikchat-branch-preview
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout authorized PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: atlas9/admin-governance-control-center
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run regression tests
+        run: npm test
+      - name: Install pinned Wrangler
+        run: npm install --no-save wrangler@4.153.0
+      - name: Create or update isolated Workers Preview (not a Version URL)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "3d93e6045415c35893397a5c37b512a3"
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "CLOUDFLARE_API_TOKEN repository secret is not configured"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "CLOUDFLARE_ACCOUNT_ID is not configured"; exit 1; }
+          npx wrangler preview --config wrangler.toml --name atlas9-prompt-intelligence-mvp --ignore-base-config --json
