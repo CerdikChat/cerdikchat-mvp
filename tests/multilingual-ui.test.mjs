@@ -17,7 +17,8 @@ test("Indonesian, English and Simplified Chinese provide human-facing workspace 
 });
 
 test("Language selection updates welcome and beta guidance, not only the header", () => {
-  assert.match(html, /setText\("#welcome \.workspace-intro h1", p\.welcome\)/);
+  assert.match(html, /welcomeHeading\.firstChild\.nodeValue = p\.welcomePrefix/);
+  assert.match(html, /highlight\.textContent = p\.welcomeHighlight/);
   assert.match(html, /setText\("#welcome \.workspace-intro p", p\.welcomeDescription\)/);
   assert.match(html, /setText\("#sideNavigation h2", p\.sideTitle\)/);
   assert.match(html, /setText\("\.side-note", p\.sideNote\)/);
