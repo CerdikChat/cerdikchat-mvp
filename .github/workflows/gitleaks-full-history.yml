@@ -1,0 +1,39 @@
+name: CerdikChat full-history secret scan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - atlas9/backup-gitleaks-allowlist-20261105
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerdikchat-gitleaks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-history-secret-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout full repository history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch all remote branches and tags
+        run: git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*' '+refs/tags/*:refs/tags/*'
+      - name: Verify allowlist is constrained to one exact file and literal
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'condition = "AND"' .gitleaks.toml
+          grep -F 'src/prompt-intelligence\\.js' .gitleaks.toml
+          grep -F 'cerdikgo-prompt-vault-v1' .gitleaks.toml
+          echo "Narrow allowlist contract: PASS"
+      - name: Scan all fetched Git history with Gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
