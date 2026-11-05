@@ -490,3 +490,10 @@ PR #84's current branch head is documentation-only commit `b1e6e636fff22cdf90cc2
 - No complete 100-task reasoning, 50-task coding, 50-task research, 50-scenario governance, 30-scenario workflow, 90-task specialist or seven-day ecosystem benchmark has been executed.
 - No matched Workers AI/Gemini inference comparison, live web retrieval test, Android device test, live scanner test, backup restore, 100-concurrent-user edge test, or RPO/RTO test was performed.
 - Capability scores remain NOT MEASURED; evidence-credit remains 0/100 per dimension. CI counts are engineering tests only.
+
+
+## PR #84 exact-head evidence correction — 2026-11-05
+
+An earlier continuation described PR #84's documentation-only head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a` as not rerun. That statement is superseded: exact-head Legacy Auto Pilot run `42037076015` and isolated Worker readiness run `42037076046` both completed SUCCESS on `b1e6e636...`, with 97/97 tests. The Worker dry-run used `wrangler.cerdikgo.toml` and explicitly showed `GOOGLE_AUTH_REQUIRED=true`; no deployment occurred. TypeScript remains NOT CONFIGURED on this JavaScript branch.
+
+A later documentation-only correction advanced PR #84 to `db8ed792537094a2adde85018e17ddb9f6613c45`. No application/config/test code changed after `b1e6e636...`; the current documentation-only head `db8ed792...` has no new exact-head workflow run. Keep Human Verification NOT STARTED and do not transfer the prior run to the later doc-only SHA.
