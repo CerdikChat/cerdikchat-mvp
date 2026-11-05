@@ -309,3 +309,18 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Current main/Primary prompt still has legacy identity terminology. Exactly nine specialists are verified only in candidate PR branches; Optimus Prime remains coordinator, not a tenth agent. Gateway stays `plan_only`.
 - All seven capability scores remain NOT MEASURED; evidence-credit 0/100 per dimension until the complete reproducible benchmark samples are executed. No Gemini superiority/parity claim.
 - No merge, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, billing activation or other privileged operation. Human Verification NOT STARTED.
+
+ 
+## Decision and approval continuation — 2026-11-05 20:58 WIB
+
+### Decisions recorded
+1. VERIFIED: Preserve exactly nine specialist IDs ATLAS-01 through ATLAS-09. Optimus Prime remains coordinator outside the nine. Gateway remains read_only and plan_only; no agent execution, tools or external calls are enabled.
+2. VERIFIED: Reapply the Primary identity correction on clean PR #85 instead of force-pushing or rewriting diverged PR #69. Candidate efdc6390a5555aa5050ec8b797a7f4004bb4d202; Auto Pilot 42041437992 SUCCESS, 107/107.
+3. VERIFIED: Reapply query-string redaction on clean PR #86 instead of rewriting diverged PR #66. Candidate ebf500bd10738580bb7001a8fec772ad463000e4; Auto Pilot 42041734344 SUCCESS, 107/107; config dry-run 42041734530 SUCCESS.
+4. BLOCKED: Do not treat cerdikchat-mvp as isolated Preview until the live script DB binding discrepancy is resolved. Read-only settings report cerdikchat-db while the deployment annotation says controlled field-test Preview. No D1 query/write/migration was performed.
+5. BLOCKED: Do not enable live ClamAV Containers on a paid plan. Keep fail-closed scanner behavior; evaluate only a no-cost, security-reviewed alternative.
+6. PLANNED: Do not run live model inference until remaining free Workers AI quota is confirmed. Cloudflare documents 10,000 free neurons/day; use beyond that requires the Workers Paid plan. No billing activation or inference call was made.
+7. VERIFIED: No Gemini superiority/parity claim. All seven capability benchmarks remain NOT MEASURED.
+
+### Explicit non-approvals
+No approval was granted or exercised for PR merge, Production deployment, remote D1 read/write/migration, OAuth or secret changes, DNS changes, billing activation, live model spend, or autonomous specialist execution. Human Verification was NOT STARTED.
