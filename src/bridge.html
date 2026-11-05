@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071426">
+<meta name="description" content="CerdikGo Context Bridge — pertukaran tugas aman dengan ChatGPT Go.">
+<title>CerdikGo · Context Bridge</title>
+<style>
+:root{color-scheme:dark;--bg:#071426;--panel:#10233a;--line:#234969;--text:#eff7ff;--muted:#a4bad1;--accent:#39b8ee;--mint:#35dec8;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#12365a,transparent 48%),var(--bg);color:var(--text);min-height:100vh}.shell{max-width:900px;margin:auto;padding:20px 16px 48px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}.brand{font-size:19px;font-weight:850}.brand em{font-style:normal;color:var(--mint)}a{color:#8bdcff}.pill{border:1px solid #236a65;color:#8af0dc;background:#10332f;border-radius:30px;padding:5px 10px;font-size:11px}.intro h1{font-size:clamp(27px,6vw,40px);margin:8px 0}.intro p,.muted{color:var(--muted);line-height:1.6}.grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:18px}.panel{background:linear-gradient(145deg,#102945,#0b1b2e);border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0}.panel h2{font-size:16px;margin:0 0 8px}.panel p{font-size:13px;color:var(--muted);line-height:1.5}.wide{grid-column:1/-1}label{display:block;font-size:12px;color:#c4d7e9;margin:12px 0 6px}textarea,select,input{width:100%;border:1px solid #355873;border-radius:10px;background:#08182a;color:var(--text);padding:11px;font:inherit}textarea{min-height:120px;resize:vertical}button{border:1px solid #39749a;border-radius:10px;background:#143552;color:#f1f8ff;padding:10px 13px;font:inherit;font-weight:700;cursor:pointer}button.primary{background:linear-gradient(110deg,#39a7ff,#21dec9);color:#061626;border:0}button:disabled{opacity:.45;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.status{min-height:24px;font-size:13px;color:#8de8d4;margin-top:10px}.status.error{color:#ff9ca7}.inbox{display:grid;gap:8px;margin-top:12px}.task{padding:11px;border:1px solid #284c69;border-radius:10px;background:#0a1b2d}.task strong{display:block;font-size:13px}.task small{color:var(--muted)}.task p{white-space:pre-wrap;overflow-wrap:anywhere}.note{border-left:3px solid #e3b65c;padding:9px 11px;background:#2b261c;color:#f2d9a5;font-size:12px;border-radius:0 8px 8px 0;line-height:1.5}.hidden{display:none!important}.footer{font-size:11px;color:#849db6;text-align:center;margin-top:20px}@media(max-width:650px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.shell{padding:14px 12px 32px}.panel{padding:14px}.actions button{flex:1 1 auto}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="top"><div class="brand">Cerdik<em>Go</em> · Context Bridge</div><span class="pill">PREVIEW · NO CUSTOM MCP</span></header>
+<section class="intro"><a href="/">← Kembali ke workspace</a><h1>Hubungkan konteks. Kendalikan izin.</h1><p>Jembatan manual antara ChatGPT Go dan CerdikGo. Ekspor atau bagikan tugas sebagai JSON, impor dengan validasi, lalu buat rencana non-eksekusi di CerdikGo.</p></section>
+<div class="note">Jangan masukkan password, API key, token, data pelanggan, atau informasi rahasia. Transfer hanya terjadi saat Anda menekan tombol. Inbox disimpan sementara di sesi browser ini.</div>
+<div class="grid">
+<section class="panel">
+<h2>1 · Buat paket tugas</h2><p>Tempel instruksi dari ChatGPT Go atau tulis permintaan baru. Paket ini tidak menjalankan agent.</p>
+<label for="intent">Instruksi / konteks tugas</label><textarea id="intent" maxlength="4000" placeholder="Tempel hasil analisis atau instruksi dari ChatGPT Go…"></textarea>
+<label for="agents">Spesialis ATLAS-9</label><select id="agents" multiple size="5"><option value="ATLAS-01" selected>ATLAS-01 · Research Intelligence</option><option value="ATLAS-02" selected>ATLAS-02 · Engineering</option><option value="ATLAS-03">ATLAS-03 · AI & Prompt Intelligence</option><option value="ATLAS-04">ATLAS-04 · Cybersecurity</option><option value="ATLAS-05">ATLAS-05 · Governance & Compliance</option><option value="ATLAS-06">ATLAS-06 · Data Intelligence</option><option value="ATLAS-07">ATLAS-07 · Business Strategy</option><option value="ATLAS-08">ATLAS-08 · Product & UX</option><option value="ATLAS-09" selected>ATLAS-09 · Quality Assurance</option></select>
+<label for="actionClass">Kelas tugas</label><select id="actionClass"><option value="read_only">Read-only · Analisis dan perencanaan</option><option value="controlled_action">Controlled action · Wajib persetujuan manusia</option></select>
+<div class="actions"><button class="primary" id="makePackage">Buat paket JSON</button><button id="copyPackage" disabled>Salin</button><button id="sharePackage" disabled>Bagikan</button><button id="downloadPackage" disabled>Ekspor .json</button></div>
+</section>
+<section class="panel">
+<h2>2 · Impor paket ChatGPT</h2><p>Pilih file JSON yang diekspor atau tempel JSON. Sistem memeriksa skema, ukuran instruksi, ID, dan daftar agent.</p>
+<label for="importFile">Pilih file JSON</label><input id="importFile" type="file" accept="application/json,.json">
+<label for="importJson">Atau tempel JSON</label><textarea id="importJson" placeholder='{"schema":"cerdikgo.task.v1","task":{…}}'></textarea>
+<div class="actions"><button class="primary" id="importPackage">Validasi & masukkan Inbox</button></div>
+</section>
+<section class="panel wide">
+<h2>3 · Task Inbox & Governance Gate</h2><p>Inbox sementara pada tab/sesi browser. Pilih tugas yang tervalidasi untuk membuat rencana melalui endpoint Preview yang sudah tersedia. Jika endpoint belum diaktifkan atau sesi belum sah, sistem akan menolak secara tertutup.</p>
+<div class="note">P0 safeguard: tidak ada eksekusi agent, tidak ada database write, tidak ada panggilan provider eksternal, dan tidak ada akses Production. Rencana controlled action tetap menunggu persetujuan manusia.</div>
+<div class="inbox" id="inbox"><p class="muted">Belum ada tugas dalam sesi ini.</p></div>
+<div class="status" id="status" role="status" aria-live="polite"></div>
+</section>
+</div>
+<p class="footer">CerdikGo · ChatGPT Go Context Bridge · Preview only · Read-only / Plan-only</p>
+</main>
+<script type="module" src="/bridge.js"></script>
+</body></html>
