@@ -584,7 +584,8 @@ test("document research returns validated structured evidence for an authenticat
       toMarkdown: async () => ({ format: "markdown", data: "Page 1: Evidence A." }),
       run: async (_model, input) => {
         assert.match(input.messages[0].content, /Return ONLY valid JSON/);
-        assert.match(input.messages[1].content, /BEGIN UNTRUSTED FILE CONTENT/);\n        assert.match(input.messages[0].content, /verbatim excerpt/i);
+        assert.match(input.messages[1].content, /BEGIN UNTRUSTED FILE CONTENT/);
+        assert.match(input.messages[0].content, /verbatim excerpt/i);
         return { response: JSON.stringify(structured) };
       }
     }
@@ -592,7 +593,8 @@ test("document research returns validated structured evidence for an authenticat
   const response = await worker.fetch(analysisRequest(png, { path: "/api/research/document" }), env);
   const payload = await json(response);
   assert.equal(response.status, 200);
-  assert.equal(payload.research.findings[0].reference, "Page 1");\n  assert.equal(payload.research.findings[0].evidence_validation, "normalized_verbatim_match");
+  assert.equal(payload.research.findings[0].reference, "Page 1");
+  assert.equal(payload.research.findings[0].evidence_validation, "normalized_verbatim_match");
   assert.equal(payload.persisted, false);
 });
 

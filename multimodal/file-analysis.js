@@ -119,7 +119,7 @@ function extractText(result) {
 }
 
 function normalizeEvidenceText(value) {
-  return value.replace(/\\s+/g, " ").trim();
+  return value.replace(/\s+/g, " ").trim();
 }
 
 function hasVerbatimEvidence(extracted, evidence) {
@@ -130,7 +130,7 @@ function hasVerbatimEvidence(extracted, evidence) {
 }
 
 function parseResearchOutput(reply, extracted) {
-  const cleaned = reply.replace(/^\\s*\\x60\\x60\\x60(?:json)?\\s*/i, "").replace(/\\s*\\x60\\x60\\x60\\s*$/, "").trim();
+  const cleaned = reply.replace(/^\s*\x60\x60\x60(?:json)?\s*/i, "").replace(/\s*\x60\x60\x60\s*$/, "").trim();
   let value;
   try { value = JSON.parse(cleaned); } catch { return null; }
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
