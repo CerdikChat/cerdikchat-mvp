@@ -2935,9 +2935,13 @@
       const refresh = () => {
         const online = navigator.onLine;
         bar.dataset.state = online ? "online" : "offline";
-        label.textContent = online
-          ? "ONLINE · Koneksi jaringan tersedia. Layanan AI diverifikasi saat permintaan dijalankan."
-          : "OFFLINE · Koneksi jaringan tidak tersedia. Permintaan AI memerlukan koneksi.";
+        const lang = window.CerdikGoUiLanguage || "id";
+        const copy = {
+          id: { online:"ONLINE · Koneksi jaringan tersedia. Layanan AI diverifikasi saat permintaan dijalankan.", offline:"OFFLINE · Koneksi jaringan tidak tersedia. Permintaan AI memerlukan koneksi." },
+          en: { online:"ONLINE · Network connection available. AI service is verified when a request is made.", offline:"OFFLINE · No network connection. Requests to AI require connectivity." },
+          zh: { online:"在线 · 网络连接正常。AI 服务将在提交请求时验证。", offline:"离线 · 网络不可用。AI 请求需要网络连接。" }
+        };
+        label.textContent = copy[lang]?.[online ? "online" : "offline"] || copy.id[online ? "online" : "offline"];
       };
       window.addEventListener("online", refresh);
       window.addEventListener("offline", refresh);
@@ -2957,19 +2961,19 @@
           title:"CerdikGo · Innovation Workspace", menu:"☰ Menu", login:"Masuk / Akun", settings:"⚙ Pengaturan",
           language:"Bahasa / Language", help:"Pilih bahasa antarmuka CerdikGo", label:"Bahasa antarmuka",
           notice:"Preferensi bahasa disimpan pada perangkat ini.", send:"Kirim ↑", placeholder:"Tulis pesan Anda...",
-          welcomePrefix:"Selamat datang di ", welcomeHighlight:"Ruang Kerja AI", welcomeDescription:"Satu ruang untuk berpikir lebih jernih, mengolah informasi, dan mengubah ide menjadi langkah nyata.", sideTitle:"Tentang beta", sideNote:"CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting secara mandiri. Hindari memasukkan data pribadi atau rahasia.", languageButton:"Pilih bahasa", closeDialog:"Tutup pilihan bahasa", closeNav:"Tutup navigasi", openNav:"Buka navigasi"
+          welcomePrefix:"Selamat datang di ", welcomeHighlight:"Ruang Kerja AI", welcomeDescription:"Satu ruang untuk berpikir lebih jernih, mengolah informasi, dan mengubah ide menjadi langkah nyata.", sideTitle:"Tentang beta", sideNote:"CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting secara mandiri. Hindari memasukkan data pribadi atau rahasia.", languageButton:"Pilih bahasa", closeDialog:"Tutup pilihan bahasa", closeNav:"Tutup navigasi", openNav:"Buka navigasi", tools:"Alat kerja", toolsHint:"Ketuk untuk membuka fitur", toolsSubtitle:"Fitur tambahan CerdikGo", theme:"☼ Tema terang", record:"🎙 Mulai rekam", conversation:"🎧 Mode percakapan suara", voiceIdle:"Mikrofon hanya aktif setelah Anda menekan tombol rekam.", voiceConversationIdle:"Mode suara nonaktif. Aktifkan secara manual untuk berbicara dan mendengar jawaban AI.", voiceSend:"Kirim ke AI", voiceUse:"Gunakan di pesan", voiceDiscard:"Buang", docLabel:"Analisis dokumen (PDF/JPG/PNG/WEBP/GIF)", composer:"Pesan Anda", expand:"⤢ Perbesar kolom", composerHint:"karakter · Enter untuk kirim", networkOnline:"ONLINE · Koneksi jaringan tersedia. Layanan AI diverifikasi saat permintaan dijalankan.", networkOffline:"OFFLINE · Koneksi jaringan tidak tersedia. Permintaan AI memerlukan koneksi."
         },
         en: {
           title:"CerdikGo · Innovation Workspace", menu:"☰ Menu", login:"Sign in / Account", settings:"⚙ Settings",
           language:"Language", help:"Choose your CerdikGo interface language", label:"Interface language",
           notice:"Your language preference is saved on this device.", send:"Send ↑", placeholder:"Write your message...",
-          welcomePrefix:"Welcome to ", welcomeHighlight:"AI Workspace", welcomeDescription:"A workspace to think clearly, work with information, and turn ideas into practical steps.", sideTitle:"About the beta", sideNote:"CerdikChat is a prototype under testing. Independently verify important facts. Avoid entering personal or confidential data.", languageButton:"Choose language", closeDialog:"Close language selector", closeNav:"Close navigation", openNav:"Open navigation"
+          welcomePrefix:"Welcome to ", welcomeHighlight:"AI Workspace", welcomeDescription:"A workspace to think clearly, work with information, and turn ideas into practical steps.", sideTitle:"About the beta", sideNote:"CerdikChat is a prototype under testing. Independently verify important facts. Avoid entering personal or confidential data.", languageButton:"Choose language", closeDialog:"Close language selector", closeNav:"Close navigation", openNav:"Open navigation", tools:"Workspace tools", toolsHint:"Tap to open features", toolsSubtitle:"CerdikGo additional features", theme:"☼ Light theme", record:"🎙 Start recording", conversation:"🎧 Voice conversation mode", voiceIdle:"The microphone activates only after you press Record.", voiceConversationIdle:"Voice mode is off. Enable it manually to speak and hear AI responses.", voiceSend:"Send to AI", voiceUse:"Use in message", voiceDiscard:"Discard", docLabel:"Document analysis (PDF/JPG/PNG/WEBP/GIF)", composer:"Your message", expand:"⤢ Expand input", composerHint:"characters · Enter to send", networkOnline:"ONLINE · Network connection available. AI service is verified when a request is made.", networkOffline:"OFFLINE · No network connection. Requests to AI require connectivity."
         },
         zh: {
           title:"CerdikGo · 智能工作空间", menu:"☰ 菜单", login:"登录 / 账户", settings:"⚙ 设置",
           language:"语言", help:"选择 CerdikGo 界面语言", label:"界面语言",
           notice:"语言偏好保存在此设备上。", send:"发送 ↑", placeholder:"输入您的消息...",
-          welcomePrefix:"欢迎来到", welcomeHighlight:"AI 工作空间", welcomeDescription:"帮助您清晰思考、处理信息并将想法转化为实际行动的工作空间。", sideTitle:"关于测试版", sideNote:"CerdikChat 仍处于测试阶段。重要事实请独立核实。请勿输入个人或机密信息。", languageButton:"选择语言", closeDialog:"关闭语言选择", closeNav:"关闭导航", openNav:"打开导航"
+          welcomePrefix:"欢迎来到", welcomeHighlight:"AI 工作空间", welcomeDescription:"帮助您清晰思考、处理信息并将想法转化为实际行动的工作空间。", sideTitle:"关于测试版", sideNote:"CerdikChat 仍处于测试阶段。重要事实请独立核实。请勿输入个人或机密信息。", languageButton:"选择语言", closeDialog:"关闭语言选择", closeNav:"关闭导航", openNav:"打开导航", tools:"工作区工具", toolsHint:"点击以打开功能", toolsSubtitle:"CerdikGo 附加功能", theme:"☼ 浅色主题", record:"🎙 开始录音", conversation:"🎧 语音对话模式", voiceIdle:"仅在您按下录音按钮后才会启用麦克风。", voiceConversationIdle:"语音模式已关闭。手动启用后即可与 AI 语音交流。", voiceSend:"发送给 AI", voiceUse:"用于消息", voiceDiscard:"丢弃", docLabel:"文档分析 (PDF/JPG/PNG/WEBP/GIF)", composer:"您的消息", expand:"⤢ 展开输入框", composerHint:"字符 · 按 Enter 发送", networkOnline:"在线 · 网络连接正常。AI 服务将在提交请求时验证。", networkOffline:"离线 · 网络不可用。AI 请求需要网络连接。"
         }
       };
       const setText = (selector, value) => {
@@ -3010,8 +3014,26 @@
         if (languageClose) languageClose.setAttribute("aria-label", p.closeDialog);
         window.CerdikGoUiLanguage = lang;
         setText("#send", p.send);
+        setText("#workspaceTools > summary strong", p.tools);
+        setText("#workspaceTools > summary small", p.toolsHint);
+        setText("#workspaceTools .tool-heading strong", p.tools);
+        setText("#workspaceTools .tool-heading span", p.toolsSubtitle);
+        setText("#themeToggle", p.theme);
+        setText("#voiceRecord", p.record);
+        setText("#voiceConversation", p.conversation);
+        setText("#voiceState", p.voiceIdle);
+        setText("#voiceConversationState", p.voiceConversationIdle);
+        setText("#voiceSendToAI", p.voiceSend);
+        setText("#voiceUseTranscript", p.voiceUse);
+        setText("#voiceDiscard", p.voiceDiscard);
+        const docLabel = document.querySelector('#chooseAnalysisFile')?.closest(".tool-upload")?.querySelector("label");
+        if (docLabel) docLabel.textContent = p.docLabel;
+        setText(".composer-heading > span", p.composer);
+        setText("#expandComposer", p.expand);
+        const hint = document.querySelector("#composerHint");
+        if (hint) hint.lastChild.textContent = p.composerHint;
         const message = document.querySelector("#message");
-        if (message) message.placeholder = p.placeholder;
+        if (message) { message.placeholder = p.placeholder; message.setAttribute("aria-label", p.composer); }
         if (current) current.textContent = lang.toUpperCase();
         if (select) select.value = lang;
         window.CerdikGoPromptI18n?.(lang);
