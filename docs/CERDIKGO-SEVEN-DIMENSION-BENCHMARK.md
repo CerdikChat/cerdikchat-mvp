@@ -121,3 +121,23 @@ The canonical nine-role identity contract is CI-verified on PR #62, but the curr
 
 ## Engineering evidence correction — 2026-11-05
 The first PR #63 MCP hardening candidate failed because valid Bearer tokens were rejected (401). The corrected final candidate passed 139/139 tests and all four exact-head workflows. This validates a security parser fix only; it does not produce coding, reasoning, or competitive AI benchmark scores.
+
+
+## Exact-head reconciliation — 2026-11-05 (latest audit)
+
+The latest scorecard candidate is PR #60 head `ad3cbd61b6467675e71e8445f113635c45beb8c9` on `atlas9/cerdikgo-100-percent-scorecard`. Its exact-head runs all completed successfully:
+- Auto Pilot readiness: 41950862476 — https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950862476
+- Regression/installation: 41950862498 — https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950862498
+- Phase 3 regression: 41950862526 — https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950862526
+- Hybrid Gateway: 41950862654 — https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950862654
+The readiness, regression and Phase 3 logs each report 129 tests, 129 passed, 0 failed. Hybrid Gateway also completed Wrangler 4.153.0 `--dry-run`; no deployment occurred.
+
+Other exact-head evidence confirmed during this audit:
+- PR #68 head `973ea276a93bc8d47419d11b29be3259190cbe97`, readiness 41951461346 (104/104): https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41951461346
+- PR #69 head `cb5264803ca3efad03a8d168592c0b02d395354e`, readiness 41951721640 (102/102): https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41951721640
+- PR #63 head `4c5276f2ff5307949f912451d554d9be879223b6`, runs 41945833238, 41945833224, 41945833375, 41945833236 (139/139): https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833238 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833224 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833375 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833236
+- PR #65 head `154301128cc8824b76969b5da603807f5125b414`, readiness/regression 41949995940 and 41949995918 (95/95): https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949995940 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949995918
+- PR #66 head `721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1`, readiness/regression/config dry-run 41950007358, 41950000882, 41950007360 (102/102): https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950007358 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950000882 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950007360
+- PR #61 head `17760f85b01e0db2e7a09679324d55adfe1fcf95`, security/regression 41917776597 and 41917776653 (99/99): https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41917776597 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41917776653
+
+PR #70 head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1` and PR #52 head `4114cfa5ca082dfb8736d9d7aa68bb297087d8c0` have no exact-head workflow run or combined status returned at this checkpoint. They are BLOCKED/NOT VERIFIED for Auto Pilot. No benchmark inference run was executed; all seven measured dimension scores remain NOT MEASURED.
