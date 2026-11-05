@@ -32,3 +32,18 @@
 ## Evidence status vocabulary
 
 Use only **VERIFIED**, **FAILED**, **BLOCKED**, **NOT TESTED**, or **PLANNED** for subsequent acceptance records. This entry remains PLANNED until exact-head CI completes.
+
+## Follow-up — 2026-11-05 (after PR creation)
+
+- Status: **PLANNED**; no exact-head workflow evidence is available yet.
+- Draft PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/71
+- Exact PR head: `b10689e315ed401a0cb76334669f876de0fcd1af`.
+- Base branch: `atlas9/cerdikgo-connectors-primary-integration`; base SHA: `973ea276a93bc8d47419d11b29be3259190cbe97`.
+- Compare result: ahead by 5 commits, behind by 0; changed files: 5 (4 additions, 1 modification); 194 additions, 0 deletions.
+- Combined commit status: no status checks returned.
+- PR-triggered workflow lookup: no workflow runs returned for the exact head at this check.
+- Automated test result: **NOT TESTED** in this execution environment. Test file was added, but no passing test count is claimed.
+- Mergeability: GitHub currently reports `mergeable=false`; PR remains Draft and unmerged.
+- Preview runtime / Android acceptance: **NOT TESTED**.
+- No merge, deployment, remote D1 operation, secrets/OAuth/DNS change, billing action, or gateway mode change occurred.
+- Next action: diagnose the missing exact-head CI/status and non-mergeable condition; do not start Human Verification until the readiness gate passes for this exact SHA.
