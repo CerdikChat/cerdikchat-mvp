@@ -359,3 +359,26 @@ Run links:
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975711475
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975715983
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975716157
+
+
+## Repository and open-PR audit continuation — 2026-11-05 16:25 WIB
+
+**Status:** VERIFIED for repository metadata, PR metadata, and linked CI evidence; NOT TESTED for live product capability.
+
+- Default branch: `main`; reviewed head: `bc6545d6d19fd4b749d0b65fefba3d74775e0221`.
+- Repository package script: `npm test` → `node --test`; runtime engine requirement: Node >=20.
+- Open pull requests returned by GitHub search: 56. This is a point-in-time count, not a permanent total.
+- Main-branch `worker.js` currently configures `@cf/google/gemma-4-26b-a4b-it`. The main-branch system prompt still contains legacy role names (ATLAS, NEXUS, TITAN, SENTINEL, GENESIS, TERRA, AEGIS, ORACLE); canonical nine-seat identity is not yet proven integrated on `main`.
+- PR #62 proposes the canonical nine specialist prompt and has four passing workflows on head `1fa32453e9569b136ec890b7c32562dda510612f`: 41921781529, 41921781474, 41921781561, 41921781630 — all SUCCESS. PR #69 separately targets Primary governance branch identity but is DRAFT, `mergeable=false`; compare reports diverged, 4 commits ahead / 3 behind, merge base `9be9a8c3f6df416d66452c3d8c69c5112c853207`. Do not merge or force-update.
+- PR #60 scorecard/docs branch head before this append: `a2b10c42f4925164b59d48c499ac44265c48daed`; exact-head Auto Pilot run 41975851719 SUCCESS, with 129 passed / 0 failed. Regression/install 41975851562, Phase 3 41975851561, and Hybrid Gateway 41975851576 also SUCCESS. PR remains DRAFT and stacked; no rebase or merge.
+- PR #73 auth log redaction: head `98423d8aa14317052511cc69e98a8341713a3381`, run 41974840542 SUCCESS. The privacy fix is still a Draft PR and is not integrated into Primary.
+- PR #74 Gitleaks correction: head `abeca194672349e799bcfdd9d8f9c9dc82675947`; full-history scan run 41975715983 and regression run 41975716157 SUCCESS. The scan explicitly covered 816 commits / approximately 1.84 MB and reported no leaks. Scheduled backup run 41890146458 remains a historical FAILED run; archive creation, upload, and restore are not thereby verified.
+- PR #75 Context Bridge: head `7449512923fdd6c668825a841f586a67a0a980e8`; Auto Pilot run 41988795482 SUCCESS. It is a manual, local JSON bridge; no custom MCP, server synchronization, or agent execution.
+- PR #76 ClamAV Preview runtime plan: head `e02dd2bd186ae3651c75bf5eac4ddd60d89611cd`; run 41991775472 SUCCESS. Documentation and mock contract tests only. Runtime remains BLOCKED: Cloudflare account API returned HTTP 401 stating Containers require Workers Paid; no billing upgrade is authorized.
+- PR #77 WPS AI second-opinion protocol: head `960ca4e8536196775831a0ec13d7cfe625007c60`; run 41993439827 SUCCESS. Manual, user-selected document handoff only; no WPS API integration or read-only API proof.
+- PR #78 zero-cost on-demand ClamAV design: head `5bbaaae96b2a03ac5cff5b3e93520da974014774`; run 41996461917 SUCCESS. Design only; GitHub Actions cannot replace the synchronous private Service Binding without a separate asynchronous job, private staging, signed callback, quota, retention, and billing-stop design.
+- New PR #80 bounds the local Context Bridge Inbox: head `724fdb092d584cead6f34612693de8cb9336c7eb`, branch `atlas9/context-bridge-bounded-inbox-20261105`, base PR #75 branch at `7449512923fdd6c668825a841f586a67a0a980e8`. Auto Pilot run 42002523884 SUCCESS (113 passed / 0 failed); regression run 42002508692 SUCCESS; push Auto Pilot run 42002508523 SUCCESS. PR is DRAFT and mergeable; no merge/deploy.
+
+The six governance registers remain on this scorecard feature branch and are not yet integrated into `main`. This continuation is append-only; prior evidence and historical failures are retained.
+
+Next actions: reconcile the stacked branch graph; review PR #69 divergence; integrate canonical identity through the approved Primary chain only after conflict resolution; complete runtime and benchmark evidence; keep all privileged actions gated.
