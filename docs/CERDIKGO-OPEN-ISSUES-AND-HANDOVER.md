@@ -339,3 +339,16 @@ Main worker.js only requires Google authentication when GOOGLE_AUTH_REQUIRED is 
 PR #44 (head 30e05c23ce56116d80c3d5b872e3f9b5c7adef91) proposes fail-closed behavior for Production or any D1-backed Worker and passed regression run 41383765675 (40/40). It remains DRAFT and is not integrated.
 
 Before any Production-readiness claim: review/integrate the fail-closed default through an approved branch, run exact-head Auto Pilot, then verify auth behavior in an isolated Preview. Do not change OAuth or environment secrets as part of this audit. No Production deployment is authorized.
+
+
+## PR #60 status correction — 2026-11-05
+
+Earlier entries recorded mergeable=false during a transient GitHub mergeability calculation. Latest PR metadata for head a6d00bbdec7ba6d49460441ef2327224f6a41ba5 returns mergeable=true. The compare graph still reports 79 commits ahead / 2 behind its base (merge base de11d34257005ba72a621312230489a7d161ff53). Treat this as a stacked branch requiring dependency review, not permission to merge.
+
+Final exact candidate a6d00bbdec7ba6d49460441ef2327224f6a41ba5 passed:
+- Auto Pilot 42003333775 — SUCCESS, 129/129, doctor/preflight 16/16, strict TypeScript PASS, Wrangler dry-run PASS.
+- Regression/install 42003333772 — SUCCESS.
+- Phase 3 42003333754 — SUCCESS.
+- Hybrid Gateway 42003333825 — SUCCESS.
+
+PR #60 remains Draft; no merge or Human Verification was initiated. Production, Preview runtime, Android, and capability benchmarks remain separate.
