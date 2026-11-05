@@ -608,3 +608,22 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - No live Workers AI inference or matched Gemini comparison was run. Model catalog listing is NOT an inference result.
 - Current capability scores: all seven dimensions NOT MEASURED; evidence-credit 0/100 each. Do not convert CI regression counts into capability scores.
 - Preview HTTP journeys, Android/WPS behavior, scanner engine, voice device flow, Live Web Research, backup restore, seven-day SLO and edge load remain NOT TESTED or BLOCKED.
+
+ 
+## QA addendum — 2026-11-05 21:12 WIB
+
+| PR | Exact candidate SHA | Workflow | Result | Evidence |
+|---|---|---:|---|---|
+| #84 | 2d37dea6fa190d37b887d648ede7d943f8024edd | 42042384546 | VERIFIED | Auto Pilot 98/98; preflight, Wrangler dry-run, safety PASS |
+| #84 | same | 42042384481 | VERIFIED | Isolated Worker readiness 98/98; dry-run confirms GOOGLE_AUTH_REQUIRED=true |
+| #87 | 5ef76571da95398373ad4f91620971b7b03fe45a | 42042622138 | VERIFIED | Auto Pilot 114/114; preflight, dry-run, safety PASS; TypeScript NOT CONFIGURED |
+| #60 | fda4216b843704276de17ea122547a839cfbd01a | 42042175701 | VERIFIED | Auto Pilot 129/129; preflight 16/16; strict TypeScript PASS |
+| #60 | same | 42042175507 | VERIFIED | Regression/install 129/129; preflight 16/16 |
+| #60 | same | 42042175599 | VERIFIED | Phase 3 regression 129/129 |
+| #60 | same | 42042175436 | VERIFIED | Hybrid Gateway 129/129; Wrangler dry-run PASS |
+
+### Interpretation
+- PR #84 verifies the config candidate's dedicated product name and fail-closed flag, not a provisioned Worker.
+- PR #87 verifies static/unit behavior for fail-closed auth, not live OAuth, D1, RBAC, session expiry or Android acceptance.
+- All seven capability benchmarks remain NOT MEASURED. These CI test counts are not model capability scores.
+- Human Verification remains NOT STARTED; exact CI success does not establish Preview, Android or Production readiness.
