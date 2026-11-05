@@ -791,3 +791,30 @@ test("administrator session endpoint fails closed when role is missing", async (
   assert.equal(response.status, 403);
   assert.equal((await json(response)).error, "ADMIN_REQUIRED");
 });
+
+
+test("file analysis rejects administrator sessions at the server boundary", async () => {
+  let conversionCalls = 0;
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    DB: {
+      prepare: () => ({
+        bind: () => ({
+          first: async () => ({
+            google_sub: "12345678901234567890",
+            email: "admin@example.com",
+            role: "admin",
+          }),
+        }),
+      }),
+    },
+    AI: {
+      toMarkdown: async () => { conversionCalls++; return { format: "markdown", data: "unexpected" }; },
+      run: async () => ({ response: "unexpected" }),
+    },
+  });
+  const response = await worker.fetch(analysisRequest(png), env);
+  assert.equal(response.status, 403);
+  assert.equal((await json(response)).error, "USER_PORTAL_REQUIRED");
+  assert.equal(conversionCalls, 0);
+});

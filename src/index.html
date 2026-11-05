@@ -44,7 +44,12 @@
     .upload-copy b { display:block; font-size:12px; }
     .upload-copy span { color:#9bb4d1; font-size:10px; }
     .upload-action { padding:8px 11px; border:1px solid #42647d; border-radius:9px; background:#172d43; color:#b9c9d9; font-size:10px; font-weight:750; }
-    .upload-action:disabled { opacity:.8; cursor:not-allowed; }
+    .upload-action:disabled { opacity:.45; cursor:not-allowed; }
+    #uploadFileName { display:block; overflow-wrap:anywhere; }
+    #uploadPanel { flex-wrap:wrap; }
+    #uploadPanel .upload-action { min-height:38px; cursor:pointer; }
+    #uploadPanel .upload-action:focus-visible { outline:2px solid var(--mint); outline-offset:3px; }
+    @media(max-width:720px) { #uploadPanel .upload-action { margin-left:0; flex:1 1 120px; } }
     .workspace-foot { margin-top:9px; color:#819bb8; font-size:10px; }
     @media(max-width:720px) {
       .workspace { margin-bottom:14px; }
@@ -863,6 +868,16 @@
     html[data-theme="light"] .app>.side{background:linear-gradient(180deg,#f4f8ff,#eaf1fa);color:#172b43;border-right-color:#c7d8e8}
     html[data-theme="light"] .app>.side .prompt{color:#243c58}
     html[data-theme="light"] .app>.side .prompt:hover{background:#e0ecf8}
+
+    .voice-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0}
+    .voice-record,.voice-review button{border:1px solid var(--border,#475569);border-radius:10px;padding:9px 12px;background:var(--surface,#172033);color:inherit;font:inherit;font-size:13px}
+    .voice-record[disabled],.voice-review button[disabled]{opacity:.5}
+    .voice-record.recording{border-color:#dc5757;color:#ff9b9b}
+    .voice-state{font-size:12px;color:var(--muted,#94a3b8)}
+    .voice-review{display:grid;gap:8px;margin:10px 0;padding:10px;border:1px solid var(--border,#475569);border-radius:12px}
+    .voice-review[hidden]{display:none}
+    .voice-review textarea{width:100%;min-height:90px;resize:vertical;border:1px solid var(--border,#475569);border-radius:8px;padding:10px;background:var(--surface,#172033);color:inherit;font:inherit}
+    .voice-review-actions{display:flex;gap:8px;flex-wrap:wrap}
   </style>
 </head>
 
@@ -962,7 +977,15 @@
             </div>
             <div id="pendingUsersList" aria-live="polite"></div>
           </article>
-          <article class="admin-module"><h3>Security & Audit</h3><p>Area pemantauan autentikasi dan audit trail. Data audit belum ditampilkan karena endpoint dashboard belum tersedia.</p><small>Awaiting verified API</small></article>
+          <article class="admin-module" id="superAdminAuditModule" hidden>
+            <h3>Security & Audit · Super Admin</h3>
+            <p>Audit trail read-only: 100 peristiwa terbaru. Tidak ada kontrol untuk mengubah atau menghapus catatan audit.</p>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0">
+              <button class="settings-button" id="refreshAdminAudit" type="button">↻ Muat audit trail</button>
+              <span id="adminAuditStatus" role="status" aria-live="polite">Menunggu verifikasi Super Admin…</span>
+            </div>
+            <div id="adminAuditList" aria-live="polite"></div>
+          </article>
           <article class="admin-module"><h3>Platform Operations</h3><p>Area status layanan dan konfigurasi platform. Tidak ada metrik simulasi atau kontrol operasional palsu.</p><small>Awaiting verified API</small></article>
         </div>
       </section>
@@ -1010,12 +1033,14 @@
         </div>
         <div class="multimodal-panel">
           <div class="multi-top"><div><strong>Multimodal document workspace</strong><br><small>PDF · PNG · JPG · WEBP</small></div><span class="workspace-tag">VALIDATION GATE</span></div>
-          <div class="upload-preview">
+          <div class="upload-preview" id="uploadPanel">
             <div class="upload-symbol" aria-hidden="true">＋</div>
-            <div class="upload-copy"><b>Attach a document or image</b><span>Secure upload interface is being prepared for the authenticated pilot.</span></div>
-            <button class="upload-action" type="button" disabled aria-disabled="true">Upload · Locked</button>
+            <div class="upload-copy"><b>Attach a PDF or image</b><span id="uploadFileName">PDF, PNG, JPG, WEBP atau GIF · Maksimal 10 MB · Satu berkas per analisis</span></div>
+            <input id="analysisFile" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,application/pdf,image/png,image/jpeg,image/webp,image/gif" hidden>
+            <button class="upload-action" id="chooseUpload" type="button">Pilih berkas</button>
+            <button class="upload-action" id="analyzeUpload" type="button" disabled>Analisis berkas</button>
           </div>
-          <div class="workspace-foot">Upload controls will be enabled after live AI inference, session security, and Android pilot checks pass. CerdikChat powers the shared core.</div>
+          <div class="workspace-foot" id="uploadHelp">Analisis aman memerlukan sesi User Portal terverifikasi. Berkas diproses untuk permintaan ini dan tidak disimpan oleh fitur ini. Jangan unggah data pribadi atau rahasia.</div>
         </div>
       </section>
 
@@ -1063,6 +1088,18 @@
             aria-label="Pesan Anda"
             required></textarea>
 
+          <div class="voice-controls">
+            <button class="voice-record" id="voiceRecord" type="button" disabled aria-pressed="false">🎙 Rekam Voice Note</button>
+            <span class="voice-state" id="voiceState" role="status" aria-live="polite">Masuk sebagai User untuk menggunakan Voice Note.</span>
+          </div>
+          <section class="voice-review" id="voiceReview" aria-label="Tinjau transkripsi suara" hidden>
+            <label for="voiceTranscript">Tinjau dan edit transkripsi sebelum dikirim</label>
+            <textarea id="voiceTranscript" rows="4" maxlength="12000" spellcheck="true"></textarea>
+            <div class="voice-review-actions">
+              <button id="voiceUseTranscript" type="button">Gunakan di pesan</button>
+              <button id="voiceDiscard" type="button">Buang</button>
+            </div>
+          </section>
           <div class="controls">
             <span class="hint">
               <span id="count">0</span>/8000 karakter · Enter untuk baris baru
@@ -1199,6 +1236,12 @@
     const input = document.querySelector("#message");
     const feed = document.querySelector("#feed");
     const send = document.querySelector("#send");
+    const voiceRecord = document.querySelector("#voiceRecord");
+    const voiceState = document.querySelector("#voiceState");
+    const voiceReview = document.querySelector("#voiceReview");
+    const voiceTranscript = document.querySelector("#voiceTranscript");
+    const voiceUseTranscript = document.querySelector("#voiceUseTranscript");
+    const voiceDiscard = document.querySelector("#voiceDiscard");
     const statusEl = document.querySelector("#status");
     const count = document.querySelector("#count");
     const jumpLatest = document.querySelector("#jumpLatest");
@@ -1236,6 +1279,11 @@
     const refreshPendingUsersButton = document.querySelector("#refreshPendingUsers");
     const pendingUsersStatus = document.querySelector("#pendingUsersStatus");
     const pendingUsersList = document.querySelector("#pendingUsersList");
+    const superAdminAuditModule = document.querySelector("#superAdminAuditModule");
+    const refreshAdminAuditButton = document.querySelector("#refreshAdminAudit");
+    const adminAuditStatus = document.querySelector("#adminAuditStatus");
+    const adminAuditList = document.querySelector("#adminAuditList");
+    refreshAdminAuditButton.addEventListener("click", loadAdminAuditEvents);
     refreshPendingUsersButton.addEventListener("click", loadPendingUsers);
     const authUser = document.querySelector("#authUser");
     const authLogout = document.querySelector("#authLogout");
@@ -1249,7 +1297,7 @@
     let googleClientId = "";
 
     async function loadPendingUsers() {
-      if (!isAuthenticated || currentRole !== "admin") return;
+      if (!isAuthenticated || (currentRole !== "admin" && currentRole !== "super_admin")) return;
       pendingUsersStatus.textContent = "Memuat permintaan…";
       pendingUsersList.replaceChildren();
       try {
@@ -1284,6 +1332,45 @@
       }
     }
 
+    async function loadAdminAuditEvents() {
+      if (!isAuthenticated || currentRole !== "super_admin") return;
+      adminAuditStatus.textContent = "Memuat audit trail read-only…";
+      adminAuditList.replaceChildren();
+      try {
+        const response = await fetch("/api/admin/audit", {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Accept": "application/json" }
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || payload.error || "Audit trail tidak tersedia.");
+        const events = Array.isArray(payload.events) ? payload.events : [];
+        adminAuditStatus.textContent = events.length
+          ? events.length + " peristiwa terbaru · read-only"
+          : "Belum ada peristiwa audit.";
+        for (const event of events) {
+          const row = document.createElement("div");
+          row.style.cssText = "padding:10px 0;border-top:1px solid var(--line);display:grid;gap:4px";
+          const heading = document.createElement("strong");
+          heading.textContent = String(event.action || "EVENT");
+          const meta = document.createElement("small");
+          const date = Number(event.createdAt);
+          meta.textContent = [
+            Number.isFinite(date) ? new Date(date * 1000).toLocaleString() : "Waktu tidak tersedia",
+            "oleh " + (event.actorEmail || "Administrator"),
+            event.targetEmail ? "target " + event.targetEmail : ""
+          ].filter(Boolean).join(" · ");
+          const detail = document.createElement("span");
+          detail.textContent = JSON.stringify(event.details || {});
+          row.append(heading, meta, detail);
+          adminAuditList.append(row);
+        }
+      } catch (error) {
+        adminAuditStatus.textContent = error instanceof Error ? error.message : "Audit trail gagal dimuat.";
+      }
+    }
+
     async function approvePendingUser(email, button) {
       if (!isAuthenticated || currentRole !== "admin" || !email) return;
       button.disabled = true;
@@ -1313,8 +1400,9 @@
       authPanel.hidden = !authRequired && !authConfigured;
       authGate.hidden = !(authRequired && !isAuthenticated);
       portalGate.hidden = !(authRequired && authConfigured && !isAuthenticated);
-      const isAdminSession = isAuthenticated && currentRole === "admin";
+      const isAdminSession = isAuthenticated && (currentRole === "admin" || currentRole === "super_admin");
       adminPlaceholder.hidden = !isAdminSession;
+      superAdminAuditModule.hidden = !(isAuthenticated && currentRole === "super_admin");
       document.querySelector("#adminSettingsSection").hidden = !isAdminSession;
       adminDisplayName.textContent = user?.displayName || "Administrator";
       adminEmail.textContent = user?.email || "Sesi administrator aktif";
@@ -1333,8 +1421,11 @@
       chooseUserPortal.hidden = isAuthenticated || !authConfigured;
       authLogout.hidden = !isAuthenticated;
       input.disabled = authRequired && !isAuthenticated;
+      if (voiceRecord) voiceRecord.disabled = !isAuthenticated || currentRole !== "user" || isSending;
       send.disabled = authRequired && !isAuthenticated;
-      if (isAuthenticated && currentRole === "admin") loadPendingUsers();
+      if (typeof updateUploadControls === "function") updateUploadControls();
+      if (isAuthenticated && (currentRole === "admin" || currentRole === "super_admin")) loadPendingUsers();
+      if (isAuthenticated && currentRole === "super_admin") loadAdminAuditEvents();
     }
 
     function createNonce() {
@@ -1432,7 +1523,7 @@
           throw new Error(payload.message || payload.error || "Google Sign-In gagal.");
         }
         isAuthenticated = true;
-        currentRole = (payload.user?.role === "admin" || payload.user?.role === "super_admin") ? "admin" : "user";
+        currentRole = (payload.user?.role === "admin" || payload.user?.role === "super_admin") ? payload.user.role : "user";
         updateAuthUI(payload.user || null);
         if (currentRole === "admin") {
           const check = await fetch("/api/admin/session", { credentials: "same-origin", headers: { "Accept": "application/json" } });
@@ -1509,7 +1600,7 @@
           if (sessionResponse.ok) {
             const session = await sessionResponse.json();
             isAuthenticated = session.authenticated === true;
-            currentRole = (session.user?.role === "admin" || session.user?.role === "super_admin") ? "admin" : (isAuthenticated ? "user" : "");
+            currentRole = (session.user?.role === "admin" || session.user?.role === "super_admin") ? session.user.role : (isAuthenticated ? "user" : "");
             updateAuthUI(session.user || null);
           } else if (sessionResponse.status === 401) {
             isAuthenticated = false;
@@ -1588,6 +1679,276 @@
       statusEl.className = isError ? "status error" : "status";
       statusEl.setAttribute("role", isError ? "alert" : "status");
     }
+
+
+    // Voice Note: audio is held in memory only and is never persisted by this UI.
+    let voiceRecorder = null;
+    let voiceStream = null;
+    let voiceChunks = [];
+    let voiceStartedAt = 0;
+    let voiceTimer = null;
+    let voiceBusy = false;
+
+    function setVoiceState(message, isError = false) {
+      voiceState.textContent = message;
+      voiceState.style.color = isError ? "#ef7777" : "";
+    }
+
+    function stopVoiceTracks() {
+      if (voiceTimer) { clearInterval(voiceTimer); voiceTimer = null; }
+      if (voiceStream) {
+        voiceStream.getTracks().forEach(track => track.stop());
+        voiceStream = null;
+      }
+    }
+
+    function resetVoiceRecording() {
+      stopVoiceTracks();
+      voiceRecorder = null;
+      voiceChunks = [];
+      voiceRecord.classList.remove("recording");
+      voiceRecord.setAttribute("aria-pressed", "false");
+      voiceRecord.textContent = "🎙 Rekam Voice Note";
+      voiceRecord.disabled = !isAuthenticated || currentRole !== "user";
+    }
+
+    async function transcribeVoice(blob, durationMs) {
+      if (!csrfToken) await refreshCsrfToken();
+      const formData = new FormData();
+      const mime = blob.type.toLowerCase().split(";")[0];
+      const extension = mime === "audio/ogg" ? "ogg" : "webm";
+      formData.set("audio", blob, `voice-note.${extension}`);
+      formData.set("durationMs", String(durationMs));
+      const response = await fetch("/api/voice/transcribe", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Accept": "application/json", "X-CSRF-Token": csrfToken },
+        body: formData
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const messages = {
+          AUTH_REQUIRED: "Sesi login berakhir. Silakan masuk kembali.",
+          USER_PORTAL_REQUIRED: "Voice Note hanya tersedia untuk User Portal.",
+          CSRF_VALIDATION_FAILED: "Token keamanan berubah. Muat ulang halaman dan coba lagi.",
+          AI_QUOTA_EXCEEDED: "Kuota AI untuk transkripsi telah tercapai.",
+          VOICE_RATE_LIMIT_UNAVAILABLE: "Layanan Voice Note belum tersedia pada Preview.",
+          RATE_LIMIT_EXCEEDED: "Batas penggunaan Voice Note tercapai. Coba kembali nanti."
+        };
+        throw new Error(messages[payload.error] || payload.message || payload.error || "Transkripsi gagal.");
+      }
+      if (typeof payload.text !== "string" || !payload.text.trim()) throw new Error("Transkripsi kosong. Silakan rekam ulang.");
+      voiceTranscript.value = payload.text.trim();
+      voiceReview.hidden = false;
+      setVoiceState("Transkripsi siap ditinjau. Periksa dan edit sebelum dikirim.");
+      voiceTranscript.focus();
+    }
+
+    async function startVoiceRecording() {
+      if (!isAuthenticated || currentRole !== "user" || voiceBusy || isSending) return;
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+        setVoiceState("Browser ini belum mendukung perekaman audio.", true);
+        return;
+      }
+      try {
+        voiceStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+        const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"];
+        const mimeType = candidates.find(type => MediaRecorder.isTypeSupported(type));
+        voiceRecorder = mimeType ? new MediaRecorder(voiceStream, { mimeType }) : new MediaRecorder(voiceStream);
+        voiceChunks = [];
+        voiceStartedAt = Date.now();
+        voiceRecorder.addEventListener("dataavailable", event => {
+          if (event.data && event.data.size) voiceChunks.push(event.data);
+        });
+        voiceRecorder.addEventListener("stop", async () => {
+          const durationMs = Date.now() - voiceStartedAt;
+          const blob = new Blob(voiceChunks, { type: voiceRecorder?.mimeType || mimeType || "audio/webm" });
+          resetVoiceRecording();
+          if (!blob.size) { setVoiceState("Rekaman kosong. Silakan coba lagi.", true); return; }
+          if (durationMs > 60_000) { setVoiceState("Durasi maksimal 60 detik. Rekam ulang dengan durasi lebih singkat.", true); return; }
+          if (blob.size > 3 * 1024 * 1024) { setVoiceState("Audio melebihi batas 3 MB. Rekam ulang lebih singkat.", true); return; }
+          voiceBusy = true;
+          voiceRecord.disabled = true;
+          setVoiceState("Mengirim audio untuk transkripsi…");
+          try { await transcribeVoice(blob, durationMs); }
+          catch (error) { setVoiceState(error instanceof Error ? error.message : "Transkripsi gagal.", true); }
+          finally {
+            voiceBusy = false;
+            voiceRecord.disabled = !isAuthenticated || currentRole !== "user" || isSending;
+            voiceChunks = [];
+          }
+        }, { once: true });
+        voiceRecorder.start(250);
+        voiceRecord.classList.add("recording");
+        voiceRecord.setAttribute("aria-pressed", "true");
+        voiceRecord.textContent = "■ Hentikan rekaman";
+        setVoiceState("Merekam… maksimal 60 detik. Ketuk tombol untuk berhenti.");
+        voiceTimer = setInterval(() => {
+          const seconds = Math.floor((Date.now() - voiceStartedAt) / 1000);
+          voiceState.textContent = `Merekam… ${seconds}s / 60s`;
+          if (seconds >= 60 && voiceRecorder?.state === "recording") voiceRecorder.stop();
+        }, 500);
+      } catch (error) {
+        stopVoiceTracks();
+        setVoiceState(error?.name === "NotAllowedError"
+          ? "Izin mikrofon ditolak. Izinkan mikrofon di pengaturan Chrome."
+          : "Mikrofon tidak tersedia. Periksa perangkat dan izin browser.", true);
+        resetVoiceRecording();
+      }
+    }
+
+    voiceRecord.addEventListener("click", () => {
+      if (voiceRecorder?.state === "recording") {
+        voiceRecorder.stop();
+      } else {
+        startVoiceRecording();
+      }
+    });
+
+    voiceUseTranscript.addEventListener("click", () => {
+      const text = voiceTranscript.value.trim();
+      if (!text) { setVoiceState("Transkripsi masih kosong.", true); return; }
+      if (text.length > MAX_MESSAGE_LENGTH) { setVoiceState("Transkripsi melebihi batas pesan chat.", true); return; }
+      input.value = text;
+      updateCount();
+      voiceReview.hidden = true;
+      setVoiceState("Transkripsi dimasukkan ke composer. Periksa kembali, lalu tekan Kirim.");
+      input.focus();
+    });
+
+    voiceDiscard.addEventListener("click", () => {
+      voiceTranscript.value = "";
+      voiceReview.hidden = true;
+      setVoiceState("Transkripsi dibuang. Rekaman tidak disimpan.");
+    });
+
+    const analysisFile = document.querySelector("#analysisFile");
+    const chooseUpload = document.querySelector("#chooseUpload");
+    const analyzeUpload = document.querySelector("#analyzeUpload");
+    const uploadFileName = document.querySelector("#uploadFileName");
+    const uploadHelp = document.querySelector("#uploadHelp");
+    const MAX_ANALYSIS_FILE_BYTES = 10 * 1024 * 1024;
+    const ALLOWED_ANALYSIS_TYPES = new Set([
+      "application/pdf", "image/png", "image/jpeg", "image/webp", "image/gif"
+    ]);
+    let selectedAnalysisFile = null;
+    let isAnalyzingFile = false;
+
+    function updateUploadControls() {
+      // Admin sessions may exercise the Preview file-picker and client validation.
+      // Actual file processing remains restricted to the server-authorized User Portal role.
+      const canSelectFile = isAuthenticated && ["user", "admin"].includes(currentRole);
+      const canAnalyzeFile = isAuthenticated && currentRole === "user";
+      chooseUpload.disabled = !canSelectFile || isAnalyzingFile;
+      analyzeUpload.disabled = !canAnalyzeFile || !selectedAnalysisFile || isAnalyzingFile;
+      analysisFile.disabled = !canSelectFile || isAnalyzingFile;
+    }
+
+    chooseUpload.addEventListener("click", () => {
+      if (!isAuthenticated || !["user", "admin"].includes(currentRole) || isAnalyzingFile) {
+        setStatus("Silakan masuk melalui akun terverifikasi untuk memilih berkas.", true);
+        return;
+      }
+      analysisFile.click();
+    });
+
+    analysisFile.addEventListener("change", () => {
+      const file = analysisFile.files?.[0] || null;
+      selectedAnalysisFile = null;
+      if (!file) {
+        uploadFileName.textContent = "PDF, PNG, JPG, WEBP atau GIF · Maksimal 10 MB";
+        updateUploadControls();
+        return;
+      }
+      if (file.size <= 0 || file.size > MAX_ANALYSIS_FILE_BYTES) {
+        analysisFile.value = "";
+        uploadFileName.textContent = "Berkas kosong atau melebihi batas 10 MB.";
+        setStatus("Ukuran berkas harus lebih dari 0 dan maksimal 10 MB.", true);
+        updateUploadControls();
+        return;
+      }
+      if (!ALLOWED_ANALYSIS_TYPES.has(file.type.toLowerCase())) {
+        analysisFile.value = "";
+        uploadFileName.textContent = "Format tidak didukung. Pilih PDF atau gambar PNG/JPG/WEBP/GIF.";
+        setStatus("Format berkas tidak didukung.", true);
+        updateUploadControls();
+        return;
+      }
+      selectedAnalysisFile = file;
+      uploadFileName.textContent = file.name + " · " + (file.size / 1024 / 1024).toFixed(2) + " MB";
+      setStatus(currentRole === "admin"
+        ? "Berkas berhasil dipilih. Sesi Admin hanya dapat menguji pemilih dan validasi awal; gunakan User Portal untuk pemrosesan analisis."
+        : "Berkas dipilih. Siap dianalisis.");
+      updateUploadControls();
+    });
+
+    async function analyzeSelectedFile() {
+      if (isAnalyzingFile || !selectedAnalysisFile) return;
+      if (!isAuthenticated || currentRole !== "user") {
+        setStatus("Analisis berkas hanya tersedia untuk sesi User Portal yang terverifikasi.", true);
+        return;
+      }
+      isAnalyzingFile = true;
+      updateUploadControls();
+      analyzeUpload.textContent = "Menganalisis…";
+      uploadHelp.textContent = "Mengirim berkas melalui koneksi aman untuk analisis. Jangan tutup halaman.";
+      setStatus("Memvalidasi sesi dan memproses berkas…");
+      try {
+        if (!csrfToken) await refreshCsrfToken();
+        const formData = new FormData();
+        formData.append("file", selectedAnalysisFile, selectedAnalysisFile.name);
+        formData.append("prompt", input.value.trim().slice(0, 1000));
+        const response = await fetch("/api/analyze", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Accept": "application/json", "X-CSRF-Token": csrfToken },
+          body: formData
+        });
+        let payload;
+        try { payload = await response.json(); }
+        catch { throw new Error("Server mengirim respons analisis yang tidak valid."); }
+        if (!response.ok) {
+          if (payload.error === "CSRF_VALIDATION_FAILED") {
+            await refreshCsrfToken();
+            throw new Error("Token keamanan diperbarui. Silakan ulangi analisis.");
+          }
+          const messages = {
+            AUTH_REQUIRED: "Sesi berakhir. Silakan masuk kembali.",
+            AUTH_UNAVAILABLE: "Layanan autentikasi sementara tidak tersedia.",
+            USER_PORTAL_REQUIRED: "Fitur analisis hanya tersedia untuk akun User Portal.",
+            ENCRYPTED_PDF_UNSUPPORTED: "PDF terenkripsi atau dilindungi kata sandi belum didukung.",
+            FILE_TOO_LARGE: "Ukuran berkas melebihi batas 10 MB.",
+            UNSUPPORTED_FILE_TYPE: "Format berkas tidak didukung.",
+            FILE_SIGNATURE_MISMATCH: "Isi berkas tidak sesuai dengan ekstensi atau tipe yang dinyatakan.",
+            AI_QUOTA_EXCEEDED: "Kuota AI sementara tercapai. Coba lagi nanti."
+          };
+          throw new Error(messages[payload.error] || payload.message || payload.error || "Analisis berkas gagal.");
+        }
+        if (typeof payload.reply !== "string" || !payload.reply.trim()) {
+          throw new Error("AI tidak mengembalikan hasil analisis.");
+        }
+        addMessage("user", "Analisis berkas: " + selectedAnalysisFile.name);
+        const answerElement = addMessage("assistant", "");
+        renderBasicMarkdown(answerElement, payload.reply);
+        setStatus("Analisis selesai. Berkas tidak disimpan oleh fitur ini.");
+        selectedAnalysisFile = null;
+        analysisFile.value = "";
+        uploadFileName.textContent = "PDF, PNG, JPG, WEBP atau GIF · Maksimal 10 MB";
+        input.value = "";
+        updateCount();
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : "Analisis berkas gagal.", true);
+      } finally {
+        isAnalyzingFile = false;
+        analyzeUpload.textContent = "Analisis berkas";
+        uploadHelp.textContent = "Analisis aman memerlukan sesi User Portal terverifikasi. Berkas diproses untuk permintaan ini dan tidak disimpan oleh fitur ini. Jangan unggah data pribadi atau rahasia.";
+        updateUploadControls();
+      }
+    }
+
+    analyzeUpload.addEventListener("click", analyzeSelectedFile);
 
     function scrollToLatest(target = null, block = "start") {
       window.requestAnimationFrame(() => {
@@ -2259,6 +2620,7 @@
     }
 
     form.addEventListener("submit", sendMessage);
+    window.addEventListener("pagehide", stopVoiceTracks);
     updateCount();
     const networkState = document.getElementById("networkState");
     function updateNetworkState() {

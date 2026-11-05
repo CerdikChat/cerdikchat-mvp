@@ -25,8 +25,9 @@
 
 "use strict";
 
-import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession, requestUserAccess, listPendingUserAccess, decideUserAccess } from "./auth/google-auth.js";
+import { authConfig, googleLogin, currentSession, logout, requireSession, requireAdminSession, requestUserAccess, listPendingUserAccess, decideUserAccess, listAdminAuditEvents } from "./auth/google-auth.js";
 import { handleFileAnalysis } from "./multimodal/file-analysis.js";
+import { handleVoiceTranscription } from "./multimodal/voice-assistance.js";
 
 /* =========================================================
    1. CONFIGURATION
@@ -1495,6 +1496,7 @@ export default {
     if (url.pathname === "/api/auth/request-access") return requestUserAccess(request, env);
     if (url.pathname === "/api/admin/users/pending") return listPendingUserAccess(request, env);
     if (url.pathname === "/api/admin/users/decision") return decideUserAccess(request, env);
+    if (url.pathname === "/api/admin/audit") return listAdminAuditEvents(request, env);
     if (url.pathname === "/api/auth/google") return googleLogin(request, env);
     if (url.pathname === "/api/auth/me" && request.method === "GET") return currentSession(request, env);
     if (url.pathname === "/api/auth/logout") return logout(request, env);
@@ -1522,6 +1524,22 @@ export default {
         return new Response(null, { status: 204, headers: analysisCors });
       }
       return handleFileAnalysis(request, env, analysisCors);
+    }
+
+
+    if (url.pathname === "/api/voice/transcribe") {
+      const voiceCors = {
+        ...corsHeaders,
+        "access-control-allow-methods": "POST, OPTIONS",
+        "access-control-allow-headers": "Content-Type, X-CSRF-Token",
+      };
+      if (request.method === "OPTIONS") {
+        if (!isSameOriginOrNoOrigin(request)) {
+          return errorResponse("ORIGIN_NOT_ALLOWED", "Origin permintaan tidak diizinkan.", 403, voiceCors);
+        }
+        return new Response(null, { status: 204, headers: voiceCors });
+      }
+      return handleVoiceTranscription(request, env, voiceCors);
     }
 
     if (url.pathname === CONFIG.API_PATH) {
