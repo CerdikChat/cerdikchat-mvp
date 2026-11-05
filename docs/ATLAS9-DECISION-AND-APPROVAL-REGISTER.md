@@ -224,3 +224,10 @@ Latest GitHub PR metadata reports mergeable=true for head a6d00bbdec7ba6d4946044
 11. **Prohibited operations:** no merge, Production deployment, remote D1 write/migration, DNS change, OAuth/secret modification, billing activation or other privileged operation was performed.
 
 These decisions preserve the existing approval boundary. Any later change to execution mode, resource provisioning, billing, external document transfer or Production release requires separate explicit approval and a traceable decision entry.
+
+
+## PR #84 exact-head evidence correction — 2026-11-05
+
+An earlier continuation described PR #84's documentation-only head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a` as not rerun. That statement is superseded: exact-head Legacy Auto Pilot run `42037076015` and isolated Worker readiness run `42037076046` both completed SUCCESS on `b1e6e636...`, with 97/97 tests. The Worker dry-run used `wrangler.cerdikgo.toml` and explicitly showed `GOOGLE_AUTH_REQUIRED=true`; no deployment occurred. TypeScript remains NOT CONFIGURED on this JavaScript branch.
+
+A later documentation-only correction advanced PR #84 to `db8ed792537094a2adde85018e17ddb9f6613c45`. No application/config/test code changed after `b1e6e636...`; the current documentation-only head `db8ed792...` has no new exact-head workflow run. Keep Human Verification NOT STARTED and do not transfer the prior run to the later doc-only SHA.
