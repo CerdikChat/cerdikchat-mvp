@@ -1,3 +1,5 @@
+import { assertInboxCapacity } from "./bridge-inbox.js";
+
 const ALLOWED_AGENTS = new Set(Array.from({ length: 9 }, (_, i) => `ATLAS-${String(i + 1).padStart(2, "0")}`));
 const MAX_INTENT = 4000;
 const inbox = [];
@@ -138,6 +140,7 @@ byId("importPackage").addEventListener("click", () => {
     if (!raw || raw.length > 16000) throw new Error("JSON kosong atau melebihi batas 16 KB.");
     const item = validatePackage(JSON.parse(raw));
     if (inbox.some((entry) => entry.task.id === item.task.id)) throw new Error("Paket dengan ID ini sudah ada di Inbox.");
+    assertInboxCapacity(inbox);
     inbox.push(item);
     renderInbox();
     setStatus("Paket tervalidasi dan masuk Inbox sesi ini. Belum ada eksekusi atau sinkronisasi server.");
