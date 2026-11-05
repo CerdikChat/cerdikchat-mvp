@@ -34,3 +34,23 @@ test("AI workspace reports only the outcome of its own request", () => {
   assert.match(wps, /gate\("ai-core","rejected"/);
   assert.match(wps, /Permintaan analisis teks gagal:/);
 });
+
+test("Core workspace controls and network status have ID, EN and ZH translations", () => {
+  for (const language of ["id", "en", "zh"]) {
+    assert.match(index, new RegExp(`\${language}: \\\{`));
+  }
+  for (const key of ["tools:", "voiceConversation:", "docLabel:", "composer:", "networkOnline:", "networkOffline:"]) {
+    assert.ok(index.includes(key), `Missing translation key: ${key}`);
+  }
+  assert.match(index, /#workspaceTools > summary strong/);
+  assert.match(index, /#voiceConversationState/);
+  assert.match(index, /#networkStatusText/);
+});
+
+test("Voice transcription preserves Android Tap-to-Open keyboard behavior", () => {
+  const transcriptHandler = index.slice(index.indexOf('voiceUseTranscript.addEventListener'), index.indexOf('voiceSendToAI.addEventListener'));
+  assert.match(transcriptHandler, /input.value = transcript/);
+  assert.doesNotMatch(transcriptHandler, /input\.focus\(\)/);
+  const transcriptionReady = index.slice(index.indexOf('voiceTranscript.value = String(result.text'), index.indexOf('} catch (error)', index.indexOf('voiceTranscript.value = String(result.text')));
+  assert.doesNotMatch(transcriptionReady, /voiceTranscript\.focus\(\)/);
+});
