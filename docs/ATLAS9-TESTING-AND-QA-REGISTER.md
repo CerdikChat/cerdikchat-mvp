@@ -627,3 +627,25 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - PR #87 verifies static/unit behavior for fail-closed auth, not live OAuth, D1, RBAC, session expiry or Android acceptance.
 - All seven capability benchmarks remain NOT MEASURED. These CI test counts are not model capability scores.
 - Human Verification remains NOT STARTED; exact CI success does not establish Preview, Android or Production readiness.
+
+
+## 2026-11-06 — Exact-commit CI and regression continuation
+
+### VERIFIED
+| Candidate | Exact head | Workflow evidence | Result |
+|---|---|---|---|
+| PR #60 scorecard | `2c8e67d24173399b1132579886bd91997cce4ffe` | `42042915326`, `42042915327`, `42042915341`, `42042915407` | 4/4 workflows SUCCESS; 129/129 tests; install preflight 16/16 |
+| PR #89 identity | `7befbfa37764446836373acee0bc34c4d0cb654c` | `42076426053`, `42076426065`, `42076516226`, `42076516402` | All SUCCESS; 37/37 tests on push and PR |
+| PR #90 installation docs | `358a99f368471f904f5a88d8398f9369af9a34fd` | `42076670331`, `42076670342`, `42076773736`, `42076773480` | All SUCCESS; 37/37 tests on push and PR |
+| PR #48 workspace redesign | `ba1c2af21de4eff88efdd58cdb6519ae883075ed` | `42070406696` | SUCCESS; 37/37 after earlier failures |
+| Prompt-intelligence workspace fix | `41d7f30d7a1bedbd763504970ad059050f9f2188` | `42077076800`, `42077076781` | Both SUCCESS; 90/90; Wrangler dry-run PASS; TypeScript NOT CONFIGURED |
+| Superseded workspace candidate | `0048b495dad08fdaf7f81281be4293640a6f328d` | `42077117556`, `42077117726` | Both SUCCESS; 91/91; not opened as PR because base independently advanced |
+
+### FAILED and corrected
+- PR #48 run `42069979986`: 35/37; run `42070149714`: 35/37; run `42070245727`: 36/37. The current #48 head then passed `42070406696` with 37/37.
+- Prompt-intelligence run `42054908998` and Auto Pilot `42054909323`: 88/89; failing test `workspace tools are available from the main page in a collapsed expandable panel` (status deck nested in the collapsed drawer). Intermediate commit `199b4029eaed982462f105664475f1bf810d44b1` also failed before correction. Commit `41d7f30d7a1bedbd763504970ad059050f9f2188` passed 90/90 in both workflows.
+- Cancellation of superseded push runs is not treated as a test failure; final exact-head results govern.
+
+### NOT TESTED
+- All seven capability benchmark sample sets remain unexecuted. CI counts above are software regression evidence, not AI reasoning or model quality scores.
+- No live inference, Gemini comparison, Android device test, scanner EICAR test, live research retrieval, backup restore, edge-load test or seven-day SLO.

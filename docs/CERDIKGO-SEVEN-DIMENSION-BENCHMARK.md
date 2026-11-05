@@ -471,3 +471,35 @@ No capability score changed. All seven dimensions remain NOT MEASURED with evide
 - PR #87: 114/114 tests validate fail-closed Production/D1 authentication. This supports a governance control candidate only; no live OAuth/RBAC/session runtime benchmark.
 - PR #60 exact head fda4216b843704276de17ea122547a839cfbd01a passed 129/129 tests across all four workflows. This remains engineering CI evidence, not competitive capability.
 - The full reasoning/coding/research/governance/workflow/specialist/ecosystem sample sets have not been executed. No live inference or Gemini comparison.
+
+
+## 2026-11-06 — Measurement status update
+
+**No capability score changes.** All seven dimensions remain `NOT TESTED` for their complete acceptance benchmark, with evidence-credit **0/100** and target **100/100**. Software CI results below are not model-quality measurements.
+
+| Dimension | Current capability score | Evidence credit | Target | Current gap |
+|---|---|---:|---:|---|
+| General AI reasoning | NOT MEASURED | 0/100 | 100/100 | No 100-task inference set or calibration study |
+| Coding and engineering | NOT MEASURED | 0/100 | 100/100 | CI is passing on selected branches, but no 50-task capability benchmark |
+| Specialized research and analysis | NOT MEASURED | 0/100 | 100/100 | No 50-task live retrieval/citation/freshness benchmark |
+| Governance/audit/control | NOT MEASURED | 0/100 | 100/100 | Security unit tests exist; no 50-scenario runtime authorization/audit campaign |
+| Organizational workflow integration | NOT MEASURED | 0/100 | 100/100 | No 30-scenario end-to-end integration/recovery campaign |
+| Product identity and specialization | NOT MEASURED | 0/100 | 100/100 | Canonical prompt candidate CI passes; no 90-task specialist routing evaluation |
+| Ecosystem maturity and scale | NOT MEASURED | 0/100 | 100/100 | No seven-day SLO, 100-user edge load or restore drill |
+
+### Additional software evidence (not capability scores)
+- PR #60: 129/129 regression tests; four exact-head workflows SUCCESS.
+- PR #89: 37/37 tests; canonical nine-seat prompt regression and Controlled Autopilot SUCCESS on exact head `7befbfa37764446836373acee0bc34c4d0cb654c`.
+- PR #90: 37/37 tests; Workers AI installation-guide checks and Controlled Autopilot SUCCESS on exact head `358a99f368471f904f5a88d8398f9369af9a34fd`.
+- Prompt-intelligence workspace branch: 90/90 tests and Legacy Auto Pilot SUCCESS on `41d7f30d7a1bedbd763504970ad059050f9f2188`.
+
+### Acceptance thresholds retained
+- Reasoning: 100 tasks; correctness >=90%, instruction adherence >=98%, repeatability >=95%, unsupported high-confidence claims <=1%.
+- Coding: 50 tasks; acceptance tests >=95%, critical security tests 100%, build/typecheck 100%, zero critical/high defects.
+- Research: 50 tasks; citation precision >=98%, material-claim coverage >=95%, unsupported claims <=1%, freshness >=95%.
+- Governance: 50 scenarios; authorization 100%, prohibited actions blocked 100%, approval bypasses 0, audit completeness 100%.
+- Workflow: 30 scenarios; completion >=95%, idempotency 100%, recovery >=95%, unauthorized side effects 0.
+- Identity: 90 tasks; exactly nine specialists, routing >=95%, each specialist >=90%, cross-role violations 0.
+- Ecosystem: seven-day SLO plus 100 concurrent users for 30 minutes; availability >=99.5%, error rate <1%, restore success 100%, RPO <=24h, RTO <=4h.
+
+No live model inference benchmark was run, and no matched Gemini comparison was run. Do not claim parity or superiority. The Workers AI model catalog/configuration is not evidence of quality.

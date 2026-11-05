@@ -530,3 +530,33 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Scheduled backup runs 41695574776 and 41890146458 FAILED; PR #74 full-history scan is green but archive, Drive upload and restore are NOT TESTED.
 - Real ClamAV remains BLOCKED by paid Containers. WPS, voice, document scanning and Android remain NOT TESTED at device/runtime level.
 - Live Web Research, full benchmark sample sets, Workers AI inference, 100-user edge load, seven-day SLO, RPO/RTO remain NOT TESTED.
+
+
+## 2026-11-06 — Current open issues and handover
+
+### VERIFIED progress
+- 65 open PRs at the audit snapshot.
+- PR #89: canonical nine-seat identity correction on `main`, head `7befbfa37764446836373acee0bc34c4d0cb654c`, all push/PR Controlled Autopilot and regression checks SUCCESS (37/37). Draft: https://github.com/CerdikChat/cerdikchat-mvp/pull/89.
+- PR #90: README/install guide aligned to Workers AI, head `358a99f368471f904f5a88d8398f9369af9a34fd`, all push/PR Controlled Autopilot and regression checks SUCCESS (37/37). Draft: https://github.com/CerdikChat/cerdikchat-mvp/pull/90.
+- PR #48 current head `ba1c2af21de4eff88efdd58cdb6519ae883075ed` passes 37/37. PR #88 is stale and diverged; keep it Draft and transplant no changes without a fresh base review.
+- Prompt-intelligence branch current head `41d7f30d7a1bedbd763504970ad059050f9f2188` passes 90/90 and Auto Pilot; it is 128 commits ahead of main and has no open PR. Do not integrate its full history without a scoped migration plan.
+
+### P0 — resolve before Preview acceptance
+1. Confirm the exact environment-scoped D1 binding for `cerdikchat-mvp`; the live script-level settings expose `cerdikchat-db` while repository Preview config declares a staging override. No database operation has been performed.
+2. Remediate query-string logging exposure: live `cerdikchat-mvp` and `cerdikgo-mcp-preview` both report `redact_query_string=false` with persisted invocation logs at 100% sampling. PR #86 is repository-only.
+3. Integrate and runtime-test fail-closed authentication; PR #87 remains a Draft candidate. Main authentication is not yet proven fail-closed.
+4. Review PR #89 for main identity parity and PR #90 for installation documentation accuracy; neither is merged.
+
+### P1 — reliability and multimodal
+- Backup: scheduled runs `41695574776` and `41890146458` failed; PR #74 scanner correction passed but backup archive/Drive upload/restore remain NOT TESTED.
+- Scanner: fail-closed contract exists; real scanner runtime/EICAR test BLOCKED without a free-tier runtime path. No paid upgrade.
+- Voice: Preview/Production binding parity and Android microphone/playback acceptance NOT TESTED.
+- Live Web Research: no verified live retrieval/citation/freshness benchmark.
+
+### P2 — capability and scale
+- Run 100 reasoning, 50 coding, 50 research, 50 governance, 30 workflow, 90 specialist-routing tasks and seven-day/100-concurrent-user ecosystem campaign per benchmark register.
+- Existing 99,990-request in-process stress test is synthetic and does not establish edge-scale or AI inference latency.
+- No matched Gemini benchmark; no superiority claim.
+
+### Safety
+No merge, Production deploy, remote D1 write/migration, OAuth/secrets/DNS change, billing activation or agent execution. Gateway remains `plan_only`; Human Verification not started.

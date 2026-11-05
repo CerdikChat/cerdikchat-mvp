@@ -449,3 +449,26 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - PR #84 candidate 2d37dea6fa190d37b887d648ede7d943f8024edd renames the isolated Worker target to cerdikgo-primary-preview and passes 98/98 tests plus Wrangler dry-run.
 - Cloudflare inventory still has no script with that name. No resource was provisioned or deployed.
 - Live cerdikchat-mvp DB binding discrepancy and redact_query_string=false remain unresolved; PR #86 is source/config only and has not changed live settings.
+
+
+## 2026-11-06 — Read-only Cloudflare and repository security review
+
+### VERIFIED — observed configuration (read-only)
+- Cloudflare script `cerdikchat-mvp`: observability enabled; head sampling 1.0; `redact_query_string=false`; logs enabled, 1.0 sampling, persisted, invocation logs enabled. Script-level binding list includes `DB` -> `cerdikchat-db`. Annotation identifies a controlled field-test Preview.
+- Cloudflare script `cerdikgo-mcp-preview`: observability enabled; head sampling 1.0; `redact_query_string=false`; logs persisted and invocation logs enabled. It exposes a bearer-token binding and `CERDIKGO_MCP_ENABLED=true`, but no D1, Workers AI or rate-limit binding. This is an MCP service, not a complete Primary Worker.
+- Only binding names and settings metadata were read; secret values and D1 contents were not accessed.
+
+### BLOCKED — environment isolation and log privacy
+- Repository `wrangler.toml` defines a top-level D1 binding and a Preview staging override. The live script-level settings show the production-named `cerdikchat-db` binding under the field-test Preview annotation. Exact environment-scoped binding resolution is not yet established; no database operation was attempted.
+- Both live scripts still have query-string redaction disabled while invocation logs are persisted at 100% sampling. PR #86 changes repository configuration only; it has not changed live settings. A separate reviewed/approved runtime remediation is required.
+
+### VERIFIED — candidate controls, not integrated
+- PR #89 main prompt candidate enforces the canonical nine-seat identity and single-model truthfulness; exact-head CI passed. It does not alter authentication or runtime authorization.
+- PR #87 remains the fail-closed Production/D1 authentication candidate; its exact candidate passed earlier CI but is not integrated. Main branch authentication default remains opt-in until approved correction is integrated and Preview-tested.
+- PR #90 removes stale Gemini credential instructions; documentation tests passed. No credentials were read or changed.
+
+### BLOCKED / NOT TESTED — outstanding controls
+- Document scanner runtime remains BLOCKED by the unavailable free-tier scanner/container path; keep uploads fail-closed. No billing upgrade.
+- Backup restore remains NOT TESTED; scheduled backup runs `41695574776` and `41890146458` failed before archive creation. PR #74 scanner correction is not proof of a successful backup/restore.
+- Voice Production rate-limit binding and Android recording/playback remain NOT TESTED.
+- No OAuth, secrets, DNS, D1, billing, Worker settings or deployment changes were performed in this audit.

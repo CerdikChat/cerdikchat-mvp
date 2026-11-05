@@ -659,3 +659,31 @@ No PR merge, Production deployment, remote D1 read/write/migration, OAuth/secret
 - The 76-hour Primary session TTL remains unchanged and requires policy review; no session expiry/revocation runtime test was performed.
 - Live Cloudflare script settings still report cerdikchat-mvp DB -> cerdikchat-db, redact_query_string=false, and persisted invocation logs at 100% sampling. PR #86 is a code-only redaction candidate; no live settings changed.
 - No PR merge, deployment, D1 operation, OAuth/secret/DNS change, billing action, live inference or autonomous execution. Human Verification NOT STARTED.
+
+
+## 2026-11-06 — Auto Pilot continuation and repository/Preview audit
+
+### Snapshot
+- Repository: `CerdikChat/cerdikchat-mvp`; default branch `main` at `bc6545d6d19fd4b749d0b65fefba3d74775e0221`.
+- Open pull requests at this snapshot: 65.
+- Scorecard branch: `atlas9/cerdikgo-100-percent-scorecard`; audited candidate `2c8e67d24173399b1132579886bd91997cce4ffe`.
+
+### VERIFIED
+- PR #60 exact-head workflows: Auto Pilot `42042915326`, Phase 3 `42042915327`, regression/install `42042915341`, Hybrid Gateway `42042915407`; all SUCCESS. Candidate suite: 129/129; installation preflight: 16/16.
+- PR #89 main identity candidate: `7befbfa37764446836373acee0bc34c4d0cb654c`, branch `atlas9/cerdikgo-main-identity-correction-20261106`; changed `worker.js`, `tests/atlas9-main-identity.test.mjs`, `docs/ATLAS9-MAIN-IDENTITY-CORRECTION.md`, and `.github/workflows/atlas9-controlled-autopilot.yml`. Push runs `42076426053` and `42076426065`; PR runs `42076516226` and `42076516402`; all SUCCESS, 37/37 tests. Draft PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/89.
+- PR #90 installation documentation candidate: `358a99f368471f904f5a88d8398f9369af9a34fd`, branch `atlas9/cerdikgo-install-docs-correction-20261106`; changed `README.md`, `tests/readme-installation-docs.test.mjs`, `.github/workflows/atlas9-controlled-autopilot.yml`, and `docs/CERDIKGO-INSTALLATION-DOCS-CORRECTION.md`. Push runs `42076670331` and `42076670342`; PR runs `42076773736` and `42076773480`; all SUCCESS, 37/37 tests. Draft PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/90.
+- PR #48 current workspace branch head `ba1c2af21de4eff88efdd58cdb6519ae883075ed`; final regression run `42070406696` SUCCESS, 37/37 after three intermediate failures.
+- The long-lived branch `atlas9/prompt-intelligence-mvp` advanced to `41d7f30d7a1bedbd763504970ad059050f9f2188` (128 commits ahead of main). It moved the system status deck outside the collapsed tools drawer. Regression `42077076800` and Legacy Auto Pilot `42077076781` both SUCCESS, 90/90. This is branch-level evidence; no PR to main exists.
+- A separate candidate branch `atlas9/fix-workspace-tools-order-20261106-v2` at `0048b495dad08fdaf7f81281be4293640a6f328d` passed 91/91 and its Auto Pilot run `42077117726`; it was not opened as a PR because the base branch independently advanced with the same correction to `41d7f30d7a1bedbd763504970ad059050f9f2188`. Treat the candidate as superseded, not integrated.
+
+### FAILED / BLOCKED
+- PR #48 intermediate regression failures: `42069979986` (35/37), `42070149714` (35/37), `42070245727` (36/37). The current branch head subsequently passed `42070406696` (37/37).
+- PR #88 is stale: head `8bdef7d20431eb08c9b36f414ffa5221e2ddae90`, base snapshot `e72ce40170eab4282e1536ed1447467326e1c935`; current base branch head `ba1c2af21de4eff88efdd58cdb6519ae883075ed`; compare 1 ahead / 4 behind / diverged, GitHub `mergeable=false`. Its earlier Preview deployment and 37/37 regression are not current-base acceptance. Keep Draft; do not merge as-is. https://github.com/CerdikChat/cerdikchat-mvp/pull/88.
+- Live Cloudflare read-only settings show query-string redaction disabled and persisted invocation logs at 100% sampling on both `cerdikchat-mvp` and `cerdikgo-mcp-preview`. The `cerdikchat-mvp` script-level settings show a `DB` binding named `cerdikchat-db` under a field-test Preview annotation, while repository Preview config declares a staging override. Environment-specific isolation remains BLOCKED pending confirmation. No secret values or database contents were accessed.
+
+### NOT TESTED
+- Live model inference/quality, seven-dimension capability benchmarks, Android acceptance, full Preview user journeys, live scanner, Live Web Research, backup restore, edge load and seven-day SLO.
+- No Gemini comparison or superiority claim.
+
+### Safety and approvals
+- No merge, Production deploy, remote D1 write/migration, OAuth/secret/DNS change, billing activation, or autonomous specialist execution. Gateway remains `plan_only`. Human Verification was not started.

@@ -462,3 +462,27 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 
 ### Outstanding
 The 76-hour session TTL remains unchanged. Live authentication, Google OAuth, RBAC role matrix and Android sign-in still require isolated Preview runtime acceptance. No merge or deployment.
+
+
+## 2026-11-06 — Engineering continuation
+
+### VERIFIED — PR #89 main identity correction
+- Branch `atlas9/cerdikgo-main-identity-correction-20261106`; head `7befbfa37764446836373acee0bc34c4d0cb654c`.
+- Replaced the main Worker prompt's legacy coordinator/role list with exactly ATLAS-01 through ATLAS-09; Optimus Prime is coordinator outside the nine seats; TITAN/GENESIS/TERRA are legacy labels only.
+- Added three regression tests and an audit note. Push CI: `42076426053` / `42076426065`; PR CI: `42076516226` / `42076516402`; all SUCCESS, 37/37.
+- Draft PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/89. Not merged or deployed.
+
+### VERIFIED — PR #90 installation documentation correction
+- Branch `atlas9/cerdikgo-install-docs-correction-20261106`; head `358a99f368471f904f5a88d8398f9369af9a34fd`.
+- Replaced obsolete Gemini API-key setup with source-verified Cloudflare Workers AI instructions, current model identifier, safe local checks, Wrangler dry-run boundary, and Preview/auth/D1 limitations.
+- Added regression coverage for stale Gemini setup commands. Push CI: `42076670331` / `42076670342`; PR CI: `42076773736` / `42076773480`; all SUCCESS, 37/37.
+- Draft PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/90. Not merged or deployed.
+
+### VERIFIED — workspace status visibility correction on long-lived branch
+- Branch `atlas9/prompt-intelligence-mvp`; commit `41d7f30d7a1bedbd763504970ad059050f9f2188` moved the status deck outside the collapsed tools drawer.
+- Regression `42077076800`: 90/90; Legacy Auto Pilot `42077076781`: SUCCESS, including install/config preflight, Wrangler dry-run and workflow safety scan. TypeScript is NOT CONFIGURED on this JavaScript branch.
+- The same correction was independently prototyped on `atlas9/fix-workspace-tools-order-20261106-v2` at `0048b495dad08fdaf7f81281be4293640a6f328d` (91/91; Auto Pilot `42077117726`), but that candidate was superseded by the base branch's newer verified commit and no PR was opened.
+
+### FAILED then VERIFIED — workspace regression correction
+- PR #48 had three intermediate failures (`42069979986`, `42070149714`, `42070245727`) caused by workspace/account selector contracts. Current head `ba1c2af21de4eff88efdd58cdb6519ae883075ed` passed `42070406696`, 37/37.
+- PR #88 remains a stale, diverged Draft and must not be merged without a fresh branch based on current #48.

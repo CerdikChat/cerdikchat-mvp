@@ -337,3 +337,24 @@ No approval was granted or exercised for PR merge, Production deployment, remote
 7. NOT TESTED: No Workers AI inference or Gemini comparison; remaining free quota was not confirmed. Do not activate billing.
 
 No merge, Production/Preview deployment, D1 operation, OAuth/secret/DNS change, billing activation or Human Verification was authorized or performed.
+
+
+## 2026-11-06 — Decisions and approval boundaries
+
+### VERIFIED decisions
+1. Preserve exactly nine specialist seats: ATLAS-01 through ATLAS-09. Optimus Prime remains coordinator outside the registry; no tenth agent.
+2. Keep the hybrid gateway `plan_only`; role profiles are analytical profiles in one model unless independent runtime evidence proves otherwise.
+3. PR #89 and PR #90 remain Draft. Their exact-head CI passed, but no merge or deployment is authorized by that result.
+4. The long-lived `atlas9/prompt-intelligence-mvp` branch is 128 commits ahead of `main`; do not treat it as a release-ready integration candidate or merge its accumulated feature set as a batch.
+5. PR #88 remains Draft and stale (1 ahead / 4 behind / diverged); do not merge as-is. Its preview success is historical and does not supersede current-base checks.
+
+### BLOCKED approvals
+- Live D1 environment binding reconciliation and any binding change require separate approval; no D1 read/write/migration was performed.
+- Live observability query-redaction changes require a reviewed change window; repository PR #86 is not a live remediation.
+- OAuth/secrets/DNS changes, billing activation, Production deployment and privileged Worker settings changes remain prohibited without explicit approval.
+
+### Human Verification gate
+- PR #89 exact candidate `7befbfa37764446836373acee0bc34c4d0cb654c` passed Controlled Autopilot and regression on push and PR events.
+- PR #90 exact candidate `358a99f368471f904f5a88d8398f9369af9a34fd` passed Controlled Autopilot and regression on push and PR events.
+- The prompt-intelligence workspace fix `41d7f30d7a1bedbd763504970ad059050f9f2188` passed its Legacy Auto Pilot gate and regression.
+- These candidates are eligible for a separately authorized human review, but Human Verification was NOT STARTED during this automation run. CI readiness is not Preview, Android or Production acceptance.
