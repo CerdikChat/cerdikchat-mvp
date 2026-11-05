@@ -95,3 +95,13 @@ No merge, deployment, remote D1 write/migration, credential change, DNS change o
 - Correction: appended a dated baseline and transparent failure note to the benchmark document; correction commit `68db999e24f854aa9137904054f53433a865b8a1`.
 - Status: correction commit recorded; retest on the final exact branch head is PENDING. Do not report PR #94 as green until that exact-head run succeeds.
 - No prior failure was removed or overwritten. No merge, deployment, D1 operation, credential change, DNS change or billing action occurred.
+
+
+## 2026-11-06 — Corrected register candidate regression evidence
+
+- PR #95 exact tested snapshot: `518c580894cab90d99c4f129bb7f207e8973532a`, branch `atlas9/cerdikgo-main-governance-registers-rerun-20261106`, base main `bc6545d6d19fd4b749d0b65fefba3d74775e0221`.
+- Regression workflow `42114354000`: SUCCESS; `npm test` 37/37 passed, 0 failed. All three new structural tests passed.
+- Evidence: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42114354000.
+- PR #94 initial candidate `005402e41eb807c0ec44e2629fef1c7d16325341` failed run `42114199024` at 36/37 because the benchmark spec lacked a dated entry. Correction commit: `68db999e24f854aa9137904054f53433a865b8a1`. The failed run is preserved.
+- Subsequent register-only appends on this branch are documentation changes; exact-head CI for the resulting updated branch remains PENDING. The 37/37 result above must not be generalized to a later SHA until retested.
+- Auto Pilot readiness, live inference, Preview runtime, Android, backup restore and Production readiness remain NOT TESTED. Human Verification has not started.
