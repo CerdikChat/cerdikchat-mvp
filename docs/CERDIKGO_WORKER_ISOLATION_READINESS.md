@@ -133,3 +133,12 @@ PR #51 remains open and unmerged. Therefore the supplied Primary URL is not evid
 The connected Cloudflare account's read-only Worker inventory returned only `cerdikchat-mvp` and `cerdikgo-mcp-preview`; no script named `atlas9-prompt-intelligence-mvp-cerdikchat-mvp` exists in the returned inventory. This PR therefore remains a readiness package, not a separately provisioned CerdikGo Primary Worker. Do not reuse CerdikChat D1 or rate-limit resources to make it appear functional.
 
 No Production deployment, D1 write/migration, OAuth/secret/DNS change, billing activation, scanner provisioning, or merge was performed. Human Verification remains NOT STARTED. Preview runtime, Android acceptance and Production readiness remain separate and NOT TESTED.
+
+## Exact-head verification correction — 2026-11-05
+
+The preceding addendum stated that documentation-only head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a` had not been re-run. That statement is superseded by exact-commit workflow evidence:
+- Legacy JavaScript Auto Pilot run `42037076015`: SUCCESS, 97/97; repository preflight PASS; Wrangler 4.153.0 dry-run PASS; workflow safety scan PASS; TypeScript NOT CONFIGURED and not counted.
+- Isolated Worker readiness run `42037076046`: SUCCESS, 97/97; `wrangler deploy --dry-run --config wrangler.cerdikgo.toml` passed and printed `GOOGLE_AUTH_REQUIRED=true`; no deployment.
+- Both runs tested exact head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a`.
+
+This verifies the doc-only head's CI/dry-run gate. It still does not verify a live Worker, D1, rate limiter, OAuth session, scanner, Android behavior or Production readiness. No Human Verification was started.
