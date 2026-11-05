@@ -1569,14 +1569,14 @@
       card.addEventListener("click", () => {
         const action = card.dataset.workspaceAction;
         if (action === "validation") {
-          document.querySelector("#cerdikgoValidationGate")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          document.querySelector("#cerdikgoValidationGate .cg-gate-toggle")?.focus();
           return;
         }
         if (action === "research") {
           input.value = "Bantu saya melakukan riset terstruktur mengenai: ";
           input.dispatchEvent(new Event("input", { bubbles: true }));
           input.focus();
-          input.scrollIntoView({ behavior: "smooth", block: "center" });
+          
           statusEl.textContent = "Alur riset siap di chat. Konektor live web khusus belum diaktifkan.";
           return;
         }
@@ -1598,7 +1598,7 @@
     });
     document.querySelector("#composerMore")?.addEventListener("click", () => {
       if (workspaceToolsDrawer) workspaceToolsDrawer.open = !workspaceToolsDrawer.open;
-      if (workspaceToolsDrawer?.open) workspaceToolsDrawer.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      
     });
 
     const authPanel = document.querySelector("#authPanel");
