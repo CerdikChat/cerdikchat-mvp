@@ -265,3 +265,28 @@ Run links:
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975711475
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975715983
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975716157
+
+
+## Current evidence snapshot — 2026-11-05 16:25 WIB (append-only update)
+
+**Scoring rule:** Capability score is NOT MEASURED until the complete benchmark set has been run and independently scored. Evidence-credit 0/100 means no complete dimension-level benchmark result has been accepted; it is not a statement that the underlying capability is zero. Target remains 100/100 per dimension.
+
+| Dimension | Current measured capability score | Current evidence credit | Status | Target |
+|---|---:|---:|---|---:|
+| 1. General AI reasoning | NOT MEASURED | 0/100 | NOT TESTED | 100/100 |
+| 2. Coding & engineering | NOT MEASURED | 0/100 | PARTIALLY VERIFIED for branch CI only; capability benchmark NOT TESTED | 100/100 |
+| 3. Specialized research & analysis | NOT MEASURED | 0/100 | NOT TESTED | 100/100 |
+| 4. Governance, audit & control | NOT MEASURED | 0/100 | PARTIALLY VERIFIED for selected static/CI controls; full scenario benchmark NOT TESTED | 100/100 |
+| 5. Organizational workflow integration | NOT MEASURED | 0/100 | PARTIALLY VERIFIED for manual local Context Bridge only; end-to-end organizational workflows NOT TESTED | 100/100 |
+| 6. Product identity & specialization | NOT MEASURED | 0/100 | BLOCKED for Primary parity; PR #62 candidate CI passes but main prompt still legacy | 100/100 |
+| 7. Ecosystem maturity & scale | NOT MEASURED | 0/100 | BLOCKED / NOT TESTED for scanner runtime, backup restore, Android and scale | 100/100 |
+
+### New engineering evidence (not model capability scores)
+- PR #60 exact candidate `a2b10c42f4925164b59d48c499ac44265c48daed`: Auto Pilot 41975851719 SUCCESS, 129/129 tests; install/regression 41975851562, Phase 3 41975851561, Hybrid Gateway 41975851576 SUCCESS.
+- PR #80 exact candidate `724fdb092d584cead6f34612693de8cb9336c7eb`: Auto Pilot 42002523884 SUCCESS, 113/113 tests; regression 42002508692 and push Auto Pilot 42002508523 SUCCESS. This validates the local Inbox cap and branch contracts only.
+- PR #74 exact candidate `abeca194672349e799bcfdd9d8f9c9dc82675947`: full-history Gitleaks run 41975715983 SUCCESS; 816 commits / ~1.84 MB / no leaks. This is scanner configuration evidence, not backup/restore evidence.
+- PR #62 canonical identity candidate has four successful workflows, but is not proof of Primary integration or nine-agent autonomous runtime.
+
+The fixed 35-task v0.1 manifest remains a smoke-test structure. The required 100 reasoning, 50 coding, 50 research, 50 governance, 30 workflow, 90 specialist, and seven-day ecosystem/scale evidence sets remain outstanding. No Gemini comparative result exists. No inference benchmark, latency benchmark, Android acceptance, live research retrieval, ClamAV runtime test, backup restore drill, or 100-concurrent-user test was run in this continuation.
+
+Next action: run the complete fixed task sets against the exact candidate and comparator under matched model/provider, tool, context, temperature, and token/time budgets; preserve raw outputs, scoring, repeats, and SHA-linked evidence. Do not award partial capability points from CI or feature presence.
