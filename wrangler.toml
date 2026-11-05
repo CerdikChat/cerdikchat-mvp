@@ -14,6 +14,7 @@ binding = "AI"
 [observability]
 enabled = true
 head_sampling_rate = 1
+redact_query_string = true
 
 [[ratelimits]]
 name = "CHAT_RATE_LIMITER"
@@ -27,6 +28,18 @@ period = 60
 binding = "DB"
 database_name = "cerdikchat-db"
 database_id = "e5116f7b-53f0-4671-afca-28bfdc366ded"
+
+# Preview observability: redact request query strings without reducing diagnostic sampling.
+[previews.observability]
+enabled = true
+head_sampling_rate = 1
+redact_query_string = true
+
+[previews.observability.logs]
+enabled = true
+invocation_logs = true
+head_sampling_rate = 1
+persist = true
 
 # Preview-only configuration: isolated from Production.
 [previews.vars]
