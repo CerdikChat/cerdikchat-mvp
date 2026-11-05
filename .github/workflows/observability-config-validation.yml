@@ -1,0 +1,36 @@
+name: CerdikGo Wrangler configuration dry-run
+
+on:
+  push:
+    branches:
+      - atlas9/cerdikgo-observability-redaction
+    paths:
+      - "wrangler.toml"
+      - ".github/workflows/observability-config-validation.yml"
+  pull_request:
+    branches:
+      - atlas9/admin-governance-control-center
+    paths:
+      - "wrangler.toml"
+      - ".github/workflows/observability-config-validation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerdikgo-observability-config-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  config-dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate Wrangler config without deploying
+        run: npx --yes wrangler@4.153.0 deploy --dry-run --outdir /tmp/cerdikgo-observability-config
