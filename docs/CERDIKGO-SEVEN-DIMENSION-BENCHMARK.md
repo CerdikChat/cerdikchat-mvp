@@ -146,3 +146,11 @@ PR #70 head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1` and PR #52 head `4114cfa5
 ## Exact-head evidence correction — 2026-11-05
 
 The 129/129 CI evidence previously recorded for PR #60 applies to head `ad3cbd61b6467675e71e8445f113635c45beb8c9` only. The scorecard branch was later advanced by append-only audit updates; the pre-correction observed head `d8fd4d04b119f4e8a63bffa6624396ead9f723f3` has no exact-head workflow run or combined status. PR #60 reports mergeable=false and compare shows it is 2 commits behind base. The current documentation branch is therefore **BLOCKED** for Auto Pilot/integration until reconciled and retested. All seven competitive model scores remain NOT MEASURED; no model inference benchmark has been executed.
+
+
+## Current CI evidence correction — 2026-11-05
+
+- PR #60 head `62e36278386e37a47b91c4e246ac7ccb6ba9decf`: readiness `41953152984`, regression/install `41953152983`, Phase 3 `41953153084`, Hybrid Gateway `41953152956` all passed; 129/129 tests, 0 failures. The readiness log records PR base snapshot `de11d34257005ba72a621312230489a7d161ff53`; current base branch head is `637ff536011ed25fc598888f62f520b4cfdccd3c`, two commits ahead. This is engineering CI evidence, not a model benchmark.
+- PR #70 archive candidate head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1`: legacy readiness `41952747628` passed 108/108 tests; install, preflight, Wrangler dry-run and safety scan passed. The run records base snapshot `9be9a8c3f6df416d66452c3d8c69c5112c853207`; current admin-governance base is two commits ahead.
+- PR #52 head `3653fa27ce9cbd01849b6f8a5478e7c335eb2465` has no exact-head PR workflow result.
+- All seven competitive model scores remain NOT MEASURED. No Workers AI or Gemini inference tasks were executed. Green CI does not award AI capability points.

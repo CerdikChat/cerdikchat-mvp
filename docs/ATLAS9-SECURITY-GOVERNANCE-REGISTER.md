@@ -136,3 +136,10 @@ The initial PR #63 candidate failed because a valid case-insensitive Bearer cred
 ## Exact-head governance correction — 2026-11-05
 
 The scorecard documentation branch received further append-only audit commits after the passing PR #60 checkpoint. The prior 129/129 CI result belongs to `ad3cbd61b6467675e71e8445f113635c45beb8c9` only. The later observed head `d8fd4d04b119f4e8a63bffa6624396ead9f723f3` has no exact-head workflow/status evidence and PR #60 reports mergeable=false (base divergence: 2 commits behind). No merge/rebase or privileged action was attempted. Treat current PR #60 integration as **BLOCKED** until the branch is reconciled and retested.
+
+
+## Archive control verification — 2026-11-05
+
+PR #70 head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1` passed legacy Auto Pilot run `41952747628` with 108/108 tests and zero failures. Coverage includes super-admin-only archive authorization, same-origin/CSRF guards, request validation, atomic D1 batch/audit response behavior, active/archive filtering and UI action wiring. This is automated mock/regression evidence only; no live D1 migration or runtime archive transaction was performed. Migration `0008_feature_request_archive.sql` remains unapplied.
+
+The run tested PR base snapshot `9be9a8c3f6df416d66452c3d8c69c5112c853207`; the admin-governance base has since advanced by two commits to `3653fa27ce9cbd01849b6f8a5478e7c335eb2465`. Revalidate the current merge candidate before Human Verification. Do not treat the run as Preview runtime acceptance.

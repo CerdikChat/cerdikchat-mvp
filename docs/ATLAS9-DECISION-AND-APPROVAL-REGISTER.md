@@ -83,3 +83,12 @@ The initial PR #63 candidate was FAILED due to Bearer parser whitespace escaping
 ## Decision correction — 2026-11-05: no inherited CI approval
 
 The PR #60 129/129 result and Auto Pilot pass apply only to parent head `ad3cbd61b6467675e71e8445f113635c45beb8c9`. The later observed scorecard head `d8fd4d04b119f4e8a63bffa6624396ead9f723f3` has no exact-head workflow/status and PR metadata reports mergeable=false, with the branch 2 commits behind its base. No merge, rebase, or force update is authorized or performed here. Current status: **BLOCKED** pending reconciliation and exact-head rerun.
+
+
+## Decision update — 2026-11-05: verified head tests, base drift and approval boundaries
+
+1. PR #70 exact head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1` passed Auto Pilot run `41952747628` (108/108, zero failures). The run used base snapshot `9be9a8c3f6df416d66452c3d8c69c5112c853207`; current base has advanced by two commits. Human Verification has not started; rerun the current merge candidate first.
+2. PR #60 exact head `62e36278386e37a47b91c4e246ac7ccb6ba9decf` passed four workflows (129/129). Readiness used base snapshot `de11d34257005ba72a621312230489a7d161ff53`; current base has advanced by two commits. Revalidate before integration.
+3. PR #52 head `3653fa27ce9cbd01849b6f8a5478e7c335eb2465` has a readiness workflow, but no exact-head PR run/status is visible. Do not claim readiness.
+4. PR #61/#66/#68/#69 branches are 2 commits behind their current admin-governance base and GitHub reports mergeable=false. No merge/rebase is authorized in this run.
+5. Migration #0008 remains unapplied. No remote D1 write/migration, Preview or Production deployment, OAuth/secrets/DNS change, billing activation or destructive action is approved/performed.

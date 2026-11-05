@@ -141,3 +141,11 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 - Subsequent audit-record appends advanced the scorecard branch to `d8fd4d04b119f4e8a63bffa6624396ead9f723f3` before this correction. That newer SHA has no workflow run or combined status in the available GitHub evidence.
 - PR #60 now reports mergeable=false; compare shows the feature branch is 59 commits ahead and 2 behind its base. No merge or rebase was attempted.
 - Status: **BLOCKED** for exact-head CI and integration. Do not reuse the parent commit's CI result for the new branch head.
+
+
+## 2026-11-05 — Exact-head CI results for archive controls and scorecard
+
+- PR #70 head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1`: legacy Auto Pilot run `41952747628` passed 108/108 tests, dependency install, preflight, Wrangler 4.153.0 dry-run and safety scan. TypeScript is explicitly NOT CONFIGURED, not passed. https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41952747628
+- PR #60 head `62e36278386e37a47b91c4e246ac7ccb6ba9decf`: runs `41953152984`, `41953152983`, `41953153084`, `41953152956` passed; readiness/regression/Phase 3/Hybrid Gateway logs confirm 129/129 tests. Hybrid Gateway includes Wrangler dry-run. The readiness log records base snapshot `de11d34257005ba72a621312230489a7d161ff53`; current base branch has advanced to `637ff536011ed25fc598888f62f520b4cfdccd3c` (2 commits ahead of tested base). Revalidate latest merge candidate before integration.
+- PR #52 branch readiness workflow is present at `3653fa27ce9cbd01849b6f8a5478e7c335eb2465`; no exact-head PR workflow run/status is visible.
+- No deployment, D1 write/migration, secret/OAuth/DNS change, billing action or merge occurred.

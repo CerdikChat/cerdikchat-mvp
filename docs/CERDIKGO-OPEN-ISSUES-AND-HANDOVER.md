@@ -161,3 +161,13 @@ Initial candidate c9a5b7f5575e4571a7fefe3f7df39827a4a76439 failed 4/4 PR workflo
 ## Handover correction — 2026-11-05: PR #60 exact-head blocker
 
 The passing PR #60 checkpoint is parent SHA `ad3cbd61b6467675e71e8445f113635c45beb8c9` only. Append-only audit updates advanced the branch; the pre-correction observed head was `d8fd4d04b119f4e8a63bffa6624396ead9f723f3`. No workflow run or combined status is available for that later head. Compare reports 59 commits ahead and 2 behind base; PR metadata reports mergeable=false. Do not start Human Verification or merge PR #60 until the branch is reconciled without losing the append-only audit trail and a new exact-head gate passes.
+
+
+## Handover update — 2026-11-05: latest exact-head results
+
+- PR #70 `d546c121c9d95f6568eb4c7d728655d72fd2fcd1`: legacy readiness `41952747628` passed 108/108; install, preflight, Wrangler dry-run and safety scan passed. TypeScript is NOT CONFIGURED. Base snapshot `9be9a8c3f6df416d66452c3d8c69c5112c853207` is 2 commits behind current admin-governance base. Human Verification has not started; rerun current merge candidate first.
+- PR #60 `62e36278386e37a47b91c4e246ac7ccb6ba9decf`: four workflows `41953152984`, `41953152983`, `41953153084`, `41953152956` passed 129/129. Tested base snapshot `de11d34257005ba72a621312230489a7d161ff53` is 2 commits behind current base; revalidate before integration.
+- PR #52 `3653fa27ce9cbd01849b6f8a5478e7c335eb2465`: readiness workflow present but no exact-head PR workflow/status. Do not mark verified.
+- PR #61/#66/#68/#69 have successful prior exact-head CI but are 2 commits behind updated admin-governance base and report mergeable=false. Reconcile branch dependencies and rerun before integration.
+- PR #70 migration #0008 remains unapplied. No remote D1 write/migration or deployment occurred.
+- Seven model capability scores remain NOT MEASURED. The 35-task manifest is only a smoke fixture; no model inference benchmark has been run.

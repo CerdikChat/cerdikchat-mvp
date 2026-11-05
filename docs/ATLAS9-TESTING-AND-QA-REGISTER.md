@@ -259,3 +259,22 @@ Failure links: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/4193486
 - For `d8fd4d04b119f4e8a63bffa6624396ead9f723f3`, `fetch_commit_workflow_runs` returned no PR workflows and combined status returned no checks.
 - Compare with base head `637ff536011ed25fc598888f62f520b4cfdccd3c`: diverged, 59 ahead / 2 behind. PR metadata reports mergeable=false.
 - Current status: **BLOCKED**. Previous run IDs are historical evidence for the parent SHA only; they are not a pass for the latest branch head.
+
+
+## Exact-head verification correction — 2026-11-05
+
+| PR | Tested head | Run IDs | Result | Exact scope |
+|---|---|---|---|---|
+| #60 | `62e36278386e37a47b91c4e246ac7ccb6ba9decf` | 41953152984, 41953152983, 41953153084, 41953152956 | VERIFIED | 129/129 tests; readiness, regression/install, Phase 3, Hybrid Gateway; dry-run only. PR base snapshot in readiness log: `de11d34257005ba72a621312230489a7d161ff53`. |
+| #70 | `d546c121c9d95f6568eb4c7d728655d72fd2fcd1` | 41952747628 | VERIFIED | 108/108 tests; legacy readiness, install/preflight, Wrangler dry-run and safety scan. TypeScript NOT CONFIGURED. PR base snapshot: `9be9a8c3f6df416d66452c3d8c69c5112c853207`. |
+| #52 | `3653fa27ce9cbd01849b6f8a5478e7c335eb2465` | None returned | BLOCKED | Readiness workflow exists, but no exact-head PR run or combined status. |
+
+Direct links:
+- PR #60 readiness: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953152984
+- PR #60 regression/install: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953152983
+- PR #60 Phase 3: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953153084
+- PR #60 Hybrid Gateway: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953152956
+- PR #70 legacy readiness: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41952747628
+
+### Base-branch reconciliation
+PR #60's tested base snapshot `de11d34257005ba72a621312230489a7d161ff53` is behind current base head `637ff536011ed25fc598888f62f520b4cfdccd3c` by two commits. PR #70's tested base snapshot `9be9a8c3f6df416d66452c3d8c69c5112c853207` is behind current admin-governance base head `3653fa27ce9cbd01849b6f8a5478e7c335eb2465` by two commits. Their head-specific test passes remain valid for the logged snapshots; rerun the merge candidate against the current base before integration or Human Verification.
