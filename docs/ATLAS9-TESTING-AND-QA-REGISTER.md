@@ -167,3 +167,16 @@ Links:
 
 ## Correction — 2026-11-05: Voice limiter status
 The PR #52 deployed source uses CHAT_RATE_LIMITER for voice transcription, and the Preview deployment metadata confirms CHAT_RATE_LIMITER exists. The earlier statement that the PR #52 Preview lacks VOICE_RATE_LIMITER and therefore cannot run voice transcription was incorrect for this deployed source version. No runtime or Android voice acceptance test was performed; status remains NOT TESTED. FILE_SCANNER remains absent and the file-analysis route is expected to return FILE_SCAN_UNAVAILABLE after authorization succeeds.
+
+## Failure and correction record — 2026-11-05
+
+| Candidate | Run ID | Status | Result |
+|---|---:|---|---|
+| PR #65 intermediate 0be3cfeaa52dcd639bf62f62bba13fb53825b66c | 41949291912 | FAILED | 35/36 passed; SyntaxError in tests/worker.test.mjs:587 caused by literal escaped newline |
+| PR #65 corrected 2529b05efa4fd02883eb493a2683218a7be2e83f | 41949338154 | VERIFIED | 95/95 tests, push regression |
+| PR #65 corrected same SHA | 41949364570 | VERIFIED | 95/95 tests, pull-request regression |
+| PR #65 final 154301128cc8824b76969b5da603807f5125b414 | 41949989419 | VERIFIED | 95/95; legacy Auto Pilot readiness, push |
+| PR #65 final same SHA | 41949995940 | VERIFIED | 95/95; legacy Auto Pilot readiness, pull_request |
+
+Failure log: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949291912 .
+Correction runs: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949338154 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949364570 .

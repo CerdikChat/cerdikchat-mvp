@@ -112,3 +112,6 @@ The 35-task v0.1 manifest is a structural smoke-test fixture only. It does not e
 
 ## Correction — 2026-11-05: Preview voice capability status
 The PR #52 deployed source uses CHAT_RATE_LIMITER for voice transcription, and that binding is present. The earlier claim of a missing VOICE_RATE_LIMITER binding on that Preview was incorrect for the deployed commit. This does not establish voice runtime success: model invocation, browser microphone support, playback, interruption and Android acceptance remain NOT TESTED. FILE_SCANNER is absent and document scanning is blocked by fail-closed behavior.
+
+## Benchmark integrity note — 2026-11-05
+The PR #65 evidence validator's first implementation candidate failed its regression workflow (run 41949291912: 35 passed, 1 failed due to malformed test-source escaping). The corrected implementation passed 95/95 on commit 2529b05efa4fd02883eb493a2683218a7be2e83f and the final readiness gate passed on 154301128cc8824b76969b5da603807f5125b414. This is software-regression evidence only; it does not add points to specialized research or AI capability scores.

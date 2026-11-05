@@ -58,3 +58,6 @@ Append decisions. General permission to improve code does not authorize privileg
 
 ## Correction — 2026-11-05: Preview voice binding
 For the PR #52 deployed commit, voice transcription uses the existing CHAT_RATE_LIMITER binding, so no separate VOICE_RATE_LIMITER provisioning is required for that source version. Do not provision a new limiter based solely on the PR #41 branch contract. Voice runtime/Android acceptance remains NOT TESTED; FILE_SCANNER remains a confirmed missing binding and must not be bypassed.
+
+## Evidence integrity decision record — 2026-11-05
+The first PR #65 implementation commit 0be3cfeaa52dcd639bf62f62bba13fb53825b66c failed regression due to a literal escaped newline in the test source (run 41949291912; 35 pass, 1 fail). The implementation was corrected in commit 2529b05efa4fd02883eb493a2683218a7be2e83f and re-tested at 95/95. Final candidate 154301128cc8824b76969b5da603807f5125b414 passed exact-head readiness. The failed attempt remains visible in Git history and the QA register.

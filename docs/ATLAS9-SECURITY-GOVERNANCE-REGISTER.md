@@ -98,3 +98,6 @@ The PR #52 Preview deployment metadata (run 41825376685) lists AI, ASSETS, CHAT_
 
 ## Correction — 2026-11-05: deployed voice rate-limit dependency
 The exact PR #52 source uses CHAT_RATE_LIMITER for the voice endpoint (key prefix voice:user:<subject>); the deployed Preview has this binding. The earlier assertion that VOICE_RATE_LIMITER was missing from the deployed PR #52 Preview was incorrect. PR #41's branch contains a separate VOICE_RATE_LIMITER variant, but it is not the deployed source. Voice runtime remains NOT TESTED. FILE_SCANNER is still absent; multimodal/file-scanner.js returns FILE_SCAN_UNAVAILABLE when the binding is missing, and file analysis fails closed.
+
+## Evidence integrity remediation chronology — 2026-11-05
+PR #65's first implementation commit failed CI because of a test-source formatting error and an over-escaped whitespace expression. The exact failure was recorded in run 41949291912 (35 passed, 1 failed). The follow-up commit 2529b05efa4fd02883eb493a2683218a7be2e83f corrected the parser and test source; 95/95 tests then passed in runs 41949338154 and 41949364570. The final candidate 154301128cc8824b76969b5da603807f5125b414 passed exact-head readiness in 41949989419 and 41949995940. No failed evidence has been removed from the audit history.

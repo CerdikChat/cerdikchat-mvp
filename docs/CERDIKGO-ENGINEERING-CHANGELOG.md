@@ -105,3 +105,8 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 - Exact PR #52 deployed source commit 9be9a8c3f6df416d66452c3d8c69c5112c853207 uses CHAT_RATE_LIMITER in multimodal/voice-assistance.js, with a voice:user key prefix. The Preview contains CHAT_RATE_LIMITER.
 - The earlier note that the deployed Preview lacked VOICE_RATE_LIMITER was incorrect for this source version; PR #41's branch uses a newer, different binding contract and is not the deployed code.
 - Voice runtime and Android acceptance remain NOT TESTED. The FILE_SCANNER binding remains absent and file analysis remains fail-closed.
+
+## 2026-11-05 — PR #65 intermediate CI failure and correction
+- Commit 0be3cfeaa52dcd639bf62f62bba13fb53825b66c failed run 41949291912: 35/36 tests passed; a literal escaped newline in tests/worker.test.mjs caused a SyntaxError at line 587. Code review also found an over-escaped whitespace regex in the evidence validator.
+- Follow-up commit 2529b05efa4fd02883eb493a2683218a7be2e83f corrected the source regex and test formatting. Runs 41949338154 and 41949364570 then passed 95/95.
+- Final PR #65 head 154301128cc8824b76969b5da603807f5125b414 passed readiness runs 41949989419 and 41949995940, 95/95. The failed intermediate commit remains in history and is not treated as verified.

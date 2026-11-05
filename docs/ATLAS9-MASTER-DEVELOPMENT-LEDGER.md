@@ -171,3 +171,16 @@ Readiness links:
 ## Correction — 2026-11-05: deployed Preview voice limiter binding
 
 A prior entry incorrectly stated that the PR #52 deployed Preview lacked VOICE_RATE_LIMITER and that voice transcription therefore fails closed. Inspection of the exact deployed source commit 9be9a8c3f6df416d66452c3d8c69c5112c853207 shows that its multimodal/voice-assistance.js uses CHAT_RATE_LIMITER with a separate voice:user key prefix. The Preview deployment metadata lists CHAT_RATE_LIMITER, so the required limiter binding is present for that deployed code path. A newer PR #41 branch uses a VOICE_RATE_LIMITER contract, but that is not the code version deployed by PR #52. Voice runtime and Android behavior remain NOT TESTED; no binding gap is claimed for the PR #52 version. The FILE_SCANNER gap remains confirmed.
+
+## Transparent CI correction — 2026-11-05: PR #65 intermediate candidate
+
+- Intermediate PR #65 branch commit 0be3cfeaa52dcd639bf62f62bba13fb53825b66c failed push regression run 41949291912. Result: 35 passed, 1 failed; Node reported SyntaxError at tests/worker.test.mjs:587 because a literal escaped newline was inserted between two assertions.
+- Review also found the evidence-normalization regex had been over-escaped. Both issues were corrected in follow-up commit 2529b05efa4fd02883eb493a2683218a7be2e83f before the PR was opened.
+- Corrected commit regression runs 41949338154 (push) and 41949364570 (pull_request) passed 95/95.
+- Final PR #65 candidate 154301128cc8824b76969b5da603807f5125b414 then passed exact-head legacy Auto Pilot runs 41949989419 (push) and 41949995940 (pull_request), 95/95; no failures.
+- The failed intermediate commit remains in branch history and is explicitly recorded here; it was not hidden or overwritten.
+
+## Final scorecard documentation candidate — 2026-11-05
+- Parent/current candidate before this append: 24d9520e973a343ff5b0b6aba57de16faac5b127 on atlas9/cerdikgo-100-percent-scorecard.
+- Exact-head CI on that parent: push regression 41950413546, push readiness 41950413823, PR regression 41950419748, PR readiness 41950419727, Phase 3 41950419849, Hybrid Gateway 41950419718 — all SUCCESS; 129/129 tests in each relevant suite.
+- This final append records the intermediate PR #65 failure transparently. The resulting documentation commit must pass its own exact-head gate before any Human Verification.

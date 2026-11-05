@@ -118,3 +118,6 @@ Next actions: start Human Verification only for the exact PR #65/#66 candidates 
 
 ## Correction — 2026-11-05: Preview voice dependency
 The primary PR #52 Preview uses multimodal/voice-assistance.js that calls CHAT_RATE_LIMITER, and CHAT_RATE_LIMITER is present in the deployment metadata. The earlier note that VOICE_RATE_LIMITER was missing and blocks this deployed voice route was incorrect; that binding belongs to a different PR #41 branch version. Voice runtime and Android acceptance remain NOT TESTED. FILE_SCANNER is still missing and document analysis remains fail-closed until a private scanner Service Binding is provisioned and verified.
+
+## Transparent remediation history — 2026-11-05
+PR #65 first implementation commit 0be3cfeaa52dcd639bf62f62bba13fb53825b66c failed run 41949291912 (35 pass, 1 fail) due to a literal escaped newline in tests/worker.test.mjs:587; an over-escaped evidence whitespace regex was also corrected. Commit 2529b05efa4fd02883eb493a2683218a7be2e83f passed 95/95 in runs 41949338154 and 41949364570. Final head 154301128cc8824b76969b5da603807f5125b414 passed readiness runs 41949989419 and 41949995940. Keep this failed intermediate commit in the audit trail.
