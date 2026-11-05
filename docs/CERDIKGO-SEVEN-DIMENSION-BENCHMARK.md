@@ -162,3 +162,13 @@ The 129/129 CI evidence previously recorded for PR #60 applies to head `ad3cbd61
 - PR #70 `0aae5032f2d6521255aefea172a27552ea3053a8`: legacy readiness `41953678319` passed 108/108; TypeScript NOT CONFIGURED.
 - PR #60 `465f8c5a6dc2f65c59537078fa98759c73299181`: four workflows passed 129/129, including strict TypeScript and Wrangler dry-run; tested base snapshot is two commits behind current base.
 - These results validate bounded CI tasks only. The 35-task manifest has not been executed against any model. All seven model scores remain NOT MEASURED.
+
+## Final scorecard candidate gate — 2026-11-05
+
+PR #60 exact head `53989231850f5f1628bf5b10203cc5e81ca9bb97` passed all four workflows:
+- Auto Pilot readiness `41953817591` — 129/129, zero failures: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817591
+- Regression/install `41953817553` — 129/129, zero failures: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817553
+- Phase 3 regression `41953817606` — 129/129, zero failures: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817606
+- Hybrid Gateway `41953817569` — 129/129, zero failures; Wrangler 4.153.0 dry-run exited normally: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817569
+
+Readiness log identifies PR head `53989231850f5f1628bf5b10203cc5e81ca9bb97` and base snapshot `de11d34257005ba72a621312230489a7d161ff53`. The current base branch is two commits ahead. Do not treat this as Preview/Android/Production acceptance or as a model capability score. All seven model scores remain NOT MEASURED.

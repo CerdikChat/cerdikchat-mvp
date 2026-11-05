@@ -151,3 +151,13 @@ The run tested PR base snapshot `9be9a8c3f6df416d66452c3d8c69c5112c853207`; the 
 - PR #70 archive head `0aae5032f2d6521255aefea172a27552ea3053a8` passed legacy gate `41953678319` (108/108). Tests use isolated/mocked D1 behavior; migration #0008 remains unapplied and no real archive transaction was executed.
 - Both legacy workflows report TypeScript NOT CONFIGURED. They do not deploy or mutate remote D1.
 - Human Verification remains pending current-base synchronization and explicit Preview migration approval.
+
+## Final scorecard candidate gate — 2026-11-05
+
+PR #60 exact head `53989231850f5f1628bf5b10203cc5e81ca9bb97` passed all four workflows:
+- Auto Pilot readiness `41953817591` — 129/129, zero failures: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817591
+- Regression/install `41953817553` — 129/129, zero failures: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817553
+- Phase 3 regression `41953817606` — 129/129, zero failures: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817606
+- Hybrid Gateway `41953817569` — 129/129, zero failures; Wrangler 4.153.0 dry-run exited normally: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817569
+
+Readiness log identifies PR head `53989231850f5f1628bf5b10203cc5e81ca9bb97` and base snapshot `de11d34257005ba72a621312230489a7d161ff53`. The current base branch is two commits ahead. Do not treat this as Preview/Android/Production acceptance or as a model capability score. All seven model scores remain NOT MEASURED.
