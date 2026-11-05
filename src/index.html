@@ -1546,7 +1546,9 @@
     function setNavigationOpen(open, restoreFocus = true) {
       appShell.classList.toggle("nav-open", open);
       navToggle.setAttribute("aria-expanded", String(open));
-      navToggle.setAttribute("aria-label", open ? "Tutup navigasi" : "Buka navigasi");
+      const navLabels = { id:["Tutup navigasi","Buka navigasi"], en:["Close navigation","Open navigation"], zh:["关闭导航","打开导航"] };
+      const navLanguage = window.CerdikGoUiLanguage || "id";
+      navToggle.setAttribute("aria-label", navLabels[navLanguage][open ? 0 : 1]);
       document.body.classList.toggle("nav-scroll-locked", open);
       if (open) {
         sideNavigation.querySelector("[data-prompt]")?.focus({ preventScroll: true });
@@ -2955,19 +2957,19 @@
           title:"CerdikGo · Innovation Workspace", menu:"☰ Menu", login:"Masuk / Akun", settings:"⚙ Pengaturan",
           language:"Bahasa / Language", help:"Pilih bahasa antarmuka CerdikGo", label:"Bahasa antarmuka",
           notice:"Preferensi bahasa disimpan pada perangkat ini.", send:"Kirim ↑", placeholder:"Tulis pesan Anda...",
-          welcome:"Selamat datang di CerdikGo", closeNav:"Tutup navigasi", openNav:"Buka navigasi"
+          welcome:"Selamat datang di CerdikGo", welcomeDescription:"Satu ruang untuk berpikir lebih jernih, mengolah informasi, dan mengubah ide menjadi langkah nyata.", sideTitle:"Tentang beta", sideNote:"CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting secara mandiri. Hindari memasukkan data pribadi atau rahasia.", languageButton:"Pilih bahasa", closeDialog:"Tutup pilihan bahasa", closeNav:"Tutup navigasi", openNav:"Buka navigasi"
         },
         en: {
           title:"CerdikGo · Innovation Workspace", menu:"☰ Menu", login:"Sign in / Account", settings:"⚙ Settings",
           language:"Language", help:"Choose your CerdikGo interface language", label:"Interface language",
           notice:"Your language preference is saved on this device.", send:"Send ↑", placeholder:"Write your message...",
-          welcome:"Welcome to CerdikGo", closeNav:"Close navigation", openNav:"Open navigation"
+          welcome:"Welcome to CerdikGo", welcomeDescription:"A workspace to think clearly, work with information, and turn ideas into practical steps.", sideTitle:"About the beta", sideNote:"CerdikChat is a prototype under testing. Independently verify important facts. Avoid entering personal or confidential data.", languageButton:"Choose language", closeDialog:"Close language selector", closeNav:"Close navigation", openNav:"Open navigation"
         },
         zh: {
           title:"CerdikGo · 智能工作空间", menu:"☰ 菜单", login:"登录 / 账户", settings:"⚙ 设置",
           language:"语言", help:"选择 CerdikGo 界面语言", label:"界面语言",
           notice:"语言偏好保存在此设备上。", send:"发送 ↑", placeholder:"输入您的消息...",
-          welcome:"欢迎使用 CerdikGo", closeNav:"关闭导航", openNav:"打开导航"
+          welcome:"欢迎使用 CerdikGo", welcomeDescription:"帮助您清晰思考、处理信息并将想法转化为实际行动的工作空间。", sideTitle:"关于测试版", sideNote:"CerdikChat 仍处于测试阶段。重要事实请独立核实。请勿输入个人或机密信息。", languageButton:"选择语言", closeDialog:"关闭语言选择", closeNav:"关闭导航", openNav:"打开导航"
         }
       };
       const setText = (selector, value) => {
@@ -2987,6 +2989,17 @@
         setText("#languageHelp", p.help);
         setText("#languageLabel", p.label);
         setText("#languageNotice", p.notice);
+        setText("#welcome .workspace-intro h1", p.welcome);
+        setText("#welcome .workspace-intro p", p.welcomeDescription);
+        setText("#sideNavigation h2", p.sideTitle);
+        setText(".side-note", p.sideNote);
+        const navBackdrop = document.querySelector("#navBackdrop");
+        if (navBackdrop) navBackdrop.setAttribute("aria-label", p.closeNav);
+        const languageOpen = document.querySelector("#languageOpen");
+        if (languageOpen) languageOpen.setAttribute("aria-label", p.languageButton);
+        const languageClose = document.querySelector("#languageClose");
+        if (languageClose) languageClose.setAttribute("aria-label", p.closeDialog);
+        window.CerdikGoUiLanguage = lang;
         setText("#send", p.send);
         const message = document.querySelector("#message");
         if (message) message.placeholder = p.placeholder;
