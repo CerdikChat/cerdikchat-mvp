@@ -131,3 +131,8 @@ The initial PR #63 candidate failed because a valid case-insensitive Bearer cred
 - PR #65 validates normalized verbatim source spans. It does not establish semantic entailment, claim relevance or research quality; human review remains necessary for high-impact claims.
 - PR #52's 76-hour access session policy remains a security review item. No evidence in this audit justifies increasing the session lifetime.
 - Status: no Production, OAuth/secrets, DNS, billing or remote database changes.
+
+
+## Exact-head governance correction — 2026-11-05
+
+The scorecard documentation branch received further append-only audit commits after the passing PR #60 checkpoint. The prior 129/129 CI result belongs to `ad3cbd61b6467675e71e8445f113635c45beb8c9` only. The later observed head `d8fd4d04b119f4e8a63bffa6624396ead9f723f3` has no exact-head workflow/status evidence and PR #60 reports mergeable=false (base divergence: 2 commits behind). No merge/rebase or privileged action was attempted. Treat current PR #60 integration as **BLOCKED** until the branch is reconciled and retested.
