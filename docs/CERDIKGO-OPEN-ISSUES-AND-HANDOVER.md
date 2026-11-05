@@ -479,3 +479,34 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Current main/Primary prompt still has legacy identity terminology. Exactly nine specialists are verified only in candidate PR branches; Optimus Prime remains coordinator, not a tenth agent. Gateway stays `plan_only`.
 - All seven capability scores remain NOT MEASURED; evidence-credit 0/100 per dimension until the complete reproducible benchmark samples are executed. No Gemini superiority/parity claim.
 - No merge, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, billing activation or other privileged operation. Human Verification NOT STARTED.
+
+ 
+## Open issues and handover continuation — 2026-11-05 20:58 WIB
+
+### P0 — resolve before any Primary Preview or Production claim
+- BLOCKED: Confirm environment-specific D1 binding for cerdikchat-mvp. Cloudflare script settings report DB -> cerdikchat-db while the deployment annotation says controlled field-test Preview. Do not run D1 queries, writes or migrations until the environment is confirmed and separately authorized.
+- BLOCKED: Live query-string redaction remains false on cerdikchat-mvp and cerdikgo-mcp-preview. PR #86 passes exact-head CI but is Draft and not deployed. Obtain review/approval before any deployment; then re-read settings and verify effective redaction.
+- VERIFIED candidate / NOT INTEGRATED: Primary prompt identity fix PR #85 passes exact-head Auto Pilot 107/107. Review and integrate through the governance dependency chain only after human approval; keep PR #69 history intact.
+- NOT TESTED: Production-equivalent authentication, Google OIDC allowlist/session/revocation, and Android sign-in. Review 76-hour session TTL. PR #44 regression is not a full runtime gate.
+- NOT TESTED: Query/body/header/application-log PII beyond query-string redaction. Redaction does not sanitize bodies, headers or application log strings.
+
+### P1 — backup, scanner, voice and document workflow
+- FAILED: Scheduled backup runs 41695574776 and 41890146458 stop at Gitleaks. PR #74 scan correction passes full-history scan, but a subsequent scheduled archive has not succeeded.
+- NOT TESTED: Google Drive off-site upload and isolated restore drill; define and measure RPO <=24h and RTO <=4h.
+- BLOCKED: Real ClamAV scanner binding and EICAR test; paid Containers access is not authorized. PR #76 is mock-contract only; PR #78 is design-only.
+- NOT TESTED: Voice recording/transcription on Android; Production VOICE_RATE_LIMITER binding is not evidenced.
+- NOT TESTED: WPS Office Android share/open for DOC/DOCX/XLS/XLSX/PPT/PPTX/PDF/ODF. PR #81 uses Web Share handoff and text paste; it is not binary Office parsing. Validation Gate PR #82 is session-level UI, not persistent audit.
+- NOT TESTED: Live Web Research retrieval and citation verification; structured document evidence checks are not a live web provider.
+
+### P2 — competitive benchmark and ecosystem
+- NOT TESTED: Full benchmark sample sets (100 reasoning, 50 coding, 50 research, 50 governance, 30 workflow, 90 specialist routing tasks, seven-day SLO/load/restore). The 35-task v0.1 manifest is structural only.
+- NOT TESTED: Workers AI live inference and latency. Model catalog lists @cf/google/gemma-4-26b-a4b-it, but remaining free quota was not confirmed; no inference call or billing action.
+- NOT TESTED: 100 concurrent users for 30 minutes, p95/p99, seven-day availability, edge error rate and restore objectives.
+- NOT VERIFIED: Dedicated CerdikGo Primary Worker. Cloudflare inventory has cerdikchat-mvp and cerdikgo-mcp-preview only; PR #84 is a no-deploy readiness configuration with no D1/rate-limit/OAuth/scanner resources.
+- NOT TESTED: Physical Android accessibility, keyboard, WPS app launch, voice and document flow.
+
+### Exact candidate evidence
+- PR #60: head 9d3e7d67e62acbd1eae1ea01b7d49d99243b1d6a; runs 42039500315, 42039500670, 42039500314, 42039500262 all SUCCESS; 129/129; branch remains 138 ahead / 2 behind and diverged.
+- PR #85: head efdc6390a5555aa5050ec8b797a7f4004bb4d202; run 42041437992 SUCCESS; 107/107; Draft, 4 ahead / 0 behind.
+- PR #86: head ebf500bd10738580bb7001a8fec772ad463000e4; runs 42041734344 and 42041734530 SUCCESS; 107/107; Draft, 4 ahead / 0 behind.
+- PR #74: head abeca194672349e799bcfdd9d8f9c9dc82675947; full-history Gitleaks run 41975715983 SUCCESS, 816 commits, no leaks; backup restore still NOT TESTED.
