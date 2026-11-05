@@ -4,12 +4,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="theme-color" content="#0b1220">
+  <meta name="theme-color" content="#e8f4ff">
   <meta name="description" content="CerdikGo — ruang kerja AI terpadu untuk riset, analisis, penulisan, dan inovasi.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="CerdikGo">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light">
   <link rel="manifest" href="/manifest.webmanifest">
   <title>CerdikGo — AI Innovation Workspace</title>
 
@@ -1259,7 +1259,10 @@
         </div>
       </header>
 
-      <section class="status-deck" aria-label="Status sistem">
+
+
+      <details class="workspace-tools-drawer main-workspace-tools" id="workspaceTools">
+        <summary class="workspace-tools-trigger"><span aria-hidden="true">＋</span><strong>Alat kerja</strong><small>Ketuk untuk membuka fitur</small></summary>\n      <section class="status-deck" aria-label="Status sistem">
         <div class="network-status" id="networkStatus" data-state="online" role="status" aria-live="polite">
           <span class="network-dot" aria-hidden="true"></span>
           <span id="networkStatusText">Memeriksa konektivitas jaringan…</span>
@@ -1277,9 +1280,6 @@
           </a>
         </div>
       </section>
-
-      <details class="workspace-tools-drawer main-workspace-tools" id="workspaceTools">
-        <summary class="workspace-tools-trigger"><span aria-hidden="true">＋</span><strong>Alat kerja</strong><small>Ketuk untuk membuka fitur</small></summary>
         <section class="workspace-tools" aria-label="Alat workspace">
         <div class="tool-heading"><strong>Alat kerja</strong><span>Fitur tambahan CerdikGo</span></div>
         <div class="tool-actions">
@@ -2699,7 +2699,7 @@
     };
     const savedTheme = localStorage.getItem("cerdikgo-theme");
     if (themeModes.includes(savedTheme)) document.documentElement.dataset.theme = savedTheme;
-    else document.documentElement.dataset.theme = "dark";
+    else document.documentElement.dataset.theme = "light-blue";
     function syncThemeButton() {
       const current = document.documentElement.dataset.theme || "dark";
       const index = themeModes.indexOf(current);
