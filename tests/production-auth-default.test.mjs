@@ -52,3 +52,31 @@ test("explicit false remains available for isolated development only", async () 
   const payload = await response.json();
   assert.equal(payload.required, false);
 });
+
+test("production chat remains blocked when GOOGLE_AUTH_REQUIRED is explicitly false", async () => {
+  let aiCalls = 0;
+  let rateLimitCalls = 0;
+  const response = await worker.fetch(
+    request("/api/chat", "POST", { message: "Do not process this request" }),
+    {
+      ENVIRONMENT: "production",
+      GOOGLE_AUTH_REQUIRED: "false",
+      CHAT_RATE_LIMITER: {
+        limit: async () => {
+          rateLimitCalls += 1;
+          return { success: true };
+        },
+      },
+      AI: {
+        run: async () => {
+          aiCalls += 1;
+          return { response: "must not run" };
+        },
+      },
+    }
+  );
+  assert.equal(response.status, 401);
+  assert.equal((await response.json()).error, "AUTH_REQUIRED");
+  assert.equal(rateLimitCalls, 0);
+  assert.equal(aiCalls, 0);
+});
