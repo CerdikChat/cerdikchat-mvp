@@ -172,3 +172,39 @@ PR #60 exact head `53989231850f5f1628bf5b10203cc5e81ca9bb97` passed all four wor
 - Hybrid Gateway `41953817569` — 129/129, zero failures; Wrangler 4.153.0 dry-run exited normally: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817569
 
 Readiness log identifies PR head `53989231850f5f1628bf5b10203cc5e81ca9bb97` and base snapshot `de11d34257005ba72a621312230489a7d161ff53`. The current base branch is two commits ahead. Do not treat this as Preview/Android/Production acceptance or as a model capability score. All seven model scores remain NOT MEASURED.
+
+
+## Current measured evidence snapshot — 2026-11-05 audit
+
+**Reviewed candidate:** `c38274f200e3762db242bd5642cc783a2dfa5de5` on `atlas9/cerdikgo-100-percent-scorecard`. The PR #60 base branch currently points to `637ff536011ed25fc598888f62f520b4cfdccd3c`; comparison is 69 commits ahead / 2 behind, so integration is **BLOCKED** pending safe synchronization and a new exact-head gate.
+
+| Competitive dimension | Evidence-credit score | Capability score | Current status |
+|---|---:|---|---|
+| General AI reasoning | 0/100 | NOT MEASURED | NOT TESTED — no 100-task inference run |
+| Coding & engineering | 0/100 | NOT MEASURED | CI evidence exists, but no 50-task model engineering benchmark |
+| Specialized research & analysis | 0/100 | NOT MEASURED | NOT TESTED — no 50-task source-grounded run; Live Web Research provider not configured |
+| Governance, audit & control | 0/100 | NOT MEASURED | PARTIALLY VERIFIED controls only; no 50-scenario benchmark |
+| Organizational workflow integration | 0/100 | NOT MEASURED | NOT TESTED — no 30 end-to-end workflow run |
+| Product identity & specialization | 0/100 | NOT MEASURED | Gateway registry contract exists; Primary Preview identity parity is FAILED until canonical prompt is integrated |
+| Ecosystem maturity & scale | 0/100 | NOT MEASURED | CI/preflight evidence only; Preview SLO, Android, edge load and restore are NOT TESTED |
+
+**Scoring clarification:** 0/100 is the evidence-credit score because no competitive benchmark task has been executed and scored. It is not a measured model-quality result and does not mean the model has zero capability. The capability score remains **NOT MEASURED** for all seven dimensions. The 35-task v0.1 file is a structural smoke manifest only; it is not a statistically adequate evaluation and has not been run against a model.
+
+### Verified engineering evidence — separate from competitive scores
+
+- PR #60 exact head `c38274f200e3762db242bd5642cc783a2dfa5de5`: Auto Pilot `41954020365`, regression/install `41954020357`, Phase 3 `41954020411`, Hybrid Gateway `41954020566`; all four SUCCESS, 129/129 tests, zero failures. The readiness log confirms `npm run doctor`, strict TypeScript, full regression, and Wrangler dry-run. Base snapshot in the run was `de11d34257005ba72a621312230489a7d161ff53`.
+- PR #73 exact head `98423d8aa14317052511cc69e98a8341713a3381`: Auto Pilot `41974840542` SUCCESS, 104/104 tests; push regression `41974833367` SUCCESS. Wrangler 4.153.0 dry-run and workflow safety scan passed. TypeScript is NOT CONFIGURED on this JavaScript branch.
+- PR #70 exact head `0aae5032f2d6521255aefea172a27552ea3053a8`: Auto Pilot `41953678319` SUCCESS, 108/108 tests. This uses mocked/isolated D1 behavior; migration `0008_feature_request_archive.sql` remains unapplied.
+- PR #52 exact head `679a6719fcfa1492f984c094adbcaa1dad2ddff3`: regression `41973472009`, Auto Pilot `41973478257`, and isolated Preview workflow `41973472047` all SUCCESS. This is CI/Preview deployment evidence, not human runtime or Android acceptance.
+
+### Architecture and runtime boundaries
+
+- Current scorecard-branch model router is free-only Workers AI, defaulting to `@cf/google/gemma-4-26b-a4b-it`; DeepSeek and GitHub Copilot are disabled and no fallback is configured. No live inference or model comparison has been run.
+- The gateway declares exactly ATLAS-01 through ATLAS-09; Optimus Prime is coordinator outside the nine seats. Every registry entry is read-only, has no tools, and has execution disabled. Gateway output is `plan_only`; no provider calls, external fetches, or database writes occur.
+- The primary PR #52 Worker prompt still contains the legacy seven-role labels (including TITAN, GENESIS and TERRA) rather than the canonical nine IDs. PR #69/PR #62 identity corrections are not integrated into the Primary Preview. Product identity parity is therefore FAILED for that Preview.
+- Document analysis requires the private `FILE_SCANNER` Service Binding and fails closed when it is absent. The PR #52 Preview metadata does not include that binding. Voice code uses `CHAT_RATE_LIMITER`; its runtime and Android acceptance remain NOT TESTED.
+- Live Web Research is not implemented/configured. PR #34 is an architecture foundation; PR #35 is single-file/stateless document research, not persistent RAG or web search.
+- The 99,990-request script is synthetic in-process `worker.fetch()` testing, not Cloudflare edge load. No 100-concurrent-user/30-minute edge test or seven-day SLO evidence exists.
+- Scheduled backup run `41890146458` failed at Gitleaks before archive creation. PR #74 is correcting one reviewed localStorage false positive; backup restore remains NOT TESTED.
+
+The 100% thresholds and minimum sample sizes in Section 2 remain unchanged. No threshold was lowered and no score was inferred from feature presence or green CI.

@@ -191,3 +191,26 @@ PR #60 exact head `53989231850f5f1628bf5b10203cc5e81ca9bb97` passed all four wor
 - Hybrid Gateway `41953817569` — 129/129, zero failures; Wrangler 4.153.0 dry-run exited normally: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817569
 
 Readiness log identifies PR head `53989231850f5f1628bf5b10203cc5e81ca9bb97` and base snapshot `de11d34257005ba72a621312230489a7d161ff53`. The current base branch is two commits ahead. Do not treat this as Preview/Android/Production acceptance or as a model capability score. All seven model scores remain NOT MEASURED.
+
+
+## 2026-11-05 — Current handover and prioritized next actions
+
+### Exact candidates
+- Scorecard PR #60: `c38274f200e3762db242bd5642cc783a2dfa5de5`, branch `atlas9/cerdikgo-100-percent-scorecard`; 4/4 CI workflows passed 129/129 (runs `41954020365`, `41954020357`, `41954020411`, `41954020566`). Current base `637ff536011ed25fc598888f62f520b4cfdccd3c` is 2 commits ahead of tested base; branch integration remains BLOCKED.
+- Primary PR #52: `679a6719fcfa1492f984c094adbcaa1dad2ddff3`; regression, Auto Pilot and Preview workflows passed (`41973472009`, `41973478257`, `41973472047`). The Preview workflow ran; no remote D1 migration or human acceptance.
+- PR #73 privacy fix: `98423d8aa14317052511cc69e98a8341713a3381`; Auto Pilot `41974840542` and push regression `41974833367` passed, 104/104. Draft only.
+- PR #74 Gitleaks correction: current head `61735292750540afe2bbfb61fb69b252dee3fb6f`; push Gitleaks `41975248939` passed; PR-event Gitleaks `41975255549` and regression `41975255582` were IN_PROGRESS when this entry was written. Recheck before changing status.
+- PR #70 archive controls: `0aae5032f2d6521255aefea172a27552ea3053a8`; Auto Pilot `41953678319` passed 108/108. Base drift is 3 commits; migration #0008 unapplied.
+
+### Priority order
+1. Confirm PR #74's latest PR-event Gitleaks and regression runs. Then run the scheduled/manual backup only through its approved workflow; do not upload to Drive unless separately authorized. A restore drill is still required.
+2. Reconcile PR #60 against its current base without losing append-only audit history, then rerun all four exact-head workflows.
+3. Integrate PR #73 only after the Primary base is synchronized; preserve its PII-redaction regression test and rerun exact-head readiness.
+4. Bring the canonical nine-role identity prompt into Primary; verify exactly nine IDs, Optimus Prime outside the roster, and truthful single-model wording. Do not claim independent agents.
+5. Provision a real private `FILE_SCANNER` binding and verify fail-closed document analysis in isolated Preview; no scanner bypass.
+6. Run voice Android Chrome acceptance; voice runtime remains NOT TESTED even though its code and rate-limit binding are present.
+7. Implement/approve a Live Web Research provider and SSRF-safe fetch adapter before claiming live research.
+8. Complete the 100/50/50/50/30/90 task benchmarks, 7-day SLO, 100-concurrent-user edge test, backup restore (RPO ≤24h/RTO ≤4h), and Android/accessibility acceptance.
+9. Obtain separate scoped approval before any Preview D1 migration #0007/#0008. No Production or privileged action.
+
+Human Verification has not started. CI readiness, Preview runtime, Android acceptance and Production readiness remain separate states.

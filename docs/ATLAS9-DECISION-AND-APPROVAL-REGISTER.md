@@ -110,3 +110,15 @@ PR #60 exact head `53989231850f5f1628bf5b10203cc5e81ca9bb97` passed all four wor
 - Hybrid Gateway `41953817569` — 129/129, zero failures; Wrangler 4.153.0 dry-run exited normally: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817569
 
 Readiness log identifies PR head `53989231850f5f1628bf5b10203cc5e81ca9bb97` and base snapshot `de11d34257005ba72a621312230489a7d161ff53`. The current base branch is two commits ahead. Do not treat this as Preview/Android/Production acceptance or as a model capability score. All seven model scores remain NOT MEASURED.
+
+
+## Decision checkpoint — 2026-11-05
+
+1. **Competitive target:** retain 100% VERIFIED as an acceptance target only. All seven capability scores remain NOT MEASURED; no Gemini superiority/parity claim is authorized.
+2. **Specialist identity:** exactly ATLAS-01…ATLAS-09. Optimus Prime remains coordinator outside the nine seats. Legacy labels TITAN, GENESIS and TERRA are not additional specialists.
+3. **Gateway:** retain `plan_only`; no agent execution, external calls, provider invocation or database writes.
+4. **Branch integration:** PR #60 is 2 commits behind its current base; PR #70 is 3 commits behind Primary governance. No rebase, merge or force update without a safe reconciliation and exact-head retest.
+5. **Privacy fix:** PR #73 may proceed as a Draft review candidate. Its exact head `98423d8aa14317052511cc69e98a8341713a3381` passed Auto Pilot `41974840542` (104/104). This is not authorization to deploy or begin human testing.
+6. **Backup scan fix:** PR #74 remains Draft until both push and PR-event Gitleaks scans pass on the latest exact head. The allowlist must continue to require both exact path and exact literal; no broad rule or path suppression is accepted.
+7. **Human Verification:** not started. Auto Pilot must pass for the exact candidate first; Preview runtime, Android acceptance and Production readiness remain separate gates.
+8. **Privileged operations:** no merge, Production deployment, remote D1 write/migration, OAuth/secrets/DNS change, billing activation, permanent deletion, or Google Drive upload is authorized by this audit.

@@ -307,3 +307,23 @@ PR #60 exact head `53989231850f5f1628bf5b10203cc5e81ca9bb97` passed all four wor
 - Hybrid Gateway `41953817569` — 129/129, zero failures; Wrangler 4.153.0 dry-run exited normally: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817569
 
 Readiness log identifies PR head `53989231850f5f1628bf5b10203cc5e81ca9bb97` and base snapshot `de11d34257005ba72a621312230489a7d161ff53`. The current base branch is two commits ahead. Do not treat this as Preview/Android/Production acceptance or as a model capability score. All seven model scores remain NOT MEASURED.
+
+
+## Exact-head QA checkpoint — 2026-11-05
+
+| Candidate | Exact head | Workflow evidence | Result / limitation |
+|---|---|---|---|
+| PR #60 scorecard | `c38274f200e3762db242bd5642cc783a2dfa5de5` | Auto Pilot `41954020365`; regression/install `41954020357`; Phase 3 `41954020411`; Hybrid Gateway `41954020566` | 4/4 SUCCESS; 129/129; strict TypeScript, `npm run doctor`, regression and Wrangler dry-run passed. Base snapshot `de11d34257005ba72a621312230489a7d161ff53`; current base is 2 commits ahead. |
+| PR #52 Primary governance | `679a6719fcfa1492f984c094adbcaa1dad2ddff3` | Regression `41973472009`; Auto Pilot `41973478257`; Preview `41973472047` | 3/3 SUCCESS. Preview was created by the existing branch workflow; no D1 migration. This is not human/Android acceptance. |
+| PR #70 archive controls | `0aae5032f2d6521255aefea172a27552ea3053a8` | Auto Pilot `41953678319` | SUCCESS; 108/108, install/preflight/dry-run/safety scan passed. TypeScript NOT CONFIGURED; D1 behavior mocked; migration #0008 unapplied. Historical failure `41952077304` belongs to earlier SHA `a04fc15985929848a7a5144c7e16a86456179ad3`, not this exact head. |
+| PR #71 context bridge | `4321b744addd7bef2260b87ecf94513e45ca5fe9` | Auto Pilot `41957105622` | SUCCESS; dry-run only. No automatic external tool execution evidenced. |
+| PR #73 auth log redaction | `98423d8aa14317052511cc69e98a8341713a3381` | Auto Pilot `41974840542`; push regression `41974833367` | SUCCESS; 104/104; dry-run and workflow safety scan passed. TypeScript NOT CONFIGURED; no Preview runtime test. |
+| PR #74 Gitleaks correction | `61735292750540afe2bbfb61fb69b252dee3fb6f` | Push Gitleaks `41975248939`; PR Gitleaks `41975255549`; PR regression `41975255582` | Push Gitleaks SUCCESS. PR Gitleaks and regression were IN_PROGRESS at entry time; refresh before claiming exact PR readiness. |
+
+### Failure and remediation chronology
+- PR #70 regression run `41952077304` failed on earlier SHA `a04fc15985929848a7a5144c7e16a86456179ad3`; log shows one stale archive-button text assertion. Later exact head `0aae5032f2d6521255aefea172a27552ea3053a8` passed full `npm test` through Auto Pilot.
+- Main scheduled backup run `41890146458` failed at Gitleaks 8.24.3 before archive creation. The one finding was a generic-api-key false positive on the reviewed localStorage namespace; no credential was confirmed.
+- PR #74 first candidate `5dc1eee11a65669ef3d980d8894c231755e92403` had a failing workflow assertion due to a double-escaped path literal; run `41975066503` failed before Gitleaks execution. Follow-up `f2bdbdaea78cba6a4eb2a4ea5545bf060d059147` fixed the assertion; push scan `41975164869` passed. PR scan `41975170524` then failed with HTTP 403 because the workflow token lacked `pull-requests: read`; permission was added in `61735292750540afe2bbfb61fb69b252dee3fb6f`.
+- Do not delete or rewrite failed-run history. Current PR #74 PR-event results must be checked on its latest SHA.
+
+All run links are under `https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/<run-id>`. CI evidence is not Preview runtime, Android acceptance, Production readiness, or competitive model scoring.

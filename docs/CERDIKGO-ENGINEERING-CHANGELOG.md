@@ -167,3 +167,23 @@ PR #60 exact head `53989231850f5f1628bf5b10203cc5e81ca9bb97` passed all four wor
 - Hybrid Gateway `41953817569` — 129/129, zero failures; Wrangler 4.153.0 dry-run exited normally: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817569
 
 Readiness log identifies PR head `53989231850f5f1628bf5b10203cc5e81ca9bb97` and base snapshot `de11d34257005ba72a621312230489a7d161ff53`. The current base branch is two commits ahead. Do not treat this as Preview/Android/Production acceptance or as a model capability score. All seven model scores remain NOT MEASURED.
+
+
+## 2026-11-05 — Auto Pilot security and backup scan corrections
+
+### PR #73 — auth-log data minimization
+- Commit: `98423d8aa14317052511cc69e98a8341713a3381`.
+- Branch: `atlas9/cerdikgo-auth-log-redaction-primary-20261105`; stacked on Primary governance head `679a6719fcfa1492f984c094adbcaa1dad2ddff3`.
+- Changed: `auth/google-auth.js`, `tests/worker.test.mjs`.
+- The access-request event log now emits a fixed event code only; request ID, email, Google subject and ID token are excluded from the log. User-facing response fields remain unchanged.
+- Validation: Auto Pilot `41974840542` and regression push `41974833367` passed; 104/104. Wrangler dry-run passed; no deployment. TypeScript is NOT CONFIGURED on this legacy JS branch.
+
+### PR #74 — backup secret-scan false-positive correction
+- Current commit: `61735292750540afe2bbfb61fb69b252dee3fb6f`.
+- Branch: `atlas9/backup-gitleaks-allowlist-20261105`, based on main `bc6545d6d19fd4b749d0b65fefba3d74775e0221`.
+- Changed: `.gitleaks.toml`, `.github/workflows/gitleaks-full-history.yml`, `docs/BACKUP-SECURITY-SCAN-CORRECTION.md`.
+- The allowlist is limited to the exact Prompt Intelligence file and exact localStorage namespace, with AND matching. Default Gitleaks rules remain enabled.
+- Push scan `41975248939` passed. PR scan `41975255549` and regression `41975255582` were pending at the time of this entry. Earlier failed runs `41975066503`, `41975061188`, and `41975170524` remain part of the audit history; causes were corrected test-path escaping and missing PR-read permission, not a confirmed credential leak.
+- The scheduled backup remains FAILED at run `41890146458` until a subsequent backup run completes successfully and a restore drill is performed.
+
+No merge, deployment, remote database mutation, secret rotation, OAuth/DNS change, billing activation or Drive upload was performed.

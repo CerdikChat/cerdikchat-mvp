@@ -161,3 +161,30 @@ PR #60 exact head `53989231850f5f1628bf5b10203cc5e81ca9bb97` passed all four wor
 - Hybrid Gateway `41953817569` — 129/129, zero failures; Wrangler 4.153.0 dry-run exited normally: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41953817569
 
 Readiness log identifies PR head `53989231850f5f1628bf5b10203cc5e81ca9bb97` and base snapshot `de11d34257005ba72a621312230489a7d161ff53`. The current base branch is two commits ahead. Do not treat this as Preview/Android/Production acceptance or as a model capability score. All seven model scores remain NOT MEASURED.
+
+
+## 2026-11-05 — Current security/governance findings
+
+### Authentication and log minimization
+- Primary governance head `679a6719fcfa1492f984c094adbcaa1dad2ddff3` still logs the access-request ID and requester email in `auth/google-auth.js`.
+- PR #73 candidate `98423d8aa14317052511cc69e98a8341713a3381` replaces that log payload with a fixed event code and tests that email, Google subject and ID token do not appear in logs. Auto Pilot `41974840542` passed 104/104. The fix is Draft and not deployed/integrated.
+- Session lifetime remains `76 * 60 * 60` seconds (76 hours). Keep this as a review item; no extension was made.
+- Existing code uses server-side session checks, same-origin validation, CSRF double-submit checks, and rate limiting. CI does not replace a full 50-scenario authorization/privacy audit.
+
+### Registry and execution boundary
+- Scorecard gateway registry contains exactly ATLAS-01…ATLAS-09; each is read-only, has no tools, and has execution disabled. Optimus Prime is coordinator, not a tenth specialist.
+- Gateway is `plan_only`; it does not invoke model providers, fetch externally or write D1. Do not enable execution without a separate scoped approval and a tested authorization boundary.
+- Primary PR #52 Worker prompt still contains legacy role labels. Canonical identity correction is not integrated into Primary Preview; identity parity remains FAILED there.
+
+### File, voice and research boundaries
+- `FILE_SCANNER` is a required private Service Binding to a ClamAV-backed scanner. Missing binding returns `FILE_SCAN_UNAVAILABLE`; the Primary Preview does not list this binding. Do not bypass or fabricate a clean verdict.
+- Voice route uses `CHAT_RATE_LIMITER`; its code path is present but voice runtime and Android Chrome acceptance remain NOT TESTED.
+- Live Web Research has no configured provider. PR #34 is architecture only; PR #35 is single-file/stateless document research, not open-web retrieval or persistent RAG.
+
+### Backup and data protection
+- Scheduled backup run `41890146458` failed at Gitleaks before bundle/ZIP creation and artifact publication. Source review identified the finding as the localStorage namespace `cerdikgo-prompt-vault-v1`, not a credential.
+- PR #74 adds a narrow AND-matched allowlist for that exact path and literal and a full-history scan. Push scan `41975248939` passed; PR-event run `41975255549` and regression `41975255582` were still running at the time of this entry.
+- No backup restore drill exists. PR #53 backup reconciliation is not equivalent to restore evidence.
+- Migrations #0007 and #0008 remain unapplied; no remote D1 write/migration was performed.
+
+No Production, OAuth/secrets, DNS, billing or privileged gateway action occurred.
