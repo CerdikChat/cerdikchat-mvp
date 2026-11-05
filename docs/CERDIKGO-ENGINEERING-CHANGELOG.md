@@ -121,3 +121,15 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 - Test “MCP accepts bearer scheme case-insensitively and rate-limits the credential fingerprint” returned 401 because worker.js used an over-escaped whitespace regex in the Bearer parser.
 - Commit 0df022076c6bcd1ce19620470943defacce27fba fixed the parser; commit 4c5276f2ff5307949f912451d554d9be879223b6 added malformed-token coverage. Final exact-head runs 41945833238, 41945833224, 41945833375, 41945833236 all passed; 139/139 tests.
 - This failure/correction sequence is retained in the ledger; the initial failed candidate is not counted as verified.
+
+
+## 2026-11-05 — Admin archive regression coverage and legacy CI foundation
+
+- PR #70 branch `atlas9/admin-feature-request-archive` received six additional tests in `tests/admin-portal.test.mjs`, latest commit `d546c121c9d95f6568eb4c7d728655d72fd2fcd1`.
+- Added test coverage for: two-statement archive/audit batch, already-archived or missing request, unconfirmed audit insert, active-versus-archived SQL visibility, super-admin-only UI action/filter reload, and invalid request ID/wrong method.
+- The endpoint implementation remains a soft archive: super_admin authorization, same-origin and CSRF checks, UUID validation, bounded request body, D1 batch, and traceable audit event. Data is retained; this is not a permanent DELETE.
+- PR #70 exact-head workflow list and combined status are empty at audit time. Test additions are **NOT TESTED by CI** and are not marked VERIFIED. PR remains draft/open; mergeable=true.
+- Added `.github/workflows/autopilot-readiness-legacy.yml` to PR #52's admin governance branch at commit `4114cfa5ca082dfb8736d9d7aa68bb297087d8c0`. It runs dependency install, repository preflight, `npm test`, Wrangler `--dry-run`, and a workflow safety scan; it explicitly reports TypeScript as NOT CONFIGURED. No deploy or remote D1 operation is included.
+- PR #52 exact-head combined status remained empty and GitHub reported mergeable=false at the audit checkpoint. The workflow addition is therefore **PLANNED/BLOCKED**, not a passing gate.
+- Existing exact-head CI verified in this review: PR #60 `ad3cbd61b6467675e71e8445f113635c45beb8c9` (129/129; runs 41950862476, 41950862498, 41950862526, 41950862654); PR #68 (104/104; 41951461346); PR #69 (102/102; 41951721640); PR #63 (139/139; four workflows); PR #65 (95/95); PR #66 (102/102 plus Wrangler dry-run).
+- No merge, Preview deployment, Production deployment, remote D1 migration/write, secrets/OAuth/DNS mutation, billing activation, or data deletion was performed.
