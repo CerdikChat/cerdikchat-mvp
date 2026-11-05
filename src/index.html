@@ -2897,7 +2897,7 @@
       input.dispatchEvent(new Event("input", { bubbles: true }));
       voiceReview.hidden = true;
       voiceState.textContent = "Transkripsi dimasukkan ke pesan. Tinjau kembali sebelum mengirim.";
-      input.focus();
+      // Keep the Android keyboard closed; the user can tap the message field to edit.
     });
     voiceSendToAI.addEventListener("click", () => {
       const transcript = voiceTranscript.value.trim();
