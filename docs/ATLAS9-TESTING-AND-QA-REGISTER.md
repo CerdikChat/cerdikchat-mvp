@@ -203,3 +203,36 @@ Correction runs: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949
 | Same final head | 41945833236 | VERIFIED | ATLAS-9 Phase 3 |
 
 Failure links: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41934869172 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41934869329 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41934869387 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41934869843 .
+
+
+## Exact-head audit checkpoint — 2026-11-05
+
+| PR | Exact head SHA | Workflow evidence | Result | Scope / limitation |
+|---|---|---|---|---|
+| #60 | `ad3cbd61b6467675e71e8445f113635c45beb8c9` | 41950862476, 41950862498, 41950862526, 41950862654 | VERIFIED | 129/129 tests; install/regression, readiness, Phase 3, Hybrid Gateway; Wrangler dry-run only |
+| #68 | `973ea276a93bc8d47419d11b29be3259190cbe97` | 41951461346 | VERIFIED | 104/104 tests; legacy readiness |
+| #69 | `cb5264803ca3efad03a8d168592c0b02d395354e` | 41951721640 | VERIFIED | 102/102 tests; legacy readiness |
+| #62 | `1fa32453e9569b136ec890b7c32562dda510612f` | 41921781529, 41921781474, 41921781561, 41921781630 | VERIFIED | Four exact-head workflows; canonical nine-role identity contract only in candidate |
+| #63 | `4c5276f2ff5307949f912451d554d9be879223b6` | 41945833238, 41945833224, 41945833375, 41945833236 | VERIFIED | Four workflows; readiness log 139/139; MCP remains opt-in |
+| #64 | `929e5bcf9d2be683c94b9cd882209ce194fc9119` | 41944458563, 41944458347, 41944458558, 41944458354 | VERIFIED | Four workflows; prior QA log records 134/134; not deployed |
+| #65 | `154301128cc8824b76969b5da603807f5125b414` | 41949995940, 41949995918 | VERIFIED | 95/95; source-span validation is not semantic entailment |
+| #66 | `721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1` | 41950007358, 41950000882, 41950007360 | VERIFIED | 102/102; Wrangler dry-run; redaction config not deployed |
+| #61 | `17760f85b01e0db2e7a09679324d55adfe1fcf95` | 41917776597, 41917776653 | VERIFIED | 99/99 security/regression tests; no PR readiness run recorded |
+| #70 | `d546c121c9d95f6568eb4c7d728655d72fd2fcd1` | None returned; combined status empty | BLOCKED | Six new archive tests not yet run by CI |
+| #52 | `4114cfa5ca082dfb8736d9d7aa68bb297087d8c0` | None returned; combined status empty | BLOCKED | Legacy readiness workflow added; no exact-head run/status; GitHub reports mergeable=false |
+
+### Test evidence detail
+
+- PR #60 readiness log records `# tests 129`, `# pass 129`, `# fail 0`; Hybrid Gateway log also records 129/129 and Wrangler 4.153.0 dry-run exits normally.
+- PR #68 legacy readiness log records 104/104, zero failures.
+- PR #69 legacy readiness log records 102/102, zero failures.
+- PR #61 security and regression logs record 99/99, zero failures; this is push CI evidence, not a complete PR Auto Pilot gate.
+- PR #70 latest commit adds six archive test cases but no exact-head workflow result exists. Do not start Human Verification for PR #70.
+- PR #52 workflow file commit has no reported workflow result; its mergeability is unresolved. Do not use its new workflow as proof until a run on the exact SHA is visible.
+
+### Competitive benchmark QA
+
+- Manifest `benchmarks/seven-dimension/tasks.v0.1.json`: 35 fixed smoke tasks, five per dimension. The manifest-structure test validates count, uniqueness and rubric presence only.
+- Current measured score: **NOT MEASURED for all seven dimensions**. No task was executed against Workers AI or Gemini in this audit.
+- CI results above are software engineering evidence and earn no AI capability benchmark points.
+- Human Verification, Preview runtime acceptance, Android acceptance, backup restore, live web research and Production readiness are separate gates; they are not implied by green CI.
