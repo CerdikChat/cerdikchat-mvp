@@ -45,6 +45,7 @@
   const $ = id => dialog.querySelector("#"+id);
   let selected = null;
   function status(message){$("wbStatus").textContent=message;}
+  function gate(id,state,reason){window.CerdikGoValidationGate?.report(id,state,reason);}
   launch.addEventListener("click",()=>dialog.showModal());
   dialog.querySelector("[data-close]").addEventListener("click",()=>dialog.close());
   dialog.addEventListener("click",e=>{if(e.target===dialog)dialog.close();});
@@ -83,8 +84,8 @@
       const payload=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(payload.error||"HTTP_"+response.status);
       const answer=document.createElement("pre");answer.style.cssText="white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;border:1px solid #31516d;border-radius:10px;background:#071426;color:#eef7ff";
-      answer.textContent=typeof payload.reply==="string"?payload.reply:"Respons AI kosong."; $("wbAnswer").append(answer);status("Analisis selesai. Periksa hasil sebelum digunakan.");
-    }catch(error){status("Analisis gagal: "+String(error.message||"AI_REQUEST_FAILED")+". File asli tidak diubah.");}
+      answer.textContent=typeof payload.reply==="string"?payload.reply:"Respons AI kosong."; $("wbAnswer").append(answer);status("Analisis selesai. Periksa hasil sebelum digunakan.");gate("ai-core","accepted","Endpoint /api/chat mengembalikan HTTP sukses untuk analisis teks yang ditempel pada sesi ini.");
+    }catch(error){const reason=String(error.message||"AI_REQUEST_FAILED");status("Analisis gagal: "+reason+". File asli tidak diubah.");gate("ai-core","rejected","Permintaan analisis teks gagal: "+reason+". Periksa sesi, koneksi, kuota, dan status layanan AI.");}
     finally{button.disabled=false;}
   });
 })();
