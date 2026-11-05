@@ -33,6 +33,7 @@ export async function adminFeatureRequests(request,env){
   }
 }
 
+// Soft archive: preserve proposal content and audit history; never hard-delete here.
 export async function archiveFeatureRequest(request,env){
   if(request.method!=="POST")return json({error:"METHOD_NOT_ALLOWED"},405);
   const access=await requireAdmin(request,env,"super_admin");
