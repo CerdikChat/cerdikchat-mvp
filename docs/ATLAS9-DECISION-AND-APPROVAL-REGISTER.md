@@ -324,3 +324,16 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 
 ### Explicit non-approvals
 No approval was granted or exercised for PR merge, Production deployment, remote D1 read/write/migration, OAuth or secret changes, DNS changes, billing activation, live model spend, or autonomous specialist execution. Human Verification was NOT STARTED.
+
+ 
+## Decision continuation — 2026-11-05 21:12 WIB
+
+1. VERIFIED: PR #84 uses the CerdikGo-specific future Worker name cerdikgo-primary-preview; no such script exists in Cloudflare inventory. This is a no-deploy configuration candidate only.
+2. VERIFIED: PR #87 adds fail-closed authentication for Production and D1-backed Primary requests. It is Draft and stacked on PR #85; no merge or deployment.
+3. PLANNED: Review the 76-hour session TTL and RBAC role matrix separately. No TTL change, session revocation or OAuth modification was approved.
+4. BLOCKED: Treat live Preview D1 isolation as unresolved while cerdikchat-mvp script settings show DB -> cerdikchat-db. Do not query/write/migrate D1.
+5. BLOCKED: Live query-string redaction remains false until PR #86 is reviewed and a separate deployment is authorized. The MCP Preview script needs its own config remediation.
+6. VERIFIED: Keep exactly nine specialist profiles, Optimus Prime as coordinator, gateway read_only/plan_only, no agent execution.
+7. NOT TESTED: No Workers AI inference or Gemini comparison; remaining free quota was not confirmed. Do not activate billing.
+
+No merge, Production/Preview deployment, D1 operation, OAuth/secret/DNS change, billing activation or Human Verification was authorized or performed.
