@@ -441,3 +441,24 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Scheduled backup runs 41695574776 and 41890146458 remain FAILED at Gitleaks; PR #74 scan correction passes full-history scan 41975715983 (816 commits, no leaks), but scheduled archive/Drive/restore remain NOT TESTED.
 - Real ClamAV remains BLOCKED by paid Containers access; PR #76 mocks only the service-binding contract.
 - No application runtime, Android acceptance, live inference, backup restore, edge load or Production deployment was performed.
+
+ 
+## 2026-11-05 — Additional Primary hardening
+
+### VERIFIED — Worker naming correction (PR #84)
+- Candidate head 2d37dea6fa190d37b887d648ede7d943f8024edd.
+- Updated wrangler.cerdikgo.toml to name the isolated target cerdikgo-primary-preview.
+- Added a regression assertion for the dedicated CerdikGo name and product ID.
+- Changed files: wrangler.cerdikgo.toml; tests/cerdikgo-worker-config.test.mjs; docs/CERDIKGO_WORKER_ISOLATION_READINESS.md.
+- Auto Pilot 42042384546 and Worker readiness 42042384481: SUCCESS, 98/98; dry-run confirmed GOOGLE_AUTH_REQUIRED=true.
+- No actual Worker with that name exists in Cloudflare inventory; no deployment or provisioning. Draft PR #84.
+
+### VERIFIED — Production/D1 authentication fail-closed (PR #87)
+- Candidate head 5ef76571da95398373ad4f91620971b7b03fe45a, branch atlas9/cerdikgo-primary-auth-fail-closed-20261105, stacked on PR #85 identity head efdc6390a5555aa5050ec8b797a7f4004bb4d202.
+- Changed files: worker.js; auth/google-auth.js; tests/production-auth-default.test.mjs; tests/production-d1-auth-default.test.mjs; docs/PRIMARY-AUTH-FAIL-CLOSED.md.
+- Production or D1-backed requests now require a session even if GOOGLE_AUTH_REQUIRED is absent or false; /api/auth/config reports the same requirement.
+- Auto Pilot 42042622138 SUCCESS: 114/114; preflight, Wrangler dry-run and workflow safety PASS. TypeScript NOT CONFIGURED.
+- Draft PR #87; no live auth setting or session was changed.
+
+### Outstanding
+The 76-hour session TTL remains unchanged. Live authentication, Google OAuth, RBAC role matrix and Android sign-in still require isolated Preview runtime acceptance. No merge or deployment.
