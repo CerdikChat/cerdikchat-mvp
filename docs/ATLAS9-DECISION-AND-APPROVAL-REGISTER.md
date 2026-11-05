@@ -380,3 +380,16 @@ No merge, Production/Preview deployment, D1 operation, OAuth/secret/DNS change, 
 - PR #91 is Draft and adds a regression lock only; source correction is already on its base branch `41d7f30d7a1bedbd763504970ad059050f9f2188`.
 - Exact candidate `023db6f9b8f1b8078cdf6e7d154316e78b774d5e` passed regression 91/91 and PR-triggered Legacy Auto Pilot `42079473235`.
 - Decision: no Human Verification until the gate passes; it has passed for this exact head, but Human Verification remains NOT STARTED pending separate manual action. No merge/deploy authorized.
+
+
+## 2026-11-06 — Current candidate decisions and approval boundaries
+
+- **VERIFIED:** PR #60 exact head `d6b1843e159506414bd476ed3fa3dedd3ed405c5` passed Auto Pilot `42079686324`, regression/install `42079686307`, Phase 3 `42079686095`, and Hybrid Gateway `42079685988`; 129/129. Its branch is nevertheless DIVERGED 158 ahead / 2 behind; keep Draft and do not rebase/merge in this run.
+- **VERIFIED:** PR #89 exact head `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7` passed Auto Pilot `42078347572`, guardrails `42078347480`, regression `42078347610`; 37/37. It corrects main prompt identity to exactly nine profiles, but remains Draft and unmerged.
+- **VERIFIED:** PR #90 exact head `4c2ef0438be4e8f85225c059887d078be44826e2` passed Auto Pilot `42078357659`, guardrails `42078357621`, regression `42078357598`; 37/37. README now reflects Workers AI; it does not prove inference performance.
+- **VERIFIED:** PR #91 exact head `023db6f9b8f1b8078cdf6e7d154316e78b774d5e` passed regression `42079236946` and PR Auto Pilot `42079473235`; 91/91. It is test/docs-only and based on non-main prompt-intelligence branch.
+- **BLOCKED:** PR #88 exact head `8bdef7d20431eb08c9b36f414ffa5221e2ddae90`; compare against base `atlas9/cerdikgo-workspace-redesign` is 1 ahead / 4 behind / diverged; GitHub reports mergeable=false; no workflow runs returned. Decision: do not rebase, cherry-pick or retarget automatically. Require conflict-aware reconciliation, regression coverage and explicit visual direction review.
+- Fresh main status lookup for `bc6545d6d19fd4b749d0b65fefba3d74775e0221` returned no status entries; classify NOT TESTED / NO STATUS DATA.
+- Fresh Cloudflare read-only settings confirm no dedicated `cerdikgo-primary-preview` Worker and query-string redaction disabled on both existing scripts with persisted 100% sampled invocation logs. No live config change approved or performed.
+- **Approval boundary:** no Human Verification was initiated. Passing exact-head Auto Pilot is a prerequisite, not automatic permission to start manual tests. No merge, Production deployment, D1 write/migration, OAuth/secret/DNS change, billing or autonomous agent execution was authorized.
+- Gateway remains `plan_only`; exactly nine specialist profiles; Optimus Prime remains coordinator outside the registry.
