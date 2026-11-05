@@ -167,3 +167,7 @@ Readiness links:
 - PR #65 gate: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949995940 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949989419 .
 - PR #66 gate: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950007358 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950001066 .
 - PR #60 exact head: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807568 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807519 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807537 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949807546 .
+
+## Correction — 2026-11-05: deployed Preview voice limiter binding
+
+A prior entry incorrectly stated that the PR #52 deployed Preview lacked VOICE_RATE_LIMITER and that voice transcription therefore fails closed. Inspection of the exact deployed source commit 9be9a8c3f6df416d66452c3d8c69c5112c853207 shows that its multimodal/voice-assistance.js uses CHAT_RATE_LIMITER with a separate voice:user key prefix. The Preview deployment metadata lists CHAT_RATE_LIMITER, so the required limiter binding is present for that deployed code path. A newer PR #41 branch uses a VOICE_RATE_LIMITER contract, but that is not the code version deployed by PR #52. Voice runtime and Android behavior remain NOT TESTED; no binding gap is claimed for the PR #52 version. The FILE_SCANNER gap remains confirmed.

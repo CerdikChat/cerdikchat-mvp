@@ -115,3 +115,6 @@ Next actions: obtain exact-head Auto Pilot gates for PR #65/#66; resolve PR #35 
 - PR #66 redaction change is not deployed to this Preview. PR #64 Connectors UI is also not deployed to this Preview.
 
 Next actions: start Human Verification only for the exact PR #65/#66 candidates if desired; first resolve Preview bindings and run isolated Preview/Android checks. Continue to keep all Production and privileged operations blocked.
+
+## Correction — 2026-11-05: Preview voice dependency
+The primary PR #52 Preview uses multimodal/voice-assistance.js that calls CHAT_RATE_LIMITER, and CHAT_RATE_LIMITER is present in the deployment metadata. The earlier note that VOICE_RATE_LIMITER was missing and blocks this deployed voice route was incorrect; that binding belongs to a different PR #41 branch version. Voice runtime and Android acceptance remain NOT TESTED. FILE_SCANNER is still missing and document analysis remains fail-closed until a private scanner Service Binding is provisioned and verified.

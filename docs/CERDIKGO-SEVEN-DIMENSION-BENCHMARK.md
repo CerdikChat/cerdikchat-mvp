@@ -109,3 +109,6 @@ The 35-task v0.1 manifest is a structural smoke-test fixture only. It does not e
 - PR #66 passed 102/102 tests and its exact-head legacy readiness gate plus Wrangler dry-run; this validates query-string redaction configuration, not actual deployed telemetry behavior.
 - The PR #52 primary Preview lacks FILE_SCANNER and VOICE_RATE_LIMITER bindings, so document scanning and voice transcription are NOT VERIFIED at runtime.
 - All seven competitive model scores remain NOT MEASURED. CI, readiness gates, source-span checks and configuration dry-runs earn no AI capability score.
+
+## Correction — 2026-11-05: Preview voice capability status
+The PR #52 deployed source uses CHAT_RATE_LIMITER for voice transcription, and that binding is present. The earlier claim of a missing VOICE_RATE_LIMITER binding on that Preview was incorrect for the deployed commit. This does not establish voice runtime success: model invocation, browser microphone support, playback, interruption and Android acceptance remain NOT TESTED. FILE_SCANNER is absent and document scanning is blocked by fail-closed behavior.

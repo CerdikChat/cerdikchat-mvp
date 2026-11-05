@@ -100,3 +100,8 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 - PR #65 final head 154301128cc8824b76969b5da603807f5125b414 adds .github/workflows/autopilot-readiness-legacy.yml. Exact-head readiness runs 41949995940 and 41949989419 passed; 95/95 tests. It runs safe dependency installation, repository preflight, npm test, Wrangler dry-run, and workflow safety scan. TypeScript is not configured and is explicitly not counted as passed.
 - PR #66 final head 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1 adds the same legacy readiness gate. Runs 41950007358 and 41950001066 passed; 102/102 tests. Wrangler dry-run run 41950007360 also passed. No deployment occurred.
 - Both PRs remain draft/open/unmerged. Their exact candidates are eligible for Human Verification, but no Human Verification was initiated.
+
+## 2026-11-05 — Correction to Preview voice binding analysis
+- Exact PR #52 deployed source commit 9be9a8c3f6df416d66452c3d8c69c5112c853207 uses CHAT_RATE_LIMITER in multimodal/voice-assistance.js, with a voice:user key prefix. The Preview contains CHAT_RATE_LIMITER.
+- The earlier note that the deployed Preview lacked VOICE_RATE_LIMITER was incorrect for this source version; PR #41's branch uses a newer, different binding contract and is not the deployed code.
+- Voice runtime and Android acceptance remain NOT TESTED. The FILE_SCANNER binding remains absent and file analysis remains fail-closed.

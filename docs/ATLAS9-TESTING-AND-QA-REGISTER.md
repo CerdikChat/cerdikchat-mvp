@@ -164,3 +164,6 @@ Links:
 - PR #65 and #66 exact heads published READY FOR HUMAN VERIFICATION. Human Verification has not been started.
 - The legacy gate transparently records TypeScript as NOT CONFIGURED and does not count it as passed. No doctor script exists on those branches; repository preflight ran instead.
 - Neither gate proves Preview runtime, Android, backup restore, model benchmark performance, scale, or Production readiness.
+
+## Correction — 2026-11-05: Voice limiter status
+The PR #52 deployed source uses CHAT_RATE_LIMITER for voice transcription, and the Preview deployment metadata confirms CHAT_RATE_LIMITER exists. The earlier statement that the PR #52 Preview lacks VOICE_RATE_LIMITER and therefore cannot run voice transcription was incorrect for this deployed source version. No runtime or Android voice acceptance test was performed; status remains NOT TESTED. FILE_SCANNER remains absent and the file-analysis route is expected to return FILE_SCAN_UNAVAILABLE after authorization succeeds.

@@ -55,3 +55,6 @@ Append decisions. General permission to improve code does not authorize privileg
 - PR #66 final head 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1 passed exact-head readiness runs 41950007358 and 41950001066 (102/102); config dry-run 41950007360 passed. It is eligible for Human Verification; Human Verification has not started.
 - These legacy JS gates explicitly mark TypeScript NOT CONFIGURED. They do not prove Preview runtime or Android acceptance.
 - Existing PR #52 Preview lacks FILE_SCANNER and VOICE_RATE_LIMITER bindings; document and voice routes must remain fail-closed until approved service/binding configuration exists.
+
+## Correction — 2026-11-05: Preview voice binding
+For the PR #52 deployed commit, voice transcription uses the existing CHAT_RATE_LIMITER binding, so no separate VOICE_RATE_LIMITER provisioning is required for that source version. Do not provision a new limiter based solely on the PR #41 branch contract. Voice runtime/Android acceptance remains NOT TESTED; FILE_SCANNER remains a confirmed missing binding and must not be bypassed.

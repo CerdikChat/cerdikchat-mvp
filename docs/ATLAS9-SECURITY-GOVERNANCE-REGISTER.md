@@ -95,3 +95,6 @@ The PR #52 Preview deployment metadata (run 41825376685) lists AI, ASSETS, CHAT_
 - multimodal/file-analysis.js imports the scanner guard and fails closed when FILE_SCANNER is absent/unavailable; therefore document scanning is not expected to succeed in this Preview.
 - multimodal/voice-assistance.js returns VOICE_RATE_LIMIT_UNAVAILABLE when VOICE_RATE_LIMITER is absent; therefore voice transcription is not expected to succeed in this Preview.
 - No binding was fabricated, no scanner bypass was added, and no Cloudflare resource was created. Provisioning a real scanner service and dedicated rate-limit binding requires a separate scoped implementation and Preview verification.
+
+## Correction — 2026-11-05: deployed voice rate-limit dependency
+The exact PR #52 source uses CHAT_RATE_LIMITER for the voice endpoint (key prefix voice:user:<subject>); the deployed Preview has this binding. The earlier assertion that VOICE_RATE_LIMITER was missing from the deployed PR #52 Preview was incorrect. PR #41's branch contains a separate VOICE_RATE_LIMITER variant, but it is not the deployed source. Voice runtime remains NOT TESTED. FILE_SCANNER is still absent; multimodal/file-scanner.js returns FILE_SCAN_UNAVAILABLE when the binding is missing, and file analysis fails closed.
