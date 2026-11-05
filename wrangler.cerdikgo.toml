@@ -18,3 +18,5 @@ binding = "AI"
 [vars]
 ENVIRONMENT = "cerdikgo-readiness"
 PRODUCT_ID = "cerdikgo"
+# Fail closed until dedicated D1, OAuth client and approved users are provisioned.
+GOOGLE_AUTH_REQUIRED = "true"
