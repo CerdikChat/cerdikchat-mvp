@@ -179,3 +179,16 @@ Run links:
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975711475
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975715983
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975716157
+
+
+## Decision and approval continuation — 2026-11-05 16:25 WIB
+
+1. **Seven-dimension target remains an acceptance target, not a claim.** Each dimension must reach 100/100 only after its full KPI thresholds are met with reproducible evidence. Current capability scores are NOT MEASURED; evidence-credit 0/100 is not a capability rating.
+2. **Exactly nine specialists.** Registry seats remain ATLAS-01 through ATLAS-09. Optimus Prime is coordinator outside the registry; never count as specialist ten. PR #62 provides a canonical prompt candidate with four passing workflows, but its integration into the active Primary path is not established.
+3. **Gateway remains `plan_only`.** No agent execution, privileged tool execution, remote write, or autonomous external side effect is authorized by this audit.
+4. **No privileged operations.** No merge, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, billing activation, or other privileged action was performed or approved.
+5. **Human Verification gate.** PR #60 exact candidate `a2b10c42f4925164b59d48c499ac44265c48daed` passed Auto Pilot run 41975851719 and 129/129 tests; PR #80 exact candidate `724fdb092d584cead6f34612693de8cb9336c7eb` passed Auto Pilot run 42002523884 and 113/113 tests. These are branch-specific CI results only. Human Verification was NOT STARTED; no Android, live Preview, or Production acceptance is inferred.
+6. **Free-tier policy.** Do not enable Cloudflare Workers Paid/Containers or any external paid scanner. PR #76 remains BLOCKED on the current account entitlement. PR #78 is design-only and cannot be treated as an implemented free alternative.
+7. **Document privacy.** WPS AI remains manual and user-authorized only; no confidential file transfer or API integration is approved by PR #77.
+
+These decisions preserve the existing safety boundary and do not authorize integration or deployment. Any later change to execution mode, billing, external document transfer, or Production access requires separate explicit approval and a traceable decision entry.
