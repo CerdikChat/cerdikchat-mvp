@@ -105,3 +105,12 @@ As of this read-only inventory, CerdikGo Primary is **not verified as a separate
 - In `worker.js`, Google session enforcement in `handleChat` is conditional on `GOOGLE_AUTH_REQUIRED === "true"`. The candidate `wrangler.cerdikgo.toml` does not currently set this variable.
 - The existing repository's top-level `wrangler.toml` also does not declare the variable at the top level; it declares it only in the Preview vars section. The Cloudflare settings read did not expose runtime plain-text vars, so the effective Production value is **not independently verified** by this audit.
 - Before any CerdikGo user-facing release, explicitly configure `GOOGLE_AUTH_REQUIRED=true`, a CerdikGo-specific Google Client ID and exact authorized origin, then prove unauthenticated chat is rejected (401) and an approved authenticated session succeeds. Do not infer authentication from the presence of a Google login button or from the D1 binding alone.
+
+
+### Identity of the supplied CerdikGo Primary URL
+
+A direct read of PR #51's Cloudflare deployment-bot comment confirms that the exact supplied hostname
+`https://atlas9-prompt-intelligence-mvp-cerdikchat-mvp.ngyoonseong.workers.dev`
+is the Cloudflare **Preview URL for PR #51**, branch `atlas9/prompt-intelligence-mvp`, candidate SHA `afa2ad537b3979b5e2361d0a3242059ea639f59c`. The latest reported Preview deployment for that branch was created on 2026-11-05 at 10:21:27 UTC and reported Build: Success / Deployment: Success.
+
+PR #51 remains open and unmerged. Therefore the supplied Primary URL is not evidence of a separately provisioned CerdikGo Primary Worker or a Production release. It is an automatically generated branch Preview hosted under the `cerdikchat-mvp` Worker service. Keep the product label “CerdikGo Primary candidate / Preview” until a separate Worker is actually provisioned and its own runtime is verified.
