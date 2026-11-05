@@ -290,3 +290,16 @@ Run links:
 The fixed 35-task v0.1 manifest remains a smoke-test structure. The required 100 reasoning, 50 coding, 50 research, 50 governance, 30 workflow, 90 specialist, and seven-day ecosystem/scale evidence sets remain outstanding. No Gemini comparative result exists. No inference benchmark, latency benchmark, Android acceptance, live research retrieval, ClamAV runtime test, backup restore drill, or 100-concurrent-user test was run in this continuation.
 
 Next action: run the complete fixed task sets against the exact candidate and comparator under matched model/provider, tool, context, temperature, and token/time budgets; preserve raw outputs, scoring, repeats, and SHA-linked evidence. Do not award partial capability points from CI or feature presence.
+
+
+## Runtime and integration evidence correction — 2026-11-05
+
+- Current main model setting is Gemma 4 26B A4B. Document analysis candidate PR #35 hardcodes the same model; voice candidate PR #32 hardcodes Workers AI Whisper. This is configuration evidence only. Live inference, model availability, latency, fallback behavior, and comparative quality remain NOT TESTED.
+- The reviewed voice handler requires VOICE_RATE_LIMITER, but PR #32 Wrangler defines it only under Preview. Production voice capability is therefore not accepted until the binding is configured and verified in a safe environment.
+- The document-analysis candidate on PR #76 requires a private FILE_SCANNER service binding before AI processing. The reviewed Wrangler file does not define that binding; no ClamAV runtime exists. File scanning remains BLOCKED/FAIL-CLOSED.
+- PR #35 structured document research is a document-analysis workflow, not a verified Live Web Research service. No live retrieval provider, query execution, source freshness, or end-to-end citation validation has been measured.
+- Main still has legacy team-role wording; PR #62 canonical nine-seat prompt candidate has passing CI but is not integrated. Product identity dimension remains NOT TESTED for Primary parity.
+- PR #60 final documentation head 8ed0be04b883e8f1639728290528de87cc16fe6b passed Auto Pilot 42002779910 (129/129), regression/install 42002779876, Phase 3 42002779803, and Hybrid Gateway 42002779818. PR #80 local Inbox cap head 724fdb092d584cead6f34612693de8cb9336c7eb passed Auto Pilot 42002523884 (113/113) and regression 42002508692.
+- The repository now has 57 open PRs after #80. Branch CI is not a measured capability benchmark and does not change any of the seven NOT MEASURED capability scores.
+
+No Gemini comparison, live inference benchmark, live research, Android acceptance, real ClamAV scan, backup restore, or edge-scale test was performed. The 100/100 targets and KPI thresholds remain unchanged.
