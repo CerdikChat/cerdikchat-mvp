@@ -437,3 +437,11 @@ All seven competitive capability scores remain NOT MEASURED. CI results are engi
 - Results: 40 passed / 0 failed.
 - Covered: Production chat rejects missing GOOGLE_AUTH_REQUIRED with 401 AUTH_REQUIRED; Production auth config reports required; explicit false cannot disable Production auth; D1-backed deployments require auth by default.
 - Scope: unit/regression evidence only. No live Production flag inspection, Preview/Production authentication runtime test, or deployment was performed.
+
+
+## Observability and backup workflow branch evidence — 2026-11-05
+
+- PR #66 observability redaction candidate head 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1: Auto Pilot run 41950007358 SUCCESS; Wrangler configuration dry-run 41950007360 SUCCESS. This is branch-only evidence; main wrangler.toml still lacks redact_query_string=true.
+- PR #53 backup reconciliation candidate head 142f4d8a893ba81d5f926da65f53b9e077ad1cad: regression 41825322436 SUCCESS; Phase 3 41825322322 SUCCESS. No live Drive upload or restore drill was run.
+- Main scheduled backup runs 41890146458 and 41695574776 FAILED at Gitleaks before archive creation. The scheduled workflow's Drive upload condition is false for schedule events; schedule creates a GitHub artifact only, while Drive upload requires manual workflow_dispatch with upload_to_google_drive=true.
+- Main backup checkout retains credentials by default; PR #53 proposes persist-credentials=false. No backup workflow was manually dispatched during this audit.
