@@ -629,3 +629,27 @@ The preceding audit append initially recorded the new documentation head as NOT 
 - Hybrid Gateway `42080700595`: SUCCESS, 129/129; Wrangler 4.153.0 Worker bundle `deploy --dry-run` PASS, no deployment.
 - Failed tests: 0. Non-blocking runner warnings: Node.js 20 deprecation for checkout/setup-node v4 under Node.js 24 and Node `punycode` deprecation; neither failed a workflow.
 - This is exact-commit CI/configuration evidence only. It does not prove live Preview, Android, Production, scanner, backup restore, scale, or competitive model benchmark acceptance. Human Verification remains NOT STARTED.
+
+
+## 2026-11-06 — Final candidate evidence reconciliation (PR #60 and main-based PR #92)
+
+### PR #60 scorecard candidate
+- Exact tested candidate: `a76778726acb0f3202caa78b0f88d1f8ecaa7a84`, branch `atlas9/cerdikgo-100-percent-scorecard`.
+- Auto Pilot `42081019850`: SUCCESS; doctor, strict TypeScript, 129/129 tests and workflow safety PASS.
+- Regression/install `42081019298`: SUCCESS, 129/129.
+- Phase 3 `42081019237`: SUCCESS, 129/129.
+- Hybrid Gateway `42081019137`: SUCCESS, 129/129; Wrangler 4.153.0 bundle dry-run PASS; no deployment.
+- The branch comparison at this snapshot was 172 ahead / 2 behind / diverged against `atlas9/cerdikgo-autopilot-readiness`; keep Draft and do not merge/rebase automatically.
+
+### PR #92 — clean main-based authentication correction
+- Draft PR: https://github.com/CerdikChat/cerdikchat-mvp/pull/92.
+- Branch `atlas9/cerdikgo-main-auth-fail-closed-20261106`; exact head `0a5fdea7f1c1c4091ff5fb674a1bac6bbb6ce8fb`; base main `bc6545d6d19fd4b749d0b65fefba3d74775e0221`.
+- Changed files: `worker.js`, `auth/google-auth.js`, `tests/production-auth-default.test.mjs`, `tests/production-d1-auth-default.test.mjs`, `docs/PRIMARY-AUTH-FAIL-CLOSED-MAIN-CANDIDATE.md`, `.github/workflows/atlas9-controlled-autopilot.yml`, `.github/workflows/autopilot-readiness-legacy.yml`.
+- Regression `42081225364`: SUCCESS, 41/41. Controlled Autopilot `42081225068`: SUCCESS, 41/41. Legacy Auto Pilot `42081225451`: SUCCESS; install/config preflight, 41/41, Wrangler 4.153.0 dry-run and workflow safety scan PASS. TypeScript NOT CONFIGURED and not counted as passed.
+- Change requires authentication for Production, any D1-backed Worker, or explicit true; auth-config endpoint uses the same rule. Unauthenticated requests are rejected before rate limiting and AI inference. Eight-hour session TTL unchanged. Draft only; no live auth setting or OAuth change.
+
+### Current repository blockers and measurements
+- Open PR inventory: 67. PR #88 remains BLOCKED (1 ahead / 4 behind / diverged; mergeable=false; no workflow run); PR #91 is a test/docs-only regression lock on a non-main base.
+- Fresh Cloudflare read-only inventory: only `cerdikchat-mvp` and `cerdikgo-mcp-preview`; no `cerdikgo-primary-preview`. Both existing scripts have query redaction disabled with 100% sampled persisted invocation logs. The CerdikChat Worker has a DB binding and legacy secret-binding names; secret values were not read. D1 environment label remains unconfirmed.
+- All seven capability dimensions remain NOT MEASURED, evidence-credit 0/100 each, target 100/100. No model inference or Gemini comparison.
+- Exactly nine specialist profiles; Optimus Prime coordinator; gateway `plan_only`. No Human Verification, merge, deployment, D1 operation, OAuth/secrets/DNS change or billing action.
