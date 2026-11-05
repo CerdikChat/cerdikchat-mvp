@@ -236,3 +236,17 @@ Failure links: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/4193486
 - Current measured score: **NOT MEASURED for all seven dimensions**. No task was executed against Workers AI or Gemini in this audit.
 - CI results above are software engineering evidence and earn no AI capability benchmark points.
 - Human Verification, Preview runtime acceptance, Android acceptance, backup restore, live web research and Production readiness are separate gates; they are not implied by green CI.
+
+
+### Direct workflow links for this checkpoint
+
+- PR #60: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950862476 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950862498 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950862526 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950862654 .
+- PR #68: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41951461346 .
+- PR #69: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41951721640 .
+- PR #62: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41921781529 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41921781474 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41921781561 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41921781630 .
+- PR #63: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833238 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833224 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833375 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41945833236 .
+- PR #64: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41944458563 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41944458347 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41944458558 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41944458354 .
+- PR #65: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949995940 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949995918 .
+- PR #66: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950007358 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950000882 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950007360 .
+- PR #61: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41917776597 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41917776653 .
+- PR #70 and PR #52: no exact-head workflow links exist at this checkpoint; do not infer a pass.
