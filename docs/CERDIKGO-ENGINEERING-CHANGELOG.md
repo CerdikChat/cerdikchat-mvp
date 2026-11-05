@@ -327,3 +327,10 @@ PR #60 remains Draft and non-mergeable due branch divergence (79 ahead / 2 behin
    - Appended this dated continuation to the six ATLAS-9 registers and the seven-dimension benchmark document on `atlas9/cerdikgo-100-percent-scorecard`.
    - Pre-update scorecard head `2a9c24b0d7b6c1bf463656143708ddcbbf25047f` passed runs `42004006242`, `42004006381`, `42004006364`, `42004006208` (129/129; all SUCCESS). The new documentation commits require a new exact-head gate.
    - PR #60 remains Draft; current base comparison is 103 ahead / 2 behind. No rebase/merge.
+
+
+## PR #84 exact-head evidence correction — 2026-11-05
+
+An earlier continuation described PR #84's documentation-only head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a` as not rerun. That statement is superseded: exact-head Legacy Auto Pilot run `42037076015` and isolated Worker readiness run `42037076046` both completed SUCCESS on `b1e6e636...`, with 97/97 tests. The Worker dry-run used `wrangler.cerdikgo.toml` and explicitly showed `GOOGLE_AUTH_REQUIRED=true`; no deployment occurred. TypeScript remains NOT CONFIGURED on this JavaScript branch.
+
+A later documentation-only correction advanced PR #84 to `db8ed792537094a2adde85018e17ddb9f6613c45`. No application/config/test code changed after `b1e6e636...`; the current documentation-only head `db8ed792...` has no new exact-head workflow run. Keep Human Verification NOT STARTED and do not transfer the prior run to the later doc-only SHA.
