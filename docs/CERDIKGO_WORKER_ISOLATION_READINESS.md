@@ -142,3 +142,13 @@ The preceding addendum stated that documentation-only head `b1e6e636fff22cdf90cc
 - Both runs tested exact head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a`.
 
 This verifies the doc-only head's CI/dry-run gate. It still does not verify a live Worker, D1, rate limiter, OAuth session, scanner, Android behavior or Production readiness. No Human Verification was started.
+
+## Exact current-head CI correction — 2026-11-05
+
+The prior note that head `db8ed792537094a2adde85018e17ddb9f6613c45` had no new workflow is superseded. Exact-head checks completed:
+- `42037825983`: Auto Pilot/readiness SUCCESS, 97/97; preflight, Wrangler dry-run and workflow safety scan PASS.
+- `42037826034`: isolated Worker readiness SUCCESS, 97/97; dry-run confirmed `GOOGLE_AUTH_REQUIRED=true`; no deployment.
+- `42037817647`: regression SUCCESS.
+- Cloudflare Workers Builds: SUCCESS, build `7cbb5b94-3047-436a-93f6-c9c8d92b2c4d`.
+
+These checks apply to exact head `db8ed792...`. This confirms CI and branch Preview build only. The separate Worker is still not provisioned with D1, rate limits, OAuth, secrets or FILE_SCANNER; no live user journey, Android or Production acceptance is claimed. No Human Verification or deployment occurred.
