@@ -271,3 +271,41 @@ Run links:
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975711475
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975715983
 - https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41975716157
+
+
+## Open issues and handover — 2026-11-05 16:25 WIB
+
+### P0 — identity and branch integration
+- Main head `bc6545d6d19fd4b749d0b65fefba3d74775e0221` still has the legacy role list in `worker.js`; the nine-seat canonical roster is not verified on main.
+- PR #62 head `1fa32453e9569b136ec890b7c32562dda510612f` has four passing workflows (41921781529, 41921781474, 41921781561, 41921781630), but remains a candidate branch, not integrated runtime evidence.
+- PR #69 head `cb5264803ca3efad03a8d168592c0b02d395354e` is DRAFT and non-mergeable; compare with base branch reports 4 ahead / 3 behind and diverged. Resolve by reviewing the three base-only commits and four PR commits, then rebase/cherry-pick only through an approved safe branch workflow. Do not force-push.
+- PR #60 scorecard branch head before this append was `a2b10c42f4925164b59d48c499ac44265c48daed`; it is stacked on `atlas9/cerdikgo-autopilot-readiness`. Reconcile its base ancestry before integration; keep Draft.
+
+### P1 — security and document processing
+- PR #73 auth log redaction is tested but not integrated. Primary Preview still requires a fresh verification after the dependency chain is integrated.
+- PR #74 Gitleaks full-history correction passed, but scheduled backup run 41890146458 is still FAILED historically. Re-run the authorized backup workflow only after its exact configuration is reviewed; then perform a real restore drill. No restore evidence exists.
+- PR #76 ClamAV Service Binding has mock-contract tests only. Runtime is BLOCKED by Workers Paid/Containers entitlement (HTTP 401); no billing is authorized. Maintain fail-closed behavior.
+- PR #78 proposes an asynchronous GitHub Actions scanner but is DESIGN ONLY; private staging, signed verdict, job lifecycle, retention, quotas, and hard billing stop are unresolved.
+
+### P1 — product workflows
+- PR #75 is a manual JSON Context Bridge, not MCP or automatic synchronization. PR #80 adds a 50-task local Inbox cap; PR #80 is Draft and stacked on #75. Exact head `724fdb092d584cead6f34612693de8cb9336c7eb`; runs 42002523884, 42002508692, 42002508523 SUCCESS; Auto Pilot 113/113.
+- PR #77 WPS AI second opinion is manual only; account eligibility, privacy terms, free quota, and API read-only support are NOT TESTED.
+- Voice device capture/playback and Android acceptance remain NOT TESTED.
+- Live Web Research provider configuration and end-to-end retrieval/citation tests remain NOT TESTED.
+- Document scanning cannot be called operational until real ClamAV Preview runtime, current signatures, EICAR rejection, benign acceptance, no-AI-on-failure, and Android tests pass.
+- Hybrid radio/mesh and offshore coverage are NOT TESTED; offline shell cache is not proof of offline chat or radio mesh.
+
+### P2 — scale and evidence
+- 56 open PRs were returned by repository search on this audit snapshot. Review dependency chains before opening additional overlapping branches.
+- Seven-dimension capability benchmarks have not run. The 35-task v0.1 manifest is structural smoke coverage only.
+- 100-user load for 30 minutes, seven-day Preview SLO, p95 latency, backup RPO/RTO, and restore success are NOT TESTED.
+- Main-branch `package.json` currently exposes only `npm test` → `node --test`; Node >=20. No local dependency installation was performed during this connector-based review. Exact-candidate CI performed install/preflight and tests on its own checked-out commit.
+
+### Next actions
+1. Reconcile PR #60 and PR #69 dependency graphs without merge/force-push.
+2. Bring the canonical nine-specialist identity to the active Primary path through a reviewed Draft PR; add an exact ordered registry test at the actual route used by Primary.
+3. Integrate PR #73 only after base synchronization; retest Primary Preview logs and RBAC.
+4. Review PR #74 then obtain successful backup execution and restore evidence.
+5. Keep PR #76/78 scanner fail-closed and free-tier; no billing or public scanner fallback.
+6. Finish Android voice/document tests, live research, workflow idempotency, and full benchmark suites.
+7. Keep Human Verification and Production readiness separate from CI success.
