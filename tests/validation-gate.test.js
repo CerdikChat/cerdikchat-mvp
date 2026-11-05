@@ -39,7 +39,7 @@ test("Core workspace controls and network status have ID, EN and ZH translations
   for (const language of ["id", "en", "zh"]) {
     assert.ok(index.includes(`${language}: {`), `Missing language pack: ${language}`);
   }
-  for (const key of ["tools:", "voiceConversation:", "docLabel:", "composer:", "networkOnline:", "networkOffline:"]) {
+  for (const key of ["tools:", "conversation:", "docLabel:", "composer:", "networkOnline:", "networkOffline:"]) {
     assert.ok(index.includes(key), `Missing translation key: ${key}`);
   }
   assert.match(index, /#workspaceTools > summary strong/);
