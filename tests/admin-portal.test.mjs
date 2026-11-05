@@ -349,10 +349,10 @@ test("Admin approval refuses role escalation beyond the administrator tier", asy
 });
 
 test("Admin feature-request archive is super-admin only and requires CSRF", async () => {
-  const regular=await worker.fetch(adminRequest("/api/admin/feature-requests/archive",{method:"POST"}),authenticatedAdminEnv("admin"));
+  const regular=await worker.fetch(adminRequest("/api/admin/feature-requests/archive",{method:"POST",origin:"https://cerdikchat.test"}),authenticatedAdminEnv("admin"));
   assert.equal(regular.status,403);
   assert.equal((await regular.json()).error,"ADMIN_REQUIRED");
-  const missingCsrf=await worker.fetch(adminRequest("/api/admin/feature-requests/archive",{method:"POST"}),authenticatedAdminEnv());
+  const missingCsrf=await worker.fetch(adminRequest("/api/admin/feature-requests/archive",{method:"POST",origin:"https://cerdikchat.test"}),authenticatedAdminEnv());
   assert.equal(missingCsrf.status,403);
   assert.equal((await missingCsrf.json()).error,"CSRF_VALIDATION_FAILED");
 });
