@@ -572,7 +572,7 @@ test("document research returns validated structured evidence for an authenticat
   const structured = {
     research_question: "Apa temuan utama?",
     executive_summary: "Ringkasan berbasis dokumen.",
-    findings: [{ claim: "Temuan A", evidence: "Bukti pada Page 1.", reference: "Page 1", confidence: "high", caveat: "" }],
+    findings: [{ claim: "Temuan A", evidence: "Evidence A.", reference: "Page 1", confidence: "high", caveat: "" }],
     methodology: "Analisis isi dokumen.",
     limitations: ["Hanya satu dokumen dianalisis."],
     recommendations: ["Verifikasi dengan sumber primer."],
@@ -585,6 +585,7 @@ test("document research returns validated structured evidence for an authenticat
       run: async (_model, input) => {
         assert.match(input.messages[0].content, /Return ONLY valid JSON/);
         assert.match(input.messages[1].content, /BEGIN UNTRUSTED FILE CONTENT/);
+        assert.match(input.messages[0].content, /verbatim excerpt/i);
         return { response: JSON.stringify(structured) };
       }
     }
@@ -593,6 +594,7 @@ test("document research returns validated structured evidence for an authenticat
   const payload = await json(response);
   assert.equal(response.status, 200);
   assert.equal(payload.research.findings[0].reference, "Page 1");
+  assert.equal(payload.research.findings[0].evidence_validation, "normalized_verbatim_match");
   assert.equal(payload.persisted, false);
 });
 
@@ -613,7 +615,7 @@ test("document research rejects references absent from extracted source text", a
   const structured = {
     research_question: "Apa temuan?",
     executive_summary: "Ringkasan.",
-    findings: [{ claim: "Klaim", evidence: "Bukti", reference: "Page 99", confidence: "high", caveat: "" }],
+    findings: [{ claim: "Klaim", evidence: "Source evidence.", reference: "Page 99", confidence: "high", caveat: "" }],
     methodology: "Analisis isi.",
     limitations: [], recommendations: [], next_questions: []
   };
@@ -627,6 +629,64 @@ test("document research rejects references absent from extracted source text", a
   const response = await worker.fetch(analysisRequest(png, { path: "/api/research/document" }), env);
   assert.equal(response.status, 502);
   assert.equal((await json(response)).error, "RESEARCH_OUTPUT_INVALID");
+});
+
+test("document research rejects paraphrased evidence even when the page reference exists", async () => {
+  const structured = {
+    research_question: "Apa temuan?",
+    executive_summary: "Ringkasan.",
+    findings: [{
+      claim: "Klaim yang tidak didukung kutipan",
+      evidence: "The document clearly proves this conclusion.",
+      reference: "Page 1",
+      confidence: "high",
+      caveat: ""
+    }],
+    methodology: "Analisis isi.",
+    limitations: [],
+    recommendations: [],
+    next_questions: []
+  };
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => ({ format: "markdown", data: "Page 1: The source records a measured value of 12 units." }),
+      run: async () => ({ response: JSON.stringify(structured) })
+    }
+  });
+  const response = await worker.fetch(analysisRequest(png, { path: "/api/research/document" }), env);
+  assert.equal(response.status, 502);
+  assert.equal((await json(response)).error, "RESEARCH_OUTPUT_INVALID");
+});
+
+test("document research labels unsupported findings without inventing an evidence excerpt", async () => {
+  const structured = {
+    research_question: "Apa yang tidak dapat disimpulkan?",
+    executive_summary: "Dokumen tidak menyediakan bukti yang cukup.",
+    findings: [{
+      claim: "Klaim belum dapat diverifikasi dari dokumen.",
+      evidence: "",
+      reference: null,
+      confidence: "insufficient_evidence",
+      caveat: "Tidak ditemukan kutipan pendukung."
+    }],
+    methodology: "Pemeriksaan isi dokumen.",
+    limitations: ["Tidak ada kutipan pendukung untuk klaim ini."],
+    recommendations: [],
+    next_questions: []
+  };
+  const png = new File([new Uint8Array([137,80,78,71,13,10,26,10])], "sample.png", { type: "image/png" });
+  const env = authenticatedAnalysisEnv({
+    AI: {
+      toMarkdown: async () => ({ format: "markdown", data: "Page 1: Unrelated source text." }),
+      run: async () => ({ response: JSON.stringify(structured) })
+    }
+  });
+  const response = await worker.fetch(analysisRequest(png, { path: "/api/research/document" }), env);
+  const payload = await json(response);
+  assert.equal(response.status, 200);
+  assert.equal(payload.research.findings[0].evidence_validation, "none");
+  assert.equal(payload.research.findings[0].reference, null);
 });
 
 test("document research denies administrator sessions at the User Portal boundary", async () => {
