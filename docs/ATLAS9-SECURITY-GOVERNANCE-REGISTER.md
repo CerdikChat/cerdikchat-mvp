@@ -429,3 +429,23 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Scheduled backup runs 41695574776 and 41890146458 remain FAILED; backup archive generation and restore are NOT TESTED.
 - PR #76 real ClamAV runtime remains BLOCKED by paid Containers access. Mocked contract tests do not prove malware detection.
 - No secret values, OAuth credentials or tokens were read or changed.
+
+ 
+## Security continuation — 2026-11-05 21:12 WIB
+
+### VERIFIED — Primary authentication hardening candidate
+- Finding: current Primary worker.js previously enforced chat auth only when GOOGLE_AUTH_REQUIRED=true; auth/google-auth.js authConfig mirrored that optional-flag rule.
+- PR #87 candidate 5ef76571da95398373ad4f91620971b7b03fe45a now requires auth when ENVIRONMENT=production, when env.DB is present, or when GOOGLE_AUTH_REQUIRED=true. /api/auth/config reports the same state.
+- Tests prove Production and D1-backed chat reject unauthenticated requests before rate limiting/AI calls, including explicit GOOGLE_AUTH_REQUIRED=false.
+- Auto Pilot 42042622138 SUCCESS, 114/114. TypeScript NOT CONFIGURED; no runtime or Android auth acceptance.
+- This is stacked on clean identity PR #85 and remains Draft/unmerged.
+
+### Residual session and RBAC risks
+- SESSION_TTL_SECONDS remains 76 * 60 * 60 (76 hours) in the governance branch. No change was made because TTL policy requires an explicit decision.
+- Full role/permission matrix, admin approval bypass tests, session revocation, token rotation and CSRF lifecycle remain NOT TESTED as an integrated runtime campaign.
+- PR #87 does not change OAuth client IDs, secrets, D1 or existing sessions.
+
+### VERIFIED — product isolation candidate
+- PR #84 candidate 2d37dea6fa190d37b887d648ede7d943f8024edd renames the isolated Worker target to cerdikgo-primary-preview and passes 98/98 tests plus Wrangler dry-run.
+- Cloudflare inventory still has no script with that name. No resource was provisioned or deployed.
+- Live cerdikchat-mvp DB binding discrepancy and redact_query_string=false remain unresolved; PR #86 is source/config only and has not changed live settings.
