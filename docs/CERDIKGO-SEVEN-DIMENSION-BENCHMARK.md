@@ -141,3 +141,8 @@ Other exact-head evidence confirmed during this audit:
 - PR #61 head `17760f85b01e0db2e7a09679324d55adfe1fcf95`, security/regression 41917776597 and 41917776653 (99/99): https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41917776597 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41917776653
 
 PR #70 head `d546c121c9d95f6568eb4c7d728655d72fd2fcd1` and PR #52 head `4114cfa5ca082dfb8736d9d7aa68bb297087d8c0` have no exact-head workflow run or combined status returned at this checkpoint. They are BLOCKED/NOT VERIFIED for Auto Pilot. No benchmark inference run was executed; all seven measured dimension scores remain NOT MEASURED.
+
+
+## Exact-head evidence correction — 2026-11-05
+
+The 129/129 CI evidence previously recorded for PR #60 applies to head `ad3cbd61b6467675e71e8445f113635c45beb8c9` only. The scorecard branch was later advanced by append-only audit updates; the pre-correction observed head `d8fd4d04b119f4e8a63bffa6624396ead9f723f3` has no exact-head workflow run or combined status. PR #60 reports mergeable=false and compare shows it is 2 commits behind base. The current documentation branch is therefore **BLOCKED** for Auto Pilot/integration until reconciled and retested. All seven competitive model scores remain NOT MEASURED; no model inference benchmark has been executed.
