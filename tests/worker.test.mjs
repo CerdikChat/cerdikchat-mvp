@@ -561,7 +561,7 @@ test("CerdikGo exposes honest network, Protection Mode and Hybrid Connectivity s
   assert.match(html, /Layanan AI diverifikasi saat permintaan dijalankan/);
   assert.match(html, /id="protectionStatusCard"/);
   assert.match(html, /Protection Mode/);
-  assert.match(html, /Perlindungan sesi & akses/);
+  assert.match(html, /Perlindungan sesi &amp; akses/);
   assert.match(html, /Hybrid Connectivity/);
   assert.match(html, /SIMULATOR/);
   assert.match(html, /Fiber · Cellular · Wi-Fi Mesh · LoRa/);
@@ -848,4 +848,40 @@ test("mobile feature request trigger opens the dialog through delegated click ha
   assert.match(html, /requestFeatureDialog\.showModal\(\)/);
   assert.match(html, /requestFeatureDialog\.setAttribute\("open", ""\)/);
   assert.match(html, /requestFeatureCategory\?\.focus\(\)/);
+});
+
+
+test("Workers AI quota errors are classified and returned as retryable 429", async () => {
+  const env = makeEnv({ AI: { run: async () => { throw new Error("daily allocation quota exceeded"); } } });
+  const response = await worker.fetch(post({ message: "Buat prompt" }), env);
+  const payload = await json(response);
+  assert.equal(response.status, 429);
+  assert.equal(payload.error, "AI_QUOTA_EXCEEDED");
+  assert.doesNotMatch(JSON.stringify(payload), /daily allocation quota exceeded/i);
+});
+
+test("unavailable Workers AI model is classified without exposing provider details", async () => {
+  const env = makeEnv({ AI: { run: async () => { throw new Error("model not found: private-model-id"); } } });
+  const response = await worker.fetch(post({ message: "Buat prompt" }), env);
+  const payload = await json(response);
+  assert.equal(response.status, 502);
+  assert.equal(payload.error, "AI_MODEL_UNAVAILABLE");
+  assert.doesNotMatch(JSON.stringify(payload), /private-model-id/);
+});
+
+test("Workers AI timeout errors receive a stable timeout code", async () => {
+  const env = makeEnv({ AI: { run: async () => { throw new Error("request timed out"); } } });
+  const response = await worker.fetch(post({ message: "Buat prompt" }), env);
+  const payload = await json(response);
+  assert.equal(response.status, 502);
+  assert.equal(payload.error, "AI_TIMEOUT");
+});
+
+test("unexpected Workers AI errors remain sanitized", async () => {
+  const env = makeEnv({ AI: { run: async () => { throw new Error("secret provider endpoint and token"); } } });
+  const response = await worker.fetch(post({ message: "Buat prompt" }), env);
+  const payload = await json(response);
+  assert.equal(response.status, 502);
+  assert.equal(payload.error, "AI_REQUEST_FAILED");
+  assert.doesNotMatch(JSON.stringify(payload), /secret provider endpoint|token/);
 });
