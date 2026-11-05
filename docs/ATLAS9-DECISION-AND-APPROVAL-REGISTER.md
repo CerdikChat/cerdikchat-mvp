@@ -78,3 +78,8 @@ The initial PR #63 candidate was FAILED due to Bearer parser whitespace escaping
 5. PR #60 head `ad3cbd61b6467675e71e8445f113635c45beb8c9` passed exact-head workflows 41950862476, 41950862498, 41950862526 and 41950862654 (129/129 tests; no failures). This validates code/test readiness for that candidate, not Preview or Production.
 6. Preserve exactly nine specialist IDs; Optimus Prime remains coordinator. Keep gateway `plan_only`. No merge, deployment, remote D1 write/migration, OAuth/secrets/DNS change, billing activation or destructive action was performed.
 7. The CI evidence for PR #61/#62–#69 applies only to their exact recorded SHAs and named workflow scopes. It does not transfer to later commits or another branch.
+
+
+## Decision correction — 2026-11-05: no inherited CI approval
+
+The PR #60 129/129 result and Auto Pilot pass apply only to parent head `ad3cbd61b6467675e71e8445f113635c45beb8c9`. The later observed scorecard head `d8fd4d04b119f4e8a63bffa6624396ead9f723f3` has no exact-head workflow/status and PR metadata reports mergeable=false, with the branch 2 commits behind its base. No merge, rebase, or force update is authorized or performed here. Current status: **BLOCKED** pending reconciliation and exact-head rerun.
