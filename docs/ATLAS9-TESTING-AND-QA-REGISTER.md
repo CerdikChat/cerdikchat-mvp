@@ -462,3 +462,31 @@ Candidate: d0ffbd53864be9c1bb6afbb608658cd532179727
 PR #60 scorecard candidate head b7c6c13fd9c52f8abbfd5bbe5880f013a375f3a0 passed Auto Pilot 42003778480 (129/129), regression/install 42003778516, Phase 3 42003778573, and Hybrid Gateway 42003778499. The exact workflow definition/logs do not run Wrangler; therefore Wrangler dry-run for PR #60 is NOT TESTED, not PASS. Installation preflight 16/16, strict TypeScript, and workflow safety scan passed.
 
 Wrangler 4.153.0 deploy --dry-run evidence is confirmed only for PR #80 legacy-branch Auto Pilot run 42002523884. Do not transfer that result to PR #60.
+
+## Exact-head QA continuation — 2026-11-05 20:31 WIB
+
+### Verified CI on current code/test candidates
+| PR | Exact code/test head | Workflow evidence | Result |
+|---|---|---|---|
+| #44 | `c7a11a58716048a9170586dd8b26436193ee5e59` | `42036693384` | SUCCESS, 41/41 |
+| #50 | `29ad33fb7e0f8c72a6c988253798143ee399135c` | `42036848615`, `42036848634`, `42036856392` | SUCCESS, 93/93; install/preflight, Wrangler dry-run and safety scan pass |
+| #84 | `e3c0a6295001c07476aa3900a6075b37f7bc7b6f` | `42036859248`, `42036859327`, `42036865561`, `42036859143`, `42036865996` | SUCCESS, 97/97; isolated Wrangler dry-run passes |
+| #60 | `2a9c24b0d7b6c1bf463656143708ddcbbf25047f` | `42004006242`, `42004006381`, `42004006364`, `42004006208` | SUCCESS, 129/129; exact pre-update scorecard candidate |
+| #80 | `724fdb092d584cead6f34612693de8cb9336c7eb` | `42002523884`, `42002508692`, `42002508523` | SUCCESS, 113/113 |
+| #74 | `abeca194672349e799bcfdd9d8f9c9dc82675947` | `41975711475`, `41975715983`, `41975716157` | SUCCESS; explicit all-ref Gitleaks scan: 816 commits, ~1.84 MB, no leaks |
+| #62 | `1fa32453e9569b136ec890b7c32562dda510612f` | `41921764508`, `41921781561`, `41921781529`, `41921781630` | SUCCESS; candidate prompt/identity checks |
+
+PR #84's current branch head is documentation-only commit `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a`; the listed code/test runs are for parent `e3c0a62...`. Exact current-head Auto Pilot is NOT TESTED after that documentation-only append. PR #60's current branch head will also advance due this register update; its prior green runs do not automatically transfer to the new head.
+
+### Failed and superseded CI
+- The 100-run recent Actions window contained 33 failures and 9 cancellations, primarily across intermediate/superseded branch commits. Do not aggregate these as current candidate failures.
+- Latest identified multilingual regression failure `42035887695` tested superseded SHA `935a039323ba7ed807420061a604ead7871a14b7`; the corrected current PR #50 head `29ad33f...` passes 93/93.
+- PR #81 current head `f1b5d39b42c4200eeb42b8cb899558ae3984866e` has passing regression/readiness checks but GitHub reports mergeable=false/dirty; this is an integration blocker, not a test failure.
+- PR #82 current head `89786c607446fd49fc21b7d0def4b30bd9cb3999` has passing checks but is stacked on PR #81.
+- PR #84 current doc-only head and the post-append PR #60 head require exact-head CI before any Human Verification.
+
+### Test limitations and outstanding benchmark work
+- TypeScript is NOT CONFIGURED on PR #44/#50/#84 legacy JavaScript paths; it is not counted as passed.
+- No complete 100-task reasoning, 50-task coding, 50-task research, 50-scenario governance, 30-scenario workflow, 90-task specialist or seven-day ecosystem benchmark has been executed.
+- No matched Workers AI/Gemini inference comparison, live web retrieval test, Android device test, live scanner test, backup restore, 100-concurrent-user edge test, or RPO/RTO test was performed.
+- Capability scores remain NOT MEASURED; evidence-credit remains 0/100 per dimension. CI counts are engineering tests only.
