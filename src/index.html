@@ -740,6 +740,8 @@
     .hero-composer{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr) 40px 44px;align-items:center;gap:7px;max-width:940px;margin:0 auto;padding:12px 14px 43px;border:1px solid #c2d8eb;border-radius:20px;background:#ffffffed;box-shadow:0 8px 24px #367db51c}
     .hero-composer input{min-width:0;height:40px;border:0;outline:0;background:transparent;color:#15365e;font-size:16px}.hero-composer input::placeholder{color:#7489a2}.composer-tool{height:40px;border:0;background:transparent;color:#34577e;font-size:25px}.composer-tool:disabled{opacity:.75}.hero-send{height:42px;border:0;border-radius:11px;background:linear-gradient(135deg,#0879e6,#0960cf);color:white;font-size:24px;font-weight:800}
     .hero-composer-meta{position:absolute;left:16px;right:14px;bottom:8px;display:flex;align-items:center;gap:9px;color:#506c8e;font-size:11px}.prompt-chip,.model-chip{padding:6px 12px;border:1px solid #cbddec;border-radius:20px;background:#f8fbff;color:#1b3c68;font-size:11px}.prompt-chip{margin-left:auto}.model-chip{font-weight:700}
+    .reference-launcher.workspace-launcher{max-width:960px;margin:0 auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+    .profile-action{font-size:12px;font-weight:750;color:#15365f}.profile-action:before{content:"C";display:inline-grid;place-items:center;width:34px;height:34px;margin-right:8px;border-radius:50%;background:linear-gradient(140deg,#d6f5ff,#8bcfff);border:2px solid #8bc9f5;color:#0757b7;vertical-align:middle}
     .reference-shortcuts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;max-width:960px;margin:24px auto 0}.reference-card{display:flex;min-height:128px;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 8px;border:1px solid #c7dceb;border-radius:17px;background:linear-gradient(150deg,#fff,#f3f9ff);box-shadow:0 5px 14px #376e9c17;color:#102c58;text-align:center}.reference-card>span{color:#0874dc;font-size:31px;font-weight:800;line-height:1.2}.reference-card strong{font-size:14px}.reference-card small{color:#4e6685;font-size:12px}.reference-card:hover{border-color:#72c8ee;transform:translateY(-2px)}.reference-card.wps-card>span{color:#e21d37;font-weight:950}
     .workspace-footnote{max-width:950px;margin:12px auto 0;border:0;color:#7187a1;text-align:center;font-size:10px}
     .composer-wrap{background:#f8fcffed;border-top:1px solid #d3e4f1}.composer{background:white;border-color:#bfd7e9;box-shadow:0 6px 20px #387bad17}.composer textarea{color:#17385f}.composer textarea::placeholder{color:#778ca3}.send{background:linear-gradient(110deg,#0878e7,#13bdce);color:#fff}.footer{color:#71859c}.footer .developer{color:#1685b4}
@@ -780,7 +782,7 @@
           <span class="online-pill"><i></i> ONLINE</span>
           <button class="icon-action" type="button" data-prompt="Bantu saya meninjau notifikasi dan status pekerjaan terbaru." aria-label="Notifikasi">♟</button>
           <button class="icon-action" type="button" data-prompt="Jelaskan cara menggunakan CerdikGo AI Innovation Workspace." aria-label="Bantuan">?</button>
-          <button id="loginOpen" class="profile-action" type="button" aria-haspopup="dialog" aria-controls="settingsDialog"><span class="profile-avatar">C</span><span class="profile-label">Profil / Akun<small>Google authentication</small></span></button>
+          <button id="loginOpen" class="profile-action" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
           <button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog" aria-label="Pengaturan">⚙</button>
         </div>
       </header>
@@ -807,7 +809,7 @@
       <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
         <div class="welcome" id="welcome">
-          <div class="reference-hero">
+          <div class="workspace-intro reference-hero">
             <div class="hero-wordmark"><strong>Cerdik<span>Go</span></strong><small>AI INNOVATION WORKSPACE</small></div>
             <div class="mascot-stage" aria-label="Maskot robot CerdikGo">
               <svg class="mascot" viewBox="0 0 300 260" role="img" aria-label="Robot maskot CerdikGo berwarna putih dan biru">
@@ -844,6 +846,7 @@
             <p>Satu ruang untuk berpikir lebih jernih, mengolah informasi, dan mengubah ide menjadi langkah nyata.</p>
           </div>
 
+          <div class="workspace-launcher reference-launcher">
           <form id="heroComposer" class="hero-composer" aria-label="Mulai percakapan CerdikGo">
             <button class="composer-tool" type="button" disabled aria-label="Lampiran segera tersedia">＋</button>
             <input id="heroMessage" type="text" maxlength="8000" placeholder="Tulis pesan Anda..." aria-label="Tulis pesan Anda" />
@@ -858,6 +861,7 @@
             <button class="reference-card" type="button" data-prompt="Saya ingin memproses dokumen PDF, gambar, atau OCR. Jelaskan opsi yang tersedia untuk:"><span>▤</span><strong>Dokumen</strong><small>PDF, gambar, OCR</small></button>
             <button class="reference-card" type="button" data-prompt="Bantu saya melakukan riset web dan mengidentifikasi sumber tepercaya tentang:"><span>◎</span><strong>Riset Web</strong><small>Cari sumber tepercaya</small></button>
             <button class="reference-card wps-card" type="button" data-prompt="Jelaskan alur kerja dokumen Office yang saat ini didukung CerdikGo:"><span>W</span><strong>WPS Office</strong><small>Buat & edit dokumen</small></button>
+          </div>
           </div>
           <div class="workspace-footnote"><span aria-hidden="true">✦</span> Pilih salah satu fitur atau mulai percakapan. Fitur yang belum tersedia akan ditandai secara transparan.</div>
         </div>
