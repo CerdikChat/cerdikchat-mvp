@@ -1,0 +1,102 @@
+name: CerdikGo PR #64 Isolated Preview
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerdikgo-pr64-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Verify Auto Pilot gate and publish isolated Preview
+    if: github.ref == 'refs/heads/atlas9/cerdikgo-connectors-menu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact PR candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Verify all required CI workflows passed for this exact SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+          CANDIDATE_SHA: ${{ github.sha }}
+        run: |
+          node --input-type=module <<'NODE'
+          const required = [
+            "CerdikGo Auto Pilot Readiness Gate",
+            "ATLAS-9 Phase 3 Regression Tests",
+            "CerdikGo Hybrid Gateway Tests",
+            "CerdikGo regression and installation checks"
+          ];
+          const url = `https://api.github.com/repos/${process.env.GH_REPOSITORY}/actions/runs?head_sha=${process.env.CANDIDATE_SHA}&per_page=100`;
+          const response = await fetch(url, {
+            headers: {
+              authorization: `Bearer ${process.env.GH_TOKEN}`,
+              accept: "application/vnd.github+json",
+              "x-github-api-version": "2022-11-28"
+            }
+          });
+          if (!response.ok) throw new Error(`GitHub Actions lookup failed: ${response.status}`);
+          const data = await response.json();
+          const runs = data.workflow_runs.filter(run => run.head_sha === process.env.CANDIDATE_SHA);
+          const failures = [];
+          for (const name of required) {
+            const match = runs.find(run => run.name === name && run.status === "completed" && run.conclusion === "success");
+            if (!match) failures.push(name);
+            else console.log(`PASS ${name}: ${match.html_url}`);
+          }
+          if (failures.length) throw new Error(`Auto Pilot blocked; missing successful exact-SHA workflows: ${failures.join(", ")}`);
+          console.log(`All required gates passed for ${process.env.CANDIDATE_SHA}`);
+          NODE
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Deploy isolated branch Preview (not Production)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo "::error::CLOUDFLARE_API_TOKEN repository secret is not configured."; exit 1; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo "::error::CLOUDFLARE_ACCOUNT_ID repository secret is not configured."; exit 1; }
+          npx --yes wrangler@4.153.0 preview --name cerdikgo-connectors-pr64 --message "PR #64 Connectors UI | SHA ${GITHUB_SHA}" --json | tee preview-result.json
+
+      - name: Publish Preview URL and tested SHA
+        if: success()
+        run: |
+          {
+            echo "## CERDIKGO PR #64 PREVIEW READY"
+            echo
+            echo "- Candidate SHA: ${GITHUB_SHA}"
+            echo "- Preview name: cerdikgo-connectors-pr64"
+            echo "- Deployment type: isolated Worker Preview; no Production traffic routing"
+            echo "- Bindings: sourced from the Wrangler previews configuration, including staging D1"
+            echo
+            echo "### Wrangler output"
+            echo '~~~json'
+            cat preview-result.json
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Preview result
+        if: always() && hashFiles('preview-result.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerdikgo-pr64-preview-result
+          path: preview-result.json
+          if-no-files-found: ignore
+          retention-days: 7
