@@ -69,3 +69,26 @@ test("Validation Gate, Protection Mode and Hybrid Connectivity are exposed from 
   const deckEnd = index.indexOf('</section>', deckStart);
   assert.doesNotMatch(index.slice(deckStart, deckEnd), /status-cards|protectionStatusCard/);
 });
+
+test("Android Tap-to-Open keeps prompt selection from opening the keyboard", () => {
+  const start = index.indexOf("function usePrompt(prompt)");
+  const end = index.indexOf("document.querySelectorAll(\"[data-prompt]\")", start);
+  assert.ok(start >= 0 && end > start, "Prompt handler must remain identifiable");
+  const handler = index.slice(start, end);
+  assert.match(handler, /input\.value = prompt/);
+  assert.doesNotMatch(handler, /input\.focus\(\)/);
+});
+
+test("Header status menus are mutually exclusive and dismiss on outside tap or Escape", () => {
+  assert.match(index, /menu\.open && !menu\.contains\(event\.target\)/);
+  assert.match(index, /if \(event\.key !== "Escape"\) return/);
+  assert.match(index, /for \(const other of menus\) if \(other !== menu\) other\.open = false/);
+});
+
+test("Header status menu labels and descriptions follow ID, EN and ZH language selection", () => {
+  for (const value of ["validationGate:", "systemStatus:", "protectionSubtitle:", "hybridSubtitle:"]) {
+    assert.equal((index.match(new RegExp(value, "g")) || []).length, 3, `Expected three translations for ${value}`);
+  }
+  assert.match(index, /#validationGateMenu > summary span/);
+  assert.match(index, /#systemStatusMenu > summary span/);
+});
