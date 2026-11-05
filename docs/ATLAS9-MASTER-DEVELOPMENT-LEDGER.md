@@ -382,3 +382,27 @@ Run links:
 The six governance registers remain on this scorecard feature branch and are not yet integrated into `main`. This continuation is append-only; prior evidence and historical failures are retained.
 
 Next actions: reconcile the stacked branch graph; review PR #69 divergence; integrate canonical identity through the approved Primary chain only after conflict resolution; complete runtime and benchmark evidence; keep all privileged actions gated.
+
+
+## Audit correction and exact documentation commit chain — 2026-11-05
+
+**Status:** VERIFIED for repository/CI metadata; integration BLOCKED by branch divergence.
+
+### Corrections to the earlier point-in-time snapshot
+- The earlier count of 56 open PRs was taken before PR #80 was created. After PR #80, the direct GitHub REST listing returned **57 open PRs**. The earlier 56 count is retained as a valid pre-#80 snapshot; 57 is the current count at this correction.
+- Main branch scheduled backup failures are confirmed for both run 41890146458 (2026-11-04) and 41695574776 (2026-11-03). Both failed in Gitleaks before archive creation; logs report no .gitleaks.toml was found and default rules flagged the reviewed localStorage namespace. PR #74's correction remains unmerged, so these main-branch failures are not cleared.
+- PR #60 final docs candidate is 8ed0be04b883e8f1639728290528de87cc16fe6b. Exact-head runs: Auto Pilot 42002779910 SUCCESS; regression/install 42002779876 SUCCESS; Phase 3 42002779803 SUCCESS; Hybrid Gateway 42002779818 SUCCESS. Auto Pilot log: 129 passed / 0 failed; doctor/preflight 16/16; strict TypeScript PASS; Wrangler dry-run PASS.
+- PR #60 remains DRAFT and is not mergeable. Compare against base branch atlas9/cerdikgo-autopilot-readiness: base head 637ff536011ed25fc598888f62f520b4cfdccd3c; merge base de11d34257005ba72a621312230489a7d161ff53; scorecard branch is 79 commits ahead and 2 behind (diverged). No rebase, force-push, or merge was attempted.
+- PR #80 remains DRAFT and mergeable on its exact head 724fdb092d584cead6f34612693de8cb9336c7eb; Auto Pilot 42002523884 SUCCESS (113/113), regression 42002508692 SUCCESS, push Auto Pilot 42002508523 SUCCESS.
+
+### Exact append-only register commit chain
+Branch: atlas9/cerdikgo-100-percent-scorecard
+- docs/ATLAS9-MASTER-DEVELOPMENT-LEDGER.md — ff246deabcda65c36835e44bd0ca903012e5e528
+- docs/CERDIKGO-ENGINEERING-CHANGELOG.md — ede6b9bbe56954b8a4a8cd8f7c7789aeaea10b90
+- docs/ATLAS9-TESTING-AND-QA-REGISTER.md — ca0d552717153f7320ea0ae1b65d6d81c4c9389b
+- docs/ATLAS9-SECURITY-GOVERNANCE-REGISTER.md — 923ddf36f23ba3d18b7377b37e4a775b8160ff10
+- docs/ATLAS9-DECISION-AND-APPROVAL-REGISTER.md — d040f9e79bbf8a211b2027ab753b65deb5103838
+- docs/CERDIKGO-OPEN-ISSUES-AND-HANDOVER.md — 147d834a43b12fc55ea0079d6b61c7fcd2e9719b
+- docs/CERDIKGO-SEVEN-DIMENSION-BENCHMARK.md — 8ed0be04b883e8f1639728290528de87cc16fe6b
+
+All seven records were appended; previous entries were not overwritten. The PR remains Draft, branch-divergence is unresolved, and no Human Verification was initiated.
