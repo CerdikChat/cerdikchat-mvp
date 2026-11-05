@@ -25,7 +25,16 @@ async function decide(requestId,decision,role){if(!csrf){statusEl.textContent="T
       const details=document.createElement("p");details.textContent=item.description||"Tidak ada deskripsi.";
       const problem=document.createElement("p");problem.textContent="Masalah: "+(item.problem||"—");
       const benefit=document.createElement("p");benefit.textContent="Manfaat: "+(item.expected_benefit||"—");
-      article.append(title,meta,id,time,details,problem,benefit);target.append(article);
+      article.append(title,meta,id,time,details,problem,benefit);
+      if(adminRole==="super_admin"){
+        const actions=document.createElement("div");actions.className="actions";
+        const archiveButton=document.createElement("button");archiveButton.className="danger";
+        archiveButton.textContent=isArchived?"Diarsipkan":"Hapus dari daftar";
+        archiveButton.disabled=isArchived;
+        if(!isArchived)archiveButton.addEventListener("click",()=>archiveProposal(item.request_id,item.feature_name||"usulan ini"));
+        actions.append(archiveButton);article.append(actions);
+      }
+      target.append(article);
     }
   }catch(error){target.className="empty";target.textContent="Usulan tidak dapat dimuat: "+String(error.message||"UNKNOWN").slice(0,100);}
   finally{button.disabled=false;}
