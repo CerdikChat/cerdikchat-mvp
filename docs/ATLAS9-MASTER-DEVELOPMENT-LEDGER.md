@@ -225,3 +225,12 @@ A prior entry incorrectly stated that the PR #52 deployed Preview lacked VOICE_R
 - Current seven competitive dimension scores remain **NOT MEASURED**. The 35-task manifest is a smoke fixture only. No model inference benchmark was run.
 - Status labels: PR #60/#62–#69 listed above are CI-verified only for their exact recorded heads and workflow scopes; PR #70 and PR #52 CI status is BLOCKED/NOT VERIFIED; Preview runtime, Android, backup restore, live research and scale remain NOT TESTED or previously recorded as blocked.
 - Next actions: obtain an exact-head CI result for PR #70; diagnose PR #52 mergeability without merging; validate migration #0008 only after scoped Preview approval; integrate canonical identity and privacy fixes through the approved dependency chain; build and execute full-sized model benchmarks before scoring any dimension.
+
+
+## Correction — 2026-11-05: scorecard branch advanced after the passing checkpoint
+
+- The previously recorded PR #60 pass applies to parent head `ad3cbd61b6467675e71e8445f113635c45beb8c9` only.
+- Append-only audit documentation was subsequently committed to the same branch. At the start of this correction the head was `d8fd4d04b119f4e8a63bffa6624396ead9f723f3`; the PR now reports mergeable=false.
+- Compare against base `atlas9/cerdikgo-autopilot-readiness` (head `637ff536011ed25fc598888f62f520b4cfdccd3c`) reports diverged: 59 commits ahead, 2 behind. No merge/rebase was performed.
+- Exact-head workflow runs and combined statuses for `d8fd4d04b119f4e8a63bffa6624396ead9f723f3` were empty. The earlier passing runs must not be attributed to this later head.
+- Status for current PR #60 branch: **BLOCKED** pending branch synchronization/conflict resolution and a new exact-head Auto Pilot run. This documentation correction does not claim a pass.
