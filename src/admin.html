@@ -8,7 +8,9 @@ async function decide(requestId,decision,role){if(!csrf){statusEl.textContent="T
   if(!target||!filter||!button)return;
   button.disabled=true;target.textContent="Memuat usulan dari server…";
   try{
-    const archiveFilter=$("#proposalArchiveFilter");\n    const isArchived=archiveFilter?.value==="archived";\n    const response=await fetch("/api/admin/feature-requests?status="+encodeURIComponent(filter.value)+"&archived="+(isArchived?"1":"0")+"&limit=100",{credentials:"same-origin",cache:"no-store"});
+    const archiveFilter=$("#proposalArchiveFilter");
+    const isArchived=archiveFilter?.value==="archived";
+    const response=await fetch("/api/admin/feature-requests?status="+encodeURIComponent(filter.value)+"&archived="+(isArchived?"1":"0")+"&limit=100",{credentials:"same-origin",cache:"no-store"});
     const data=await response.json();
     if(!response.ok)throw new Error(data.error||"FEATURE_REQUEST_QUEUE_UNAVAILABLE");
     target.replaceChildren();
