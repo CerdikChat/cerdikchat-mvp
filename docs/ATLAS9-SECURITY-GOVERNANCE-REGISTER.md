@@ -472,3 +472,10 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Backup restore remains NOT TESTED; scheduled backup runs `41695574776` and `41890146458` failed before archive creation. PR #74 scanner correction is not proof of a successful backup/restore.
 - Voice Production rate-limit binding and Android recording/playback remain NOT TESTED.
 - No OAuth, secrets, DNS, D1, billing, Worker settings or deployment changes were performed in this audit.
+
+
+## 2026-11-06 — Security/governance candidate verification correction
+
+- PR #89 current exact head `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7` passed the full Auto Pilot install/config/regression/Wrangler dry-run/safety gate (`42078337644`, `42078347572`). This corrects the main prompt's specialist identity only; it does not enable agent execution or change authentication.
+- PR #90 current exact head `4c2ef0438be4e8f85225c059887d078be44826e2` passed the same gate (`42078344776`, `42078357659`). This is documentation/test hardening, not a live security configuration change.
+- Both branches report TypeScript NOT CONFIGURED. Neither candidate changes live Cloudflare settings. Query-string redaction and D1 environment isolation remain BLOCKED pending separate review; no secrets, OAuth, DNS or D1 operations were performed.

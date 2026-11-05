@@ -486,3 +486,10 @@ The 76-hour session TTL remains unchanged. Live authentication, Google OAuth, RB
 ### FAILED then VERIFIED — workspace regression correction
 - PR #48 had three intermediate failures (`42069979986`, `42070149714`, `42070245727`) caused by workspace/account selector contracts. Current head `ba1c2af21de4eff88efdd58cdb6519ae883075ed` passed `42070406696`, 37/37.
 - PR #88 remains a stale, diverged Draft and must not be merged without a fresh branch based on current #48.
+
+
+## 2026-11-06 — Auto Pilot workflow hardening for main-branch Draft PRs
+
+- PR #89 current head `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7`: added `.github/workflows/autopilot-readiness-legacy.yml` to the earlier identity candidate. Full Auto Pilot push/PR runs `42078337644` and `42078347572` passed; 37/37 tests, install/config preflight, Wrangler dry-run and workflow safety scan all PASS. TypeScript NOT CONFIGURED.
+- PR #90 current head `4c2ef0438be4e8f85225c059887d078be44826e2`: added the same full readiness workflow to the installation-docs candidate. Full Auto Pilot push/PR runs `42078344776` and `42078357659` passed with the same results; TypeScript NOT CONFIGURED.
+- Earlier heads `7befbfa...` and `358a99f...` remain historical candidates and were superseded; no history was rewritten. Both PRs remain Draft and unmerged.

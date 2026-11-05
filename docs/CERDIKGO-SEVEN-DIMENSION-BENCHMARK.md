@@ -503,3 +503,9 @@ No capability score changed. All seven dimensions remain NOT MEASURED with evide
 - Ecosystem: seven-day SLO plus 100 concurrent users for 30 minutes; availability >=99.5%, error rate <1%, restore success 100%, RPO <=24h, RTO <=4h.
 
 No live model inference benchmark was run, and no matched Gemini comparison was run. Do not claim parity or superiority. The Workers AI model catalog/configuration is not evidence of quality.
+
+## 2026-11-06 — CI evidence correction; capability scores unchanged
+
+PR #89's current identity candidate `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7` and PR #90's current installation-docs candidate `4c2ef0438be4e8f85225c059887d078be44826e2` each passed the full JavaScript Auto Pilot gate on both push and PR events. Each ran 37/37 tests, installation/config preflight, Wrangler dry-run and workflow safety scan. TypeScript is NOT CONFIGURED.
+
+These are implementation/documentation CI results only. They do not add any reasoning, coding capability, research, governance-runtime, workflow-integration, specialist-routing or ecosystem benchmark samples. All seven capability scores remain NOT MEASURED; evidence-credit remains 0/100; target remains 100/100. No Gemini comparison was run.

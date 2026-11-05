@@ -573,3 +573,10 @@ No merge, Production deploy, remote D1 write/migration, OAuth/secrets/DNS change
 | #88 | 1 ahead / 4 behind against workspace base `ba1c2af21de4eff88efdd58cdb6519ae883075ed` | Draft; not mergeable | Do not merge; transplant only after current-base review |
 
 No stale branch was rebased, force-pushed, closed or merged. The exact comparisons were added as comments on the affected PRs.
+
+## 2026-11-06 — Updated candidate heads after full Auto Pilot gate
+
+- PR #89 current head: `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7`; full Auto Pilot push/PR `42078337644` / `42078347572` SUCCESS; 37/37; Wrangler dry-run PASS. Draft, mergeable, not merged.
+- PR #90 current head: `4c2ef0438be4e8f85225c059887d078be44826e2`; full Auto Pilot push/PR `42078344776` / `42078357659` SUCCESS; 37/37; Wrangler dry-run PASS. Draft, mergeable, not merged.
+- TypeScript is NOT CONFIGURED on both JavaScript branches. Preview runtime and Android acceptance remain NOT TESTED. Do not equate the gate result with Production readiness.
+- The earlier candidate SHAs remain in history as superseded revisions; the PR bodies now identify the current exact heads and checks.

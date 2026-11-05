@@ -358,3 +358,11 @@ No merge, Production/Preview deployment, D1 operation, OAuth/secret/DNS change, 
 - PR #90 exact candidate `358a99f368471f904f5a88d8398f9369af9a34fd` passed Controlled Autopilot and regression on push and PR events.
 - The prompt-intelligence workspace fix `41d7f30d7a1bedbd763504970ad059050f9f2188` passed its Legacy Auto Pilot gate and regression.
 - These candidates are eligible for a separately authorized human review, but Human Verification was NOT STARTED during this automation run. CI readiness is not Preview, Android or Production acceptance.
+
+
+## 2026-11-06 — Auto Pilot gate passed; manual review still separate
+
+- PR #89 exact head `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7`: full Auto Pilot push/PR runs `42078337644` and `42078347572` SUCCESS.
+- PR #90 exact head `4c2ef0438be4e8f85225c059887d078be44826e2`: full Auto Pilot push/PR runs `42078344776` and `42078357659` SUCCESS.
+- Both pass installation/configuration, 37/37 regression, Wrangler dry-run and workflow safety. TypeScript NOT CONFIGURED.
+- Decision: candidates are eligible for separately authorized Human Verification; Human Verification was NOT STARTED in this run. No merge, Preview deployment, Production deployment, D1 operation, credential change, DNS change or billing action is authorized by CI success.

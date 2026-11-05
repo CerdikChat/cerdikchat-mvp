@@ -658,3 +658,13 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 - Regression and installation workflow `42077582885`: SUCCESS — 129/129 tests, 16/16 preflight.
 - Phase 3 `42042915327` and Hybrid Gateway `42042915407` were last run successfully on prior code head `2c8e67d24173399b1132579886bd91997cce4ffe`; not rerun for this documentation-only change due workflow path filters.
 - The above results establish CI readiness of the documentation candidate only, not Preview runtime, Android acceptance, Production readiness or any seven-dimension model capability score.
+
+
+## 2026-11-06 — Full Auto Pilot gate correction for PR #89 and #90
+
+| PR | Current exact head | Auto Pilot push | Auto Pilot PR | Result |
+|---|---|---:|---:|---|
+| #89 identity | `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7` | `42078337644` | `42078347572` | Both SUCCESS; 37/37; install/config PASS; Wrangler dry-run PASS; safety scan PASS |
+| #90 install docs | `4c2ef0438be4e8f85225c059887d078be44826e2` | `42078344776` | `42078357659` | Both SUCCESS; 37/37; install/config PASS; Wrangler dry-run PASS; safety scan PASS |
+
+TypeScript is NOT CONFIGURED on these JavaScript branches and is not counted as a pass. The earlier heads `7befbfa...` and `358a99f...` had only the lighter guardrail/regression checks and are superseded by the exact heads above. Human Verification remains NOT STARTED.

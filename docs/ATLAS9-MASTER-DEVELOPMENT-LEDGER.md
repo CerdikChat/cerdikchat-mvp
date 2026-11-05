@@ -706,3 +706,13 @@ No PR merge, Production deployment, remote D1 read/write/migration, OAuth/secret
 - PR #69 head `cb5264803ca3efad03a8d168592c0b02d395354e` versus current governance base `679a6719fcfa1492f984c094adbcaa1dad2ddff3`: 4 ahead / 3 behind / diverged; `mergeable=false`. Clean replacement candidate: PR #85.
 - PR #88 remains 1 ahead / 4 behind / diverged and `mergeable=false`; do not merge as-is.
 - Review comments were added to PRs #84, #66, #69 and #88 documenting the exact base/head comparisons. No force-push, rebase, merge or branch deletion was performed.
+
+
+## 2026-11-06 — Transparent correction: full Auto Pilot gates on PR #89 and #90
+
+The earlier entries for PR #89 head `7befbfa37764446836373acee0bc34c4d0cb654c` and PR #90 head `358a99f368471f904f5a88d8398f9369af9a34fd` remain historical and were superseded when the full install/config/regression/Wrangler dry-run readiness workflow was added. Current exact heads:
+
+- PR #89: `3fd1fc2d01a67eef8053ba64fcd9a9f59b1ed3f7`; full Auto Pilot push `42078337644` and PR `42078347572` both SUCCESS; 37/37; install/config preflight PASS; Wrangler 4.153.0 dry-run PASS; workflow safety scan PASS. TypeScript is NOT CONFIGURED and is not counted as passed. https://github.com/CerdikChat/cerdikchat-mvp/pull/89.
+- PR #90: `4c2ef0438be4e8f85225c059887d078be44826e2`; full Auto Pilot push `42078344776` and PR `42078357659` both SUCCESS; 37/37; install/config preflight PASS; Wrangler 4.153.0 dry-run PASS; workflow safety scan PASS. TypeScript is NOT CONFIGURED and is not counted as passed. https://github.com/CerdikChat/cerdikchat-mvp/pull/90.
+
+Both PRs remain Draft, open and mergeable; neither was merged or deployed. Their full Auto Pilot gates have passed, but Human Verification was not started. This is a correction/addendum, not a replacement of earlier history.
