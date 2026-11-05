@@ -133,3 +133,11 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 - PR #52 exact-head combined status remained empty and GitHub reported mergeable=false at the audit checkpoint. The workflow addition is therefore **PLANNED/BLOCKED**, not a passing gate.
 - Existing exact-head CI verified in this review: PR #60 `ad3cbd61b6467675e71e8445f113635c45beb8c9` (129/129; runs 41950862476, 41950862498, 41950862526, 41950862654); PR #68 (104/104; 41951461346); PR #69 (102/102; 41951721640); PR #63 (139/139; four workflows); PR #65 (95/95); PR #66 (102/102 plus Wrangler dry-run).
 - No merge, Preview deployment, Production deployment, remote D1 migration/write, secrets/OAuth/DNS mutation, billing activation, or data deletion was performed.
+
+
+## 2026-11-05 — Exact-head status correction after append-only audit updates
+
+- The earlier PR #60 pass (129/129) belongs to `ad3cbd61b6467675e71e8445f113635c45beb8c9`.
+- Subsequent audit-record appends advanced the scorecard branch to `d8fd4d04b119f4e8a63bffa6624396ead9f723f3` before this correction. That newer SHA has no workflow run or combined status in the available GitHub evidence.
+- PR #60 now reports mergeable=false; compare shows the feature branch is 59 commits ahead and 2 behind its base. No merge or rebase was attempted.
+- Status: **BLOCKED** for exact-head CI and integration. Do not reuse the parent commit's CI result for the new branch head.
