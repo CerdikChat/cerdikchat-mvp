@@ -75,5 +75,5 @@ test("Composer shortcuts are connected to existing attachment, voice and tools c
   assert.match(index, /id="composerMore"/);
   assert.match(index, /querySelector\("#chooseAnalysisFile"\)\?\.click\(\)/);
   assert.match(index, /querySelector\("#voiceRecord"\)\?\.click\(\)/);
-  assert.match(index, /querySelector\("#cerdikgoValidationGate"\)\?\.scrollIntoView/);
+  assert.match(index, /querySelector\("#cerdikgoValidationGate \.cg-gate-toggle"\)\?\.focus\(\)/);
 });
