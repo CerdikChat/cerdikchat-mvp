@@ -1,0 +1,47 @@
+name: CerdikGo Worker Readiness (No Deploy)
+
+on:
+  pull_request:
+    branches:
+      - atlas9/prompt-intelligence-mvp
+    paths:
+      - "worker.js"
+      - "src/**"
+      - "auth/**"
+      - "multimodal/**"
+      - "wrangler.cerdikgo.toml"
+      - ".github/workflows/cerdikgo-worker-readiness.yml"
+      - "package.json"
+      - "tests/**"
+  push:
+    branches:
+      - atlas9/cerdikgo-worker-isolation-readiness
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerdikgo-worker-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Regression and isolated Wrangler dry-run
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run regression tests
+        run: npm test
+      - name: Validate isolated CerdikGo Worker configuration (dry-run only)
+        run: npx --yes wrangler@4.153.0 deploy --dry-run --config wrangler.cerdikgo.toml
+
+# Deliberately no deploy job. A separate deployment workflow may be added only
+# after dedicated D1, rate limiter, OAuth settings, secrets, scanner binding,
+# and explicit Production deployment authorization have been verified.
