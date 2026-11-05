@@ -22,6 +22,7 @@ test("Language selection updates welcome and beta guidance, not only the header"
   assert.match(html, /setText\("#sideNavigation h2", p\.sideTitle\)/);
   assert.match(html, /setText\("\.side-note", p\.sideNote\)/);
   assert.match(html, /window\.CerdikGoPromptI18n\?\.\(lang\)/);
+  assert.match(html, /cerdikgo:ui-language-changed/);
 });
 
 test("Navigation and language controls expose localized accessible names", () => {
