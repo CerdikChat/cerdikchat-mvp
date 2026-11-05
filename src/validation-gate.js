@@ -20,9 +20,9 @@
   host.setAttribute("aria-label","Validation Gate CerdikGo");
   host.innerHTML = `
     <button type="button" class="cg-gate-toggle" aria-expanded="true" aria-controls="cgGateDetails">
-      <span class="cg-gate-symbol" aria-hidden="true">✓</span>
+      <span class="cg-gate-symbol" aria-hidden="true">i</span>
       <span class="cg-gate-heading"><strong>VALIDATION GATE</strong><small>Keputusan pemeriksaan, bukti, dan alasan penolakan</small></span>
-      <span class="cg-gate-summary" id="cgGateSummary">PENDING · 5 pemeriksaan</span>
+      <span class="cg-gate-summary" id="cgGateSummary" role="status" aria-live="polite">PENDING · 5 pemeriksaan</span>
       <span aria-hidden="true">⌄</span>
     </button>
     <div id="cgGateDetails" class="cg-gate-details">
@@ -81,9 +81,15 @@
     report(id,status,reason){
       const item=entries.find(entry=>entry.id===id);
       if(!item||!Object.hasOwn(labels,status))return false;
-      const explanation=String(reason||"");
-      if((status==="rejected"||status==="unavailable")&&!explanation.trim())return false;
-      item.status=status;item.reason=explanation.trim()||"Pemeriksaan dinyatakan tidak memerlukan tindakan.";
+      if (typeof reason !== "string") return false;
+      const explanation = reason.trim();
+      // A success label is meaningful only when its evidence is visible to the user.
+      if (["accepted", "rejected", "unavailable"].includes(status) && !explanation) return false;
+      if (explanation.length > 500) return false;
+      item.status = status;
+      item.reason = explanation || (status === "pending"
+        ? "Belum ada bukti yang dilaporkan pada sesi ini."
+        : "Pemeriksaan tidak memerlukan tindakan.");
       render();return true;
     },
     snapshot(){return entries.map(({id,name,status,reason})=>({id,name,status,reason}));}
