@@ -4,17 +4,6 @@
   // AI requests contain only text explicitly pasted by the user.
   const MAX_TEXT = 24000;
   const ACCEPT = ".doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.odt,.ods,.odp";
-  const MIME = {
-    ".doc":"application/msword",
-    ".docx":"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ".xls":"application/vnd.ms-excel",
-    ".xlsx":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    ".ppt":"application/vnd.ms-powerpoint",
-    ".pptx":"application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    ".pdf":"application/pdf",".odt":"application/vnd.oasis.opendocument.text",
-    ".ods":"application/vnd.oasis.opendocument.spreadsheet",
-    ".odp":"application/vnd.oasis.opendocument.presentation"
-  };
   const style = document.createElement("style");
   style.textContent = `
     #wpsBridgeOpen{position:fixed;right:14px;bottom:calc(94px + env(safe-area-inset-bottom));z-index:30;border:1px solid #20b9d4;border-radius:13px;padding:11px 14px;background:#102b49;color:#effaff;font:700 13px system-ui;box-shadow:0 8px 24px #0006}
