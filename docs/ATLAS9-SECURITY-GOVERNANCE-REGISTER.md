@@ -267,3 +267,13 @@ No secrets, OAuth settings, DNS, Production resources, remote D1, or billing wer
 - PR #76 file-analysis path requires env.FILE_SCANNER before AI processing and rejects absent/unavailable scanner. The reviewed wrangler.toml does not define a FILE_SCANNER service binding. Scanner runtime is therefore NOT PROVISIONED; fail-closed upload behavior is safer than bypassing malware scanning.
 - PR #35 document research and main Core currently hardcode Gemma 4 26B A4B; PR #32 voice hardcodes Workers AI Whisper. No centralized model router/fallback policy or live inference benchmark is verified.
 - No OAuth, secrets, DNS, D1, billing, or Production configuration was changed during this review.
+
+
+## Production authentication control — 2026-11-05
+
+- Main worker.js currently gates Google auth on GOOGLE_AUTH_REQUIRED === "true".
+- Main wrangler.toml sets that flag under Preview variables; no repository-level Production default is declared. Cloudflare environment variables configured outside the repository were not accessible, so actual Production auth state is NOT TESTED / NOT VERIFIED.
+- This is a P0 configuration assurance gap: unless an out-of-band Production flag is set, repository defaults do not force authentication.
+- PR #44 proposes a fail-closed rule based on ENVIRONMENT=production or presence of a D1 DB binding, and adds regression tests. Exact head 30e05c23ce56116d80c3d5b872e3f9b5c7adef91; run 41383765675 SUCCESS, 40/40.
+- PR #44 remains DRAFT and unmerged. Do not represent the fix as active in Primary or Production.
+- No environment variables, OAuth credentials, secrets, DNS, D1, or Production resources were inspected or changed.
