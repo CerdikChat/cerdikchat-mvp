@@ -114,3 +114,22 @@ A direct read of PR #51's Cloudflare deployment-bot comment confirms that the ex
 is the Cloudflare **Preview URL for PR #51**, branch `atlas9/prompt-intelligence-mvp`, candidate SHA `afa2ad537b3979b5e2361d0a3242059ea639f59c`. The latest reported Preview deployment for that branch was created on 2026-11-05 at 10:21:27 UTC and reported Build: Success / Deployment: Success.
 
 PR #51 remains open and unmerged. Therefore the supplied Primary URL is not evidence of a separately provisioned CerdikGo Primary Worker or a Production release. It is an automatically generated branch Preview hosted under the `cerdikchat-mvp` Worker service. Keep the product label “CerdikGo Primary candidate / Preview” until a separate Worker is actually provisioned and its own runtime is verified.
+
+## Fail-closed authentication default correction — 2026-11-05
+
+**Status:** VERIFIED on isolated Draft PR #84; NOT INTEGRATED; NOT DEPLOYED.
+
+- Branch: `atlas9/cerdikgo-worker-isolation-readiness`.
+- Config change commit: `c827b1c3cc08027ee036d0f82465046521b6993e`.
+- Regression guardrail test commit / exact current head: `e3c0a6295001c07476aa3900a6075b37f7bc7b6f`.
+- Changed files: `wrangler.cerdikgo.toml`, `tests/cerdikgo-worker-config.test.mjs`, and this readiness document.
+- `wrangler.cerdikgo.toml` now sets `GOOGLE_AUTH_REQUIRED = "true"`. The dedicated Worker remains fail-closed until its own D1, rate-limit namespace, Google OAuth client/origin, secrets and scanner binding are separately provisioned and approved.
+- The new tests assert that authentication is required and that the config does not reuse shared D1 or rate-limit resources.
+- Exact-head regression: run `42036859248` SUCCESS; `npm test` 97 passed / 0 failed.
+- Exact-head readiness: PR run `42036859327` SUCCESS and push run `42036865561` SUCCESS; install/preflight and full regression passed; TypeScript is NOT CONFIGURED on this legacy JavaScript branch.
+- Isolated Worker readiness: PR run `42036859143` SUCCESS and push run `42036865996` SUCCESS; command `npx --yes wrangler@4.153.0 deploy --dry-run --config wrangler.cerdikgo.toml` passed. Wrangler output explicitly showed `env.GOOGLE_AUTH_REQUIRED ("true")`. No deployment occurred.
+- Workflow safety scan passed; no deploy job exists in the readiness workflow.
+
+The connected Cloudflare account's read-only Worker inventory returned only `cerdikchat-mvp` and `cerdikgo-mcp-preview`; no script named `atlas9-prompt-intelligence-mvp-cerdikchat-mvp` exists in the returned inventory. This PR therefore remains a readiness package, not a separately provisioned CerdikGo Primary Worker. Do not reuse CerdikChat D1 or rate-limit resources to make it appear functional.
+
+No Production deployment, D1 write/migration, OAuth/secret/DNS change, billing activation, scanner provisioning, or merge was performed. Human Verification remains NOT STARTED. Preview runtime, Android acceptance and Production readiness remain separate and NOT TESTED.
