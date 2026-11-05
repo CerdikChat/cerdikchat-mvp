@@ -98,3 +98,10 @@ The connected Cloudflare account was queried using read-only Worker inventory an
 ### Consequence for product identity and release status
 
 As of this read-only inventory, CerdikGo Primary is **not verified as a separate deployed Cloudflare Worker**. The supplied hostname is associated with a branch Preview deployment; `cerdikgo-mcp-preview` is a different service. The separate Worker name in `wrangler.cerdikgo.toml` is only a candidate target until a dedicated script exists and has been provisioned under explicit authorization.
+
+
+### Authentication fail-closed gate
+
+- In `worker.js`, Google session enforcement in `handleChat` is conditional on `GOOGLE_AUTH_REQUIRED === "true"`. The candidate `wrangler.cerdikgo.toml` does not currently set this variable.
+- The existing repository's top-level `wrangler.toml` also does not declare the variable at the top level; it declares it only in the Preview vars section. The Cloudflare settings read did not expose runtime plain-text vars, so the effective Production value is **not independently verified** by this audit.
+- Before any CerdikGo user-facing release, explicitly configure `GOOGLE_AUTH_REQUIRED=true`, a CerdikGo-specific Google Client ID and exact authorized origin, then prove unauthenticated chat is rejected (401) and an approved authenticated session succeeds. Do not infer authentication from the presence of a Google login button or from the D1 binding alone.
