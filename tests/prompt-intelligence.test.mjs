@@ -68,9 +68,9 @@ test("Quality score is explicitly heuristic and includes verification caveat", (
 
 
 test("Inline SVG gradient IDs are unique across the complete workspace", () => {
-  const ids = [...html.matchAll(/\\bid=["']([^"']+)["']/g)].map(match => match[1]);
+  const ids = [...html.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]);
   assert.equal(ids.length, new Set(ids).size, "HTML id attributes must be unique");
-  for (const reference of html.matchAll(/url\\(#([^)]*)\\)/g)) {
+  for (const reference of html.matchAll(/url\(#([^)]*)\)/g)) {
     assert.ok(ids.includes(reference[1]), `SVG/CSS reference #${reference[1]} must resolve to an existing ID`);
   }
 });
