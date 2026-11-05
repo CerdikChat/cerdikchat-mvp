@@ -338,3 +338,10 @@ No Gemini comparison, live inference benchmark, live research, Android acceptanc
 | Ecosystem | 7-day reliability plus scale/recovery | Availability ≥99.5%; 100 concurrent users for 30 minutes; error rate <1%; restore success 100%; RPO ≤24h; RTO ≤4h |
 
 The 35-task v0.1 manifest is structural smoke coverage only. It is not a substitute for the required samples and has not been executed against a model. No matched Gemini benchmark, live inference campaign, edge-load campaign, Android acceptance, scanner runtime, backup restore, or seven-day SLO run was performed. Do not claim superiority, parity or overall victory against Gemini.
+
+
+## PR #84 exact-head evidence correction — 2026-11-05
+
+An earlier continuation described PR #84's documentation-only head `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a` as not rerun. That statement is superseded: exact-head Legacy Auto Pilot run `42037076015` and isolated Worker readiness run `42037076046` both completed SUCCESS on `b1e6e636...`, with 97/97 tests. The Worker dry-run used `wrangler.cerdikgo.toml` and explicitly showed `GOOGLE_AUTH_REQUIRED=true`; no deployment occurred. TypeScript remains NOT CONFIGURED on this JavaScript branch.
+
+A later documentation-only correction advanced PR #84 to `db8ed792537094a2adde85018e17ddb9f6613c45`. No application/config/test code changed after `b1e6e636...`; the current documentation-only head `db8ed792...` has no new exact-head workflow run. Keep Human Verification NOT STARTED and do not transfer the prior run to the later doc-only SHA.
