@@ -461,3 +461,13 @@ All seven capability dimensions remain NOT MEASURED. Evidence-credit is 0/100 fo
 Cloudflare model catalog search confirms @cf/google/gemma-4-26b-a4b-it is listed for text generation and carries token-price metadata. This is catalog evidence, not inference evidence. No live inference was run because the remaining free allocation was not confirmed. Cloudflare Workers AI documentation (pricing page updated 2026-10-20) states 10,000 free neurons per day; usage above this requires Workers Paid. No billing activation or paid dependency was added.
 
 No matched Gemini benchmark was run. Do not claim Gemini superiority or parity.
+
+ 
+## Capability measurement addendum — 2026-11-05 21:12 WIB
+
+No capability score changed. All seven dimensions remain NOT MEASURED with evidence-credit 0/100. New tests are implementation and configuration checks, not model benchmark samples.
+
+- PR #84: 98/98 tests validate dedicated CerdikGo Preview naming, auth-required config, and isolation from shared D1/rate limits. This supports product/configuration readiness only.
+- PR #87: 114/114 tests validate fail-closed Production/D1 authentication. This supports a governance control candidate only; no live OAuth/RBAC/session runtime benchmark.
+- PR #60 exact head fda4216b843704276de17ea122547a839cfbd01a passed 129/129 tests across all four workflows. This remains engineering CI evidence, not competitive capability.
+- The full reasoning/coding/research/governance/workflow/specialist/ecosystem sample sets have not been executed. No live inference or Gemini comparison.
