@@ -277,3 +277,12 @@ No secrets, OAuth settings, DNS, Production resources, remote D1, or billing wer
 - PR #44 proposes a fail-closed rule based on ENVIRONMENT=production or presence of a D1 DB binding, and adds regression tests. Exact head 30e05c23ce56116d80c3d5b872e3f9b5c7adef91; run 41383765675 SUCCESS, 40/40.
 - PR #44 remains DRAFT and unmerged. Do not represent the fix as active in Primary or Production.
 - No environment variables, OAuth credentials, secrets, DNS, D1, or Production resources were inspected or changed.
+
+
+## Main-branch observability and backup workflow review — 2026-11-05
+
+- Main wrangler.toml enables observability with 100% head sampling but does not set redact_query_string=true. PR #66 proposes top-level and Preview query-string redaction and adds configuration tests. PR #66 head 721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1; runs 41950007358 and 41950007360 SUCCESS; PR remains DRAFT and mergeability was false at review. Do not claim the redaction fix is active on main.
+- Main auth/google-auth.js has an 8-hour session TTL and 8-hour CSRF TTL. The 76-hour session noted in PR #52 belongs to that governance branch, not main.
+- Main backup workflow uses actions/checkout with persist-credentials=true and contents:read. PR #53 proposes persist-credentials=false. This is a least-privilege hardening opportunity; PR #53 head 142f4d8a893ba81d5f926da65f53b9e077ad1cad; regression 41825322436 and Phase 3 41825322322 SUCCESS; still Draft.
+- The scheduled backup workflow does not upload to Google Drive. The Drive upload step runs only for workflow_dispatch when upload_to_google_drive=true; scheduled runs create a GitHub artifact with 30-day retention. The latest two scheduled runs (41890146458 and 41695574776) failed at Gitleaks before artifact generation. Therefore automated off-site Drive backup is NOT VERIFIED.
+- No workflow was dispatched, no Google Drive upload was triggered, and no repository secrets or tokens were accessed or modified.
