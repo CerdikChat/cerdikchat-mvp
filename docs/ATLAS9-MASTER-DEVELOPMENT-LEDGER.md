@@ -464,3 +464,12 @@ This entry supersedes the earlier point-in-time statement that PR #60 was non-me
 - Hybrid Gateway 42003589653 — SUCCESS.
 - PR #60 remains DRAFT; latest GitHub metadata says mergeable=true. Compare graph still reports 79 commits ahead / 2 behind; no merge or rebase was performed.
 - This gate applies only to this exact scorecard documentation candidate. It does not prove Preview runtime, Android acceptance, seven-dimension model capability, backup restore, edge scale, or Production readiness. Human Verification was NOT STARTED.
+
+
+## QA evidence correction — Wrangler dry-run scope — 2026-11-05
+
+Earlier entries attributed a Wrangler dry-run PASS to PR #60's scorecard Auto Pilot candidate. Exact workflow review shows the current scorecard gate definition and runs 42003778480 / 42003778516 do not execute a Wrangler command. Correct status for PR #60 head b7c6c13fd9c52f8abbfd5bbe5880f013a375f3a0: Wrangler dry-run is NOT TESTED by these workflows; do not count it as PASS.
+
+PR #60 exact-head verified items remain: Auto Pilot 42003778480 SUCCESS, 129 passed / 0 failed; doctor/install preflight 16/16; strict TypeScript PASS; deployment-workflow safety scan PASS; regression/install 42003778516 SUCCESS; Phase 3 42003778573 SUCCESS; Hybrid Gateway 42003778499 SUCCESS.
+
+The Wrangler 4.153.0 dry-run evidence belongs to PR #80's legacy-branch workflow 42002523884, not PR #60. This correction preserves the prior log and narrows the claim to the exact tested commands.
