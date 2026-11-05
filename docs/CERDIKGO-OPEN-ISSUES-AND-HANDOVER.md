@@ -428,3 +428,36 @@ An earlier entry recorded PR #50 head `29ad33fb7e0f8c72a6c988253798143ee399135c`
 - PR #60 current head after documentation-only corrections: `da12d65fe9aa75afd6d2bf1ecd5ccab70027e489`; its preceding code/benchmark candidate `d23c19d292516b0174a41b54aca0a164bc9d20ba` passed exact Auto Pilot `42037452512`, regression/install `42037452506`, Phase 3 `42037452504`, Hybrid Gateway `42037452923` (129/129). Current documentation-only head has no new workflow run.
 - PR #84 current head after documentation-only correction: `db8ed792537094a2adde85018e17ddb9f6613c45`; preceding code/doc candidate `b1e6e636fff22cdf90cc2fda4f0b07ec65aff51a` passed Auto Pilot `42037076015` and isolated Worker readiness `42037076046` (97/97). Current documentation-only head has no new workflow run.
 - Keep both PRs Draft; do not transfer exact-head CI evidence across later documentation-only SHAs. Human Verification remains NOT STARTED.
+
+
+## Exact-head verification update — 2026-11-05
+
+The previous continuation stated that PR #60 head `3aec9ba0d9877531cb965028c8b0e0a6f576028c` and PR #84 head `db8ed792537094a2adde85018e17ddb9f6613c45` had no new exact-head workflow runs. That statement is superseded by the following evidence:
+
+### PR #60 — scorecard candidate
+- Exact head `3aec9ba0d9877531cb965028c8b0e0a6f576028c`.
+- Auto Pilot `42038684180`: SUCCESS, 129/129; installation preflight 16/16; strict TypeScript PASS.
+- Regression/install `42038684115`: SUCCESS, 129/129.
+- Phase 3 `42038683966`: SUCCESS, 129/129.
+- Hybrid Gateway `42038684396`: SUCCESS, 129/129; Wrangler 4.153.0 dry-run PASS, no deployment.
+- Additional push Auto Pilot `42038674566` and regression `42038674594`: SUCCESS.
+- Cloudflare Workers Builds check for the branch Preview: SUCCESS, build `9ad6900e-c084-43fd-8978-eb0d3a653e92`.
+- This is CI and branch Preview build evidence only. It is not live application runtime, Android acceptance, Production readiness or competitive model benchmarking.
+
+### PR #84 — isolated Worker guard
+- Exact current head `db8ed792537094a2adde85018e17ddb9f6613c45`.
+- Auto Pilot/readiness `42037825983`: SUCCESS, 97/97; repository preflight, Wrangler dry-run and workflow safety scan PASS.
+- Isolated Worker readiness `42037826034`: SUCCESS, 97/97; `wrangler.cerdikgo.toml` dry-run explicitly printed `GOOGLE_AUTH_REQUIRED=true`; no deployment.
+- Regression `42037817647`: SUCCESS.
+- Cloudflare Workers Builds check: SUCCESS, build `7cbb5b94-3047-436a-93f6-c9c8d92b2c4d`.
+- The Worker remains a readiness package without dedicated D1, rate-limit, OAuth, secret or FILE_SCANNER resources; Preview build is not runtime or Production acceptance.
+
+### PR #50 — latest multilingual/voice candidate
+- Exact head `1b7a9142a58f9681130fa0f3f3f9d8d600ae70eb`.
+- Regression `42038433092` and Auto Pilot `42038441088`: SUCCESS, 95/95.
+- Cloudflare Workers Builds check: SUCCESS, build `ceabf2b8-f12f-4cab-b644-04f94e6994c5`.
+- TypeScript NOT CONFIGURED on this legacy JavaScript branch. Live runtime and Android acceptance remain NOT TESTED.
+
+PR #69 still contains the canonical exactly-nine Primary prompt candidate (head `cb5264803ca3efad03a8d168592c0b02d395354e`) with successful Auto Pilot/regression, but it is 4 ahead / 3 behind and GitHub reports dirty/non-mergeable. Main Primary identity remains NOT VERIFIED.
+
+No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, billing activation or Human Verification was performed.
