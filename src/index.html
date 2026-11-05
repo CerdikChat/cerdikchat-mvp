@@ -1166,7 +1166,31 @@
     [data-theme="light"] .pi-home-card,[data-theme="light-blue"] .pi-home-card{background:#e7f3fc;color:#17324f;border-color:#b8d5eb}
     @media(max-width:720px){.pi-shell{margin:4px auto;padding:10px}.pi-card{padding:12px}.pi-btn{flex:1 1 130px}.pi-vault-item{align-items:flex-start}}
 
-  </style>
+  
+    /* Header menus: Validation Gate and system status live in compact, accessible dropdowns. */
+    .top-actions{flex-wrap:wrap}
+    .header-menu{position:relative}
+    .header-menu>summary{display:flex;align-items:center;gap:7px;list-style:none;white-space:nowrap}
+    .header-menu>summary::-webkit-details-marker{display:none}
+    .header-menu[open]>summary{border-color:var(--blue);box-shadow:0 0 0 2px #318ce522}
+    .header-menu-panel{position:absolute;top:calc(100% + 9px);right:0;z-index:1200;width:min(390px,calc(100vw - 24px));max-height:min(70dvh,560px);overflow:auto;padding:10px;border:1px solid #28618a;border-radius:14px;background:var(--panel);color:var(--text);box-shadow:0 18px 48px #0009}
+    .validation-menu-panel{width:min(460px,calc(100vw - 24px))}
+    .header-menu-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:11px;color:var(--text);text-decoration:none;background:var(--panel2)}
+    .header-menu-item+.header-menu-item{margin-top:8px}
+    .header-menu-item>span:first-child{font-size:24px;flex:0 0 30px;text-align:center}
+    .header-menu-item>span:last-child{display:flex;flex-direction:column;gap:3px;min-width:0}
+    .header-menu-item strong{font-size:13px}
+    .header-menu-item small{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+    .header-menu-item.protection{border-color:#279b69}
+    .header-menu-item.hybrid{border-color:#168fc5}
+    .cg-gate{margin:0!important}
+    .cg-gate-toggle{cursor:default!important}
+    @media(max-width:700px){
+      .top-actions{gap:6px}
+      .header-menu>summary,.top-actions>.settings-button{padding:8px 9px;font-size:11px}
+      .header-menu-panel{right:-8px}
+    }
+</style>
 </head>
 
 <body>
@@ -1252,6 +1276,21 @@
         </div>
         <strong>CerdikGo · Innovation Workspace</strong>
         <div class="top-actions">
+          <details class="header-menu" id="validationGateMenu">
+            <summary class="settings-button" aria-controls="validationGateMount">ⓘ <span>Validation Gate</span></summary>
+            <div class="header-menu-panel validation-menu-panel"><div id="validationGateMount"></div></div>
+          </details>
+          <details class="header-menu" id="systemStatusMenu">
+            <summary class="settings-button" aria-controls="systemStatusMenuPanel">◈ <span>Status Sistem</span></summary>
+            <div class="header-menu-panel" id="systemStatusMenuPanel">
+              <a class="header-menu-item protection" href="#settingsDialog" id="protectionStatusCard" aria-label="Protection Mode — perlindungan sesi dan akses">
+                <span aria-hidden="true">⬡</span><span><strong>Protection Mode</strong><small>ACTIVE · SERVER CHECK</small><small>Perlindungan sesi &amp; akses</small></span>
+              </a>
+              <a class="header-menu-item hybrid" href="#hybridModule" aria-label="Hybrid Connectivity — simulator">
+                <span aria-hidden="true">⌘</span><span><strong>Hybrid Connectivity</strong><small>SIMULATOR</small><small>Fiber · Cellular · Wi-Fi Mesh · LoRa</small></span>
+              </a>
+            </div>
+          </details>
           <button id="languageOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="languageDialog" aria-label="Pilih bahasa">🌐 <span id="languageCurrent">ID</span></button>
           <span class="pill">● AI · Beta</span>
           <button id="loginOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
@@ -1264,18 +1303,7 @@
           <span class="network-dot" aria-hidden="true"></span>
           <span id="networkStatusText">Memeriksa konektivitas jaringan…</span>
         </div>
-        <div class="status-cards">
-          <a class="status-card" href="#settingsDialog" id="protectionStatusCard" aria-label="Protection Mode — perlindungan sesi dan akses">
-            <span class="status-icon" aria-hidden="true">⬡</span>
-            <span class="status-copy"><span class="status-title">Protection Mode</span><span class="status-pill">ACTIVE · SERVER CHECK</span><span class="status-sub">Perlindungan sesi & akses</span></span>
-            <span class="status-chevron" aria-hidden="true">›</span>
-          </a>
-          <a class="status-card hybrid" href="#hybridModule" aria-label="Hybrid Connectivity — simulator">
-            <span class="status-icon" aria-hidden="true">⌘</span>
-            <span class="status-copy"><span class="status-title">Hybrid Connectivity</span><span class="status-pill">SIMULATOR</span><span class="status-sub">Fiber · Cellular · Wi-Fi Mesh · LoRa</span></span>
-            <span class="status-chevron" aria-hidden="true">›</span>
-          </a>
-        </div>
+        
       </section>
 
       <details class="workspace-tools-drawer main-workspace-tools" id="workspaceTools">
