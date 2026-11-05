@@ -195,3 +195,13 @@ A prior entry incorrectly stated that the PR #52 deployed Preview lacked VOICE_R
 
 ## Documentation candidate CI — 2026-11-05
 - Parent commit d0ea6afe4d300b9bbbb79962a7b5159b86c30e7f on atlas9/cerdikgo-100-percent-scorecard passed exact-head push readiness 41950554539, push regression 41950554542, PR readiness 41950560458, PR regression 41950560505, Phase 3 41950560449, Hybrid Gateway 41950560428 — all SUCCESS; 129/129 tests.
+
+## Transparent CI correction — 2026-11-05: PR #63 initial MCP failure
+
+- Initial PR #63 head c9a5b7f5575e4571a7fefe3f7df39827a4a76439 failed all four pull-request workflows: Hybrid Gateway 41934869172, Auto Pilot Readiness 41934869329, Regression/Installation 41934869387, and Phase 3 41934869843. Push runs 41934848054 (readiness) and 41934848022 (regression) also failed.
+- The failing test was “MCP accepts bearer scheme case-insensitively and rate-limits the credential fingerprint”; expected a non-401 response but received 401. Root cause: an over-escaped whitespace expression in the Bearer parser.
+- Worker correction commit 0df022076c6bcd1ce19620470943defacce27fba fixed the regex. Test commit 4c5276f2ff5307949f912451d554d9be879223b6 added malformed-Bearer regression coverage.
+- Final PR #63 exact head 4c5276f2ff5307949f912451d554d9be879223b6 passed all four workflows: 41945833238 Hybrid Gateway, 41945833224 Regression/Installation, 41945833375 Auto Pilot Readiness, 41945833236 Phase 3. Readiness log confirms 139/139 tests, 0 failed. Failed initial history remains visible and is not overwritten.
+
+## Documentation candidate checkpoint — 2026-11-05
+- Parent e8d46e51b0ba2395fca6821fe7691fcf96420d04 on atlas9/cerdikgo-100-percent-scorecard passed exact-head runs 41950695912 (push regression), 41950695958 (push readiness), 41950700930 (PR regression), 41950700949 (PR readiness), 41950700912 (Phase 3), 41950700978 (Hybrid Gateway) — all SUCCESS; 129/129 tests.

@@ -186,3 +186,20 @@ Correction runs: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41949
 - Observed prompt roles: ATLAS coordinator plus seven specialist labels; prompt says all are analytical approaches in one model. This is not the canonical nine-specialist registry contract.
 - Status: FAILED for identity parity on current Preview (source inspection); NOT TESTED for live UI/model behavior.
 - Canonical PR #62 candidate 1fa32453e9569b136ec890b7c32562dda510612f passed exact-head runs 41921781529, 41921781474, 41921781561, 41921781630. It remains unmerged and undeployed.
+
+## PR #63 failure and remediation record — 2026-11-05
+
+| Candidate | Run ID | Status | Evidence |
+|---|---:|---|---|
+| Initial head c9a5b7f5575e4571a7fefe3f7df39827a4a76439 | 41934869172 | FAILED | Hybrid Gateway; MCP Bearer test returned 401 |
+| Same initial head | 41934869329 | FAILED | Auto Pilot Readiness |
+| Same initial head | 41934869387 | FAILED | Regression/Installation; 137/138 tests |
+| Same initial head | 41934869843 | FAILED | ATLAS-9 Phase 3 |
+| Same initial head | 41934848054 | FAILED | Push Auto Pilot Readiness |
+| Same initial head | 41934848022 | FAILED | Push Regression/Installation |
+| Final head 4c5276f2ff5307949f912451d554d9be879223b6 | 41945833238 | VERIFIED | Hybrid Gateway |
+| Same final head | 41945833224 | VERIFIED | Regression/Installation |
+| Same final head | 41945833375 | VERIFIED | Auto Pilot Readiness; 139/139 |
+| Same final head | 41945833236 | VERIFIED | ATLAS-9 Phase 3 |
+
+Failure links: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41934869172 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41934869329 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41934869387 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41934869843 .

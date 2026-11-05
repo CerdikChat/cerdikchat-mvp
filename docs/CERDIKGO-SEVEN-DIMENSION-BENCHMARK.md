@@ -118,3 +118,6 @@ The PR #65 evidence validator's first implementation candidate failed its regres
 
 ## Product identity evidence boundary — 2026-11-05
 The canonical nine-role identity contract is CI-verified on PR #62, but the current primary Preview from PR #52 still contains the legacy ATLAS-plus-seven-role prompt. Therefore product identity/specialization is PARTIALLY VERIFIED in the development candidate and FAILED for parity in the deployed Preview. No independent nine-agent execution is evidenced, and the seven-dimension score remains NOT MEASURED.
+
+## Engineering evidence correction — 2026-11-05
+The first PR #63 MCP hardening candidate failed because valid Bearer tokens were rejected (401). The corrected final candidate passed 139/139 tests and all four exact-head workflows. This validates a security parser fix only; it does not produce coding, reasoning, or competitive AI benchmark scores.

@@ -104,3 +104,6 @@ PR #65's first implementation commit failed CI because of a test-source formatti
 
 ## Identity governance drift — 2026-11-05
 The deployed PR #52 Preview worker.js prompt still enumerates ATLAS as coordinator and only seven specialist labels (NEXUS, TITAN, SENTINEL, GENESIS, TERRA, AEGIS, ORACLE). It does not match the canonical nine ATLAS-01..ATLAS-09 specialist roles with Optimus Prime as coordinator. The prompt itself states that roles are analytical approaches in a single model; no independent agents are evidenced. PR #62 contains the canonical correction and CI passed, but it is not in the deployed Preview. Status: FAILED for Preview identity parity; no autonomous execution enabled.
+
+## MCP Bearer parser remediation chronology — 2026-11-05
+The initial PR #63 candidate failed because a valid case-insensitive Bearer credential was parsed with an over-escaped whitespace regex and rejected with 401. Exact failed head c9a5b7f5575e4571a7fefe3f7df39827a4a76439; the failing test expected a non-401 result but received 401. Worker fix 0df022076c6bcd1ce19620470943defacce27fba corrected parsing; final head 4c5276f2ff5307949f912451d554d9be879223b6 added malformed-token regression and passed 4/4 CI, 139/139 tests. MCP remains opt-in and no executing tools were enabled.

@@ -64,3 +64,6 @@ The first PR #65 implementation commit 0be3cfeaa52dcd639bf62f62bba13fb53825b66c 
 
 ## Identity parity decision — 2026-11-05
 Keep the canonical nine specialist IDs and Optimus Prime coordinator as the required identity contract. The current PR #52 Preview is not compliant: its deployed prompt enumerates only seven specialist labels plus ATLAS coordinator. PR #62 is the approved candidate fix with 4/4 CI success, but no merge or Preview deployment is authorized by this audit. Do not claim current Preview identity parity until the exact canonical candidate is integrated and revalidated.
+
+## MCP parser failure decision record — 2026-11-05
+The initial PR #63 candidate was FAILED due to Bearer parser whitespace escaping (401 on valid token). The parser was corrected and malformed-token coverage added; final exact head 4c5276f2ff5307949f912451d554d9be879223b6 passed all four required workflows. Preserve this failure history; do not count the initial candidate as verified. MCP remains opt-in and execution remains disabled.

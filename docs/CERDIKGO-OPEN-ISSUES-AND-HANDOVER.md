@@ -124,3 +124,6 @@ PR #65 first implementation commit 0be3cfeaa52dcd639bf62f62bba13fb53825b66c fail
 
 ## Identity parity blocker — 2026-11-05
 The primary Preview at PR #52 head 9be9a8c3f6df416d66452c3d8c69c5112c853207 still has the legacy worker.js prompt: ATLAS coordinator plus seven specialist labels. It does not implement the canonical nine specialist registry or Optimus Prime coordinator identity. PR #62 has the fix and passed 4/4 CI but is not merged/deployed. Keep this as FAILED for current Preview identity parity. Next action: integrate PR #62 through the approved branch chain, then run exact-head Auto Pilot and isolated Preview validation; do not deploy or merge as part of this audit.
+
+## PR #63 remediation history — 2026-11-05
+Initial candidate c9a5b7f5575e4571a7fefe3f7df39827a4a76439 failed 4/4 PR workflows and two push workflows because a valid Bearer credential was rejected with 401 by an over-escaped whitespace regex. Fix commit 0df022076c6bcd1ce19620470943defacce27fba corrected the parser; final head 4c5276f2ff5307949f912451d554d9be879223b6 passed 4/4 exact-head workflows with 139/139 tests. MCP remains opt-in. Retain the failed candidate and correction commits in the audit trail.

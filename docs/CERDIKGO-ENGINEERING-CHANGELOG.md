@@ -115,3 +115,9 @@ Append dated entries. Link every change to its branch, commit SHA, PR, tests, an
 - Inspected worker.js at deployed PR #52 source head 9be9a8c3f6df416d66452c3d8c69c5112c853207. Its prompt still describes ATLAS plus seven specialist labels (NEXUS, TITAN, SENTINEL, GENESIS, TERRA, AEGIS, ORACLE), not the canonical nine specialist IDs and Optimus Prime coordinator.
 - PR #62 provides the canonical identity fix at 1fa32453e9569b136ec890b7c32562dda510612f with 4/4 CI success, but it has not been integrated into the deployed PR #52 Preview.
 - No runtime identity change or deployment was made. Current Preview identity parity remains FAILED pending approved integration.
+
+## 2026-11-05 — PR #63 initial MCP parser failure and correction
+- Initial head c9a5b7f5575e4571a7fefe3f7df39827a4a76439 failed four PR workflows (41934869172, 41934869329, 41934869387, 41934869843) and two push workflows (41934848054, 41934848022).
+- Test “MCP accepts bearer scheme case-insensitively and rate-limits the credential fingerprint” returned 401 because worker.js used an over-escaped whitespace regex in the Bearer parser.
+- Commit 0df022076c6bcd1ce19620470943defacce27fba fixed the parser; commit 4c5276f2ff5307949f912451d554d9be879223b6 added malformed-token coverage. Final exact-head runs 41945833238, 41945833224, 41945833375, 41945833236 all passed; 139/139 tests.
+- This failure/correction sequence is retained in the ledger; the initial failed candidate is not counted as verified.
