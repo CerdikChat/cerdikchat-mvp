@@ -250,3 +250,12 @@ Failure links: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/4193486
 - PR #66: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950007358 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950000882 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41950007360 .
 - PR #61: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41917776597 ; https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/41917776653 .
 - PR #70 and PR #52: no exact-head workflow links exist at this checkpoint; do not infer a pass.
+
+
+## Correction — 2026-11-05: PR #60 latest head is not the previously tested head
+
+- Previously tested head: `ad3cbd61b6467675e71e8445f113635c45beb8c9` — four workflows passed, 129/129.
+- Subsequent append-only documentation updates advanced the branch; pre-correction head observed: `d8fd4d04b119f4e8a63bffa6624396ead9f723f3`.
+- For `d8fd4d04b119f4e8a63bffa6624396ead9f723f3`, `fetch_commit_workflow_runs` returned no PR workflows and combined status returned no checks.
+- Compare with base head `637ff536011ed25fc598888f62f520b4cfdccd3c`: diverged, 59 ahead / 2 behind. PR metadata reports mergeable=false.
+- Current status: **BLOCKED**. Previous run IDs are historical evidence for the parent SHA only; they are not a pass for the latest branch head.
