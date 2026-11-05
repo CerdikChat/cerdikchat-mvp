@@ -263,3 +263,25 @@ Run links:
 - Decision: keep PR #80 DRAFT and stacked on #75. No merge, deployment, D1, secret, OAuth, DNS, or billing operation.
 
 Risk/limitation: the cap bounds in-memory DOM growth per tab but is not a persistent queue, cross-tab limit, account-level quota, or workflow integration. Android interaction remains NOT TESTED.
+
+
+## 2026-11-05 — Audit register continuation and exact-head CI
+
+**Status:** VERIFIED on the Draft scorecard branch; NOT INTEGRATED.
+
+The seven governance/benchmark files were appended on atlas9/cerdikgo-100-percent-scorecard. Commit chain:
+- Master ledger: ff246deabcda65c36835e44bd0ca903012e5e528
+- Engineering changelog: ede6b9bbe56954b8a4a8cd8f7c7789aeaea10b90
+- QA register: ca0d552717153f7320ea0ae1b65d6d81c4c9389b
+- Security register: 923ddf36f23ba3d18b7377b37e4a775b8160ff10
+- Decision register: d040f9e79bbf8a211b2027ab753b65deb5103838
+- Open issues/handover: 147d834a43b12fc55ea0079d6b61c7fcd2e9719b
+- Benchmark snapshot: 8ed0be04b883e8f1639728290528de87cc16fe6b
+
+Exact final candidate 8ed0be04b883e8f1639728290528de87cc16fe6b passed:
+- Auto Pilot 42002779910 — SUCCESS; 129/129 tests, doctor 16/16, strict TypeScript PASS, Wrangler dry-run PASS.
+- Regression/install 42002779876 — SUCCESS.
+- Phase 3 42002779803 — SUCCESS.
+- Hybrid Gateway 42002779818 — SUCCESS.
+
+PR #60 remains Draft and non-mergeable due branch divergence (79 ahead / 2 behind its base branch); no integration performed. No deployment or privileged action.
