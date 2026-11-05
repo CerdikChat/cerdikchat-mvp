@@ -412,3 +412,18 @@ PR #80 exact commands/evidence:
 Benchmark integrity: the 35-task v0.1 manifest is a structural smoke-test fixture only. No seven-dimension model inference benchmark has been executed. All seven capability scores remain NOT MEASURED; 0/100 is evidence-credit only, not a measured capability score. Do not claim competitive parity/superiority.
 
 Open test gaps: 100 reasoning tasks, 50 coding tasks, 50 research tasks, 50 governance scenarios, 30 workflow scenarios, 90 specialist tasks, and seven-day reliability/scale/restore evidence remain outstanding. Android device acceptance, Preview runtime flows, real ClamAV scanning, voice capture/playback, live research retrieval, and backup restoration remain NOT TESTED or BLOCKED as recorded in the handover.
+
+
+## Final exact-head QA correction — 2026-11-05
+
+- PR #60 final documentation candidate: 8ed0be04b883e8f1639728290528de87cc16fe6b.
+  - Auto Pilot 42002779910: SUCCESS; npm test 129 passed / 0 failed; npm run doctor PASS; installation preflight 16/16; strict TypeScript contracts PASS; Wrangler 4.153.0 dry-run PASS.
+  - Regression/install 42002779876: SUCCESS.
+  - Phase 3 42002779803: SUCCESS.
+  - Hybrid Gateway 42002779818: SUCCESS.
+- PR #80 exact candidate 724fdb092d584cead6f34612693de8cb9336c7eb: Auto Pilot 42002523884 SUCCESS (113/113), regression 42002508692 SUCCESS, push Auto Pilot 42002508523 SUCCESS. TypeScript is NOT CONFIGURED on that legacy JavaScript branch and is not counted as passed.
+- Main branch backup failures: 41890146458 (2026-11-04) and 41695574776 (2026-11-03), both FAILED at Gitleaks before archive generation. Main's last observed regression run 41318847530 (2026-11-01) was SUCCESS; it does not substitute for tests on later feature candidates.
+- Main branch had no .gitleaks.toml at the failed backup runs; PR #74's full-history fix is a Draft PR and not yet integrated.
+- PR #60 compare remains diverged: 79 ahead / 2 behind; do not count branch CI as integration readiness.
+
+All seven competitive capability scores remain NOT MEASURED. CI results are engineering evidence only.
