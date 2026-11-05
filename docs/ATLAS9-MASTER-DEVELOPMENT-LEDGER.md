@@ -696,3 +696,13 @@ No PR merge, Production deployment, remote D1 read/write/migration, OAuth/secret
 - Exact-head regression/install run `42077582885`: SUCCESS; 129/129 tests and 16/16 installation checks. https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42077582885
 - Phase 3 and Hybrid Gateway workflows were not rerun on this documentation-only head because their path filters do not match the changed register/benchmark documents. Their prior exact-head runs on `2c8e67d24173399b1132579886bd91997cce4ffe` remain SUCCESS (`42042915327`, `42042915407`).
 - No merge, deployment, remote D1 operation, credential change, billing activation or Human Verification was performed.
+
+
+## 2026-11-06 — Open-PR dependency drift addendum
+
+- PR #60 remains Draft and mergeable against base branch `atlas9/cerdikgo-autopilot-readiness` at `de11d34257005ba72a621312230489a7d161ff53`; compare is 154 commits ahead / 0 behind. This is a stacked development branch, not a direct main-branch release candidate.
+- PR #84 head `2d37dea6fa190d37b887d648ede7d943f8024edd` versus current base `atlas9/prompt-intelligence-mvp` at `41d7f30d7a1bedbd763504970ad059050f9f2188`: 27 ahead / 6 behind / diverged; `mergeable=false`. Its previous isolated Worker CI does not establish current-base integration or a live dedicated Worker.
+- PR #66 head `721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1` versus current governance base `679a6719fcfa1492f984c094adbcaa1dad2ddff3`: 3 ahead / 3 behind / diverged; `mergeable=false`. Clean replacement candidate: PR #86.
+- PR #69 head `cb5264803ca3efad03a8d168592c0b02d395354e` versus current governance base `679a6719fcfa1492f984c094adbcaa1dad2ddff3`: 4 ahead / 3 behind / diverged; `mergeable=false`. Clean replacement candidate: PR #85.
+- PR #88 remains 1 ahead / 4 behind / diverged and `mergeable=false`; do not merge as-is.
+- Review comments were added to PRs #84, #66, #69 and #88 documenting the exact base/head comparisons. No force-push, rebase, merge or branch deletion was performed.

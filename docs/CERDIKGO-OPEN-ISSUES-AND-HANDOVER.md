@@ -560,3 +560,16 @@ No merge, rebase, Production deployment, remote D1 write/migration, OAuth/secret
 
 ### Safety
 No merge, Production deploy, remote D1 write/migration, OAuth/secrets/DNS change, billing activation or agent execution. Gateway remains `plan_only`; Human Verification not started.
+
+
+## 2026-11-06 — Dependency graph and stale-branch warning
+
+| PR | Current comparison | Status | Handover |
+|---|---|---|---|
+| #60 | 154 ahead / 0 behind against `atlas9/cerdikgo-autopilot-readiness` at `de11d34257005ba72a621312230489a7d161ff53` | Draft; mergeable | Stacked branch; not a direct main release candidate |
+| #84 | 27 ahead / 6 behind against current `atlas9/prompt-intelligence-mvp` head `41d7f30d7a1bedbd763504970ad059050f9f2188` | Draft; not mergeable | Preserve history; new clean transplant only if required |
+| #66 | 3 ahead / 3 behind against governance base `679a6719fcfa1492f984c094adbcaa1dad2ddff3` | Draft; not mergeable | Prefer clean candidate #86 |
+| #69 | 4 ahead / 3 behind against governance base `679a6719fcfa1492f984c094adbcaa1dad2ddff3` | Draft; not mergeable | Prefer clean candidate #85 |
+| #88 | 1 ahead / 4 behind against workspace base `ba1c2af21de4eff88efdd58cdb6519ae883075ed` | Draft; not mergeable | Do not merge; transplant only after current-base review |
+
+No stale branch was rebased, force-pushed, closed or merged. The exact comparisons were added as comments on the affected PRs.
