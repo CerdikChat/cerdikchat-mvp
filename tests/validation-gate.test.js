@@ -21,8 +21,12 @@ test("Gate distinguishes accepted, rejected, pending and unavailable states", ()
   assert.match(gate, /PENDING berarti belum ada bukti/);
 });
 
-test("Gate rejects failure reports without an explicit reason", () => {
-  assert.match(gate, /if\(\(status===\"rejected\"\|\|status===\"unavailable\"\)&&!explanation\.trim\(\)\)return false/);
+test("Gate requires explicit, bounded evidence before ACCEPTED and reasons before failure states", () => {
+  assert.match(gate, /typeof reason !== "string"/);
+  assert.match(gate, /\["accepted", "rejected", "unavailable"\]\.includes\(status\)/);
+  assert.match(gate, /explanation\.length > 500/);
+  assert.match(gate, /aria-live="polite"/);
+  assert.match(gate, /cg-gate-symbol[^>]*>i</);
 });
 
 test("AI workspace reports only the outcome of its own request", () => {
