@@ -149,3 +149,21 @@ The gateway can be marked **VERIFIED IN PREVIEW** only when all of the following
 Until every criterion passes, the truthful status is:
 
 **ANTIVIRUS GATEWAY: FAIL-CLOSED / SCANNER RUNTIME NOT PROVISIONED / PREVIEW RUNTIME VERIFICATION PENDING.**
+
+
+## 9. WPS Office Premium — document workflow integration boundary
+
+The project owner supplied Android screenshots showing an active WPS Premium membership through 2027-12-13, 20 GB WPS Cloud allocation, and document/PDF productivity features. The screenshots do not show a malware scanner, ClamAV engine, malware-scanning API, or server-side scanner endpoint.
+
+Permitted use:
+- Author, edit, convert, watermark, merge, recover, and store project documents using the owner's WPS Premium account.
+- Use WPS Cloud as an optional human-managed document workspace or backup destination only after reviewing sharing permissions, retention, and data sensitivity.
+- Keep WPS credentials, account identifiers, and cloud access tokens out of the repository, Worker client code, logs, and public issue/PR comments.
+
+Not permitted / not evidenced:
+- Treat WPS Premium membership, PDF conversion, document encryption, camera scanning, or Android storage permission as antivirus protection.
+- Claim that WPS scans CerdikGo uploads or supplies a ClamAV-compatible verdict.
+- Integrate WPS Cloud as an automated CerdikGo backend without a documented, authorized API and a separate privacy/security review.
+- Upload confidential user files to a third-party service merely to obtain a malware verdict.
+
+Security decision: WPS Premium is a document productivity and optional human-operated storage adjunct. It does not satisfy the `FILE_SCANNER` contract and does not change the fail-closed gate. ClamAV remains NOT PROVISIONED until a real scanner runtime passes the Preview acceptance tests in this plan.
