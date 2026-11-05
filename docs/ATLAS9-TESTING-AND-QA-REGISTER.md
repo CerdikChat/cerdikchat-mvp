@@ -455,3 +455,10 @@ Candidate: d0ffbd53864be9c1bb6afbb608658cd532179727
 - Phase 3 42003589756 — SUCCESS.
 - Hybrid Gateway 42003589653 — SUCCESS.
 - No Human Verification, Preview runtime campaign, Android acceptance, Production deployment, remote D1 write/migration, OAuth/secret/DNS change, or billing activation was performed.
+
+
+## Evidence attribution correction — 2026-11-05
+
+PR #60 scorecard candidate head b7c6c13fd9c52f8abbfd5bbe5880f013a375f3a0 passed Auto Pilot 42003778480 (129/129), regression/install 42003778516, Phase 3 42003778573, and Hybrid Gateway 42003778499. The exact workflow definition/logs do not run Wrangler; therefore Wrangler dry-run for PR #60 is NOT TESTED, not PASS. Installation preflight 16/16, strict TypeScript, and workflow safety scan passed.
+
+Wrangler 4.153.0 deploy --dry-run evidence is confirmed only for PR #80 legacy-branch Auto Pilot run 42002523884. Do not transfer that result to PR #60.
