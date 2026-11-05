@@ -107,3 +107,27 @@ The deployed PR #52 Preview worker.js prompt still enumerates ATLAS as coordinat
 
 ## MCP Bearer parser remediation chronology — 2026-11-05
 The initial PR #63 candidate failed because a valid case-insensitive Bearer credential was parsed with an over-escaped whitespace regex and rejected with 401. Exact failed head c9a5b7f5575e4571a7fefe3f7df39827a4a76439; the failing test expected a non-401 result but received 401. Worker fix 0df022076c6bcd1ce19620470943defacce27fba corrected parsing; final head 4c5276f2ff5307949f912451d554d9be879223b6 added malformed-token regression and passed 4/4 CI, 139/139 tests. MCP remains opt-in and no executing tools were enabled.
+
+
+## Security and governance audit update — 2026-11-05
+
+### Feature-request archive controls (PR #70)
+
+- Candidate: `d546c121c9d95f6568eb4c7d728655d72fd2fcd1`, branch `atlas9/admin-feature-request-archive`.
+- Proposed control is a reversible soft archive, not permanent deletion. The endpoint requires `super_admin`, same-origin request validation, CSRF double-submit validation, a bounded JSON body, UUID request ID, and D1 batch execution.
+- Audit insert is conditional on a successful active-row update; the API does not return success unless both batch result counts are confirmed.
+- Six additional regression cases were added, but exact-head CI is absent. Status: **BLOCKED / NOT TESTED** pending an exact-head workflow.
+- Migration `0008_feature_request_archive.sql` is not applied. No remote D1 write or migration is authorized by this review.
+
+### Authentication and observability controls
+
+- PR #61 auth-log redaction candidate `17760f85b01e0db2e7a09679324d55adfe1fcf95`: runs 41917776597 and 41917776653 passed 99/99. It remains unmerged into PR #52; do not treat the deployed Preview as fixed.
+- PR #66 query-string redaction candidate `721ef9a7eb7068dcbe40ccad9df0d5b188e6e3a1`: exact-head tests and Wrangler dry-run passed (102/102); not deployed. Query-string redaction does not sanitize headers, request bodies or application log strings.
+- PR #63 MCP security candidate `4c5276f2ff5307949f912451d554d9be879223b6`: four workflows passed, 139/139. MCP remains disabled unless explicitly enabled with required configuration; no remote execution was enabled.
+
+### Identity and evidence integrity
+
+- PR #62 canonical registry candidate is CI-verified, but the PR #52 Preview source still has legacy identity drift until integrated and revalidated. Exactly nine specialist IDs remain the contract; Optimus Prime is coordinator, not a tenth specialist. Gateway remains `plan_only`.
+- PR #65 validates normalized verbatim source spans. It does not establish semantic entailment, claim relevance or research quality; human review remains necessary for high-impact claims.
+- PR #52's 76-hour access session policy remains a security review item. No evidence in this audit justifies increasing the session lifetime.
+- Status: no Production, OAuth/secrets, DNS, billing or remote database changes.
