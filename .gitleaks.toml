@@ -18,3 +18,14 @@ condition = "AND"
 paths = ['''(^|/)src/prompt-intelligence\.js$''']
 regexTarget = "line"
 regexes = ['''cerdikgo-prompt-vault-v1''']
+
+
+# This exception is limited to one verified Git commit object ID in an audit note.
+# The value was confirmed as commit 693bbd632480b760fff5ecab11be355d9288773c,
+# not an authentication credential or provider secret.
+[[rules.allowlists]]
+description = "Only the verified Git commit SHA in the Primary authentication candidate audit note."
+condition = "AND"
+paths = ['''(^|/)docs/PRIMARY-AUTH-FAIL-CLOSED-MAIN-CANDIDATE\.md$''']
+regexTarget = "line"
+regexes = ['''693bbd632480b760fff5ecab11be355d9288773c''']
