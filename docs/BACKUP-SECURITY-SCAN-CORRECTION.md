@@ -57,3 +57,10 @@ No secret values were accessed or exposed. No secret rotation, Drive upload, bac
 - Both values were independently verified through GitHub as commit object IDs (respectively the PR #92 readiness-gate commit and PR #74 full-history-scan commit), not credentials.
 - Add a third exact path+literal allowlist scoped to this ledger and those two SHAs only; extend the shell assertion and Node tests. Do not relax default rules or add a global allowlist.
 - Status remains BLOCKED until the new exact-head all-ref scan is clean. Scheduled backup remains FAILED and no archive/restore is verified.
+
+
+## Allowlist assertion escaping correction — 2026-11-06
+
+- Candidate `74103fb6d0b3568014f16b06121ea13168da6c37` regression run `42148073068`: SUCCESS.
+- Full-history PR run `42148073057` and push run `42148063396` failed at the shell allowlist assertion before Gitleaks ran. The master-ledger path grep contained two backslashes while the TOML path regex contains one. The Node allowlist test passed; the shell assertion mismatch is corrected here to one literal backslash.
+- No new Gitleaks scan result is inferred from those failed jobs. Retest the exact updated head.
