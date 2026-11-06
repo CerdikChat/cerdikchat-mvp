@@ -69,13 +69,13 @@ jobs:
         run: |
           set -euo pipefail
           workflow=".github/workflows/atlas9-legacy-autopilot-readiness.yml"
-          unsafe_deploy=$(grep -nE 'wrangler[[:space:]]+deploy([[:space:]]|$)' "$workflow" | grep -v -- '--dry-run' || true)
+          unsafe_deploy=$(grep -nE 'wrangler(@[^[:space:]]+)?[[:space:]]+deploy([[:space:]]|$)' "$workflow" | grep -v -- '--dry-run' || true)
           if [[ -n "$unsafe_deploy" ]]; then
             printf '%s\n' "$unsafe_deploy"
             echo "::error::Non-dry-run deployment command found."
             exit 1
           fi
-          unsafe_d1=$(grep -nE 'wrangler[[:space:]]+d1[[:space:]]+migrations[[:space:]]+apply.*--remote' "$workflow" || true)
+          unsafe_d1=$(grep -nE 'wrangler(@[^[:space:]]+)?[[:space:]]+d1[[:space:]]+migrations[[:space:]]+apply.*--remote' "$workflow" || true)
           if [[ -n "$unsafe_d1" ]]; then
             printf '%s\n' "$unsafe_d1"
             echo "::error::Remote D1 migration command found."

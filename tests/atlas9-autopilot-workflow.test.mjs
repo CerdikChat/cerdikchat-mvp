@@ -21,11 +21,13 @@ test("readiness gate installs, syntax-checks, tests and dry-runs the Worker", ()
   assert.match(workflow, /wrangler@4\.153\.0 deploy --dry-run/);
 });
 
-test("readiness workflow cannot deploy or migrate remote D1", () => {
-  const deployLines = workflow.split("\n").filter(line => /wrangler\s+deploy/.test(line));
-  assert.ok(deployLines.length > 0);
-  assert.ok(deployLines.every(line => line.includes("--dry-run")));
-  assert.doesNotMatch(workflow, /wrangler\s+d1\s+migrations\s+apply.*--remote/i);
+test("readiness gate detects versioned Wrangler deploy and remote D1 commands", () => {
+  const commandLines = workflow.split("\n").filter(line => /^\s*run:\s*npx\s+--yes\s+wrangler/.test(line));
+  assert.equal(commandLines.length, 1);
+  assert.match(commandLines[0], /wrangler@4\.153\.0 deploy --dry-run/);
+  assert.doesNotMatch(commandLines[0], /--remote/);
+  assert.match(workflow, /wrangler\(@\[\^\[:space:\]\]\+\)\?\[\[:space:\]\]\+deploy/);
+  assert.match(workflow, /wrangler\(@\[\^\[:space:\]\]\+\)\?\[\[:space:\]\]\+d1/);
 });
 
 test("workflow explicitly separates CI from human, Preview, Android and Production gates", () => {
