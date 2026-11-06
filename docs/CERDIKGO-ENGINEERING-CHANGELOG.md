@@ -105,3 +105,25 @@ No merge, deployment, remote D1 write/migration, credential change, DNS change o
 - PR #94 initial candidate `005402e41eb807c0ec44e2629fef1c7d16325341` failed run `42114199024` at 36/37 because the benchmark spec lacked a dated entry. Correction commit: `68db999e24f854aa9137904054f53433a865b8a1`. The failed run is preserved.
 - Subsequent register-only appends on this branch are documentation changes; exact-head CI for the resulting updated branch remains PENDING. The 37/37 result above must not be generalized to a later SHA until retested.
 - Auto Pilot readiness, live inference, Preview runtime, Android, backup restore and Production readiness remain NOT TESTED. Human Verification has not started.
+
+
+## 2026-11-06 — Auto Pilot run 6 audit append
+
+- Status: VERIFIED for the exact pre-append candidate only; this append creates a new documentation-only commit that must receive its own exact-head CI result.
+- Repository: `CerdikChat/cerdikchat-mvp`; main SHA `bc6545d6d19fd4b749d0b65fefba3d74775e0221`; branch `atlas9/cerdikgo-main-governance-registers-rerun-20261106`; PR #95 head before this append `7c3d8b19a10d2927ec546d6ec7222eb4d868aa20` (Draft, base main, 20 commits ahead, 0 behind, GitHub mergeable=true).
+- Open PR inventory: 69. This is an inventory count, not a count of verified or merge-ready changes.
+- Exact-head Auto Pilot workflow `42144736797`: SUCCESS. Exact-head regression workflow `42144736592`: SUCCESS. Both tested checkout SHA `7c3d8b19a10d2927ec546d6ec7222eb4d868aa20`.
+- Commands verified by workflow logs: `npm install --ignore-scripts --no-audit --no-fund --package-lock=false`; `node --check worker.js`; `node --check auth/google-auth.js`; `npm test`; `npx --yes wrangler@4.153.0 deploy --dry-run --outdir /tmp/cerdikgo-autopilot`; readiness-workflow safety assertion.
+- Results: 41/41 tests passed, 0 failed; dependency install PASS; JavaScript syntax checks PASS; Worker bundle dry-run PASS (44.72 KiB upload, 12.32 KiB gzip); safety assertion PASS. TypeScript is NOT CONFIGURED and is not counted as passed.
+- Workflow links: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42144736797 and https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42144736592.
+- The safety assertion inspects the readiness workflow file itself; it is not a repository-wide proof that every workflow is free of privileged commands. It found no non-dry-run deploy or remote D1 migration in that gate.
+- Non-blocking warnings: Node `punycode` deprecation; GitHub Actions checkout/setup-node v4 report Node 20 deprecation and execution under Node 24. Evaluate supported action upgrades in a separate CI-only change.
+- The earlier PR #94 structural failure remains preserved: run `42114199024`, 36/37, caused by the missing benchmark date marker; correction was made and later candidates passed. Do not erase the failure.
+- No merge, deployment, remote D1 read/write/migration, OAuth/secret/DNS change, billing action, or autonomous agent execution occurred. Gateway remains `plan_only`; exactly nine specialist profiles; Optimus Prime is coordinator, not a tenth specialist.
+- Human Verification was not started. Preview runtime, Android acceptance, live model inference, backup restore and Production readiness remain separate and NOT TESTED/BLOCKED.
+
+### Changes in this audit append
+- Appended current exact-head CI, branch provenance, warnings and operational limitations to the six mandatory registers and benchmark record; no application source, model routing, runtime binding, or UI code changed in this append.
+- PR #95's 11-file candidate comprises `.github/workflows/atlas9-legacy-autopilot-readiness.yml`, `benchmarks/seven-dimension/tasks.v0.1.json`, the six required registers, `docs/CERDIKGO-SEVEN-DIMENSION-BENCHMARK.md`, `tests/atlas9-autopilot-workflow.test.mjs`, and `tests/atlas9-governance-registers.test.mjs`.
+- Main `package.json` exposes only `npm test` and requires Node >=20; no build, lint, typecheck or TypeScript script is configured on main.
+- Main workflow inventory includes `regression.yml` and `google-drive-backup.yml`; the exact-head Auto Pilot gate is introduced by PR #95 and is not yet on main.

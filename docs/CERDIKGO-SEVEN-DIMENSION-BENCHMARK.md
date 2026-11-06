@@ -64,3 +64,26 @@ Benchmark harness/manifest CI is not live inference. Live inference is not Previ
 - The acceptance specification is now present on a clean main-based branch. The 35-task manifest is carried forward from PR #60 with its original smoke-only status.
 - Initial exact-head regression run 42114199024 failed because the structural test required a dated entry in this benchmark file. This was a documentation/test-fixture mismatch, not a model benchmark result. The benchmark file is amended here with this dated baseline; the failed run remains in the QA register and is not erased.
 - Full capability scores remain NOT MEASURED. No model inference or Gemini comparison was run.
+
+
+## 2026-11-06 — Auto Pilot run 6 audit append
+
+- Status: VERIFIED for the exact pre-append candidate only; this append creates a new documentation-only commit that must receive its own exact-head CI result.
+- Repository: `CerdikChat/cerdikchat-mvp`; main SHA `bc6545d6d19fd4b749d0b65fefba3d74775e0221`; branch `atlas9/cerdikgo-main-governance-registers-rerun-20261106`; PR #95 head before this append `7c3d8b19a10d2927ec546d6ec7222eb4d868aa20` (Draft, base main, 20 commits ahead, 0 behind, GitHub mergeable=true).
+- Open PR inventory: 69. This is an inventory count, not a count of verified or merge-ready changes.
+- Exact-head Auto Pilot workflow `42144736797`: SUCCESS. Exact-head regression workflow `42144736592`: SUCCESS. Both tested checkout SHA `7c3d8b19a10d2927ec546d6ec7222eb4d868aa20`.
+- Commands verified by workflow logs: `npm install --ignore-scripts --no-audit --no-fund --package-lock=false`; `node --check worker.js`; `node --check auth/google-auth.js`; `npm test`; `npx --yes wrangler@4.153.0 deploy --dry-run --outdir /tmp/cerdikgo-autopilot`; readiness-workflow safety assertion.
+- Results: 41/41 tests passed, 0 failed; dependency install PASS; JavaScript syntax checks PASS; Worker bundle dry-run PASS (44.72 KiB upload, 12.32 KiB gzip); safety assertion PASS. TypeScript is NOT CONFIGURED and is not counted as passed.
+- Workflow links: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42144736797 and https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42144736592.
+- The safety assertion inspects the readiness workflow file itself; it is not a repository-wide proof that every workflow is free of privileged commands. It found no non-dry-run deploy or remote D1 migration in that gate.
+- Non-blocking warnings: Node `punycode` deprecation; GitHub Actions checkout/setup-node v4 report Node 20 deprecation and execution under Node 24. Evaluate supported action upgrades in a separate CI-only change.
+- The earlier PR #94 structural failure remains preserved: run `42114199024`, 36/37, caused by the missing benchmark date marker; correction was made and later candidates passed. Do not erase the failure.
+- No merge, deployment, remote D1 read/write/migration, OAuth/secret/DNS change, billing action, or autonomous agent execution occurred. Gateway remains `plan_only`; exactly nine specialist profiles; Optimus Prime is coordinator, not a tenth specialist.
+- Human Verification was not started. Preview runtime, Android acceptance, live model inference, backup restore and Production readiness remain separate and NOT TESTED/BLOCKED.
+
+### Current measured status and reproducibility boundary
+- All seven capability scores remain NOT MEASURED; do not translate absent runs into 0% capability or a pass.
+- The 35-task v0.1 manifest is a structural smoke set only; it has five tasks per dimension and does not satisfy full samples: reasoning 100, coding 50, research 50, governance 50, workflow 30, identity 90 (10 per specialist), and ecosystem seven-day SLO plus 100 concurrent users for 30 minutes and restore/RPO/RTO evidence.
+- Model candidate observed in source: `@cf/google/gemma-4-26b-a4b-it` via Cloudflare Workers AI; no live inference, latency, quota or Gemini matched comparison was executed in this run.
+- Current source model policy is single-provider/free-first with no automatic fallback. This is configuration evidence, not capability performance.
+- Preserve the existing thresholds in this document. A dimension passes only when every critical gate and its complete required sample are evidenced.

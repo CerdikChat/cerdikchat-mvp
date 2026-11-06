@@ -90,3 +90,26 @@ The earlier PR #60 register records a read-only Cloudflare snapshot dated 2026-1
 - Correction: appended a dated baseline and transparent failure note to the benchmark document; correction commit `68db999e24f854aa9137904054f53433a865b8a1`.
 - Status: correction commit recorded; retest on the final exact branch head is PENDING. Do not report PR #94 as green until that exact-head run succeeds.
 - No prior failure was removed or overwritten. No merge, deployment, D1 operation, credential change, DNS change or billing action occurred.
+
+
+## 2026-11-06 — Auto Pilot run 6 audit append
+
+- Status: VERIFIED for the exact pre-append candidate only; this append creates a new documentation-only commit that must receive its own exact-head CI result.
+- Repository: `CerdikChat/cerdikchat-mvp`; main SHA `bc6545d6d19fd4b749d0b65fefba3d74775e0221`; branch `atlas9/cerdikgo-main-governance-registers-rerun-20261106`; PR #95 head before this append `7c3d8b19a10d2927ec546d6ec7222eb4d868aa20` (Draft, base main, 20 commits ahead, 0 behind, GitHub mergeable=true).
+- Open PR inventory: 69. This is an inventory count, not a count of verified or merge-ready changes.
+- Exact-head Auto Pilot workflow `42144736797`: SUCCESS. Exact-head regression workflow `42144736592`: SUCCESS. Both tested checkout SHA `7c3d8b19a10d2927ec546d6ec7222eb4d868aa20`.
+- Commands verified by workflow logs: `npm install --ignore-scripts --no-audit --no-fund --package-lock=false`; `node --check worker.js`; `node --check auth/google-auth.js`; `npm test`; `npx --yes wrangler@4.153.0 deploy --dry-run --outdir /tmp/cerdikgo-autopilot`; readiness-workflow safety assertion.
+- Results: 41/41 tests passed, 0 failed; dependency install PASS; JavaScript syntax checks PASS; Worker bundle dry-run PASS (44.72 KiB upload, 12.32 KiB gzip); safety assertion PASS. TypeScript is NOT CONFIGURED and is not counted as passed.
+- Workflow links: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42144736797 and https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42144736592.
+- The safety assertion inspects the readiness workflow file itself; it is not a repository-wide proof that every workflow is free of privileged commands. It found no non-dry-run deploy or remote D1 migration in that gate.
+- Non-blocking warnings: Node `punycode` deprecation; GitHub Actions checkout/setup-node v4 report Node 20 deprecation and execution under Node 24. Evaluate supported action upgrades in a separate CI-only change.
+- The earlier PR #94 structural failure remains preserved: run `42114199024`, 36/37, caused by the missing benchmark date marker; correction was made and later candidates passed. Do not erase the failure.
+- No merge, deployment, remote D1 read/write/migration, OAuth/secret/DNS change, billing action, or autonomous agent execution occurred. Gateway remains `plan_only`; exactly nine specialist profiles; Optimus Prime is coordinator, not a tenth specialist.
+- Human Verification was not started. Preview runtime, Android acceptance, live model inference, backup restore and Production readiness remain separate and NOT TESTED/BLOCKED.
+
+### Current source and live-configuration observations
+- Main `worker.js` still documents Google authentication as optional unless `GOOGLE_AUTH_REQUIRED=true`; PR #92 is the main-based fail-closed candidate. Its exact head and three CI runs are listed in the master ledger above. It is not integrated.
+- Main `wrangler.toml` does not explicitly enable `redact_query_string`; PR #93 adds top-level and Preview redaction tests/config. It is not integrated.
+- Read-only Cloudflare inventory at 2026-11-06 01:56 UTC returned two scripts: `cerdikchat-mvp` and `cerdikgo-mcp-preview`; no `cerdikgo-primary-preview` script was present. Both existing script-settings responses showed observability enabled, sampling 1.0, logs enabled/persisted/invocation enabled, and `redact_query_string=false`. No live setting was changed.
+- The script-settings response did not provide a usable binding inventory in this read. Repository `wrangler.toml` defines top-level D1 `cerdikchat-db` and Preview D1 `cerdikchat-staging`; actual environment-specific live D1 mapping remains NOT VERIFIED. Do not infer isolation from repository config alone.
+- Legacy secret binding values were not accessed or changed. Query-string redaction does not sanitize request bodies, headers or application log messages; the separate MCP Worker requires its own reviewed config.
