@@ -110,3 +110,19 @@ No approval is inferred from silence, CI success, a Draft PR, or an earlier unre
 - Preserve the gateway `plan_only` and nine specialist definitions; do not enable autonomous execution.
 - Do not start Human Verification until exact-head Auto Pilot passes. PR #95 pre-append candidate passed; this append creates a new candidate SHA that must pass separately. Passing CI alone does not authorize Human Verification.
 - No Gemini superiority claim is permitted without a matched, controlled benchmark.
+
+
+## 2026-11-06 — Backup security follow-up
+
+- Status: VERIFIED for the cited PR #74 candidate; main scheduled backup remains FAILED. This is a new append-only record; no earlier failure is removed.
+- Main backup workflow run `42086628529` (2026-11-05 18:41:17 UTC) FAILED at Gitleaks 8.24.3. Three findings were reported; archive creation, artifact publication and Google Drive upload were skipped. The main branch did not load PR #74's unmerged `.gitleaks.toml`.
+- PR #74 exact candidate: `9f3940efeeea0a7d6ea85f6e48969d7120d84644`, branch `atlas9/backup-gitleaks-allowlist-20261105`, Draft, base main `bc6545d6d19fd4b749d0b65fefba3d74775e0221`, 9 commits ahead / 0 behind.
+- PR #74 full-history scan run `42148160740`: SUCCESS; Gitleaks 8.24.3 scanned 1,093 commits / approximately 2.55 MB across fetched refs; no leaks found. PR regression run `42148160744`: SUCCESS, 38/38 passed. Event-scoped PR scan examined 9 commits / approximately 12.97 KB and also found no leaks.
+- Evidence: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42148160740 and https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42148160744. PR link: https://github.com/CerdikChat/cerdikchat-mvp/pull/74.
+- Three narrow, line-targeted allowlists require exact file path AND exact literal; default Gitleaks rules remain enabled. Two Git commit SHA findings in the master ledger were verified through GitHub as commit objects, not credentials. No global allowlist was added.
+- PR #95 pre-append exact candidate `e6972d5e96d99920adc8996ad55ac83deb5fc325` had Auto Pilot run `42147411322` and regression run `42147410943`, both SUCCESS (41/41). This register append creates a new PR #95 head; its exact-head gate must run again before readiness can be carried forward.
+- No backup archive, Drive upload, restore drill, merge, deployment, D1 operation, credential change or billing action occurred.
+
+### Backup decision
+- Keep PR #74 Draft pending review. Do not merge or trigger Drive upload. The user has not approved secret changes, external backup upload, Production operation or paid services.
+- After any separately approved integration, require a fresh scheduled/manual backup run with upload disabled first, verify bundle and SHA-256, then conduct an isolated restore drill. Off-site Drive upload remains a separate approval/credential gate.

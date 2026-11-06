@@ -125,3 +125,20 @@ Append-only handover. Status applies to the exact evidence and scope named.
 - P1: PR #74 full-history secret scan passed, but scheduled backup runs `41695574776` and `41890146458` remain historical FAILED; archive, off-site copy and restore drill remain NOT TESTED.
 - P1: scanner runtime remains BLOCKED; preserve fail-closed behavior. Voice Android, live web research, persistent RAG, edge-scale and seven-day SLO remain NOT TESTED.
 - P2: run complete 100/50/50/50/30/90 task suites and seven-day reliability/scale campaign; report per-dimension scores only from raw reproducible outputs.
+
+
+## 2026-11-06 — Backup security follow-up
+
+- Status: VERIFIED for the cited PR #74 candidate; main scheduled backup remains FAILED. This is a new append-only record; no earlier failure is removed.
+- Main backup workflow run `42086628529` (2026-11-05 18:41:17 UTC) FAILED at Gitleaks 8.24.3. Three findings were reported; archive creation, artifact publication and Google Drive upload were skipped. The main branch did not load PR #74's unmerged `.gitleaks.toml`.
+- PR #74 exact candidate: `9f3940efeeea0a7d6ea85f6e48969d7120d84644`, branch `atlas9/backup-gitleaks-allowlist-20261105`, Draft, base main `bc6545d6d19fd4b749d0b65fefba3d74775e0221`, 9 commits ahead / 0 behind.
+- PR #74 full-history scan run `42148160740`: SUCCESS; Gitleaks 8.24.3 scanned 1,093 commits / approximately 2.55 MB across fetched refs; no leaks found. PR regression run `42148160744`: SUCCESS, 38/38 passed. Event-scoped PR scan examined 9 commits / approximately 12.97 KB and also found no leaks.
+- Evidence: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42148160740 and https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42148160744. PR link: https://github.com/CerdikChat/cerdikchat-mvp/pull/74.
+- Three narrow, line-targeted allowlists require exact file path AND exact literal; default Gitleaks rules remain enabled. Two Git commit SHA findings in the master ledger were verified through GitHub as commit objects, not credentials. No global allowlist was added.
+- PR #95 pre-append exact candidate `e6972d5e96d99920adc8996ad55ac83deb5fc325` had Auto Pilot run `42147411322` and regression run `42147410943`, both SUCCESS (41/41). This register append creates a new PR #95 head; its exact-head gate must run again before readiness can be carried forward.
+- No backup archive, Drive upload, restore drill, merge, deployment, D1 operation, credential change or billing action occurred.
+
+### Current backup handover
+- Main scheduled backup run `42086628529` is FAILED at Gitleaks; archive/artifact steps were skipped. This is the latest observed main backup failure.
+- PR #74 head `9f3940efeeea0a7d6ea85f6e48969d7120d84644` now passes full-history scanning and 38/38 regression, but remains Draft and unmerged.
+- Outstanding after approved integration: successful main backup generation, SHA-256 verification, off-site copy policy/approval, and isolated restore with measured RPO/RTO. Do not claim backup/recovery readiness yet.

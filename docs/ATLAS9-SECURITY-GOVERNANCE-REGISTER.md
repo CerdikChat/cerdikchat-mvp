@@ -113,3 +113,20 @@ The earlier PR #60 register records a read-only Cloudflare snapshot dated 2026-1
 - Read-only Cloudflare inventory at 2026-11-06 01:56 UTC returned two scripts: `cerdikchat-mvp` and `cerdikgo-mcp-preview`; no `cerdikgo-primary-preview` script was present. Both existing script-settings responses showed observability enabled, sampling 1.0, logs enabled/persisted/invocation enabled, and `redact_query_string=false`. No live setting was changed.
 - The script-settings response did not provide a usable binding inventory in this read. Repository `wrangler.toml` defines top-level D1 `cerdikchat-db` and Preview D1 `cerdikchat-staging`; actual environment-specific live D1 mapping remains NOT VERIFIED. Do not infer isolation from repository config alone.
 - Legacy secret binding values were not accessed or changed. Query-string redaction does not sanitize request bodies, headers or application log messages; the separate MCP Worker requires its own reviewed config.
+
+
+## 2026-11-06 — Backup security follow-up
+
+- Status: VERIFIED for the cited PR #74 candidate; main scheduled backup remains FAILED. This is a new append-only record; no earlier failure is removed.
+- Main backup workflow run `42086628529` (2026-11-05 18:41:17 UTC) FAILED at Gitleaks 8.24.3. Three findings were reported; archive creation, artifact publication and Google Drive upload were skipped. The main branch did not load PR #74's unmerged `.gitleaks.toml`.
+- PR #74 exact candidate: `9f3940efeeea0a7d6ea85f6e48969d7120d84644`, branch `atlas9/backup-gitleaks-allowlist-20261105`, Draft, base main `bc6545d6d19fd4b749d0b65fefba3d74775e0221`, 9 commits ahead / 0 behind.
+- PR #74 full-history scan run `42148160740`: SUCCESS; Gitleaks 8.24.3 scanned 1,093 commits / approximately 2.55 MB across fetched refs; no leaks found. PR regression run `42148160744`: SUCCESS, 38/38 passed. Event-scoped PR scan examined 9 commits / approximately 12.97 KB and also found no leaks.
+- Evidence: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42148160740 and https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42148160744. PR link: https://github.com/CerdikChat/cerdikchat-mvp/pull/74.
+- Three narrow, line-targeted allowlists require exact file path AND exact literal; default Gitleaks rules remain enabled. Two Git commit SHA findings in the master ledger were verified through GitHub as commit objects, not credentials. No global allowlist was added.
+- PR #95 pre-append exact candidate `e6972d5e96d99920adc8996ad55ac83deb5fc325` had Auto Pilot run `42147411322` and regression run `42147410943`, both SUCCESS (41/41). This register append creates a new PR #95 head; its exact-head gate must run again before readiness can be carried forward.
+- No backup archive, Drive upload, restore drill, merge, deployment, D1 operation, credential change or billing action occurred.
+
+### Secret-scanning disposition
+- The three matches on main run `42086628529` were reviewed: two exact localStorage namespace occurrences and one verified Git commit object ID in the auth candidate note. The later full-history PR scan also identified two verified commit IDs in the master ledger. No secret values were accessed or exposed.
+- PR #74's latest exact scan passed with narrow exceptions only. Do not treat this as evidence that main's scheduled workflow is fixed: the config is still in a Draft PR and the main backup run remains failed.
+- Query-string redaction and application log privacy are separate controls; PR #93 remains an independent Draft candidate and live Worker settings still show redaction disabled.

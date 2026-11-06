@@ -127,3 +127,21 @@ No merge, deployment, remote D1 write/migration, credential change, DNS change o
 - PR #95's 11-file candidate comprises `.github/workflows/atlas9-legacy-autopilot-readiness.yml`, `benchmarks/seven-dimension/tasks.v0.1.json`, the six required registers, `docs/CERDIKGO-SEVEN-DIMENSION-BENCHMARK.md`, `tests/atlas9-autopilot-workflow.test.mjs`, and `tests/atlas9-governance-registers.test.mjs`.
 - Main `package.json` exposes only `npm test` and requires Node >=20; no build, lint, typecheck or TypeScript script is configured on main.
 - Main workflow inventory includes `regression.yml` and `google-drive-backup.yml`; the exact-head Auto Pilot gate is introduced by PR #95 and is not yet on main.
+
+
+## 2026-11-06 — Backup security follow-up
+
+- Status: VERIFIED for the cited PR #74 candidate; main scheduled backup remains FAILED. This is a new append-only record; no earlier failure is removed.
+- Main backup workflow run `42086628529` (2026-11-05 18:41:17 UTC) FAILED at Gitleaks 8.24.3. Three findings were reported; archive creation, artifact publication and Google Drive upload were skipped. The main branch did not load PR #74's unmerged `.gitleaks.toml`.
+- PR #74 exact candidate: `9f3940efeeea0a7d6ea85f6e48969d7120d84644`, branch `atlas9/backup-gitleaks-allowlist-20261105`, Draft, base main `bc6545d6d19fd4b749d0b65fefba3d74775e0221`, 9 commits ahead / 0 behind.
+- PR #74 full-history scan run `42148160740`: SUCCESS; Gitleaks 8.24.3 scanned 1,093 commits / approximately 2.55 MB across fetched refs; no leaks found. PR regression run `42148160744`: SUCCESS, 38/38 passed. Event-scoped PR scan examined 9 commits / approximately 12.97 KB and also found no leaks.
+- Evidence: https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42148160740 and https://github.com/CerdikChat/cerdikchat-mvp/actions/runs/42148160744. PR link: https://github.com/CerdikChat/cerdikchat-mvp/pull/74.
+- Three narrow, line-targeted allowlists require exact file path AND exact literal; default Gitleaks rules remain enabled. Two Git commit SHA findings in the master ledger were verified through GitHub as commit objects, not credentials. No global allowlist was added.
+- PR #95 pre-append exact candidate `e6972d5e96d99920adc8996ad55ac83deb5fc325` had Auto Pilot run `42147411322` and regression run `42147410943`, both SUCCESS (41/41). This register append creates a new PR #95 head; its exact-head gate must run again before readiness can be carried forward.
+- No backup archive, Drive upload, restore drill, merge, deployment, D1 operation, credential change or billing action occurred.
+
+### PR #74 files changed in the latest candidate
+- `.gitleaks.toml`: retain default rules and add only exact path+literal exceptions for reviewed localStorage metadata, one verified auth commit SHA, and two verified master-ledger commit SHAs.
+- `.github/workflows/gitleaks-full-history.yml`: assert the narrow allowlist contract and scan every fetched ref with Gitleaks 8.24.3 using redacted verbose diagnostics.
+- `tests/gitleaks-allowlist.test.mjs`: verify exactly three narrow allowlist blocks, line-targeting, exact paths and exact literals.
+- `docs/BACKUP-SECURITY-SCAN-CORRECTION.md`: append failure/correction history and final verification evidence.
