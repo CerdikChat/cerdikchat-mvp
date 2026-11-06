@@ -29,3 +29,13 @@ condition = "AND"
 paths = ['''(^|/)docs/PRIMARY-AUTH-FAIL-CLOSED-MAIN-CANDIDATE\.md$''']
 regexTarget = "line"
 regexes = ['''693bbd632480b760fff5ecab11be355d9288773c''']
+
+
+# These two values are verified Git commit object IDs recorded in the master ledger.
+# Both are metadata, not credentials; scope is limited to this exact file and exact literals.
+[[rules.allowlists]]
+description = "Only the two verified commit SHAs in the ATLAS-9 master ledger."
+condition = "AND"
+paths = ['''(^|/)docs/ATLAS9-MASTER-DEVELOPMENT-LEDGER\.md$''']
+regexTarget = "line"
+regexes = ['''0a5fdea7f1c1c4091ff5fb674a1bac6bbb6ce8fb''', '''abeca194672349e799bcfdd9d8f9c9dc82675947''']

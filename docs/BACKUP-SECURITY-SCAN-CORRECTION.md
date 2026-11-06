@@ -48,3 +48,12 @@ No secret values were accessed or exposed. No secret rotation, Drive upload, bac
 - The explicit scan examined 1,090 commits / approximately 2.55 MB and reported two findings. The previous command used `--no-banner` without verbose output, so the redacted file/line diagnostics were not included in the job log.
 - No additional allowlist is authorized by this evidence alone. The next candidate adds `--verbose` while retaining `--redact` so exact file/line/fingerprint details can be reviewed without exposing secret values. Each finding must be verified before any narrowly scoped exception is considered.
 - Status: BLOCKED pending redacted diagnostics and a clean all-ref scan. The main scheduled backup remains FAILED; no archive or restore evidence exists.
+
+
+## Verified commit-SHA findings — 2026-11-06
+
+- Full-history run `42147936911`/push `42147930717` (candidate `e749b7273b8520382c7802be1f0a7e516f1ceead`) passed the narrow allowlist assertion and event-scoped Gitleaks scan, but the explicit all-ref scan failed after examining 1,091 commits / approximately 2.55 MB with two findings.
+- Redacted diagnostics identify only `docs/ATLAS9-MASTER-DEVELOPMENT-LEDGER.md:50` and `:52`. The values are `0a5fdea7f1c1c4091ff5fb674a1bac6bbb6ce8fb` and `abeca194672349e799bcfdd9d8f9c9dc82675947`.
+- Both values were independently verified through GitHub as commit object IDs (respectively the PR #92 readiness-gate commit and PR #74 full-history-scan commit), not credentials.
+- Add a third exact path+literal allowlist scoped to this ledger and those two SHAs only; extend the shell assertion and Node tests. Do not relax default rules or add a global allowlist.
+- Status remains BLOCKED until the new exact-head all-ref scan is clean. Scheduled backup remains FAILED and no archive/restore is verified.
