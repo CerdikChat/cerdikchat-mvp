@@ -33,7 +33,7 @@ jobs:
           grep -F 'condition = "AND"' .gitleaks.toml
           grep -F 'src/prompt-intelligence\.js' .gitleaks.toml
           grep -F 'cerdikgo-prompt-vault-v1' .gitleaks.toml
-          grep -F 'docs/PRIMARY-AUTH-FAIL-CLOSED-MAIN-CANDIDATE\\.md' .gitleaks.toml
+          grep -F 'docs/PRIMARY-AUTH-FAIL-CLOSED-MAIN-CANDIDATE\.md' .gitleaks.toml
           grep -F '693bbd632480b760fff5ecab11be355d9288773c' .gitleaks.toml
           echo "Two exact path+literal allowlist contracts: PASS"
       - name: Scan all fetched Git history with Gitleaks

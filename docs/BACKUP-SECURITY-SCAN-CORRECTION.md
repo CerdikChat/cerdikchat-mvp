@@ -33,3 +33,10 @@ The first passing Gitleaks Action push run used its event default `--log-opts=-1
 - Re-run the explicit all-ref scan after fetching every branch/tag. Keep backup status BLOCKED until the new PR scan passes and a subsequent scheduled/manual archive plus isolated restore succeeds.
 
 No secret values were accessed or exposed. No secret rotation, Drive upload, backup artifact publication, deployment, D1 operation or billing action was performed.
+
+
+## Allowlist-contract CI correction — 2026-11-06
+
+- Candidate `582d126a19e7b12075725ce283666deef3d3be4f` regression run `42147733732`: SUCCESS; the new Node tests passed.
+- Full-history scan run `42147733761`: FAILED before Gitleaks execution because the workflow shell assertion used a double-escaped backslash for the new path, while the TOML path regex correctly contains one escaped dot. No secret scan was performed in that run; do not count it as a scan result.
+- Correction: workflow assertion now matches the exact one-backslash TOML path. The Node test independently checks the exact path and literal. Retest the corrected exact head before considering the allowlist contract VERIFIED.
