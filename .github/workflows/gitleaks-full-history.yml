@@ -46,4 +46,4 @@ jobs:
           set -euo pipefail
           GITLEAKS_BIN="/tmp/gitleaks-8.24.3/gitleaks"
           test -x "$GITLEAKS_BIN"
-          "$GITLEAKS_BIN" detect --source . --log-opts="--all" --redact --exit-code 2 --no-banner
+          "$GITLEAKS_BIN" detect --source . --log-opts="--all" --redact --verbose --exit-code 2 --no-banner

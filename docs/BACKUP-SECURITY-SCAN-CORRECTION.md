@@ -40,3 +40,11 @@ No secret values were accessed or exposed. No secret rotation, Drive upload, bac
 - Candidate `582d126a19e7b12075725ce283666deef3d3be4f` regression run `42147733732`: SUCCESS; the new Node tests passed.
 - Full-history scan run `42147733761`: FAILED before Gitleaks execution because the workflow shell assertion used a double-escaped backslash for the new path, while the TOML path regex correctly contains one escaped dot. No secret scan was performed in that run; do not count it as a scan result.
 - Correction: workflow assertion now matches the exact one-backslash TOML path. The Node test independently checks the exact path and literal. Retest the corrected exact head before considering the allowlist contract VERIFIED.
+
+
+## Full-history diagnostic follow-up — 2026-11-06
+
+- Corrected candidate `7e340fe97ac63e50032ae1db101243973ba2157b` regression run `42147835342`: SUCCESS. Full-history scan run `42147835356`: FAILED only at the explicit all-ref scan; the event-scoped PR scan passed.
+- The explicit scan examined 1,090 commits / approximately 2.55 MB and reported two findings. The previous command used `--no-banner` without verbose output, so the redacted file/line diagnostics were not included in the job log.
+- No additional allowlist is authorized by this evidence alone. The next candidate adds `--verbose` while retaining `--redact` so exact file/line/fingerprint details can be reviewed without exposing secret values. Each finding must be verified before any narrowly scoped exception is considered.
+- Status: BLOCKED pending redacted diagnostics and a clean all-ref scan. The main scheduled backup remains FAILED; no archive or restore evidence exists.
