@@ -1,0 +1,102 @@
+name: ATLAS-9 Legacy JavaScript Auto Pilot Readiness Gate
+
+on:
+  push:
+    branches:
+      - 'atlas9/**'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: atlas9-legacy-readiness-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    name: Exact-candidate CI readiness (no deployment)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Enforce ATLAS-9 feature-branch scope
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            candidate="$HEAD_REF"
+          else
+            candidate="$REF_NAME"
+          fi
+          if [[ "$candidate" != atlas9/* ]]; then
+            echo "::error::Blocked non-ATLAS-9 branch: $candidate"
+            exit 1
+          fi
+          echo "Authorized candidate branch: $candidate"
+
+      - name: Checkout exact candidate commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies without lockfile mutation
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+
+      - name: Validate JavaScript syntax
+        run: |
+          node --check worker.js
+          node --check auth/google-auth.js
+
+      - name: Run complete automated regression suite
+        run: npm test
+
+      - name: Build Worker bundle with Wrangler dry-run only
+        run: npx --yes wrangler@4.153.0 deploy --dry-run --outdir /tmp/cerdikgo-autopilot
+
+      - name: Assert this gate contains no privileged operation
+        shell: bash
+        run: |
+          set -euo pipefail
+          workflow=".github/workflows/atlas9-legacy-autopilot-readiness.yml"
+          unsafe_deploy=$(grep -nE 'wrangler[[:space:]]+deploy([[:space:]]|$)' "$workflow" | grep -v -- '--dry-run' || true)
+          if [[ -n "$unsafe_deploy" ]]; then
+            printf '%s\n' "$unsafe_deploy"
+            echo "::error::Non-dry-run deployment command found."
+            exit 1
+          fi
+          unsafe_d1=$(grep -nE 'wrangler[[:space:]]+d1[[:space:]]+migrations[[:space:]]+apply.*--remote' "$workflow" || true)
+          if [[ -n "$unsafe_d1" ]]; then
+            printf '%s\n' "$unsafe_d1"
+            echo "::error::Remote D1 migration command found."
+            exit 1
+          fi
+          echo "Workflow safety: PASS (no deployment or remote D1 migration)."
+
+      - name: Publish exact-candidate gate summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## ATLAS-9 Auto Pilot CI Readiness"
+            echo
+            echo "- Candidate SHA: ${{ github.event.pull_request.head.sha || github.sha }}"
+            echo "- Branch: ${{ github.head_ref || github.ref_name }}"
+            echo "- Regression: see job result above"
+            echo "- JavaScript syntax: see job result above"
+            echo "- Wrangler: dry-run only; no deployment"
+            echo "- TypeScript: NOT CONFIGURED in this JavaScript repository"
+            echo "- Human Verification: NOT STARTED"
+            echo "- Preview runtime / Android acceptance / Production readiness: NOT TESTED"
+            echo "- Remote D1, OAuth/secrets, DNS and billing: untouched"
+          } >> "$GITHUB_STEP_SUMMARY"
