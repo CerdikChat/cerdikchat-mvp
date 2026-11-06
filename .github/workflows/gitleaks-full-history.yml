@@ -1,0 +1,52 @@
+name: CerdikChat full-history secret scan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - atlas9/backup-gitleaks-allowlist-20261105
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: cerdikchat-gitleaks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-history-secret-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout full repository history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch all remote branches and tags
+        run: git fetch --force --prune origin '+refs/heads/*:refs/remotes/origin/*' '+refs/tags/*:refs/tags/*'
+      - name: Verify allowlist is constrained to one exact file and literal
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'condition = "AND"' .gitleaks.toml
+          grep -F 'src/prompt-intelligence\.js' .gitleaks.toml
+          grep -F 'cerdikgo-prompt-vault-v1' .gitleaks.toml
+          grep -F 'docs/PRIMARY-AUTH-FAIL-CLOSED-MAIN-CANDIDATE\.md' .gitleaks.toml
+          grep -F '693bbd632480b760fff5ecab11be355d9288773c' .gitleaks.toml
+          grep -F 'docs/ATLAS9-MASTER-DEVELOPMENT-LEDGER\.md' .gitleaks.toml
+          grep -F '0a5fdea7f1c1c4091ff5fb674a1bac6bbb6ce8fb' .gitleaks.toml
+          grep -F 'abeca194672349e799bcfdd9d8f9c9dc82675947' .gitleaks.toml
+          echo "Three exact path+literal allowlist contracts: PASS"
+      - name: Scan all fetched Git history with Gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Scan full history across every fetched ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          GITLEAKS_BIN="/tmp/gitleaks-8.24.3/gitleaks"
+          test -x "$GITLEAKS_BIN"
+          "$GITLEAKS_BIN" detect --source . --log-opts="--all" --redact --verbose --exit-code 2 --no-banner

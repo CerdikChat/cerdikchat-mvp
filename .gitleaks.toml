@@ -1,0 +1,41 @@
+title = "CerdikChat Gitleaks configuration"
+
+[extend]
+useDefault = true
+
+# This exception is intentionally narrow: the exact localStorage namespace
+# is application metadata, not an authentication credential or provider key.
+[[rules]]
+id = "generic-api-key"
+description = "Generic API key detector with one reviewed localStorage namespace exception."
+regex = '''(?i)[\w.-]{0,50}?(?:access|auth|(?-i:[Aa]pi|API)|credential|creds|key|passw(?:or)?d|secret|token)(?:[ \t\w.-]{0,20})[\s'"]{0,3}(?:=|>|:{1,3}=|\|\||:|=>|\?=|,)[\x60'"\s=]{0,5}([\w.=-]{10,150}|[a-z0-9][a-z0-9+/]{11,}={0,3})(?:[\x60'"\s;]|\\[nr]|$)'''
+entropy = 3.5
+keywords = ["access", "api", "auth", "key", "credential", "creds", "passwd", "password", "secret", "token"]
+
+[[rules.allowlists]]
+description = "Only the reviewed non-secret Prompt Intelligence localStorage namespace."
+condition = "AND"
+paths = ['''(^|/)src/prompt-intelligence\.js$''']
+regexTarget = "line"
+regexes = ['''cerdikgo-prompt-vault-v1''']
+
+
+# This exception is limited to one verified Git commit object ID in an audit note.
+# The value was confirmed as commit 693bbd632480b760fff5ecab11be355d9288773c,
+# not an authentication credential or provider secret.
+[[rules.allowlists]]
+description = "Only the verified Git commit SHA in the Primary authentication candidate audit note."
+condition = "AND"
+paths = ['''(^|/)docs/PRIMARY-AUTH-FAIL-CLOSED-MAIN-CANDIDATE\.md$''']
+regexTarget = "line"
+regexes = ['''693bbd632480b760fff5ecab11be355d9288773c''']
+
+
+# These two values are verified Git commit object IDs recorded in the master ledger.
+# Both are metadata, not credentials; scope is limited to this exact file and exact literals.
+[[rules.allowlists]]
+description = "Only the two verified commit SHAs in the ATLAS-9 master ledger."
+condition = "AND"
+paths = ['''(^|/)docs/ATLAS9-MASTER-DEVELOPMENT-LEDGER\.md$''']
+regexTarget = "line"
+regexes = ['''0a5fdea7f1c1c4091ff5fb674a1bac6bbb6ce8fb''', '''abeca194672349e799bcfdd9d8f9c9dc82675947''']
