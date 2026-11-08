@@ -664,12 +664,8 @@
     }
 
     /* CerdikGo Innovation Workspace redesign — conversation-first, responsive. */
-    /* One canonical vector mascot asset is shared by desktop and mobile. */
-    .welcome-mascot{width:min(100%,460px);height:auto;margin:0 auto 8px;display:flex;justify-content:center;align-items:center;filter:drop-shadow(0 12px 18px rgba(13,150,220,.18))}
-    .welcome-mascot img{display:block;width:100%;height:auto;max-height:390px;object-fit:contain;object-position:center;image-rendering:auto}
-    @media(max-width:720px){.welcome-mascot{width:min(92vw,380px);margin:0 auto 5px}.welcome-mascot img{max-height:min(58vh,340px)}}
-    html[data-theme="light"] .welcome-mascot{filter:drop-shadow(0 12px 18px rgba(13,150,220,.14))}
-    .workspace-intro{max-width:760px;margin:4px auto 20px;text-align:left}
+    /* Clean welcome layout: typography and workspace tools lead the experience. */
+    .workspace-intro{max-width:760px;margin:18px auto 20px;text-align:left}
     .workspace-intro .eyebrow{font-size:10px;letter-spacing:2px;color:#42d9df}
     .workspace-intro h1{margin:9px 0 7px;font-size:clamp(27px,3.8vw,40px);line-height:1.12;letter-spacing:-1.25px}
     .workspace-intro h1 span{background:linear-gradient(90deg,#54b8ff,#28e0ce);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -692,7 +688,7 @@
     @media(max-width:900px){.suggestions{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:720px){
       .feed{padding:15px 12px 18px}
-      .workspace-intro{margin:5px 2px 15px}
+      .workspace-intro{margin:12px 2px 15px}
       .workspace-intro h1{font-size:clamp(25px,7vw,32px)}
       .workspace-intro p{font-size:12px}
     }
@@ -1410,9 +1406,6 @@
       <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
         <div class="welcome" id="welcome">
-          <div class="welcome-mascot">
-            <img src="/atlas9-mascot.svg" alt="ATLAS-9 robot putih-biru dengan cape biru, mengangkat jempol" width="640" height="520" fetchpriority="high" decoding="async">
-          </div>
           <div class="workspace-intro">
             <div class="eyebrow">CERDIKGO · AI INNOVATION WORKSPACE</div>
             <h1>Selamat datang di <span>Ruang Kerja AI</span></h1>
