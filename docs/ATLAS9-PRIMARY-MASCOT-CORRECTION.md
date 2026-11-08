@@ -1,19 +1,23 @@
-# ATLAS-9 Primary Mascot Correction
+# CerdikGo Clean Welcome Screen
 
-## Scope
-- Replace the welcome-screen inline robot drawing with one canonical SVG asset at `src/atlas9-mascot.svg`.
-- Reference the exact same URL from one image element at every viewport width.
-- Use intrinsic SVG scaling and `object-fit: contain`; enlarge the desktop hero and give Android a viewport-aware maximum height.
-- Keep all existing CerdikGo navigation, language, chat, authentication, prompt, and workspace logic intact.
+## Design decision
+The primary CerdikGo website will not display a robot mascot. ATLAS-9 remains an internal team identity and is not part of the customer-facing welcome screen.
+
+## Implementation
+- Remove the mascot image element and its dedicated desktop/mobile CSS.
+- Remove the unused mascot SVG asset from this branch.
+- Keep the CerdikGo brand, multilingual welcome copy, workspace launcher, navigation, authentication, chat, and existing product features.
+- Rebalance welcome spacing so the heading and workspace tools lead the page without an empty mascot-sized area.
+- Preserve responsive desktop and Android layout behavior.
 
 ## Changed files
-- `src/atlas9-mascot.svg` — new white/blue armored ATLAS-9 mascot, cape, and thumbs-up vector artwork.
-- `src/index.html` — shared asset markup and responsive presentation rules.
-- `tests/mascot-consistency.test.mjs` — source-level checks for one asset, responsive sizing, and vector identity.
-- `docs/ATLAS9-PRIMARY-MASCOT-CORRECTION.md` — this scope and acceptance record.
+- `src/index.html` — clean mascot-free welcome screen and spacing.
+- `tests/mascot-consistency.test.mjs` — replaced mascot tests with clean-screen regression checks.
+- `src/atlas9-mascot.svg` — removed from this branch.
+- `docs/ATLAS9-PRIMARY-MASCOT-CORRECTION.md` — this design decision and QA scope.
 
 ## Safety
-Frontend static asset and presentation only. No Worker/API, OAuth, D1/database, secrets, Wrangler configuration, billing, DNS, or deployment changes.
+Frontend presentation only. No Worker/API, OAuth, database, secrets, Wrangler configuration, billing, DNS, or Production deployment changes. Preview auto-build has been disabled for this branch to prevent further automatic deployments on push.
 
-## Verification limits
-Automated tests can prove that both breakpoints use the same asset and that the vector is scalable. They cannot prove pixel-level equivalence to the supplied reference or physical Android rendering. The reference image must be available side-by-side for final visual acceptance; desktop and Android screenshots must be captured from an isolated Preview before claiming 100% visual fidelity.
+## Verification
+Automated tests verify mascot absence, welcome content, clean spacing, and responsive layout. Physical Android and desktop screenshot review remains necessary before merge. The PR stays Draft and unmerged pending visual acceptance.
