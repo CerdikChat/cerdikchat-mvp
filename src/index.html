@@ -664,10 +664,11 @@
     }
 
     /* CerdikGo Innovation Workspace redesign — conversation-first, responsive. */
-    .welcome-mascot{width:min(100%,390px);height:auto;margin:0 auto 8px;display:flex;justify-content:center;align-items:center;filter:drop-shadow(0 12px 18px rgba(13,150,220,.16))}
-    .welcome-mascot svg{display:block;width:100%;height:auto;max-height:310px;overflow:visible}
-    @media(max-width:720px){.welcome-mascot{width:min(88vw,330px);margin:0 auto 5px}.welcome-mascot svg{max-height:250px}}
-    html[data-theme="light"] .welcome-mascot{filter:drop-shadow(0 12px 18px rgba(13,150,220,.12))}
+    /* One canonical vector mascot asset is shared by desktop and mobile. */
+    .welcome-mascot{width:min(100%,460px);height:auto;margin:0 auto 8px;display:flex;justify-content:center;align-items:center;filter:drop-shadow(0 12px 18px rgba(13,150,220,.18))}
+    .welcome-mascot img{display:block;width:100%;height:auto;max-height:390px;object-fit:contain;object-position:center;image-rendering:auto}
+    @media(max-width:720px){.welcome-mascot{width:min(92vw,380px);margin:0 auto 5px}.welcome-mascot img{max-height:min(58vh,340px)}}
+    html[data-theme="light"] .welcome-mascot{filter:drop-shadow(0 12px 18px rgba(13,150,220,.14))}
     .workspace-intro{max-width:760px;margin:4px auto 20px;text-align:left}
     .workspace-intro .eyebrow{font-size:10px;letter-spacing:2px;color:#42d9df}
     .workspace-intro h1{margin:9px 0 7px;font-size:clamp(27px,3.8vw,40px);line-height:1.12;letter-spacing:-1.25px}
@@ -1409,44 +1410,8 @@
       <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
         <div class="welcome" id="welcome">
-          <div class="welcome-mascot" aria-hidden="true">
-            <svg viewBox="0 0 520 390" role="img" aria-label="Maskot robot CerdikGo" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="mascotArmor" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8fdff"/><stop offset=".48" stop-color="#9edcff"/><stop offset="1" stop-color="#1769c9"/></linearGradient>
-                <linearGradient id="mascotBlue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#13e4f4"/><stop offset=".48" stop-color="#087de8"/><stop offset="1" stop-color="#073a91"/></linearGradient>
-                <linearGradient id="mascotCape" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#18dcf5"/><stop offset="1" stop-color="#0753bd"/></linearGradient>
-                <radialGradient id="mascotGlow"><stop stop-color="#66f4ff" stop-opacity=".48"/><stop offset="1" stop-color="#35caff" stop-opacity="0"/></radialGradient>
-                <filter id="mascotShadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur stdDeviation="7"/></filter>
-              </defs>
-              <ellipse cx="260" cy="345" rx="180" ry="28" fill="url(#mascotGlow)"/>
-              <ellipse cx="260" cy="340" rx="160" ry="24" fill="none" stroke="#65eaff" stroke-width="3" opacity=".8"/>
-              <ellipse cx="260" cy="340" rx="130" ry="15" fill="none" stroke="#24bce9" stroke-width="2" opacity=".65"/>
-              <path d="M328 208 Q414 194 465 286 Q426 314 360 302 L315 264Z" fill="url(#mascotCape)" stroke="#39cfff" stroke-width="5"/>
-              <path d="M177 226 Q117 205 83 254 L103 292 Q143 285 195 269Z" fill="#e9fbff" stroke="#64c9f4" stroke-width="5"/>
-              <g transform="translate(50 90)"><path d="M43 0 82 16 77 63 43 88 9 63 4 16Z" fill="url(#mascotArmor)" stroke="#078de0" stroke-width="6"/><circle cx="43" cy="34" r="12" fill="#0b7ddd"/><path d="M43 45v22m-9-10h18" stroke="#eaffff" stroke-width="6" stroke-linecap="round"/></g>
-              <g>
-                <path d="M194 252 Q164 268 150 304 Q145 317 158 321 L178 319 Q195 292 218 285Z" fill="url(#mascotArmor)" stroke="#328fd7" stroke-width="5"/>
-                <circle cx="158" cy="318" r="15" fill="url(#mascotBlue)" stroke="#b9efff" stroke-width="4"/>
-                <path d="M318 246 Q352 258 358 294 L344 315 326 306 311 275Z" fill="url(#mascotArmor)" stroke="#328fd7" stroke-width="5"/>
-                <circle cx="350" cy="308" r="14" fill="url(#mascotBlue)" stroke="#b9efff" stroke-width="4"/>
-                <path d="M220 276 211 327 Q210 341 226 344 L247 344 259 286Z" fill="url(#mascotArmor)" stroke="#328fd7" stroke-width="5"/>
-                <path d="M278 282 286 330 Q289 344 305 344 L326 340 309 270Z" fill="url(#mascotArmor)" stroke="#328fd7" stroke-width="5"/>
-                <path d="M215 337h39v13h-48q-8-7 9-13Zm76 0h37q15 9 5 15h-43Z" fill="#073f91" stroke="#8ce7ff" stroke-width="4"/>
-                <path d="M202 194 Q260 173 318 194 L332 268 Q316 298 260 300 Q207 295 188 268Z" fill="url(#mascotArmor)" stroke="#58b8ee" stroke-width="6"/>
-                <path d="M228 218 260 205 292 218 286 257 260 278 234 257Z" fill="#0875d5" stroke="#c9f7ff" stroke-width="5"/>
-                <circle cx="260" cy="231" r="9" fill="#bffaff"/><path d="M260 240v22m-9-12h18" stroke="#bffaff" stroke-width="5" stroke-linecap="round"/>
-                <path d="M177 91 Q260 43 343 91 L354 181 Q345 224 260 229 Q174 223 166 181Z" fill="url(#mascotArmor)" stroke="#69cfff" stroke-width="7"/>
-                <path d="M190 111 Q260 72 329 111 L333 171 Q329 205 260 210 Q191 205 187 171Z" fill="#052c68" stroke="#b9f5ff" stroke-width="5"/>
-                <ellipse cx="226" cy="153" rx="11" ry="17" fill="#3cf4ff"/><ellipse cx="294" cy="153" rx="11" ry="17" fill="#3cf4ff"/>
-                <path d="M245 179 Q260 193 275 179" fill="none" stroke="#50f5ff" stroke-width="6" stroke-linecap="round"/>
-                <path d="M180 127 Q145 126 149 166 Q151 190 178 188" fill="url(#mascotBlue)" stroke="#a8efff" stroke-width="6"/>
-                <path d="M340 127 Q375 126 371 166 Q369 190 342 188" fill="url(#mascotBlue)" stroke="#a8efff" stroke-width="6"/>
-                <path d="M244 88 Q260 55 277 88" fill="none" stroke="#0a83e9" stroke-width="9" stroke-linecap="round"/>
-                <circle cx="260" cy="75" r="9" fill="#13e3f4" stroke="#0879d9" stroke-width="4"/>
-                <path d="M203 88 Q260 60 317 88" fill="none" stroke="#fff" stroke-width="5" opacity=".8"/>
-              </g>
-              <g opacity=".55" fill="none" stroke="#69eaff" stroke-width="3"><path d="M370 95h55v38h-55zM381 108h30m-30 10h20"/><path d="M82 195h57v42H82zM94 209h31m-31 10h22"/></g>
-            </svg>
+          <div class="welcome-mascot">
+            <img src="/atlas9-mascot.svg" alt="ATLAS-9 robot putih-biru dengan cape biru, mengangkat jempol" width="640" height="520" fetchpriority="high" decoding="async">
           </div>
           <div class="workspace-intro">
             <div class="eyebrow">CERDIKGO · AI INNOVATION WORKSPACE</div>
