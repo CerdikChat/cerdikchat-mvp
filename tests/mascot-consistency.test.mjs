@@ -3,26 +3,22 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
-const mascot = await readFile(new URL("../src/atlas9-mascot.svg", import.meta.url), "utf8");
 
-test("welcome uses one canonical ATLAS-9 asset instead of inline or duplicate artwork", () => {
-  assert.equal((html.match(/src="\/atlas9-mascot\.svg"/g) || []).length, 1);
-  assert.match(html, /<img src="\/atlas9-mascot\.svg" alt="ATLAS-9 robot putih-biru dengan cape biru, mengangkat jempol"/);
-  const match = html.match(/<div class="welcome-mascot">([\s\S]*?)<\/div>/);
-  assert.ok(match, "welcome mascot container exists");
-  assert.doesNotMatch(match[1], /<svg\b/);
+test("CerdikGo welcome screen is clean and contains no mascot artwork", () => {
+  assert.doesNotMatch(html, /welcome-mascot|atlas9-mascot\.svg/i);
+  assert.doesNotMatch(html, /ATLAS-9 robot|thumbs-up pose/i);
 });
 
-test("the same mascot image has responsive desktop and Android sizing rules", () => {
-  assert.match(html, /\.welcome-mascot img\{[^}]*width:100%[^}]*height:auto[^}]*object-fit:contain/);
-  assert.match(html, /@media\(max-width:720px\)\{\.welcome-mascot\{width:min\(92vw,380px\)/);
-  assert.match(html, /\.welcome-mascot img\{max-height:min\(58vh,340px\)\}/);
+test("welcome typography remains present and readable without a mascot spacer", () => {
+  assert.match(html, /class="workspace-intro"/);
+  assert.match(html, /CERDIKGO · AI INNOVATION WORKSPACE/);
+  assert.match(html, /Ruang Kerja AI/);
+  assert.match(html, /\.workspace-intro\{max-width:760px;margin:18px auto 20px;text-align:left\}/);
+  assert.match(html, /\.workspace-intro\{margin:12px 2px 15px\}/);
 });
 
-test("mascot is a scalable vector with accessible description and thumb-up pose", () => {
-  assert.match(mascot, /viewBox="0 0 640 520"/);
-  assert.match(mascot, /white and electric-blue armored robot/i);
-  assert.match(mascot, /thumbs-up pose/i);
-  assert.match(mascot, /<path d="M477 161/);
-  assert.match(mascot, /id="cape"/);
+test("desktop and Android responsive workspace layouts remain defined", () => {
+  assert.match(html, /@media\(max-width:720px\)/);
+  assert.match(html, /\.workspace-intro h1\{font-size:clamp\(25px,7vw,32px\)\}/);
+  assert.match(html, /\.workspace-launcher/);
 });
