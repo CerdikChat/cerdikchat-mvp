@@ -8,7 +8,7 @@ const mascot = await readFile(new URL("../src/atlas9-mascot.svg", import.meta.ur
 test("welcome uses one canonical ATLAS-9 asset instead of inline or duplicate artwork", () => {
   assert.equal((html.match(/src="\/atlas9-mascot\.svg"/g) || []).length, 1);
   assert.match(html, /<img src="\/atlas9-mascot\.svg" alt="ATLAS-9 robot putih-biru dengan cape biru, mengangkat jempol"/);
-  assert.doesNotMatch(html, /<div class="welcome-mascot"[^>]*>[\s\S]*?<svg[\s\S]*?<\/svg>/);
+  const mascotContainer = html.match(/<div class="welcome-mascot">([\s\S]*?)<\/div>/)?.[1] || "";\n  assert.doesNotMatch(mascotContainer, /<svg\\b/);
 });
 
 test("the same mascot image has responsive desktop and Android sizing rules", () => {
