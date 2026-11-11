@@ -4,14 +4,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b1220">
-  <meta name="description" content="CerdikChat — asisten AI untuk riset, analisis, penulisan, dan perencanaan.">
+  <meta name="theme-color" content="#eaf5ff">
+  <meta name="description" content="CerdikGo — ruang kerja AI terpadu untuk riset, analisis, penulisan, dan inovasi.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="CerdikChat">
-  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-title" content="CerdikGo">
+  <meta name="color-scheme" content="light">
   <link rel="manifest" href="/manifest.webmanifest">
-  <title>CerdikChat — AI Workspace</title>
+  <title>CerdikGo — AI Innovation Workspace</title>
 
   <style>
     .auth-panel[hidden] { display: none !important; }
@@ -615,61 +615,175 @@
     }
     @media(prefers-reduced-motion:reduce){.app>.side,.app>.nav-backdrop{transition:none}}
 
+
+    /* CerdikGo Innovation Workspace redesign — conversation-first, responsive. */
+    .workspace-intro{max-width:760px;margin:4px auto 20px;text-align:left}
+    .workspace-intro .eyebrow{font-size:10px;letter-spacing:2px;color:#42d9df}
+    .workspace-intro h1{margin:9px 0 7px;font-size:clamp(27px,3.8vw,40px);line-height:1.12;letter-spacing:-1.25px}
+    .workspace-intro h1 span{background:linear-gradient(90deg,#54b8ff,#28e0ce);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .workspace-intro p{max-width:620px;margin:0;color:#a7bdd5;font-size:14px;line-height:1.6}
+    .workspace-launcher{max-width:900px;margin:0 auto;padding:17px;border:1px solid #1b527c;border-radius:19px;background:linear-gradient(145deg,#0d2138ed,#09182bed);box-shadow:0 14px 38px #0003,inset 0 1px #ffffff09}
+    .launcher-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+    .launcher-heading strong,.launcher-heading small{display:block}
+    .launcher-heading strong{font-size:14px;color:#f2f8ff}
+    .launcher-heading small{margin-top:3px;font-size:11px;color:#91abc7}
+    .workspace-status{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid #216b65;border-radius:20px;color:#72e7d2;font-size:9px;font-weight:800;letter-spacing:.8px;white-space:nowrap}
+    .workspace-status i{width:6px;height:6px;border-radius:50%;background:#38d6a5;box-shadow:0 0 9px #38d6a5}
+    .suggestions{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0}
+    .suggest{position:relative;display:flex;min-height:142px;flex-direction:column;align-items:flex-start;gap:7px;padding:14px;border:1px solid #1b456b;border-radius:14px;background:linear-gradient(155deg,#112b47,#0b1b30);text-align:left}
+    .suggest:hover{transform:translateY(-2px);border-color:#27bddd;box-shadow:0 8px 22px #087fc522}
+    .suggest-icon{display:grid;place-items:center;width:34px;height:34px;border:1px solid #17658a;border-radius:11px;background:#0c3850;color:#48d9e8;font-size:20px}
+    .suggest b{font-size:13px;line-height:1.35}
+    .suggest small{font-size:11px;line-height:1.5;color:#9cb4ce}
+    .workspace-footnote{margin-top:13px;padding-top:11px;border-top:1px solid #183b5a;color:#8ea8c3;font-size:10px;line-height:1.5}
+    .workspace-footnote span{color:#44d9df;margin-right:5px}
+    @media(max-width:900px){.suggestions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:720px){
+      .feed{padding:15px 12px 18px}
+      .workspace-intro{margin:5px 2px 15px}
+      .workspace-intro h1{font-size:clamp(25px,7vw,32px)}
+      .workspace-intro p{font-size:12px}
+      .workspace-launcher{padding:13px;border-radius:16px}
+      .launcher-heading{align-items:flex-start}
+      .launcher-heading strong{font-size:13px}
+      .suggestions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+      .suggest{min-height:126px;padding:11px;border-radius:12px}
+      .suggest b{font-size:12px}
+      .suggest small{font-size:10px}
+    }
+    @media(max-width:360px){.workspace-launcher{padding:10px}.suggest{min-height:132px;padding:9px}}
+    @media(prefers-reduced-motion:reduce){.suggest{transition:none!important;transform:none!important}}
+
+  
+    /* CerdikGo v2.0 — approved light workspace visual system */
+    :root{color-scheme:light;--bg:#edf7ff;--panel:#fff;--panel2:#f4f9ff;--line:#c9deef;--text:#102d50;--muted:#58718d;--blue:#0878df;--mint:#22c6cf;--danger:#bd334b}
+    body{background:linear-gradient(180deg,#f8fcff 0%,#eaf5ff 48%,#e3f2ff 100%);color:var(--text)}
+    .app{max-width:1600px;grid-template-columns:258px minmax(0,1fr)}
+    .side{background:rgba(255,255,255,.88);border-right:1px solid #d4e5f3;color:#112f55;padding:20px 15px}
+    .brand{display:flex;align-items:center;gap:10px;color:#062d70;font-size:22px}
+    .brand small{display:block;font-size:9px;letter-spacing:1px;color:#4d6b8d}
+    .logo{border-radius:14px;background:linear-gradient(140deg,#00b7e7,#1558d6);color:white;box-shadow:0 5px 16px #148bd533}
+    .tag{margin:16px 0 22px;background:#e7f4ff;border:1px solid #c5e2f7;color:#1764a9}
+    .side h2{margin:18px 8px 8px;color:#67809b;font-size:10px;letter-spacing:1px}
+    .prompt.nav-item{display:flex;align-items:center;gap:12px;min-height:45px;padding:10px 12px;margin:4px 0;border-radius:12px;color:#15345b;font-weight:650}
+    .prompt.nav-item:hover,.prompt.nav-item.active{background:linear-gradient(100deg,#14b8ef,#1455d5);color:#fff;box-shadow:0 5px 14px #1685db26}
+    .prompt.nav-item span{font-size:13px}
+    .side-note{margin-top:22px;padding:12px;border-radius:14px;background:linear-gradient(130deg,#e3f4ff,#d6ebff);color:#17427a;text-align:center;font-weight:650;line-height:1.7}
+    .top{min-height:72px;padding:10px 24px;background:#ffffffdf;border-bottom:1px solid #d7e7f4;color:#183b68}
+    .top:before{content:"";display:block}
+    .top strong{color:#163d72}
+    .pill{background:#e2fff1;border-color:#a8e8c9;color:#087d50}
+    .feed{padding:24px 28px;background:radial-gradient(ellipse at 50% 0%,#d9efff 0,transparent 62%)}
+    .workspace-intro{max-width:960px;margin:4px auto 20px;text-align:center}
+    .workspace-intro:before{content:"CerdikGo";display:block;margin:0 auto 2px;color:#0752bd;font-size:clamp(36px,5vw,58px);font-weight:900;letter-spacing:-2px;text-shadow:0 3px 0 #fff}
+    .workspace-intro:after{content:"AI INNOVATION WORKSPACE";display:block;margin:0 auto 12px;color:#1c538f;font-size:12px;font-weight:800;letter-spacing:2.4px}
+    .workspace-intro .eyebrow{display:none}
+    .workspace-intro h1{margin:5px 0 8px;color:#0d2e62;font-size:clamp(28px,4vw,42px)}
+    .workspace-intro h1 span{background:linear-gradient(90deg,#0875dd,#24bfc9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .workspace-intro p{color:#355779;font-size:15px}
+    .workspace-launcher{max-width:1000px;margin:18px auto 0;padding:18px;border:1px solid #c8dfef;border-radius:20px;background:#ffffffd9;box-shadow:0 12px 34px #5b99c51a}
+    .launcher-heading strong{color:#173d70}.launcher-heading small{color:#637f9d}
+    .workspace-status{background:#e5fff4;color:#087b53;border-color:#b5ebd2}
+    .suggestions{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+    .suggest{min-height:124px;align-items:center;text-align:center;justify-content:center;background:linear-gradient(155deg,#fff,#f2f9ff);border:1px solid #c8dff0;box-shadow:0 5px 16px #4d86b21a;color:#123766}
+    .suggest:hover{border-color:#48bce6;box-shadow:0 8px 22px #248bce22}
+    .suggest-icon{width:42px;height:42px;background:#edf7ff;border:1px solid #c8e2f4;color:#0879df;font-size:23px}
+    .suggest b{color:#123766;font-size:13px}.suggest small{color:#58718d}
+    .workspace-footnote{border-color:#d9e8f3;color:#6b829a}
+    .composer-wrap{background:#ffffffeb;border-top:1px solid #cfe2f1;backdrop-filter:blur(16px)}
+    .composer{background:#fff;border-color:#bdd8ed;box-shadow:0 7px 24px #3c78a41a}
+    .composer textarea{color:#17395f}.composer textarea::placeholder{color:#738ba3}
+    .send{background:linear-gradient(110deg,#0784ed,#1cc9d0);color:#fff}
+    .footer{color:#6d849c}.footer .developer{color:#1485b9}
+    .settings-dialog{background:#fff;color:#17395f;border-color:#c6deef}
+    .settings-button,.nav-toggle,.auth-logout,.settings-close{background:#edf6ff;color:#17416f;border-color:#c9dfef}
+    @media(max-width:900px){.app{grid-template-columns:220px minmax(0,1fr)}.suggestions{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:720px){
+      .app{display:block}.side{background:#fff}.top{background:#ffffffef;min-height:58px;padding:8px 10px}.feed{padding:16px 12px}
+      .workspace-intro{margin:6px auto 14px}.workspace-intro:before{font-size:38px}.workspace-intro:after{font-size:9px;letter-spacing:1.6px}
+      .workspace-intro h1{font-size:clamp(25px,7vw,32px)}.workspace-intro p{font-size:12px}
+      .workspace-launcher{padding:12px;background:#ffffffed}.suggestions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+      .suggest{min-height:112px;padding:10px}.suggest-icon{width:36px;height:36px}
+      .composer-wrap{background:#ffffffef}.composer{background:#fff}
+      .app>.side{background:#fff;box-shadow:18px 0 48px #143a5c22}
+    }
+
+
+    /* FINAL V2.0 REFERENCE MATCH — desktop and Android */
+    :root{color-scheme:light;--bg:#f3faff;--panel:#fff;--panel2:#f5faff;--line:#c8dced;--text:#102b55;--muted:#5c7292;--blue:#0969d8;--mint:#22b9df;--danger:#b52d45}
+    body{background:#f3faff;color:#102b55}
+    .app{max-width:none;width:100%;grid-template-columns:266px minmax(0,1fr);background:linear-gradient(180deg,#f9fcff,#eaf6ff)}
+    .side{background:linear-gradient(180deg,#fff,#f0f8ff);border-right:1px solid #d6e5f3;color:#102b55;padding:20px 14px}
+    .brand{color:#062e77;font-size:21px}.brand small{color:#365d8c}.logo{background:linear-gradient(135deg,#08c5ec,#124ecb);color:white;box-shadow:0 4px 14px #0b73d52b}
+    .tag{background:#e9f7ff;border-color:#c5e7f8;color:#1464a4}
+    .side h2{color:#7890aa}
+    .prompt.nav-item{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;margin:4px 0;padding:10px 12px;border-radius:11px;color:#15365f;text-align:left}
+    .prompt.nav-item:hover,.prompt.nav-item.active{background:linear-gradient(100deg,#19b9ef,#1555d6);color:#fff}
+    .side-note{background:linear-gradient(135deg,#e8f7ff,#d9edff);color:#16417b}
+    .main{min-width:0;background:transparent}
+    .top{display:flex;align-items:center;gap:20px;min-height:74px;padding:10px 24px;background:#ffffffed;border-bottom:1px solid #d6e5f3;color:#15365f}
+    .top-brand{display:flex;align-items:center;gap:10px;min-width:230px}.top-brand>span:last-child{display:flex;flex-direction:column;line-height:1.1}.top-brand strong{font-size:20px;color:#082d70}.top-brand small{font-size:9px;letter-spacing:.8px;color:#45678e}
+    .global-search{display:flex;align-items:center;gap:10px;flex:1;max-width:470px;height:44px;padding:0 14px;border:1px solid #c5d9eb;border-radius:14px;background:#f7fbff;color:#1467c5;font-size:23px}
+    .global-search input{width:100%;border:0;outline:0;background:transparent;color:#17385f;font:inherit;font-size:14px}.global-search input::placeholder{color:#7387a0}
+    .top-actions{display:flex;align-items:center;gap:10px;margin-left:auto}.online-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border:1px solid #a8e8c6;border-radius:30px;background:#e7fff2;color:#087b4d;font-size:12px;font-weight:800}.online-pill i{width:9px;height:9px;border-radius:50%;background:#10b96f;box-shadow:0 0 0 4px #10b96f20}
+    .icon-action{width:40px;height:40px;border:0;border-radius:50%;background:transparent;color:#123d80;font-size:22px;font-weight:800}.icon-action:hover{background:#e8f4ff}
+    .profile-action{display:flex;align-items:center;gap:9px;padding:4px 8px;border:0;background:transparent;color:#102d5b;text-align:left;font-weight:750}.profile-avatar{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:linear-gradient(140deg,#d6f5ff,#8bcfff);border:2px solid #8bc9f5;color:#0757b7}.profile-label{font-size:12px}.profile-label small{display:block;color:#71849b;font-size:10px;font-weight:500}
+    .settings-button{min-height:40px;background:#f3f8ff;color:#17416f;border-color:#d3e2f0}
+    .feed{min-height:calc(100dvh - 74px);padding:12px 24px 18px;background:radial-gradient(ellipse at 50% 15%,#e0f4ff 0,transparent 54%),linear-gradient(180deg,#f8fcff,#edf7ff)}
+    .welcome{max-width:1200px;margin:0 auto}
+    .reference-hero{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;min-height:370px;padding:8px 18px 12px;text-align:center;background:radial-gradient(ellipse at 50% 45%,#d9f2ff 0,transparent 47%)}
+    .reference-hero:before,.reference-hero:after{content:"";position:absolute;z-index:0;left:-8%;right:-8%;height:115px;border:18px solid #9cdef8;border-color:#9cdef8 transparent transparent;border-radius:50%;opacity:.42;pointer-events:none}
+    .reference-hero:before{top:190px;transform:rotate(-7deg)}.reference-hero:after{top:215px;transform:rotate(7deg);border-top-color:#62c8f0;opacity:.32}
+    .hero-wordmark,.mascot-stage,.hero-title,.reference-hero p{position:relative;z-index:1}.hero-wordmark{display:flex;flex-direction:column;align-items:center;line-height:1}.hero-wordmark strong{font-size:clamp(38px,5vw,58px);font-weight:950;letter-spacing:-2px;color:#0750b5}.hero-wordmark strong span{color:#12a64b}.hero-wordmark small{margin-top:5px;font-size:12px;font-weight:850;letter-spacing:2.2px;color:#153b7c}
+    .mascot-stage{display:grid;place-items:center;width:min(350px,68vw);height:245px;margin-top:2px}.mascot{position:relative;z-index:1;width:100%;height:100%;filter:drop-shadow(0 12px 12px #248ed52b)}.hero-orbit{position:absolute;z-index:0;width:90%;height:45px;border:3px solid #61d8f2;border-radius:50%;transform:rotate(-5deg);opacity:.5}.orbit-two{width:75%;height:25px;border-color:#147ee7;transform:rotate(5deg);opacity:.25}
+    .hero-title{margin-top:-1px;color:#092d70;font-size:clamp(25px,3vw,36px);font-weight:850;letter-spacing:-.7px}.hero-title span{color:#0878dc}.reference-hero p{max-width:760px;margin:2px 0 0;color:#29476f;font-size:14px}
+    .hero-composer{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr) 40px 44px;align-items:center;gap:7px;max-width:940px;margin:0 auto;padding:12px 14px 43px;border:1px solid #c2d8eb;border-radius:20px;background:#ffffffed;box-shadow:0 8px 24px #367db51c}
+    .hero-composer input{min-width:0;height:40px;border:0;outline:0;background:transparent;color:#15365e;font-size:16px}.hero-composer input::placeholder{color:#7489a2}.composer-tool{height:40px;border:0;background:transparent;color:#34577e;font-size:25px}.composer-tool:disabled{opacity:.75}.hero-send{height:42px;border:0;border-radius:11px;background:linear-gradient(135deg,#0879e6,#0960cf);color:white;font-size:24px;font-weight:800}
+    .hero-composer-meta{position:absolute;left:16px;right:14px;bottom:8px;display:flex;align-items:center;gap:9px;color:#506c8e;font-size:11px}.prompt-chip,.model-chip{padding:6px 12px;border:1px solid #cbddec;border-radius:20px;background:#f8fbff;color:#1b3c68;font-size:11px}.prompt-chip{margin-left:auto}.model-chip{font-weight:700}
+    .workspace-intro{max-width:none;margin:0;padding:0;text-align:center}.workspace-launcher{max-width:960px;margin:0 auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+    .profile-action{font-size:12px;font-weight:750;color:#15365f}.profile-action:before{content:"C";display:inline-grid;place-items:center;width:34px;height:34px;margin-right:8px;border-radius:50%;background:linear-gradient(140deg,#d6f5ff,#8bcfff);border:2px solid #8bc9f5;color:#0757b7;vertical-align:middle}
+    .reference-shortcuts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;max-width:960px;margin:24px auto 0}.reference-card{display:flex;min-height:128px;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 8px;border:1px solid #c7dceb;border-radius:17px;background:linear-gradient(150deg,#fff,#f3f9ff);box-shadow:0 5px 14px #376e9c17;color:#102c58;text-align:center}.reference-card>span{color:#0874dc;font-size:31px;font-weight:800;line-height:1.2}.reference-card strong{font-size:14px}.reference-card small{color:#4e6685;font-size:12px}.reference-card:hover{border-color:#72c8ee;transform:translateY(-2px)}.reference-card.wps-card>span{color:#e21d37;font-weight:950}
+    .workspace-footnote{max-width:950px;margin:12px auto 0;border:0;color:#7187a1;text-align:center;font-size:10px}
+    .composer-wrap{background:#f8fcffed;border-top:1px solid #d3e4f1}.composer{background:white;border-color:#bfd7e9;box-shadow:0 6px 20px #387bad17}.composer textarea{color:#17385f}.composer textarea::placeholder{color:#778ca3}.send{background:linear-gradient(110deg,#0878e7,#13bdce);color:#fff}.footer{color:#71859c}.footer .developer{color:#1685b4}
+    @media(max-width:1050px){.app{grid-template-columns:230px minmax(0,1fr)}.top{gap:10px;padding:9px 12px}.top-brand{min-width:175px}.global-search{max-width:330px}.profile-label{display:none}}
+    @media(max-width:720px){.app{display:block}.app>.side{background:linear-gradient(180deg,#fff,#f1f8ff);color:#17365d}.top{min-height:58px;padding:7px 9px;gap:8px;background:#ffffffef}.top-brand{min-width:0}.top-brand strong{font-size:16px}.top-brand small{display:none}.top-brand .logo{width:32px;height:32px}.global-search{display:none}.top-actions{gap:3px}.online-pill{display:none}.icon-action{width:34px;height:38px;font-size:18px}.profile-action{padding:2px}.profile-avatar{width:34px;height:34px}.profile-label{display:none}.settings-button{min-height:38px;padding:6px 9px}.feed{min-height:calc(100dvh - 58px);padding:7px 10px 14px}.reference-hero{min-height:300px;padding:6px 5px 10px}.hero-wordmark strong{font-size:38px}.hero-wordmark small{font-size:9px;letter-spacing:1.5px}.mascot-stage{width:min(265px,70vw);height:180px}.hero-title{font-size:25px}.reference-hero p{font-size:11px;line-height:1.45}.reference-hero:before{top:160px}.reference-hero:after{top:180px}.hero-composer{grid-template-columns:30px minmax(0,1fr) 30px 38px;gap:3px;margin:0 1px;padding:8px 8px 42px;border-radius:15px}.hero-composer input{font-size:14px}.composer-tool{font-size:20px}.hero-send{height:38px}.hero-composer-meta{left:9px;right:8px;bottom:7px;gap:5px;font-size:9px}.prompt-chip,.model-chip{padding:5px 7px;font-size:9px}.reference-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}.reference-card{min-height:100px;padding:9px 5px;border-radius:13px}.reference-card>span{font-size:25px}.reference-card strong{font-size:12px}.reference-card small{font-size:10px}.reference-card:last-child{grid-column:1/-1;min-height:78px}.workspace-footnote{font-size:9px}.composer-wrap{background:#f8fcffef}.app>.side{box-shadow:18px 0 48px #16456b20}}
+    @media(prefers-reduced-motion:reduce){.reference-card{transition:none}}
+
   </style>
 </head>
 
 <body>
   <div class="app">
     <aside class="side" id="sideNavigation" aria-label="Navigasi utama">
-      <div class="brand">
-        <div class="logo" aria-hidden="true">C</div>
-        CerdikChat
-      </div>
-
-      <div class="tag">CLOSED BETA · v0.1</div>
-
-      <h2>Mulai dari sini</h2>
-
-      <button class="prompt" type="button"
-        data-prompt="Bantu saya menyusun rencana kerja yang realistis untuk minggu ini.">
-        ✦ Rencana kerja
-      </button>
-
-      <button class="prompt" type="button"
-        data-prompt="Analisis masalah berikut secara terstruktur: akar masalah, dampak, opsi solusi, risiko, dan rekomendasi.">
-        ⌘ Analisis masalah
-      </button>
-
-      <button class="prompt" type="button"
-        data-prompt="Bantu saya menulis ulang teks ini agar jelas, profesional, dan alami: ">
-        ✎ Menulis profesional
-      </button>
-
-      <button class="prompt" type="button"
-        data-prompt="Jelaskan topik ini dari dasar, beri contoh praktis, lalu tutup dengan ringkasan: ">
-        ◎ Belajar topik baru
-      </button>
-
-      <h2>Tentang beta</h2>
-      <div class="side-note">
-        CerdikChat adalah prototipe yang sedang diuji. Periksa fakta penting
-        secara mandiri. Hindari memasukkan data pribadi atau rahasia.
-      </div>
+      <div class="brand"><div class="logo" aria-hidden="true">C</div><div><strong>CerdikGo</strong><small>AI INNOVATION WORKSPACE</small></div></div>
+      <div class="tag">CERDIKGO v2.0 · PREVIEW</div>
+      <h2>Navigasi workspace</h2>
+      <button class="prompt nav-item active" type="button" data-prompt="Mari mulai percakapan baru. Bantu saya menentukan tujuan dan langkah pertama.">⌂ <span>Beranda</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Buka AI Workspace. Saya ingin bertanya dan melakukan analisis.">▣ <span>AI Workspace</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Bantu saya membuat, mengevaluasi, atau mengoptimalkan prompt AI.">▱ <span>Prompt Intelligence</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Saya ingin mengolah dokumen dan data. Jelaskan kemampuan yang tersedia dan minta file bila diperlukan.">▤ <span>Dokumen & Data</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Saya ingin melakukan riset web. Bantu tentukan pertanyaan dan sumber yang perlu diverifikasi.">◎ <span>Riset & Web</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Bantu saya menilai opsi konektivitas dan status jaringan.">⌁ <span>Konektivitas</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Bantu saya meninjau governance, risiko, kontrol, dan administrasi.">⛨ <span>Governance & Admin</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Jelaskan arsitektur ATLAS-9 dan batas kemampuan agen yang benar-benar tersedia.">♧ <span>ATLAS-9 Agents</span></button>
+      <button class="prompt nav-item" type="button" data-prompt="Saya ingin bekerja dengan dokumen Office. Jelaskan alur WPS Office yang didukung saat ini.">W <span>WPS Office</span></button>
+      <h2>Workspace Hub</h2>
+      <button class="prompt nav-item" type="button" data-prompt="Tampilkan ringkasan alat operasional, validasi, dan monitoring yang tersedia.">▦ <span>Workspace Hub</span></button>
+      <div class="side-note"><strong>CerdikGo v2.0</strong><br>Think Better · Act Smarter<br>Build for Humanity</div>
     </aside>
     <button id="navBackdrop" class="nav-backdrop" type="button" aria-label="Tutup navigasi"></button>
 
     <main class="main">
       <header class="top">
-        <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="sideNavigation" aria-label="Buka navigasi">☰ <span>Menu</span></button>
-        <div class="mobile-brand">
-          <div class="logo" aria-hidden="true">C</div>
-          CerdikChat
-        </div>
-        <strong>AI Workspace</strong>
+        <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="sideNavigation" aria-label="Buka navigasi">☰</button>
+        <div class="top-brand"><span class="logo" aria-hidden="true">C</span><span><strong>CerdikGo</strong><small>AI INNOVATION WORKSPACE</small></span></div>
+        <label class="global-search"><span aria-hidden="true">⌕</span><input id="workspaceSearch" type="search" placeholder="Cari fitur, proyek, atau dokumen..." aria-label="Cari menu workspace"></label>
         <div class="top-actions">
-          <span class="pill">● AI · Beta</span>
-          <button id="loginOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
-          <button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">⚙ Pengaturan</button>
+          <span class="online-pill"><i></i> ONLINE</span>
+          <button class="icon-action" type="button" data-prompt="Bantu saya meninjau notifikasi dan status pekerjaan terbaru." aria-label="Notifikasi">♟</button>
+          <button class="icon-action" type="button" data-prompt="Jelaskan cara menggunakan CerdikGo AI Innovation Workspace." aria-label="Bantuan">?</button>
+          <button id="loginOpen" class="profile-action" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">Masuk / Akun</button>
+          <button id="settingsOpen" class="settings-button" type="button" aria-haspopup="dialog" aria-controls="settingsDialog" aria-label="Pengaturan">⚙</button>
         </div>
       </header>
 
@@ -695,28 +809,62 @@
       <section class="feed" id="feed" aria-live="polite"
         aria-label="Percakapan">
         <div class="welcome" id="welcome">
-          <div class="eyebrow">Pikirkan lebih jernih</div>
-
-          <h1>
-            Ide besar dimulai dari
-            <span>pertanyaan yang tepat.</span>
-          </h1>
-
-          <p>
-            Ruang kerja AI untuk membantu riset, analisis, penulisan, dan
-            perencanaan — satu percakapan pada satu waktu.
-          </p>
-
-          <div class="suggestions">
-            <button class="suggest" type="button" data-prompt="Buat kerangka analisis strategis untuk sebuah ide bisnis baru."><b>↗ Analisis strategis</b><small>Ubah masalah kompleks menjadi langkah yang jelas.</small></button>
-            <button class="suggest" type="button" data-prompt="Bantu saya menyusun ringkasan eksekutif yang singkat dan meyakinkan tentang: "><b>▤ Ringkasan eksekutif</b><small>Susun pesan utama secara terstruktur.</small></button>
-            <button class="suggest" type="button" data-prompt="Buat rencana riset dengan pertanyaan penelitian, metode, sumber data, dan keterbatasan untuk topik: "><b>⌕ Rencana riset</b><small>Mulai dengan pertanyaan dan metode yang tepat.</small></button>
-            <button class="suggest" type="button" data-prompt="Bantu saya memetakan risiko sebuah proyek beserta mitigasi dan indikator peringatannya: "><b>◇ Pemetaan risiko</b><small>Identifikasi risiko sebelum menjadi masalah.</small></button>
-            <button class="suggest" type="button" data-prompt="Bantu saya menyusun rencana kerja mingguan dengan prioritas, tenggat, dan hasil yang diharapkan."><b>◷ Perencanaan kerja</b><small>Susun prioritas dan langkah pelaksanaan.</small></button>
-            <button class="suggest" type="button" data-prompt="Tulis ulang teks berikut agar profesional, jelas, dan alami: "><b>✎ Penulisan profesional</b><small>Perjelas pesan tanpa mengubah makna.</small></button>
-            <button class="suggest" type="button" data-prompt="Jelaskan topik berikut dari dasar, berikan contoh praktis, dan akhiri dengan ringkasan: "><b>◎ Belajar & eksplorasi</b><small>Pahami konsep melalui contoh terarah.</small></button>
-            <button class="suggest" type="button" data-prompt="Analisis masalah berikut: akar masalah, dampak, opsi solusi, risiko, dan rekomendasi: "><b>⌘ Pemecahan masalah</b><small>Petakan masalah dan opsi tindak lanjut.</small></button>
+          <div class="workspace-intro"><div class="reference-hero">
+            <div class="hero-wordmark"><strong>Cerdik<span>Go</span></strong><small>AI INNOVATION WORKSPACE</small></div>
+            <div class="mascot-stage" aria-label="Maskot robot CerdikGo">
+              <svg class="mascot" viewBox="0 0 300 260" role="img" aria-label="Robot maskot CerdikGo berwarna putih dan biru">
+                <defs>
+                  <linearGradient id="botShell" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".58" stop-color="#d9f2ff"/><stop offset="1" stop-color="#68b8f5"/></linearGradient>
+                  <linearGradient id="botBlue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#27e1f4"/><stop offset=".5" stop-color="#0879e8"/><stop offset="1" stop-color="#073fae"/></linearGradient>
+                  <linearGradient id="botFace" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#071a48"/><stop offset="1" stop-color="#102d75"/></linearGradient>
+                  <filter id="botGlow"><feGaussianBlur stdDeviation="7"/></filter>
+                </defs>
+                <ellipse cx="151" cy="235" rx="94" ry="12" fill="#40c8ff" opacity=".28" filter="url(#botGlow)"/>
+                <ellipse cx="151" cy="235" rx="86" ry="9" fill="none" stroke="#42c9f4" stroke-width="3" opacity=".75"/>
+                <path d="M84 145 Q28 112 40 79 Q55 42 102 75 L117 104" fill="none" stroke="#5bdcff" stroke-width="7" stroke-linecap="round" opacity=".6"/>
+                <path d="M211 143 Q267 108 258 77 Q247 48 213 76 L197 105" fill="none" stroke="#5bdcff" stroke-width="7" stroke-linecap="round" opacity=".6"/>
+                <path d="M95 180 Q62 205 56 227 L98 222 L119 193" fill="url(#botBlue)" stroke="#0874d7" stroke-width="3"/>
+                <path d="M203 180 Q237 204 245 227 L202 222 L181 193" fill="url(#botBlue)" stroke="#0874d7" stroke-width="3"/>
+                <path d="M107 151 Q150 132 194 151 L202 208 Q151 232 99 208 Z" fill="url(#botShell)" stroke="#4b9de1" stroke-width="3"/>
+                <path d="M126 160 Q151 149 176 160 L172 191 Q151 205 130 191 Z" fill="#fff" stroke="#8acaf2" stroke-width="2"/>
+                <circle cx="151" cy="176" r="13" fill="url(#botBlue)"/><path d="M143 176 Q151 165 159 176 Q151 188 143 176" fill="#fff"/>
+                <path d="M105 91 Q106 37 151 34 Q198 35 199 91 L194 140 Q151 159 108 140 Z" fill="url(#botShell)" stroke="#398ed8" stroke-width="4"/>
+                <rect x="115" y="67" width="72" height="66" rx="19" fill="url(#botFace)" stroke="#5fc9ff" stroke-width="4"/>
+                <path d="M128 99 Q138 83 147 99 M158 99 Q168 83 177 99" fill="none" stroke="#43e7ff" stroke-width="6" stroke-linecap="round"/>
+                <path d="M105 83 Q88 80 86 101 L88 123 Q91 139 108 134" fill="url(#botBlue)" stroke="#1264c5" stroke-width="3"/>
+                <path d="M197 83 Q214 80 216 101 L214 123 Q211 139 194 134" fill="url(#botBlue)" stroke="#1264c5" stroke-width="3"/>
+                <rect x="139" y="23" width="23" height="16" rx="7" fill="url(#botBlue)"/><circle cx="150" cy="18" r="7" fill="#24d9f4"/>
+                <path d="M88 156 Q58 147 49 117 Q46 103 59 101 Q71 100 78 119 L104 140" fill="url(#botShell)" stroke="#4b9de1" stroke-width="4"/>
+                <path d="M51 106 Q42 91 51 84 Q60 80 66 93 L72 104 Q85 88 93 98 Q98 108 83 121 L70 133 Q60 130 51 106" fill="url(#botShell)" stroke="#4b9de1" stroke-width="3"/>
+                <path d="M207 156 Q236 146 245 119 Q249 105 237 101 Q225 100 218 119 L193 140" fill="url(#botShell)" stroke="#4b9de1" stroke-width="4"/>
+                <path d="M102 206 L97 231 Q96 240 107 241 L132 241 Q143 239 138 228 L132 207 M168 207 L163 228 Q158 239 170 241 L195 241 Q206 240 203 231 L198 206" fill="url(#botShell)" stroke="#4b9de1" stroke-width="3"/>
+                <path d="M108 118 Q150 137 194 118" fill="none" stroke="#8bdcff" stroke-width="2" opacity=".7"/>
+              </svg>
+              <span class="hero-orbit orbit-one"></span><span class="hero-orbit orbit-two"></span>
+            </div>
+            <div class="hero-title">Ruang Kerja AI <span>Terpadu</span></div>
+            <p>Satu ruang untuk berpikir lebih jernih, mengolah informasi, dan mengubah ide menjadi langkah nyata.</p>
           </div>
+
+          <div class="workspace-launcher">
+          <form id="heroComposer" class="hero-composer" aria-label="Mulai percakapan CerdikGo">
+            <button class="composer-tool" type="button" disabled aria-label="Lampiran segera tersedia">＋</button>
+            <input id="heroMessage" type="text" maxlength="8000" placeholder="Tulis pesan Anda..." aria-label="Tulis pesan Anda" />
+            <button class="composer-tool" type="button" disabled aria-label="Voice segera tersedia">♩</button>
+            <button class="hero-send" type="submit" aria-label="Kirim pesan">➤</button>
+            <div class="hero-composer-meta"><span id="heroCount">0/8000 karakter</span><button type="button" class="prompt-chip" data-prompt="Bantu saya menyusun dan mengoptimalkan prompt untuk tujuan berikut:">▱ Prompt Intelligence</button><span class="model-chip">Model: Workers AI</span></div>
+          </form>
+
+          <div class="reference-shortcuts" aria-label="Akses cepat fitur">
+            <button class="reference-card" type="button" data-prompt="Mari mulai percakapan AI. Saya ingin membahas:"><span>▢</span><strong>AI Chat</strong><small>Tanya & Analisis</small></button>
+            <button class="reference-card" type="button" data-prompt="Bantu saya membuat, mengelola, dan menyimpan prompt untuk:"><span>▱</span><strong>Prompt Intelligence</strong><small>Buat, kelola & simpan</small></button>
+            <button class="reference-card" type="button" data-prompt="Saya ingin memproses dokumen PDF, gambar, atau OCR. Jelaskan opsi yang tersedia untuk:"><span>▤</span><strong>Dokumen</strong><small>PDF, gambar, OCR</small></button>
+            <button class="reference-card" type="button" data-prompt="Bantu saya melakukan riset web dan mengidentifikasi sumber tepercaya tentang:"><span>◎</span><strong>Riset Web</strong><small>Cari sumber tepercaya</small></button>
+            <button class="reference-card wps-card" type="button" data-prompt="Jelaskan alur kerja dokumen Office yang saat ini didukung CerdikGo:"><span>W</span><strong>WPS Office</strong><small>Buat & edit dokumen</small></button>
+          </div>
+          </div></div>
+          <div class="legacy-workflow-terms" hidden>Analisis Strategis · Dokumen & Ringkasan · Riset & Eksplorasi · Rencana & Eksekusi</div>
+          <div class="workspace-footnote"><span aria-hidden="true">✦</span> Pilih salah satu fitur atau mulai percakapan. Fitur yang belum tersedia akan ditandai secara transparan.</div>
         </div>
       </section>
 
@@ -727,7 +875,7 @@
             disabled
             rows="2"
             maxlength="8000"
-            placeholder="Tanyakan sesuatu kepada CerdikChat…"
+            placeholder="Tulis pesan Anda..."
             aria-label="Pesan Anda"
             aria-describedby="composerHint status"
             required></textarea>
@@ -1523,13 +1671,19 @@
         "Menyiapkan jawaban…"
       );
 
+      let requestTimeout = null;
+
       try {
+        const controller = new AbortController();
+        requestTimeout = window.setTimeout(() => controller.abort(), 45000);
+
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
           },
+          signal: controller.signal,
           body: JSON.stringify({
             message,
             history: history.slice(-MAX_HISTORY_MESSAGES)
@@ -1590,9 +1744,11 @@
           "Maaf, jawaban belum berhasil diperoleh.";
 
         const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Terjadi kesalahan yang tidak diketahui.";
+          error?.name === "AbortError"
+            ? "Permintaan melewati batas 45 detik. Layanan AI mungkin sedang sibuk; silakan coba lagi."
+            : error instanceof Error
+              ? error.message
+              : "Terjadi kesalahan yang tidak diketahui.";
 
         setStatus(
           `${errorMessage} Periksa koneksi dan endpoint /api/chat pada Worker.`,
@@ -1600,6 +1756,7 @@
         );
 
       } finally {
+        if (requestTimeout !== null) window.clearTimeout(requestTimeout);
         isSending = false;
         send.disabled = authRequired && !isAuthenticated;
         input.disabled = authRequired && !isAuthenticated;
@@ -1609,6 +1766,43 @@
         scrollToLatest();
       }
     }
+
+    const heroForm = document.querySelector("#heroComposer");
+    const heroInput = document.querySelector("#heroMessage");
+    const heroCount = document.querySelector("#heroCount");
+    if (heroInput && heroCount) heroInput.addEventListener("input", () => { heroCount.textContent = heroInput.value.length + "/8000 karakter"; });
+    if (heroForm && heroInput) heroForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const message = heroInput.value.trim();
+      if (!message) { heroInput.focus(); return; }
+      if (authRequired && !isAuthenticated) {
+        setStatus("Silakan masuk menggunakan akun Google yang diizinkan. Pesan Anda tetap tersimpan.", true);
+        return;
+      }
+      if (isSending || input.disabled) {
+        setStatus("Pesan sebelumnya masih diproses. Pesan baru tetap tersimpan.", true);
+        return;
+      }
+
+      input.value = message;
+      updateCount();
+      form.requestSubmit();
+
+      // Clear the landing composer only after the main form accepts the submission.
+      heroInput.value = "";
+      if (heroCount) heroCount.textContent = "0/8000 karakter";
+    });
+    const workspaceSearch = document.querySelector("#workspaceSearch");
+    if (workspaceSearch) workspaceSearch.addEventListener("input", () => {
+      const q = workspaceSearch.value.trim().toLocaleLowerCase("id");
+      document.querySelectorAll("#sideNavigation .nav-item").forEach(item => {
+        item.hidden = !!q && !item.textContent.toLocaleLowerCase("id").includes(q);
+      });
+    });
+    document.querySelectorAll("#sideNavigation .nav-item").forEach(item => item.addEventListener("click", () => {
+      document.querySelectorAll("#sideNavigation .nav-item").forEach(node => node.classList.remove("active"));
+      item.classList.add("active");
+    }));
 
     form.addEventListener("submit", sendMessage);
     updateCount();

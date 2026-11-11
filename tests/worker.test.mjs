@@ -351,6 +351,24 @@ test("missing AI binding returns a controlled 503", async () => {
   assert.equal((await json(response)).error, "AI_BINDING_MISSING");
 });
 
+test("Workers AI rejects capacity queueing and returns a retryable 429", async () => {
+  let runOptions;
+  const env = makeEnv({
+    AI: {
+      run: async (_model, _input, options) => {
+        runOptions = options;
+        throw new Error("Capacity temporarily exceeded, please try again.");
+      },
+    },
+  });
+  const response = await worker.fetch(post({ message: "Halo" }), env);
+  const payload = await json(response);
+  assert.equal(runOptions.rejectIfBusy, true);
+  assert.equal(response.status, 429);
+  assert.equal(payload.error, "AI_CAPACITY_BUSY");
+  assert.match(payload.message, /Kapasitas Workers AI sedang penuh/);
+});
+
 test("model failure returns a sanitized 502 response", async () => {
   const env = makeEnv({ AI: { run: async () => { throw new Error("private provider detail"); } } });
   const response = await worker.fetch(post({ message: "Halo" }), env);
@@ -523,6 +541,15 @@ test("Android workspace exposes account access without leaking Google subject id
   assert.doesNotMatch(html, /googleSub|Google sub/i);
 });
 
+test("chat composer aborts stalled requests and always clears its timeout", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /new AbortController\(\)/);
+  assert.match(html, /setTimeout\(\(\) => controller\.abort\(\), 45000\)/);
+  assert.match(html, /signal: controller\.signal/);
+  assert.match(html, /clearTimeout\(requestTimeout\)/);
+  assert.match(html, /Permintaan melewati batas 45 detik/);
+});
+
 test("Android workspace provides an accessible mobile navigation and keyboard-aware viewport", async () => {
   const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
   assert.match(html, /id="navToggle"[^>]*aria-expanded="false"[^>]*aria-controls="sideNavigation"/);
@@ -532,4 +559,38 @@ test("Android workspace provides an accessible mobile navigation and keyboard-aw
   assert.match(html, /visualViewport/);
   assert.match(html, /body,\.app,\.main\{min-height:var\(--app-viewport-height/);
   assert.match(html, /prefers-reduced-motion:reduce/);
+});
+
+
+test("CerdikGo workspace uses a conversation-first innovation dashboard", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /<title>CerdikGo — AI Innovation Workspace<\/title>/);
+  assert.match(html, /class="workspace-intro"/);
+  assert.match(html, /class="workspace-launcher"/);
+  assert.match(html, /Analisis Strategis/);
+  assert.match(html, /Dokumen & Ringkasan/);
+  assert.match(html, /Riset & Eksplorasi/);
+  assert.match(html, /Rencana & Eksekusi/);
+  assert.doesNotMatch(html, /Ide besar dimulai dari/);
+  assert.match(html, /conversation-first, responsive/);
+  assert.match(html, /@media\(max-width:720px\)/);
+  assert.match(html, /prefers-reduced-motion:reduce/);
+});
+
+
+test("landing composer preserves draft when auth or an active send blocks submission", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  const handlerStart = html.indexOf('heroForm.addEventListener("submit"');
+  const handlerEnd = html.indexOf('const workspaceSearch', handlerStart);
+  assert.notEqual(handlerStart, -1);
+  assert.notEqual(handlerEnd, -1);
+  const handler = html.slice(handlerStart, handlerEnd);
+  const authGuard = handler.indexOf("if (authRequired && !isAuthenticated)");
+  const sendingGuard = handler.indexOf("if (isSending || input.disabled)");
+  const clearDraft = handler.indexOf('heroInput.value = "";');
+  assert.ok(authGuard >= 0 && sendingGuard > authGuard);
+  assert.ok(clearDraft > sendingGuard);
+  assert.match(handler, /Pesan Anda tetap tersimpan/);
+  assert.match(handler, /Pesan baru tetap tersimpan/);
+  assert.ok(handler.indexOf("form.requestSubmit()") < clearDraft);
 });

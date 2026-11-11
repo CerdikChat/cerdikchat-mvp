@@ -507,6 +507,10 @@ function safeErrorCode(error) {
     return "AI_QUOTA_EXCEEDED";
   }
 
+  if (/capacity temporarily exceeded|capacity.*busy|reject.?if.?busy/i.test(message)) {
+    return "AI_CAPACITY_BUSY";
+  }
+
   if (/model.*not found|unknown model|does not exist/i.test(message)) {
     return "AI_MODEL_UNAVAILABLE";
   }
@@ -1286,6 +1290,9 @@ async function handleChat(request, env, ctx) {
       chat_template_kwargs: {
         enable_thinking: false,
       },
+    }, {
+      // Do not leave users waiting in a capacity queue indefinitely.
+      rejectIfBusy: true,
     });
 
     const toolCalls = extractToolCalls(result);
@@ -1438,11 +1445,13 @@ async function handleChat(request, env, ctx) {
     });
 
     const status =
-      code === "AI_QUOTA_EXCEEDED" ? 429 : 502;
+      (code === "AI_QUOTA_EXCEEDED" || code === "AI_CAPACITY_BUSY") ? 429 : 502;
 
     const messagesByCode = {
       AI_QUOTA_EXCEEDED:
         "Kuota harian Workers AI mungkin telah tercapai. Coba lagi nanti.",
+      AI_CAPACITY_BUSY:
+        "Kapasitas Workers AI sedang penuh. Tunggu sebentar lalu coba lagi.",
       AI_MODEL_UNAVAILABLE:
         "Model AI tidak tersedia atau ID model tidak dikenali.",
       AI_TIMEOUT:
