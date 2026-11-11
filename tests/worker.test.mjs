@@ -576,3 +576,21 @@ test("CerdikGo workspace uses a conversation-first innovation dashboard", async 
   assert.match(html, /@media\(max-width:720px\)/);
   assert.match(html, /prefers-reduced-motion:reduce/);
 });
+
+
+test("landing composer preserves draft when auth or an active send blocks submission", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  const handlerStart = html.indexOf('heroForm.addEventListener("submit"');
+  const handlerEnd = html.indexOf('const workspaceSearch', handlerStart);
+  assert.notEqual(handlerStart, -1);
+  assert.notEqual(handlerEnd, -1);
+  const handler = html.slice(handlerStart, handlerEnd);
+  const authGuard = handler.indexOf("if (authRequired && !isAuthenticated)");
+  const sendingGuard = handler.indexOf("if (isSending || input.disabled)");
+  const clearDraft = handler.indexOf('heroInput.value = "";');
+  assert.ok(authGuard >= 0 && sendingGuard > authGuard);
+  assert.ok(clearDraft > sendingGuard);
+  assert.match(handler, /Pesan Anda tetap tersimpan/);
+  assert.match(handler, /Pesan baru tetap tersimpan/);
+  assert.ok(handler.indexOf("form.requestSubmit()") < clearDraft);
+});
