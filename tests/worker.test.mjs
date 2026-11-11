@@ -351,6 +351,24 @@ test("missing AI binding returns a controlled 503", async () => {
   assert.equal((await json(response)).error, "AI_BINDING_MISSING");
 });
 
+test("Workers AI rejects capacity queueing and returns a retryable 429", async () => {
+  let runOptions;
+  const env = makeEnv({
+    AI: {
+      run: async (_model, _input, options) => {
+        runOptions = options;
+        throw new Error("Capacity temporarily exceeded, please try again.");
+      },
+    },
+  });
+  const response = await worker.fetch(post({ message: "Halo" }), env);
+  const payload = await json(response);
+  assert.equal(runOptions.rejectIfBusy, true);
+  assert.equal(response.status, 429);
+  assert.equal(payload.error, "AI_CAPACITY_BUSY");
+  assert.match(payload.message, /Kapasitas Workers AI sedang penuh/);
+});
+
 test("model failure returns a sanitized 502 response", async () => {
   const env = makeEnv({ AI: { run: async () => { throw new Error("private provider detail"); } } });
   const response = await worker.fetch(post({ message: "Halo" }), env);
@@ -521,6 +539,15 @@ test("Android workspace exposes account access without leaking Google subject id
   assert.match(html, /id="authPanel"/);
   assert.match(html, /id="authUnavailable"/);
   assert.doesNotMatch(html, /googleSub|Google sub/i);
+});
+
+test("chat composer aborts stalled requests and always clears its timeout", async () => {
+  const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
+  assert.match(html, /new AbortController\(\)/);
+  assert.match(html, /setTimeout\(\(\) => controller\.abort\(\), 45000\)/);
+  assert.match(html, /signal: controller\.signal/);
+  assert.match(html, /clearTimeout\(requestTimeout\)/);
+  assert.match(html, /Permintaan melewati batas 45 detik/);
 });
 
 test("Android workspace provides an accessible mobile navigation and keyboard-aware viewport", async () => {
