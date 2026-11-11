@@ -1773,13 +1773,24 @@
     if (heroInput && heroCount) heroInput.addEventListener("input", () => { heroCount.textContent = heroInput.value.length + "/8000 karakter"; });
     if (heroForm && heroInput) heroForm.addEventListener("submit", event => {
       event.preventDefault();
-      if (!heroInput.value.trim()) { input.focus(); return; }
-      input.value = heroInput.value.trim();
+      const message = heroInput.value.trim();
+      if (!message) { heroInput.focus(); return; }
+      if (authRequired && !isAuthenticated) {
+        setStatus("Silakan masuk menggunakan akun Google yang diizinkan. Pesan Anda tetap tersimpan.", true);
+        return;
+      }
+      if (isSending || input.disabled) {
+        setStatus("Pesan sebelumnya masih diproses. Pesan baru tetap tersimpan.", true);
+        return;
+      }
+
+      input.value = message;
       updateCount();
+      form.requestSubmit();
+
+      // Clear the landing composer only after the main form accepts the submission.
       heroInput.value = "";
       if (heroCount) heroCount.textContent = "0/8000 karakter";
-      if (!input.disabled) form.requestSubmit();
-      else setStatus("Silakan masuk menggunakan akun Google yang diizinkan.", true);
     });
     const workspaceSearch = document.querySelector("#workspaceSearch");
     if (workspaceSearch) workspaceSearch.addEventListener("input", () => {
