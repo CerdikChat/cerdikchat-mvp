@@ -1671,13 +1671,19 @@
         "Menyiapkan jawaban…"
       );
 
+      let requestTimeout = null;
+
       try {
+        const controller = new AbortController();
+        requestTimeout = window.setTimeout(() => controller.abort(), 45000);
+
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
           },
+          signal: controller.signal,
           body: JSON.stringify({
             message,
             history: history.slice(-MAX_HISTORY_MESSAGES)
@@ -1738,9 +1744,11 @@
           "Maaf, jawaban belum berhasil diperoleh.";
 
         const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Terjadi kesalahan yang tidak diketahui.";
+          error?.name === "AbortError"
+            ? "Permintaan melewati batas 45 detik. Layanan AI mungkin sedang sibuk; silakan coba lagi."
+            : error instanceof Error
+              ? error.message
+              : "Terjadi kesalahan yang tidak diketahui.";
 
         setStatus(
           `${errorMessage} Periksa koneksi dan endpoint /api/chat pada Worker.`,
@@ -1748,6 +1756,7 @@
         );
 
       } finally {
+        if (requestTimeout !== null) window.clearTimeout(requestTimeout);
         isSending = false;
         send.disabled = authRequired && !isAuthenticated;
         input.disabled = authRequired && !isAuthenticated;
